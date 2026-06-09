@@ -1,3 +1,10 @@
-# proyectosigturbapst
+# Proyecto 3ºMC
 
-este es el proyecto de la escuela superior castaño
+**Institución:** Escuela Superior Catalina H. de Castaños
+
+## Integrantes
+- Aaron Crespo
+- Santiago Diez
+- Pio Monetta
+- Thiago Ustra
+- Benjamin Reina
