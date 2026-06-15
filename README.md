@@ -9,7 +9,7 @@ Proyecto desarrollado por estudiantes de 3º MC con el objetivo de contribuir a 
 - Aaron Crespo
 - Santiago Diez
 - Pio Monetta
-- Thiago Ustra
+- Federico Sarmiento
 - Benjamin Reina
 
 
