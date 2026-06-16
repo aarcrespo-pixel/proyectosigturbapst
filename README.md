@@ -9,11 +9,7 @@ Proyecto desarrollado por estudiantes de 3º MC con el objetivo de contribuir a 
 - Aaron Crespo
 - Santiago Diez
 - Pio Monetta
-<<<<<<< HEAD
-- Thiago Ustra
-=======
 - Federico Sarmiento
->>>>>>> 5ed7eea7c23f21859cea561cbdd178dba72ef2b7
 - Benjamin Reina
 
 
