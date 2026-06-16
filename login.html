@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuarios</title>
+    <link rel="stylesheet" href="css/login.css">
+
+</head>
+
+<body>
+
+    <main>
+
+        <section class="contenedor">
+
+            <h2>Registro de Usuarios</h2>
+            <p class="intro">Completa tus datos y registra tu cuenta.</p>
+
+                <form>
+
+           
+                    <a class="back-pill" href="index.html" aria-label="Volver al inicio">← Volver</a>     
+                    
+                    <label for="Usuario">Usuario</label>
+                    <input type="text" id="Usuario" placeholder="Ej: Juan Perez" />
+
+                    <label for="Contraseña">Contraseña</label>
+                    <input type="password" id="Contraseña" placeholder="Ej: 123456" />
+
+                    <label for="Correo Electronico">Correo Electrónico</label>
+                    <input type="email" id="Correo Electronico" placeholder="Ej: juan.perez@example.com" />
+
+                    <label for="Contacto">Contacto</label>
+                    <input type="text" id="Contacto" placeholder="Ej: 099123789" />
+
+                    <label for="Pais">País</label>
+                    <input type="text" id="Pais" placeholder="Ej: Uruguay" />
+
+                    <label for="comentario">Nombres Registrados</label>
+                    <textarea id="comentario" cols="40" rows="6" placeholder="Nombres registrados:" readonly></textarea>
+
+                    <button type="button" id="btnAgregar">Agregar Usuario</button>
+
+                </form>
+
+        </section>
+
+
+
+    </main>
+
+
+
+    <script src="js/login.js"></script>
+
+</body>
+
+</html>
