@@ -8,7 +8,9 @@
     <link rel="icon" href="/img/logoblanco.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Instrument+Sans:wght@300;400;500;600;700&display=swap"rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Instrument+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/css/estilos.css">
     <link rel="stylesheet" href="/css/intro.css">
 </head>
@@ -28,10 +30,6 @@
             <a href="eventos.html">Eventos</a>
             <a href="turismo.html">Turismo</a>
             <a href="lugares.html">Lugares</a>
-<<<<<<< HEAD
-            
-=======
->>>>>>> 5ed7eea7c23f21859cea561cbdd178dba72ef2b7
         </nav>
 
         <div class="barra-busqueda">
@@ -45,18 +43,10 @@
             </button>
 
             <div class="perfil-menu">
-<<<<<<< HEAD
-                <a href="login.html">Datos Personales</a>
+                <a href="login.html">Ingresar Usuario</a>
                 <a href="configuracion.html">Configuración</a>
                 <a href="soporte.html">Soporte</a>
-=======
-                <a href="#">Datos Personales</a>
-                <a href="#">Configuración</a>
-                <a href="#">Ayuda</a>
-                <a href="#">Reportes</a>
-                <a href="#">Cambiar Cuenta</a>
->>>>>>> 5ed7eea7c23f21859cea561cbdd178dba72ef2b7
-                <a href="#">Cerrar Sesión</a>
+                <a href="cerrar-sesion.html">Cerrar Sesión</a>
             </div>
         </div>
 
@@ -65,6 +55,10 @@
     <section class="pantalla-inicio">
         <img class="imagen-inicio" src="/img/inicio.jpeg" alt="Salto">
         <div class="degradado-inferior"></div>
+        <div class="texto-inicio">
+            <h2>Conoce SIGTUR, tu guía local para descubrir cultura, eventos y lugares únicos en Salto.
+                Navega el destino con recomendaciones completas y vive una experiencia auténtica en cada visita.</h2>
+        </div>
         <p class="texto-deslizar">
             Desliza para ver más
         </p>
@@ -74,22 +68,37 @@
     <section class="seccion-features">
 
         <div class="feature">
-            <img src="/img/eventos.jpeg" alt="Eventos">
-            <h3>Eventos</h3>
-            <p>Descubre las fechas y actividades destacadas para planificar tu visita a Salto.</p>
-            <p>Explora propuestas para cada estilo y no te pierdas lo mejor que ofrece la ciudad.</p>
+            <div class="feature-header">
+                <img src="/img/eventos.jpeg" alt="Eventos">
+                <h3>Eventos</h3>
+                <button class="feature-toggle" aria-expanded="false">▼</button>
+            </div>
+            <div class="feature-text">
+                <p>Descubre las fechas y actividades destacadas para planificar tu visita a Salto.</p>
+                <p>Explora propuestas para cada estilo y no te pierdas lo mejor que ofrece la ciudad.</p>
+            </div>
         </div>
         <div class="feature">
-            <img src="/img/turismo.jpeg" alt="Turismo">
-            <h3>Turismo</h3>
-            <p>Encuentra ideas de recorridos y propuestas para disfrutar la ciudad y sus alrededores.</p>
-            <p>Conecta con opciones de paseos, experiencias y consejos para tu viaje.</p>
+            <div class="feature-header">
+                <img src="/img/turismo.jpeg" alt="Turismo">
+                <h3>Turismo</h3>
+                <button class="feature-toggle" aria-expanded="false">▼</button>
+            </div>
+            <div class="feature-text">
+                <p>Encuentra ideas de recorridos y propuestas para disfrutar la ciudad y sus alrededores.</p>
+                <p>Conecta con opciones de paseos, experiencias y consejos para tu viaje.</p>
+            </div>
         </div>
         <div class="feature">
-            <img src="/img/lugares.jpeg" alt="Lugares">
-            <h3>Lugares</h3>
-            <p>Conoce los puntos más emblemáticos y los sitios imperdibles de Salto.</p>
-            <p>Descubre lugares únicos donde vivir momentos especiales y recordar la visita.</p>
+            <div class="feature-header">
+                <img src="/img/lugares.jpeg" alt="Lugares">
+                <h3>Lugares</h3>
+                <button class="feature-toggle" aria-expanded="false">▼</button>
+            </div>
+            <div class="feature-text">
+                <p>Conoce los puntos más emblemáticos y los sitios imperdibles de Salto.</p>
+                <p>Descubre lugares únicos donde vivir momentos especiales y recordar la visita.</p>
+            </div>
         </div>
 
     </section>
@@ -103,36 +112,44 @@
             <div class="contenedor-slides">
                 <div class="slide activo">
                     <div class="info-evento">
-                        <h3>Semana de la Cerveza</h3>
-                        <p>10 de la mañana, nacional nacional</p>
-                        <button>Ver Más</button>
+                        <h3>PorcoNegro</h3>
+                        <p>Todos los sabados de las 00:00 a 06:00!</p>
+                        <div class="accion-boton">
+                            <a href="eventos.html" class="boton-amarillo">Ver mas</a>
+                        </div>
                     </div>
-                    <img src="/img/evento1.jpg" alt="Evento">
+                    <img src="/img/porco.avif" alt="Evento">
                 </div>
                 <div class="slide">
                     <div class="info-evento">
-                        <h3>Festival de Música</h3>
-                        <p>Artistas nacionales e internacionales.</p>
-                        <button>Ver Más</button>
+                        <h3>La Bambola</h3>
+                        <p>Todos los fines de semana!</p>
+                        <div class="accion-boton">
+                            <a href="eventos.html" class="boton-amarillo">Ver mas</a>
+                        </div>
                     </div>
 
-                    <img src="/img/evento1.jpg" alt="Evento">
+                    <img src="/img/bambi.jpg" alt="Evento">
                 </div>
                 <div class="slide">
                     <div class="info-evento">
-                        <h3>Encuentro Deportivo</h3>
-                        <p>Competiciones y actividades para todos.</p>
-                        <button>Ver Más</button>
+                        <h3>LSF</h3>
+                        <p>Competición de futbol salteña.</p>
+                        <div class="accion-boton">
+                            <a href="eventos.html" class="boton-amarillo">Ver mas</a>
+                        </div>
                     </div>
-                    <img src="/img/evento3.jpg" alt="Evento">
+                    <img src="/img/lsf.jpg" alt="Evento">
                 </div>
                 <div class="slide">
                     <div class="info-evento">
-                        <h3>Fiesta Tradicional</h3>
-                        <p>Cultura y gastronomía local.</p>
-                        <button>Ver Más</button>
+                        <h3>LSB</h3>
+                        <p>Competición de básquetbol salteño.</p>
+                        <div class="accion-boton">
+                            <a href="eventos.html" class="boton-amarillo">Ver mas</a>
+                        </div>
                     </div>
-                    <img src="/img/evento4.jpg" alt="Evento">
+                    <img src="/img/lsb.jpg" alt="Evento" width="400" height="700">
                 </div>
             </div>
 
@@ -152,13 +169,15 @@
     </section>
 
     <section class="seccion-notificaciones">
-
+        <h2>Noticias en Salto</h2>
         <div class="contenedor-carta">
-            <img src="/img/carta.png" alt="Carta" class="imagen-carta">
+            <img src="/img/peñ.jpg" alt="Carta" class="imagen-carta">
             <div class="texto-carta">
-                <h2>Mantente informado</h2>
-                <p>Recibe información sobre eventos, turismo y novedades de Salto.</p>
-                <button>Activar Notificaciones</button>
+                <h2>Peñarol ultimo con -48 dif en gol en la LSF Juveniles</h2>
+                <p>Recibe información sobre eventos deportivos en Salto.</p>
+                <div class="accion-boton">
+                            <a href="eventos.html" class="boton-amarillo">Ver noticia</a>
+                        </div>
             </div>
         </div>
     </section>
@@ -194,7 +213,7 @@
                 <h4>SIGTUR</h4>
                 <a href="#" class="footer-link">Sobre nosotros</a>
                 <a href="#" class="footer-link">Contacto</a>
-                <a href="https://instagram.com/sigtur_salto" target="_blank" class="footer-link footer-link--icon">
+                <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon">
                     <span class="social-icon">IG</span>Instagram
                 </a>
                 <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">

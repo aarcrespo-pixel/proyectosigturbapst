@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eventos | SIGTUR</title>
-    <link rel="icon" href="img/logoblanco.png">
+    <link rel="icon" href="/img/logoblanco.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/estilos.css">
-    <link rel="stylesheet" href="css/eventos.css">
+    <link rel="stylesheet" href="/css/estilos.css">
+    <link rel="stylesheet" href="/css/eventos.css">
 </head>
 
 <body>
@@ -20,7 +20,7 @@
         </button>
         <nav class="menu">
             <a href="index.html" class="logo-link">
-                <img src="img/logoblanco.png" class="logo-menu" alt="SIGTUR">
+                <img src="/img/logoblanco.png" class="logo-menu" alt="SIGTUR">
             </a>
             <a href="eventos.html" class="pagina-activa">Eventos</a>
             <a href="turismo.html">Turismo</a>
@@ -29,18 +29,19 @@
 
         <div class="barra-busqueda">
             <input type="text" placeholder="Buscar eventos">
-            <img src="img/lupa.png" alt="Buscar">
+            <img src="/img/lupa.png" alt="Buscar">
         </div>
 
         <div class="perfil">
             <button class="perfil-btn">
-                <img src="img/user.png" alt="Perfil">
+                <img src="/img/user.png" alt="Perfil">
             </button>
 
             <div class="perfil-menu">
-                <a href="#">Datos Personales</a>
-                <a href="#">Configuración</a>
-                <a href="#">Ayuda</a>
+                <a href="login.html">Datos Personales</a>
+                <a href="configuracion.html">Configuración</a>
+                <a href="soporte.html">Soporte</a>
+                <a href="#">Cerrar Sesión</a>
             </div>
         </div>
     </header>
@@ -59,11 +60,11 @@
                 <h2 class="titulo-foco">DESTACADOS</h2>
             </div>
             <div class="carrusel-eventos">
-                <button class="flecha izquierda" data-carrusel="destacados">❮</button>
+                <button class="flecha izquierda" data-carrusel="destacados"></button>
                 <div class="visor-carrusel">
                     <div class="contenedor-tarjetas" id="destacados-contenedor"></div>
                 </div>
-                <button class="flecha derecha" data-carrusel="destacados">❯</button>
+                <button class="flecha derecha" data-carrusel="destacados"></button>
             </div>
             <div class="indicadores-carrusel" id="destacados-indicadores"></div>
         </section>
@@ -74,11 +75,11 @@
                     <h3>Deportivos</h3>
                 </div>
                 <div class="carrusel-eventos">
-                    <button class="flecha izquierda" data-carrusel="deportivos">❮</button>
+                    <button class="flecha izquierda" data-carrusel="deportivos"></button>
                     <div class="visor-carrusel">
                         <div class="contenedor-tarjetas" id="deportivos-contenedor"></div>
                     </div>
-                    <button class="flecha derecha" data-carrusel="deportivos">❯</button>
+                    <button class="flecha derecha" data-carrusel="deportivos"></button>
                 </div>
                 <div class="indicadores-carrusel" id="deportivos-indicadores"></div>
             </div>
@@ -88,11 +89,11 @@
                     <h3>Discotecas</h3>
                 </div>
                 <div class="carrusel-eventos">
-                    <button class="flecha izquierda" data-carrusel="discotecas">❮</button>
+                    <button class="flecha izquierda" data-carrusel="discotecas"></button>
                     <div class="visor-carrusel">
                         <div class="contenedor-tarjetas" id="discotecas-contenedor"></div>
                     </div>
-                    <button class="flecha derecha" data-carrusel="discotecas">❯</button>
+                    <button class="flecha derecha" data-carrusel="discotecas"></button>
                 </div>
                 <div class="indicadores-carrusel" id="discotecas-indicadores"></div>
             </div>
@@ -102,15 +103,15 @@
                     <h3>Competencias</h3>
                 </div>
                 <div class="carrusel-eventos">
-                    <button class="flecha izquierda" data-carrusel="competencias">❮</button>
+                    <button class="flecha izquierda" data-carrusel="competencias"></button>
                     <div class="visor-carrusel">
                         <div class="contenedor-tarjetas" id="competencias-contenedor"></div>
                     </div>
-                    <button class="flecha derecha" data-carrusel="competencias">❯</button>
+                    <button class="flecha derecha" data-carrusel="competencias"></button>
                 </div>
                 <div class="indicadores-carrusel" id="competencias-indicadores"></div>
             </div>
-        </section>
+        </section>                  
 
         <div class="accion-boton">
             <a href="#" class="boton-amarillo">Ver todos los eventos</a>
@@ -121,12 +122,12 @@
                 <h2 class="titulo-foco">EVENTOS ANTERIORES</h2>
             </div>
             <div class="carrusel-eventos">
-                <button class="flecha izquierda" data-carrusel="anteriores">❮</button>
+                <button class="flecha izquierda" data-carrusel="anteriores"></button>
                 <div class="visor-carrusel">
                     <div class="contenedor-tarjetas" id="anteriores-contenedor"></div>
                 </div>
-                <button class="flecha derecha" data-carrusel="anteriores">❯</button>
-            </div>
+                <button class="flecha derecha" data-carrusel="anteriores"></button>
+            </div>  
             <div class="indicadores-carrusel" id="anteriores-indicadores"></div>
             <div class="accion-boton secundaria">
                 <a href="#" class="boton-amarillo">Ver eventos anteriores</a>
@@ -181,11 +182,11 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 SIGTUR SALTO. Todos los derechos reservados.</p>
+            <p>2026 SIGTUR SALTO. Todos los derechos reservados.</p>
         </div>
     </footer>
 
-    <script src="js/eventos.js" defer></script>
+    <script src="/js/eventos.js" defer></script>
 </body>
 
 </html>

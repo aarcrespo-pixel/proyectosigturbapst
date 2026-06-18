@@ -331,6 +331,25 @@ img {
     background: linear-gradient(to top, rgba(0, 0, 0, .75), rgba(0, 0, 0, .25), transparent);
 }
 
+.texto-inicio {
+    position: absolute;
+    top: clamp(18rem, 20vw, 28rem);
+    left: clamp(3rem, 6vw, 8rem);
+    width: min(60vw, 45rem);
+    max-width: 45rem;
+    z-index: 2;
+}
+
+.texto-inicio h2 {
+    margin: 0;
+    color: white;
+    font-size: clamp(1.3rem, 2vw, 2.4rem);
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: -0.05em;
+    
+}
+
 .texto-deslizar {
     position: absolute;
     bottom: clamp(1.5rem, 3vw, 2.5rem);
@@ -359,10 +378,40 @@ img {
     text-align: center;
     box-shadow: inset 5px 5px 12px rgba(0, 0, 0, .08), inset -5px -5px 12px rgba(255, 255, 255, .9);
     transition: transform .45s ease, box-shadow .45s ease;
+    overflow: hidden;
 }
 
 .feature:hover {
     transform: translateY(-5px) scale(1.05);
+}
+
+.feature-header {
+    display: grid;
+    place-items: center;
+    gap: 1rem;
+}
+
+.feature-toggle {
+    width: 2.8rem;
+    height: 2.8rem;
+    border: none;
+    background: rgba(255, 255, 255, 0.95);
+    color: #111;
+    font-size: 1.6rem;
+    cursor: pointer;
+    transition: transform .3s ease, background .3s ease;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    margin-top: .5rem;
+}
+
+.feature-toggle:hover {
+    background: #f2f2f2;
+}
+
+.feature-toggle.open {
+    transform: rotate(180deg);
 }
 
 .feature img {
@@ -376,10 +425,23 @@ img {
     font-weight: 700;
 }
 
-.feature p {
+.feature-text {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height .4s ease, opacity .4s ease;
+}
+
+.feature.open .feature-text {
+    max-height: 18rem;
+    opacity: 1;
+}
+
+.feature-text p {
     margin-top: 1rem;
     font-size: clamp(0.95rem, 0.95vw, 1.05rem);
     line-height: 1.8;
+    text-align: left;
 }
 
 /* eventos */
@@ -423,6 +485,33 @@ img {
     transition: transform 0.25s ease, background 0.25s ease;
 }
 
+.boton-amarillo {
+    margin-top: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2rem;
+    border-radius: 999px;
+    border-top: 1px solid rgba(255, 255, 255, .85);
+    border-left: 1px solid rgba(255, 255, 255, .40);
+    border-right: 1px solid rgba(255, 255, 255, .40);
+    border-bottom: 1px solid rgba(255, 255, 255, .3);
+    background: linear-gradient(90deg, var(--amarillo-fuerte), var(--amarillo-claro));
+    color: #111;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.boton-amarillo:hover {
+    background: linear-gradient(270deg, #f7b500, #ffc400, #ffd84d, #ffea70);
+    background-size: 300% 300%;
+    animation: hoverGradientShift 3s ease infinite;
+    color: black;
+    transform: scale(1.05);
+    transition: .3s;
+}
+
 .flecha:hover {
     transform: scale(1.08);
     background: rgba(255, 255, 255, 1);
@@ -461,7 +550,7 @@ img {
 
 .info-evento h3 {
     font-size: clamp(1.7rem, 2vw, 2.4rem);
-    margin-bottom: 15px;
+        margin-bottom: 15px;
 }
 
 .info-evento p {
@@ -472,7 +561,9 @@ img {
 .info-evento button,
 .texto-carta button {
     margin-top: 20px;
-    padding: clamp(0.9rem, 1vw, 1.1rem) clamp(1.4rem, 1.8vw, 1.8rem);
+    padding: clamp(0.5rem, 0.7vw, 0.9rem) clamp(1.0rem, 1.3vw, 1.4rem);
+    font-weight: 200;
+    letter-spacing: -0.05em;
     border: none;
     border-radius: 999px;
     cursor: pointer;
@@ -495,7 +586,6 @@ img {
     display: flex;
     justify-content: center;
     gap: clamp(8px, 1vw, 12px);
-    margin-top: clamp(3rem, 4vw, 5rem);
 }
 
 .indicador {
@@ -523,6 +613,16 @@ img {
     padding: clamp(4rem, 5vw, 7rem) 0;
 }
 
+.seccion-notificaciones h2 {
+    font-size: clamp(1.9rem, 2vw, 2.4rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 350;
+    color: rgba(0, 0, 0, .55);
+    margin-bottom: clamp(2rem, 2.5vw, 3rem);
+}
+
 .contenedor-carta {
     width: min(90%, var(--site-max-width));
     margin: auto;
@@ -534,8 +634,8 @@ img {
 }
 
 .imagen-carta {
-    width: clamp(250px, 34vw, 500px);
-    filter: drop-shadow(0 0 13px #00ffff) drop-shadow(0 0 60px rgba(0, 255, 255, .15));
+    width: clamp(400px, 34vw, 600px);
+    border-radius: 25px;
     transition: .4s;
 }
 

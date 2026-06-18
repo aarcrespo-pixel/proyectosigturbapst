@@ -54,3 +54,17 @@ indicadores.forEach((indicador, index) => {
         actualizarCarrusel(index);
     });
 });
+
+/* Toggle feature accordion text */
+const toggles = document.querySelectorAll('.feature-toggle');
+
+toggles.forEach((toggle) => {
+    toggle.addEventListener('click', (event) => {
+        const button = event.currentTarget;
+        const feature = button.closest('.feature');
+        const expanded = button.getAttribute('aria-expanded') === 'true';
+
+        feature.classList.toggle('activo', !expanded);
+        button.setAttribute('aria-expanded', String(!expanded));
+    });
+});
