@@ -51,7 +51,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 6px;
+  margin-bottom: 6px; 
 }
 
 .back-pill {
@@ -62,9 +62,9 @@ body {
   min-width: 132px;
   padding: 10px 16px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  color: #1f3d5c;
-  border: 1px solid rgba(108, 180, 221, 0.28);
+  background: rgba(108, 180, 221, 0.12);
+  color: #3d6f91;
+  border: 1px solid rgba(108, 180, 221, 0.22);
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 700;
