@@ -35,9 +35,10 @@
                 <img src="/img/user.png" alt="Perfil">
             </button>
             <div class="perfil-menu">
-                <a href="#">Perfil</a>
-                <a href="#">Preferencias</a>
-                <a href="#">Soporte</a>
+                <a href="login.html">Ingresar Usuario</a>
+                <a href="configuracion.html">Configuración</a>
+                <a href="soporte.html">Soporte</a>
+                <a href="cerrar-sesion.html">Cerrar Sesión</a>
             </div>
         </div>
     </header>
@@ -147,33 +148,66 @@
     <footer class="footer">
         <div class="footer-grid">
             <div class="footer-col">
-                <h4>TURISMO</h4>
-                <a href="turismo.html" class="footer-link">Recorridos</a>
-                <a href="turismo.html" class="footer-link">Rutas destacadas</a>
-                <a href="turismo.html" class="footer-link">Galería</a>
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>EVENTOS</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="/html/eventos.html" class="footer-link">Eventos destacados</a>
+                    <a href="/html/eventos.html" class="footer-link">Próximos eventos</a>
+                    <a href="/html/eventos.html" class="footer-link">Eventos anteriores</a>
+                    <a href="/html/eventos.html" class="footer-link">Todos los eventos</a>
+                </div>
             </div>
+
             <div class="footer-col">
-                <h4>DESCUBRÍ</h4>
-                <a href="#" class="footer-link">Experiencias</a>
-                <a href="#" class="footer-link">Sabores</a>
-                <a href="#" class="footer-link">Naturaleza</a>
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>LUGARES</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="/html/plaza-artigas.html" class="footer-link">Plaza Artigas</a>
+                    <a href="/html/plaza-33.html" class="footer-link">Plaza Treinta y Tres Orientales</a>
+                    <a href="/html/costanera-norte.html" class="footer-link">Costanera Norte</a>
+                    <a href="/html/costanera-sur.html" class="footer-link">Costanera Sur</a>
+                    <a href="/html/plaza-flores.html" class="footer-link">Parque Benito Solari</a>
+                </div>
             </div>
+
             <div class="footer-col">
-                <h4>PLANIFICÁ</h4>
-                <a href="#" class="footer-link">Consejos</a>
-                <a href="#" class="footer-link">Itinerarios</a>
-                <a href="#" class="footer-link">Reservas</a>
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>TURISMO</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="/html/lugares.html" class="footer-link">Hoteles</a>
+                    <a href="/html/lugares.html" class="footer-link">Actividades</a>
+                    <a href="/html/lugares.html" class="footer-link">Lugares turísticos</a>
+                    <a href="/html/lugares.html" class="footer-link">Experiencias</a>
+                </div>
             </div>
+
             <div class="footer-col footer-col--social">
-                <h4>SIGTUR</h4>
-                <a href="#" class="footer-link">Sobre nosotros</a>
-                <a href="#" class="footer-link">Contacto</a>
-                <a href="https://instagram.com/sigtur_salto" target="_blank" class="footer-link footer-link--icon"><span class="social-icon">IG</span>Instagram</a>
-                <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon"><span class="social-icon">FB</span>Facebook</a>
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>SIGTUR</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Sobre nosotros</a>
+                    <a href="#" class="footer-link">Contacto</a>
+                    <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon">
+                        <span class="social-icon">IG</span>Instagram
+                    </a>
+                    <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
+                        <span class="social-icon">FB</span>Facebook
+                    </a>
+                </div>
             </div>
         </div>
+        </div>
+
         <div class="footer-bottom">
-            <p>2026 SIGTUR SALTO. Todos los derechos reservados.</p>
+            <p>&copy; 2026 SIGTUR SALTO. Todos los derechos reservados.</p>
         </div>
     </footer>
 </body>

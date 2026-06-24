@@ -3,27 +3,26 @@ const botonPerfil = document.querySelector(".perfil-btn");
 const hamburguesa = document.querySelector(".hamburguesa");
 const menu = document.querySelector(".menu");
 
-botonPerfil.addEventListener("click", () => {
-    perfil.classList.toggle("activo");
-});
+if (botonPerfil && perfil) {
+    botonPerfil.addEventListener("click", () => {
+        perfil.classList.toggle("activo");
+    });
+}
 
-hamburguesa.addEventListener("click", () => {
-    menu.classList.toggle("activo");
-});
+if (hamburguesa && menu) {
+    hamburguesa.addEventListener("click", () => {
+        menu.classList.toggle("activo");
+    });
+}
 
 document.addEventListener("click", (e) => {
-
-    if (!perfil.contains(e.target)) {
+    if (perfil && botonPerfil && !perfil.contains(e.target) && !botonPerfil.contains(e.target)) {
         perfil.classList.remove("activo");
     }
 
-    if (
-        !menu.contains(e.target) &&
-        !hamburguesa.contains(e.target)
-    ) {
+    if (menu && hamburguesa && !menu.contains(e.target) && !hamburguesa.contains(e.target)) {
         menu.classList.remove("activo");
     }
-
 });
 
 /* Carrusel de eventos destacados */
@@ -63,8 +62,44 @@ toggles.forEach((toggle) => {
         const button = event.currentTarget;
         const feature = button.closest('.feature');
         const expanded = button.getAttribute('aria-expanded') === 'true';
+        const shouldExpand = !expanded;
 
-        feature.classList.toggle('activo', !expanded);
-        button.setAttribute('aria-expanded', String(!expanded));
+        if (feature) {
+            feature.classList.toggle('activo', shouldExpand);
+            feature.classList.toggle('open', shouldExpand);
+            button.classList.toggle('open', shouldExpand);
+            button.setAttribute('aria-expanded', String(shouldExpand));
+        }
     });
 });
+
+/* Toggle footer sections */
+const footerToggles = document.querySelectorAll('.footer-toggle');
+
+footerToggles.forEach((toggle) => {
+    toggle.addEventListener('click', () => {
+        const footerCol = toggle.closest('.footer-col');
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        const shouldExpand = !expanded;
+
+        if (footerCol) {
+            footerCol.classList.toggle('open', shouldExpand);
+            toggle.classList.toggle('open', shouldExpand);
+            toggle.setAttribute('aria-expanded', String(shouldExpand));
+        }
+    });
+});
+
+/* Información de SIGTUR */
+const infoButton = document.querySelector('.info-btn');
+const infoPanel = document.querySelector('.info-panel');
+
+if (infoButton && infoPanel) {
+    infoButton.addEventListener('click', () => {
+        const expanded = infoButton.getAttribute('aria-expanded') === 'true';
+        const shouldExpand = !expanded;
+
+        infoButton.setAttribute('aria-expanded', String(shouldExpand));
+        infoPanel.classList.toggle('open', shouldExpand);
+    });
+}

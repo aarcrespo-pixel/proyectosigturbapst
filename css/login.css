@@ -1,43 +1,81 @@
-   body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: #0f172a;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 24px;
-        background:
-            radial-gradient(circle at top, rgba(125, 211, 252, 0.28), transparent 24%),
-            linear-gradient(135deg, #0f172a 0%, #0e235e 45%, #0f3588 100%);
-    }
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 
-    main {  
-        width: 100%;
-        max-width: 560px;
-    }
+:root {
+    --bg: linear-gradient(135deg, #edf7ff 0%, #dff2ff 42%, #cbeaff 100%);
+    --card: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 249, 255, 0.88));
+    --text: #18324a;
+    --muted: #4f6780;
+    --border: rgba(24, 50, 74, 0.12);
+    --shadow: 0 18px 36px rgba(82, 126, 163, 0.16);
+    --menu-gap: clamp(14px, 1.2vw, 24px);
+    --menu-padding: clamp(0.75rem, 1vw, 1.6rem);
+}
 
-    .contenedor {
-        background: rgba(15, 23, 42, 0.72);
-        border: 1px solid rgba(148, 163, 184, 0.22);
-        border-radius: 28px;
-        padding: 32px;
-        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);    
-    }
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    background: var(--bg);
+    letter-spacing: -0.02em;
+    position: relative;
+}
 
-    .contenedor::before {
-        content: "";
-        display: block;
-        width: 72px;
-        height: 6px;
-        border-radius: 999px;
-        margin-bottom: 14px;
-        background: linear-gradient(90deg, #38bdf8, #818cf8, #f472b6);
-    }
+main {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
 
-    .back-pill {
+.logo-back {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 62px;
+    height: 62px;
+    border-radius: 999px;
+    background: rgba(8, 18, 33, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    z-index: 10;
+}
+
+.logo-back:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 22px rgba(15, 23, 42, 0.2);
+    background: rgba(8, 18, 33, 0.9);
+}
+
+.logo-back img {
+    width: 50px;
+    height: auto;
+    object-fit: contain;
+}
+
+.contenedor {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 26px;
+    padding: 32px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.back-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -56,151 +94,201 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-    }
-    
-    .back-pill:hover {
+}
+
+.back-pill:hover {
     transform: translateY(-1px);
     box-shadow: 0 14px 22px rgba(15, 23, 42, 0.12);
+}
+
+h1 {
+    margin: 0 0 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(3.2rem, 3.8vw, 4rem);
+    line-height: 1.1;
+    text-align: left;
+    color: #f7b35c;
+    text-shadow: 0 1px 4px rgba(247, 179, 92, 0.12);
+    letter-spacing: -0.05em;
+}
+
+.intro {
+    margin: 0 0 24px;
+    color: var(--muted);
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+form {
+    display: grid;
+    gap: 14px;
+}
+
+label {
+    font-size: 0.92rem;
+    color: #24415f;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 14px 4px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 14px;
+    background: rgba(248, 250, 252, 0.98);
+    color: #0f172a;
+    font-size: 1rem;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.18);
+    background: #ffffff;
+    transform: translateY(-1px);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 110px;
+}
+
+button,
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--menu-gap);
+    padding: var(--menu-padding);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255, 255, 255, .07);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255, 255, 255, 0.65);
+    border-left: 1px solid rgba(255, 255, 255, .20);
+    border-right: 1px solid rgba(255, 255, 255, .20);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, .15), 0 8px 18px rgba(0, 0, 0, .04);
+    margin: auto;
+}
+
+button:hover,
+.action-btn:hover {
+    transform: translateY(-2px) scale(1.01);
+    transition: transform 0.3s, background 0.3s;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+button:active,
+.action-btn:active {
+    transform: translateY(0);
+}
+
+button:focus-visible,
+.action-btn:focus-visible {
+    outline: 3px solid rgba(191, 219, 254, 0.75);
+    outline-offset: 3px;
+}
+
+.botones {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-top: 12px;
+}
+
+.botones .action-btn {
+    flex: 1;
+}
+
+.forgot-password {
+    margin-top: 4px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #24415f;
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-family: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    align-self: flex-start;
+}
+
+.google-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(66, 133, 244, 0.35);
+    background: #ffffff;
+    color: #24415f;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    box-sizing: border-box;
+}
+
+.google-button:hover {
+    background: #f4f8ff;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
+.google-button:active {
+    transform: translateY(0);
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.google-legal {
+    margin: 0.75rem 0 0;
+    color: #355a7a;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.google-legal a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.google-legal a:hover {
+    color: inherit;
+}
+
+@keyframes hoverGradientShift {
+    0% {
+        background-position: 0% 50%;
     }
 
-    h2 {
-        margin: 0 0 8px;
-        font-size: 1.95rem;
-        line-height: 1.2;
-        text-align: left;
-        color: #eff6ff;
+    50% {
+        background-position: 100% 50%;
     }
 
-    .intro {
-        margin: 0 0 24px;
-        color: #dbeafe;
-        font-size: 0.98rem;
+    100% {
+        background-position: 0% 50%;
     }
-
-    form {
-        display: grid;
-        gap: 14px;
-    }
-
-    label {
-        font-size: 0.92rem;
-        color: #e2e8f0;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-    }
-
-    input,
-    textarea {
-        width: 100%;
-        padding: 14px 4px;
-        border: 1px solid rgba(148, 163, 184, 0.35);
-        border-radius: 14px;
-        background: rgba(248, 250, 252, 0.98);
-        color: #0f172a;
-        font-size: 1rem;
-        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
-        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-    }
-
-    input:focus,
-    textarea:focus {
-        outline: none;
-        border-color: #38bdf8;
-        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.18);
-        background: #ffffff;
-        transform: translateY(-1px);
-    }
-
-    textarea {
-        resize: vertical;
-        min-height: 110px;
-    }
-
-    button {
-        margin-top: 4px;
-        padding: 14px 18px;
-        border: none;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #38bdf8 0%, #2563eb 45%, #7c3aed 100%);
-        color: #ffffff;
-        font-weight: 700;
-        font-size: 1rem;
-        cursor: pointer;
-        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
-        transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
-    }
-
-    button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 14px 32px rgba(56, 189, 248, 0.35);
-        filter: brightness(1.04);
-    }
-
-    button:active {
-        transform: translateY(0);
-    }
-
-    button:focus-visible {
-        outline: 3px solid rgba(191, 219, 254, 0.75);
-        outline-offset: 3px;
-    }
-
-    .botones {
-        
-        display: flex;
-        gap: 12px;
-        justify-content:space-between;
-        margin-top: 12px;
-    }
-
-    .google-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        width: 100%;
-        padding: 14px 18px;
-        border-radius: 16px;
-        border: 1px solid rgba(66, 133, 244, 0.35);
-        background: #ffffff;
-        color: #1f3d5c;
-        font-weight: 700;
-        font-size: 1rem;
-        text-align: center;
-        text-decoration: none;
-        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
-        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-    }
-
-    .google-button:hover {
-        background: #f4f8ff;
-        transform: translateY(-1px);
-        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
-    }
-
-    .google-button:active {
-        transform: translateY(0);
-    }
-
-    .google-icon {
-        width: 20px;
-        height: 20px;
-        object-fit: contain;
-    }
-
-    .google-legal {
-        margin: 0.75rem 0 0;
-        color: #dbeafe;
-        font-size: 0.9rem;
-        line-height: 1.5;
-        text-align: center;
-    }
-
-    .google-legal a {
-        color: inherit;
-        text-decoration: underline;
-    }
-
-    .google-legal a:hover {
-        color: inherit;
-    }
+}
