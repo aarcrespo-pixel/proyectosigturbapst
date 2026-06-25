@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sigtur Salto</title>
+    <link rel="icon" href="/img/logoblanco.png">
+    <link rel="preconnect" href="/https://fonts.googleapis.com">
+    <link rel="preconnect" href="/https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Instrument+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/estilos.css">
+    <link rel="stylesheet" href="/css/intro.css">
+</head>
+
+<body>
+    <div class="intro">
+        <img src="/img/logoblanco.png">
+    </div>
+    <header class="menu-principal">
+        <button class="hamburguesa">
+            ☰
+        </button>
+        <nav class="menu">
+            <a href="index.html" class="logo-link">
+                <img src="/img/logoblanco.png" class="logo-menu" alt="Sigtur">
+            </a>
+            <a href="eventos.html">Eventos</a>
+            <a href="turismo.html">Turismo</a>
+            <a href="lugares.html">Lugares</a>
+        </nav>
+
+        <div class="barra-busqueda">
+            <input type="text" placeholder="'Eventos Destacados'">
+            <img src="/img/lupa.png" alt="Buscar">
+        </div>
+
+        <div class="perfil">
+            <button class="perfil-btn">
+                <img src="/img/user.png" alt="Perfil">
+            </button>
+
+            <div class="perfil-menu">
+                <a href="login.html">Ingresar Usuario</a>
+                <a href="configuracion.html">Configuración</a>
+                <a href="soporte.html">Soporte</a>
+                <a href="cerrar-sesion.html">Cerrar Sesión</a>
+            </div>
+        </div>
+
+        <div id="clima-widget" class="clima-widget"></div>
+
+    </header>
+
+    <nav class="bottom-nav" aria-label="Navegación inferior">
+        <a href="index.html" class="bottom-nav-item">
+            <img src="/img/logoazul.png" class="bottom-nav-icon" alt="Inicio">
+            <span class="bottom-nav-label">Inicio</span>
+        </a>
+        <a href="eventos.html" class="bottom-nav-item active">
+            <img src="/img/nav-eventos.png" class="bottom-nav-icon" alt="Eventos">
+            <span class="bottom-nav-label">Eventos</span>
+        </a>
+        <a href="turismo.html" class="bottom-nav-item">
+            <img src="/img/turismo.png" class="bottom-nav-icon" alt="Turismo">
+            <span class="bottom-nav-label">Turismo</span>
+        </a>
+        <a href="lugares.html" class="bottom-nav-item">
+            <img src="/img/lugares.png" class="bottom-nav-icon" alt="Lugares">
+            <span class="bottom-nav-label">Lugares</span>
+        </a>
+        <a href="login.html" class="bottom-nav-item">
+            <img src="/img/nav-user.png" class="bottom-nav-icon" alt="Usuario">
+            <span class="bottom-nav-label">Usuario</span>
+        </a>
+    </nav>
+
+    <section class="pantalla-inicio">
+        <img class="imagen-inicio" src="/img/inicio.jpeg" alt="Salto">
+        <div class="degradado-inferior"></div>
+        <div class="texto-inicio">
+            
+        </div>
+        <p class="texto-deslizar">
+            Desliza para ver más
+        </p>
+        <button class="info-btn" type="button" aria-expanded="false">Información</button>
+        <div class="info-panel" id="info-panel">
+            <h3>¿Qué es SIGTUR?</h3>
+            <p>SIGTUR es una guía local de Salto pensada para ayudarte a descubrir eventos, lugares y experiencias únicas de la ciudad.</p>
+            <p>La plataforma reúne recomendaciones culturales, turísticas y de ocio para que cada visita sea más simple, informada y memorable.</p>
+        </div>
+    </section>
+
+
+    <section class="seccion-features">
+
+        <div class="feature">
+            <div class="feature-header">
+                <img src="/img/eventos.jpeg" alt="Eventos">
+                <h3>Eventos</h3>
+                <button class="feature-toggle" aria-expanded="false">▼</button>
+            </div>
+            <div class="feature-text">
+                <p>Descubre las fechas y actividades destacadas para planificar tu visita a Salto.</p>
+                <p>Explora propuestas para cada estilo y no te pierdas lo mejor que ofrece la ciudad.</p>
+            </div>
+        </div>
+        <div class="feature">
+            <div class="feature-header">
+                <img src="/img/turismo.jpeg" alt="Turismo">
+                <h3>Turismo</h3>
+                <button class="feature-toggle" aria-expanded="false">▼</button>
+            </div>
+            <div class="feature-text">
+                <p>Encuentra ideas de recorridos y propuestas para disfrutar la ciudad y sus alrededores.</p>
+                <p>Conecta con opciones de paseos, experiencias y consejos para tu viaje.</p>
+            </div>
+        </div>
+        <div class="feature">
+            <div class="feature-header">
+                <img src="/img/lugares.jpeg" alt="Lugares">
+                <h3>Lugares</h3>
+                <button class="feature-toggle" aria-expanded="false">▼</button>
+            </div>
+            <div class="feature-text">
+                <p>Conoce los puntos más emblemáticos y los sitios imperdibles de Salto.</p>
+                <p>Descubre lugares únicos donde vivir momentos especiales y recordar la visita.</p>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="seccion-eventos">
+        <h2>Eventos Destacados</h2>
+        <div class="carrusel">
+            <button class="flecha izquierda">
+                ❮
+            </button>
+            <div class="contenedor-slides">
+                <div class="slide activo">
+                    <div class="info-evento">
+                        <h3>PorcoNegro</h3>
+                        <p>Todos los sabados de las 00:00 a 06:00!</p>
+                        <div class="accion-boton">
+                            <a href="eventos.html" class="boton-amarillo">Ver mas</a>
+                        </div>
+                    </div>
+                    <img src="/img/porco.avif" alt="Evento">
+                </div>
+                <div class="slide">
+                    <div class="info-evento">
+                        <h3>La Bambola</h3>
+                        <p>Todos los fines de semana!</p>
+                        <div class="accion-boton">
+                            <a href="eventos.html" class="boton-amarillo">Ver mas</a>
+                        </div>
+                    </div>
+
+                    <img src="/img/bambi.jpg" alt="Evento">
+                </div>
+                <div class="slide">
+                    <div class="info-evento">
+                        <h3>LSF</h3>
+                        <p>Competición de futbol salteña.</p>
+                        <div class="accion-boton">
+                            <a href="eventos.html" class="boton-amarillo">Ver mas</a>
+                        </div>
+                    </div>
+                    <img src="/img/lsf.jpg" alt="Evento">
+                </div>
+                <div class="slide">
+                    <div class="info-evento">
+                        <h3>LSB</h3>
+                        <p>Competición de básquetbol salteño.</p>
+                        <div class="accion-boton">
+                            <a href="eventos.html" class="boton-amarillo">Ver mas</a>
+                        </div>
+                    </div>
+                    <img src="/img/lsb.jpg" alt="Evento">
+                </div>
+            </div>
+
+            <button class="flecha derecha">
+                ❯
+            </button>
+
+        </div>
+
+        <div class="indicadores">
+            <span class="indicador activo"></span>
+            <span class="indicador"></span>
+            <span class="indicador"></span>
+            <span class="indicador"></span>
+        </div>
+
+    </section>
+
+    <section class="seccion-notificaciones">
+        <h2>Noticias en Salto</h2>
+        <div class="contenedor-carta">
+            <img src="/img/peñ.jpg" alt="Carta" class="imagen-carta">
+            <div class="texto-carta">
+                <h2>Peñarol ultimo con -48 dif en gol en la LSF Juveniles</h2>
+                <p>Recibe información sobre eventos deportivos en Salto.</p>
+                <div class="accion-boton">
+                            <a href="eventos.html" class="boton-amarillo">Ver noticia</a>
+                        </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>EVENTOS</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="/html/eventos.html" class="footer-link">Eventos destacados</a>
+                    <a href="/html/eventos.html" class="footer-link">Próximos eventos</a>
+                    <a href="/html/eventos.html" class="footer-link">Eventos anteriores</a>
+                    <a href="/html/eventos.html" class="footer-link">Todos los eventos</a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>LUGARES</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="/html/plaza-artigas.html" class="footer-link">Plaza Artigas</a>
+                    <a href="/html/plaza-33.html" class="footer-link">Plaza Treinta y Tres Orientales</a>
+                    <a href="/html/costanera-norte.html" class="footer-link">Costanera Norte</a>
+                    <a href="/html/costanera-sur.html" class="footer-link">Costanera Sur</a>
+                    <a href="/html/plaza-flores.html" class="footer-link">Parque Benito Solari</a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>TURISMO</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="/html/lugares.html" class="footer-link">Hoteles</a>
+                    <a href="/html/lugares.html" class="footer-link">Actividades</a>
+                    <a href="/html/lugares.html" class="footer-link">Lugares turísticos</a>
+                    <a href="/html/lugares.html" class="footer-link">Experiencias</a>
+                </div>
+            </div>
+
+            <div class="footer-col footer-col--social">
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>SIGTUR</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Sobre nosotros</a>
+                    <a href="#" class="footer-link">Contacto</a>
+                    <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon">
+                        <span class="social-icon">IG</span>Instagram
+                    </a>
+                    <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
+                        <span class="social-icon">FB</span>Facebook
+                    </a>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 SIGTUR SALTO. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="../js/script.js"></script>
+    <script src="../js/ith.js"></script>
+</body>
+
+</html>

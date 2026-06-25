@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuarios</title>
+    <link rel="stylesheet" href="/css/login.css">
+
+</head>
+
+<body>
+    <a class="logo-back" href="index.html" aria-label="Volver al inicio">
+        <img src="/img/logoblanco.png" alt="Volver al inicio">
+    </a>
+
+    <main>
+        <section class="contenedor">
+
+            <h1>Registro de Usuario</h1>
+            <p class="intro">Completa tus datos y registra tu cuenta o inicia sesión.</p>
+                <form>
+
+                    <br>
+                    <label for="Usuario">Usuario / Correo Electrónico</label>
+                    <input type="text" id="Usuario" placeholder="Usuario o correo electrónico" />
+
+                    <label for="Contraseña">Contraseña</label>
+                    <input type="password" id="Contraseña" placeholder="Contraseña" />
+                    <button type="button" class="forgot-password" onclick="event.preventDefault()">Olvidé mi contraseña</button>
+
+                    <div class="botones">
+                        <button type="button" id="btnAgregar" class="action-btn">Registrarse</button>
+                        <button type="button" id="btnIniciar" class="action-btn">Iniciar Sesión</button>
+                    </div>
+                    <a class="google-button" href="https://accounts.google.com/signin/v2/identifier?service=mail" target="_blank" rel="noopener noreferrer">
+                        <img class="google-icon" src="../img/google-logo.png" alt="Google logo">
+                        Iniciar con Google
+                    </a>
+                    <p class="google-legal">Al iniciar sesión aceptas los <a href="#">términos y condiciones</a> de la empresa, las <a href="#">reglas de uso</a> y la <a href="#">política de privacidad</a>.</p>
+
+                </form>
+
+        </section>
+
+
+
+    </main>
+
+    <script src="js/login.js"></script>
+
+</body>
+
+</html>
