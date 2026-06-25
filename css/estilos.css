@@ -404,7 +404,7 @@ img {
 .info-btn {
     position: absolute;
     right: clamp(1.2rem, 3vw, 4rem);
-    bottom: clamp(1rem, 2.6vw, 7rem);
+    bottom: clamp(5rem, 7vw, 7rem);
     z-index: 3;
     border: none;
     border-radius: 999px;
@@ -427,7 +427,7 @@ img {
 .info-panel {
     position: absolute;
     right: clamp(1.2rem, 2vw, 2rem);
-    bottom: clamp(4.4rem, 5vw, 5.1rem);
+    bottom: clamp(8.4rem, 12vw, 8.5rem);
     z-index: 3;
     width: min(320px, calc(100% - 2.4rem));
     padding: 1rem 1.1rem;
@@ -582,6 +582,26 @@ img {
     cursor: pointer;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
     transition: transform 0.25s ease, background 0.25s ease;
+    position: relative;
+}
+
+.flecha::before {
+    content: '';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: inherit;
+    line-height: 1;
+}
+
+.flecha.izquierda::before {
+    content: '❮';
+}
+
+.flecha.derecha::before {
+    content: '❯';
 }
 
 .boton-amarillo {
@@ -906,6 +926,142 @@ img {
     }
 }
 
+@media (max-width: 900px) {
+    .seccion-features,
+    .destinos-grid,
+    .rutas-grid,
+    .galeria-grid,
+    .galeria-lugares,
+    .intereses-grid,
+    .grilla-galeria {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .seccion-features,
+    .pagina-turismo,
+    .pagina-lugares,
+    .pagina-eventos,
+    .seccion-lugares,
+    .seccion-turismo,
+    .seccion-eventos {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    .feature,
+    .tarjeta-destino,
+    .tarjeta-ruta,
+    .tarjeta-galeria,
+    .tarjeta-lugar,
+    .tarjeta-interes,
+    .tarjeta-contenido,
+    .feature-text,
+    .info-panel article {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .carrusel,
+    .carrusel-eventos,
+    .visor-carrusel {
+        width: 100%;
+    }
+
+    .carrusel,
+    .carrusel-eventos {
+        gap: 1rem;
+    }
+
+    .boton-amarillo,
+    .boton-lugares,
+    .boton-turismo {
+        width: 100%;
+    }
+
+    .hero-texto p,
+    .feature-text p,
+    .tarjeta-contenido p,
+    .info-panel article p {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .seccion-features,
+    .destinos-grid,
+    .rutas-grid,
+    .galeria-grid,
+    .galeria-lugares,
+    .intereses-grid,
+    .grilla-galeria,
+    .contenedor-tarjetas,
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .carrusel,
+    .carrusel-eventos {
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+
+    .visor-carrusel,
+    .carrusel {
+        width: 100%;
+    }
+
+    .contenedor-tarjetas {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.9rem;
+        overflow-x: visible;
+        padding-bottom: 0;
+    }
+
+    .flecha {
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.6rem;
+    }
+
+    .hero-texto {
+        padding: 2rem 1rem;
+    }
+
+    .hero-turismo .hero-texto h1,
+    .hero-lugares .hero-texto h1,
+    .hero-texto h1 {
+        font-size: 2.6rem;
+    }
+
+    .feature,
+    .tarjeta-destino,
+    .tarjeta-ruta,
+    .tarjeta-galeria,
+    .tarjeta-lugar,
+    .tarjeta-interes {
+        padding: 1.2rem;
+    }
+
+    .boton-amarillo,
+    .boton-lugares,
+    .boton-turismo {
+        padding: 1rem 1.2rem;
+    }
+
+    .menu-principal {
+        flex-wrap: wrap;
+        gap: 0.85rem;
+    }
+
+    .menu {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding: 1rem;
+    }
+}
+
 @keyframes fade {
     from {
         opacity: 0;
@@ -1036,6 +1192,20 @@ img {
 
     .slide img {
         width: clamp(220px, 30vw, 420px);
+    }
+
+    .clima-widget {
+        top: calc(100% + 34rem);
+        left: 0.4rem;
+        right: auto;
+    }
+}
+
+@media (max-width: 1366px) and (max-height: 820px) {
+    .clima-widget {
+        top: calc(100% + 21rem);
+        left: 0.4rem;
+        right: auto;
     }
 }
 
@@ -1192,9 +1362,36 @@ img {
 
     .menu-principal > .hamburguesa,
     .menu-principal > .menu,
-    .menu-principal > .barra-busqueda,
-    .menu-principal > .perfil {
+    .menu-principal > .barra-busqueda {
         display: none;
+    }
+
+    .perfil {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        left: auto;
+        transform: none;
+        z-index: 1200;
+    }
+
+    .clima-widget {
+        position: fixed;
+        top: 16px;
+        right: calc(16px + clamp(2.8rem, 4vw, 3.6rem) + 0.8rem);
+        left: auto;
+        min-width: min(180px, 70vw);
+        max-width: 240px;
+        padding: 0.75rem 0.95rem;
+        z-index: 1100;
+    }
+
+    .perfil-menu {
+        position: fixed;
+        top: calc(16px + 3.6rem + 10px);
+        right: 16px;
+        left: auto;
+        width: min(220px, 86vw);
     }
 
     .bottom-nav {

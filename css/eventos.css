@@ -85,6 +85,18 @@ body {
     margin-bottom: 1.5rem;
 }
 
+.pagina-eventos .titulo-seccion h2 {
+    color: #111; /* h2 normales en eventos deben ser negros */
+}
+
+.pagina-eventos .galeria-eventos .titulo-seccion h2 {
+    color: #fff; /* excepto el titulo GALERÍA que va blanco */
+}
+
+.pagina-eventos .encabezado-categoria h3 {
+    color: #111; /* nombres de secciones empiezan negros y cambian con el tema */
+}
+
 .seccion-foco {
     margin-top: 3.5rem;
     padding: 2rem 2rem 2.5rem;
@@ -232,10 +244,48 @@ body {
     cursor: pointer;
     transition: transform 0.2s ease, background 0.2s ease;
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+    position: relative;
+}
+
+.flecha::before {
+    content: '';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.flecha.izquierda::before {
+    content: '❮';
+}
+
+.flecha.derecha::before {
+    content: '❯';
 }
 
 .flecha:hover {
     transform: scale(1.04);
+}
+
+body[data-tema="oscuro"] .flecha {
+    background: #ffffff;
+    color: #111111;
+}
+
+body[data-tema="claro"] .flecha {
+    background: #111111;
+    color: #ffffff;
+}
+
+body[data-tema="oscuro"] .indicador-netflix.activo {
+    background: #ffffff;
+}
+
+body[data-tema="claro"] .indicador-netflix.activo {
+    background: #111111;
 }
 
 .flecha.oculta {
@@ -503,6 +553,17 @@ body {
     .flecha {
         width: 3rem;
         height: 3rem;
+        display: grid;
+        place-items: center;
+        font-size: 1.4rem;
+    }
+
+    .flecha.izquierda::before {
+        content: '❮';
+    }
+
+    .flecha.derecha::before {
+        content: '❯';
     }
 
     .galeria-eventos .grilla-galeria {

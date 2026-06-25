@@ -232,9 +232,29 @@ body {
         font-size: 2.75rem;
     }
 
-    .info-panel,
-    .galeria-grid {
+    .destinos-grid,
+    .rutas-grid,
+    .galeria-grid,
+    .info-panel {
         grid-template-columns: 1fr;
+    }
+
+    .tarjeta-destino,
+    .tarjeta-ruta,
+    .tarjeta-galeria {
+        min-height: auto;
+    }
+
+    .tarjeta-ruta {
+        grid-template-columns: 1fr;
+    }
+
+    .contenido {
+        padding: 1.2rem;
+    }
+
+    .contenido h3 {
+        font-size: 1.35rem;
     }
 
     .hero-turismo {
