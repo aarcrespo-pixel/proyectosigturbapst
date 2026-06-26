@@ -1,4 +1,4 @@
-﻿/*
+/*
   Aquí definimos los datos que se muestran en cada carrusel.
   Cada propiedad como "destacados", "deportivos" o "discotecas"
   coincide con un bloque HTML que tiene un contenedor llamado
@@ -6,11 +6,11 @@
 */
 const datos = {
     destacados: [
-        { nombre: "MotoCross", categoria: "Carrera", lugar: "Costanera Norte", imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg" },
+        { nombre: "MotoCross", categoria: "Carrera", lugar: "Costanera Norte", imagen: "/img/moto_cross.jpg" },
         { nombre: "La Ferne", categoria: "Discoteca", lugar: "Costanera Norte", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDFLlNliF-KGMj2Lga3JGKfp0Hk3AyFP84cyTbf776SuztpI-AGEg7Ca0&s=10" },
-        { nombre: "Porco Negro", categoria: "Discoteca", lugar: "Av. Apolón de Mirbek esquina Av. José Enrique Rodó.", imagen: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Parque_Solari_Estatua.JPG" },
-        { nombre: "ExpoSalto", categoria: "Feria", lugar: "Hipódromo de Salto", imagen: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/84/ae/39/trouville-pizzeria-y.jpg?w=1200&h=1200&s=1" },
-        { nombre: "LaFosa Bike", categoria: "Deportivo", lugar: "La Fosa", imagen: "https://alba-uy-sarandi.cdn.mediatiquepress.com/wp-content/uploads/2024/08/Life_Cinemas_2.webp" }
+        { nombre: "Porco Negro", categoria: "Discoteca", lugar: "Av. Apolón de Mirbek esquina Av. José Enrique Rodó.", imagen: "/img/porco.avif" },
+        { nombre: "ExpoSalto", categoria: "Feria", lugar: "Hipódromo de Salto", imagen: "/img/exposalto.jpeg" },
+        { nombre: "LaFosa Bike", categoria: "Deportivo", lugar: "La Fosa", imagen: "/img/fosa.webp" }
     ],
     deportivos: [
         { nombre: "Maratón de la Ciudad", categoria: "Carrera", imagen: "https://www.infoturismo19.com.uy/wp-content/uploads/2023/07/SHOPPING-4-2.jpg" },
@@ -24,7 +24,7 @@ const datos = {
         { nombre: "Noche Electro", categoria: "Música", imagen: "https://www.infoturismo19.com.uy/wp-content/uploads/2023/07/SHOPPING-4-2.jpg" },
         { nombre: "Fiesta Tropical", categoria: "Baile", imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg" },
         { nombre: "DJ en Vivo", categoria: "Discoteca", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDFLlNliF-KGMj2Lga3JGKfp0Hk3AyFP84cyTbf776SuztpI-AGEg7Ca0&s=10" },
-        { nombre: "Porco Negro", categoria: "Discoteca", imagen: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Parque_Solari_Estatua.JPG" },
+        { nombre: "Porco Negro", categoria: "Discoteca", imagen: "/img/porco.avif" },
         { nombre: "Ferne", categoria: "Discoteca", imagen: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/84/ae/39/trouville-pizzeria-y.jpg?w=1200&h=1200&s=1" }
     ],
     competencias: [
@@ -35,10 +35,10 @@ const datos = {
         { nombre: "Copa de Natación", categoria: "Acuatico", imagen: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Parque_Solari_Estatua.JPG" }
     ],
     anteriores: [
-        { nombre: "Festival de la Naranja", categoria: "Cultura", lugar: "Plaza Artigas", imagen: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/84/ae/39/trouville-pizzeria-y.jpg?w=1200&h=1200&s=1" },
-        { nombre: "Carrera Nocturna", categoria: "Deportivo", lugar: "Costanera Norte", imagen: "https://alba-uy-sarandi.cdn.mediatiquepress.com/wp-content/uploads/2024/08/Life_Cinemas_2.webp" },
-        { nombre: "Muestra de Danza", categoria: "Cultura", lugar: "Centro Cultural", imagen: "https://www.infoturismo19.com.uy/wp-content/uploads/2023/07/SHOPPING-4-2.jpg" },
-        { nombre: "Feria de Emprendedores", categoria: "Local", lugar: "Mercado Central", imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg" },
+        { nombre: "Festival de la Naranja", categoria: "Cultura", lugar: "Plaza Artigas", imagen: "/img/festival_naranja.jpg" },
+        { nombre: "Carrera Nocturna", categoria: "Deportivo", lugar: "Costanera Norte", imagen: "/img/carrera_noche.webp" },
+        { nombre: "Muestra de Danza", categoria: "Cultura", lugar: "Centro Cultural", imagen: "/img/danza.jpg" },
+        { nombre: "Feria de Emprendedores", categoria: "Local", lugar: "Mercado Central", imagen: "/img/feria_emprendedores.jpg" },
         { nombre: "Toy Story 4", categoria: "Arte", lugar: "Cine Sarandi", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLYlimLpyzEAGbkjhkZr3cPP7pON89wJlOJPhKhGMLPM6xUx1nw3Pfj4s&s=10" }
     ]
 };
