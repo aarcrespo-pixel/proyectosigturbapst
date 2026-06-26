@@ -81,9 +81,9 @@ const aplicarTema = (oscuro, botonModoOscuro) => {
     const flechas = document.querySelectorAll('.flecha');
     flechas.forEach((flecha) => {
         setStyle(flecha, 'backgroundColor', oscuro ? '#ffffff' : '#111111');
-        setStyle(flecha, 'color', oscuro ? '#111111' : '#ffffff');
+        setStyle(flecha, 'color', oscuro ? '#cccccc' : '#111111');
     });
-
+    
     const indicadoresActivos = document.querySelectorAll('main.pagina-eventos .indicador-netflix.activo');
     indicadoresActivos.forEach((indicador) => {
         setStyle(indicador, 'backgroundColor', oscuro ? '#ffffff' : '#111111');
