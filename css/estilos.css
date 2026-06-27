@@ -265,6 +265,7 @@ img {
     color: rgba(40, 40, 40, .55);
 }
 
+<<<<<<< HEAD
 /* Barra de búsqueda - Modo oscuro */
 body[data-tema="oscuro"] .barra-busqueda input {
     color: #e5e5e5;
@@ -283,6 +284,8 @@ body[data-tema="claro"] .barra-busqueda input::placeholder {
     color: rgba(17, 17, 17, 0.6);
 }
 
+=======
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
 .barra-busqueda img {
     width: clamp(0.9rem, 1vw, 1rem);
     height: clamp(0.9rem, 1vw, 1rem);
@@ -329,6 +332,7 @@ body[data-tema="claro"] .barra-busqueda input::placeholder {
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, .2), 0 12px 28px rgba(0, 0, 0, .12);
 }
 
+<<<<<<< HEAD
 /* Perfil button - Modo oscuro más brilloso */
 body[data-tema="oscuro"] .perfil-btn {
     background: rgba(255, 255, 255, .20);
@@ -344,6 +348,8 @@ body[data-tema="oscuro"] .perfil-btn:hover {
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, .3), 0 12px 28px rgba(0, 0, 0, .2);
 }
 
+=======
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
 .perfil-btn img {
     width: 70%;
     height: 70%;
@@ -381,6 +387,7 @@ body[data-tema="oscuro"] .perfil-btn:hover {
     background: rgba(255, 255, 255, .25);
 }
 
+<<<<<<< HEAD
 /* Perfil menu - Modo oscuro */
 body[data-tema="oscuro"] .perfil-menu a {
     color: #e5e5e5;
@@ -401,6 +408,8 @@ body[data-tema="claro"] .perfil-menu a:hover {
     color: #000000;
 }
 
+=======
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
 .perfil.activo .perfil-menu {
     display: flex;
 }

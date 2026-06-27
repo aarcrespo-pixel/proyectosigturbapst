@@ -273,6 +273,7 @@ body {
 body[data-tema="oscuro"] .flecha {
     background: #ffffff;
     color: #111111;
+<<<<<<< HEAD
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12), 0 20px 40px rgba(0, 0, 0, 0.25);
 }
 
@@ -294,6 +295,12 @@ body[data-tema="oscuro"] .seccion-foco .flecha {
 }
 
 body[data-tema="oscuro"] .seccion-foco .flecha::before {
+=======
+}
+
+body[data-tema="claro"] .flecha {
+    background: #111111;
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
     color: #ffffff;
 }
 
@@ -528,6 +535,7 @@ body[data-tema="claro"] .indicador-netflix.activo {
         min-height: 56vh;
     }
 
+<<<<<<< HEAD
     .texto-encabezado {
         padding: 2.5rem 1.5rem;
     }
@@ -538,11 +546,19 @@ body[data-tema="claro"] .indicador-netflix.activo {
 
     .texto-encabezado p {
         font-size: 1rem;
+=======
+    .texto-encabezado h1 {
+        font-size: 2.2rem;
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
     }
 
     .carrusel-eventos {
         grid-template-columns: 1fr;
+<<<<<<< HEAD
         gap: 0.8rem;
+=======
+        gap: 1rem;
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
     }
 
     /* make the event cards horizontally scrollable on small screens */
@@ -560,6 +576,7 @@ body[data-tema="claro"] .indicador-netflix.activo {
     }
 
     .contenedor-tarjetas .tarjeta {
+<<<<<<< HEAD
         flex: 0 0 75%;
         min-width: 240px;
         scroll-snap-align: center;
@@ -580,6 +597,16 @@ body[data-tema="claro"] .indicador-netflix.activo {
 
     .contenedor-tarjetas::-webkit-scrollbar {
         height: 6px;
+=======
+        flex: 0 0 82%;
+        min-width: 260px;
+        scroll-snap-align: center;
+        min-height: 260px;
+    }
+
+    .contenedor-tarjetas::-webkit-scrollbar {
+        height: 8px;
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
     }
 
     .contenedor-tarjetas::-webkit-scrollbar-thumb {
@@ -588,11 +615,19 @@ body[data-tema="claro"] .indicador-netflix.activo {
     }
 
     .flecha {
+<<<<<<< HEAD
         width: 2.8rem;
         height: 2.8rem;
         display: grid;
         place-items: center;
         font-size: 1.3rem;
+=======
+        width: 3rem;
+        height: 3rem;
+        display: grid;
+        place-items: center;
+        font-size: 1.4rem;
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
     }
 
     .flecha.izquierda::before {
@@ -603,6 +638,7 @@ body[data-tema="claro"] .indicador-netflix.activo {
         content: '❯';
     }
 
+<<<<<<< HEAD
     .seccion-foco {
         margin-top: 2.5rem;
         padding: 1.5rem 1rem 2rem;
@@ -722,4 +758,9 @@ body[data-tema="claro"] .indicador-netflix.activo {
     .lightbox-image {
         max-height: calc(100vh - 8rem);
     }
+=======
+    .galeria-eventos .grilla-galeria {
+        grid-template-columns: 1fr;
+    }
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
 }
