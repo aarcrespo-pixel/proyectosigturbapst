@@ -1,0 +1,317 @@
+:root {
+  --cfg-bg: linear-gradient(145deg, #f5f7fb 0%, #edf3f9 42%, #fffaf6 100%);
+  --cfg-panel: rgba(255, 255, 255, 0.76);
+  --cfg-card: rgba(255, 255, 255, 0.82);
+  --cfg-border: rgba(15, 23, 42, 0.08);
+  --cfg-text: #1f2937;
+  --cfg-muted: #5b6573;
+  --cfg-accent: #6cb4dd;
+  --cfg-accent-2: #f1a24a;
+  --cfg-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--cfg-bg);
+  color: var(--cfg-text);
+  font-family: 'Instrument Sans', sans-serif;
+}
+
+.config-page {
+  position: relative;
+  min-height: 100vh;
+  padding: 8rem 28px 64px;
+  overflow: hidden;
+}
+
+.config-page::before,
+.config-page::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.22;
+  z-index: 0;
+}
+
+.config-page::before {
+  width: 320px;
+  height: 320px;
+  top: 10%;
+  left: -8%;
+  background: rgba(217, 164, 77, 0.18);
+}
+
+.config-page::after {
+  width: 380px;
+  height: 380px;
+  right: -10%;
+  bottom: 5%;
+  background: rgba(143, 181, 209, 0.20);
+}
+
+.config-container {
+  position: relative;
+  z-index: 1;
+  width: min(1280px, 100%);
+  margin: 0 auto;
+}
+
+.config-hero {
+  margin-bottom: 1.75rem;
+}
+
+.back-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 132px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(217, 164, 77, 0.12);
+  color: #1f3d5c;
+ border: 1px solid rgba(217, 164, 77, 0.18);  
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.back-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 22px rgba(15, 23, 42, 0.12);
+}
+
+.hero-top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+
+.config-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(217, 164, 77, 0.12);
+  border: 1px solid rgba(217, 164, 77, 0.18);
+  color: #8b6b3f;
+  font-size: 0.85rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-left: auto;
+}
+
+.config-hero h1 {
+  font-weight: 500;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1.05;
+  color: #22354a;
+}
+
+.config-hero p {
+  max-width: 780px;
+  color: var(--cfg-muted);
+  font-size: 1.02rem;
+  line-height: 1.7;
+  margin-top: 0.2rem;
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  align-items: stretch;
+}
+
+.config-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.72));
+  border: 1px solid var(--cfg-border);
+  border-radius: 26px;
+  padding: 1.15rem;
+  box-shadow: var(--cfg-shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.config-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(217, 164, 77, 0.35);
+  box-shadow: 0 22px 42px rgba(15, 23, 42, 0.14);
+}
+
+.config-card h2 {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 1.14rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.35rem;
+}
+
+.config-card p {
+  font-family: 'Instrument Sans', sans-serif;
+  color: var(--cfg-muted);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  margin-bottom: 0.9rem;
+}
+
+.config-card label {
+  display: block;
+  margin-top: 0.65rem;
+  font-family: 'Instrument Sans', sans-serif;
+  color: #1f2937;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.config-input,
+.config-select,
+.config-textarea {
+  font-family: 'Instrument Sans', sans-serif;
+  width: 100%;
+  margin-top: 0.35rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #1f2937;
+  padding: 0.78rem 0.9rem;
+  font: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.config-input:focus,
+.config-select:focus,
+.config-textarea:focus {
+  border-color: rgba(126, 182, 217, 0.45);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 0 0 4px rgba(126, 182, 217, 0.18);
+  transform: translateY(-1px);
+}
+
+.config-textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.config-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.config-row:first-of-type {
+  border-top: none;
+}
+
+.config-label strong {
+  display: block;
+  color: #1f2937;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 500;
+}
+
+.config-label span {
+  display: block;
+  color: var(--cfg-muted);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin-top: 0.15rem;
+}
+
+.config-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 0.45rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(217, 164, 77, 0.12);
+  border: 1px solid rgba(217, 164, 77, 0.18);
+  color: #8b6b3f;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.config-actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.btn {
+  border: none;
+  border-radius: 999px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  padding: 0.8rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px) scale(1.01);
+  filter: brightness(1.04);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6cb4dd, #f1a24a);
+  color: #16354b;
+  box-shadow: 0 12px 18px rgba(108, 180, 221, 0.22);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.78);
+  color: #1f2937;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+@media (max-width: 980px) {
+  .config-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .config-page {
+    padding-top: 8.5rem;
+  }
+
+  .config-card {
+    padding: 0.95rem;
+    border-radius: 18px;
+  }
+
+  .config-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+}
