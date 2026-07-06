@@ -2,18 +2,22 @@
 <html lang="es">
 
 <head>
+    <!-- Metaetiquetas y configuración -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eventos | SIGTUR</title>
-    <link rel="icon" href="/img/logoblanco.png">
+    <link rel="icon" href="/img/logoblanco.png"> <!-- Ícono de pestaña -->
+    <!-- Importar fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/estilos.css">
-    <link rel="stylesheet" href="/css/eventos.css">
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="/css/estilos.css"> <!-- Estilos generales -->
+    <link rel="stylesheet" href="/css/eventos.css"> <!-- Estilos específicos de eventos -->
 </head>
 
 <body>
+    <!-- Menú principal -->
     <header class="menu-principal">
         <button class="hamburguesa">
             ☰
@@ -22,16 +26,18 @@
             <a href="index.html" class="logo-link">
                 <img src="/img/logoblanco.png" class="logo-menu" alt="SIGTUR">
             </a>
-            <a href="eventos.html" class="pagina-activa">Eventos</a>
+            <a href="eventos.html" class="pagina-activa">Eventos</a> <!-- Página actual marcada -->
             <a href="turismo.html">Turismo</a>
             <a href="lugares.html">Lugares</a>
         </nav>
 
+        <!-- Barra de búsqueda -->
         <div class="barra-busqueda">
             <input type="text" placeholder="Buscar eventos">
             <img src="/img/lupa.png" alt="Buscar">
         </div>
 
+        <!-- Menú de perfil -->
         <div class="perfil">
             <button class="perfil-btn">
                 <img src="/img/user.png" alt="Perfil">
@@ -46,7 +52,28 @@
         </div>
     </header>
 
+    <!-- Navegación inferior para móviles -->
+    <nav class="bottom-nav" aria-label="Navegación inferior">
+        <a href="index.html" class="bottom-nav-item">
+            <img src="/img/logoazul.png" class="bottom-nav-icon" alt="Inicio">
+            <span class="bottom-nav-label">Inicio</span>
+        </a>
+        <a href="eventos.html" class="bottom-nav-item active">
+            <img src="/img/nav-eventos.png" class="bottom-nav-icon" alt="Eventos">
+            <span class="bottom-nav-label">Eventos</span>
+        </a>
+        <a href="turismo.html" class="bottom-nav-item">
+            <img src="/img/turismo.png" class="bottom-nav-icon" alt="Turismo">
+            <span class="bottom-nav-label">Turismo</span>
+        </a>
+        <a href="lugares.html" class="bottom-nav-item">
+            <img src="/img/lugares.png" class="bottom-nav-icon" alt="Lugares">
+            <span class="bottom-nav-label">Lugares</span>
+        </a>
+    </nav>
+
     <main class="pagina-eventos">
+        <!-- Encabezado con imagen de fondo -->
         <section class="encabezado-eventos">
             <div class="fondo-encabezado"></div>
             <div class="texto-encabezado">
@@ -55,21 +82,24 @@
             </div>
         </section>
 
+        <!-- Sección de eventos destacados con carrusel -->
         <section class="seccion seccion-foco">
             <div class="titulo-seccion">
                 <h2 class="titulo-foco">DESTACADOS</h2>
             </div>
             <div class="carrusel-eventos">
-                <button class="flecha izquierda" data-carrusel="destacados"></button>
+                <button class="flecha izquierda" data-carrusel="destacados"></button> <!-- Navegación izquierda -->
                 <div class="visor-carrusel">
-                    <div class="contenedor-tarjetas" id="destacados-contenedor"></div>
+                    <div class="contenedor-tarjetas" id="destacados-contenedor"></div> <!-- Se llena con JavaScript -->
                 </div>
-                <button class="flecha derecha" data-carrusel="destacados"></button>
+                <button class="flecha derecha" data-carrusel="destacados"></button> <!-- Navegación derecha -->
             </div>
-            <div class="indicadores-carrusel" id="destacados-indicadores"></div>
+            <div class="indicadores-carrusel" id="destacados-indicadores"></div> <!-- Puntos de navegación -->
         </section>
 
+        <!-- Categorías: Deportivos, Discotecas, Competencias -->
         <section class="seccion categoria-lista">
+            <!-- Eventos Deportivos -->
             <div class="fila-categoria">
                 <div class="encabezado-categoria">
                     <h3>Deportivos</h3>
@@ -84,6 +114,7 @@
                 <div class="indicadores-carrusel" id="deportivos-indicadores"></div>
             </div>
 
+            <!-- Discotecas -->
             <div class="fila-categoria">
                 <div class="encabezado-categoria">
                     <h3>Discotecas</h3>
@@ -98,6 +129,7 @@
                 <div class="indicadores-carrusel" id="discotecas-indicadores"></div>
             </div>
 
+            <!-- Competencias -->
             <div class="fila-categoria">
                 <div class="encabezado-categoria">
                     <h3>Competencias</h3>
@@ -113,10 +145,12 @@
             </div>
         </section>                  
 
+        <!-- Botón de acción -->
         <div class="accion-boton">
             <a href="#" class="boton-amarillo">Ver todos los eventos</a>
         </div>
 
+        <!-- Eventos anteriores ya realizados -->
         <section class="seccion seccion-foco">
             <div class="titulo-seccion">
                 <h2 class="titulo-foco">EVENTOS ANTERIORES</h2>
@@ -142,43 +176,78 @@
         </section>
     </main>
 
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+        <div class="lightbox-content">
+            <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar imagen">×</button>
+            <button class="lightbox-arrow left" id="lightbox-prev" aria-label="Imagen anterior">❮</button>
+            <img id="lightbox-image" src="" alt="Vista ampliada de galería">
+            <button class="lightbox-arrow right" id="lightbox-next" aria-label="Siguiente imagen">❯</button>
+            <div class="lightbox-caption" id="lightbox-caption"></div>
+        </div>
+    </div>
+
     <footer class="footer">
         <div class="footer-grid">
             <div class="footer-col">
-                <h4>EVENTOS</h4>
-                <a href="eventos.html" class="footer-link">Eventos destacados</a>
-                <a href="eventos.html" class="footer-link">Próximos eventos</a>
-                <a href="eventos.html" class="footer-link">Eventos anteriores</a>
-                <a href="eventos.html" class="footer-link">Todos los eventos</a>
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>EVENTOS</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="eventos.html" class="footer-link">Eventos destacados</a>
+                    <a href="eventos.html" class="footer-link">Próximos eventos</a>
+                    <a href="eventos.html" class="footer-link">Eventos anteriores</a>
+                    <a href="eventos.html" class="footer-link">Todos los eventos</a>
+                </div>
             </div>
 
             <div class="footer-col">
-                <h4>LUGARES</h4>
-                <a href="#" class="footer-link">Plaza Artigas</a>
-                <a href="#" class="footer-link">Plaza Treinta y Tres</a>
-                <a href="#" class="footer-link">Costanera Norte</a>
-                <a href="#" class="footer-link">Costanera Sur</a>
-                <a href="#" class="footer-link">Parque Benito Solari</a>
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>LUGARES</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Plaza Artigas</a>
+                    <a href="#" class="footer-link">Plaza Treinta y Tres</a>
+                    <a href="#" class="footer-link">Costanera Norte</a>
+                    <a href="#" class="footer-link">Costanera Sur</a>
+                    <a href="#" class="footer-link">Parque Benito Solari</a>
+                </div>
             </div>
 
             <div class="footer-col">
-                <h4>TURISMO</h4>
-                <a href="#" class="footer-link">Hoteles</a>
-                <a href="#" class="footer-link">Actividades</a>
-                <a href="#" class="footer-link">Lugares turísticos</a>
-                <a href="#" class="footer-link">Experiencias</a>
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>TURISMO</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Hoteles</a>
+                    <a href="#" class="footer-link">Actividades</a>
+                    <a href="#" class="footer-link">Lugares turísticos</a>
+                    <a href="#" class="footer-link">Experiencias</a>
+                </div>
             </div>
 
             <div class="footer-col footer-col--social">
-                <h4>SIGTUR</h4>
-                <a href="#" class="footer-link">Sobre nosotros</a>
-                <a href="#" class="footer-link">Contacto</a>
-                <a href="https://instagram.com/sigtur_salto" target="_blank" class="footer-link footer-link--icon">
-                    <span class="social-icon">IG</span>Instagram
-                </a>
-                <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
-                    <span class="social-icon">FB</span>Facebook
-                </a>
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>SIGTUR</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Sobre nosotros</a>
+                    <a href="#" class="footer-link">Contacto</a>
+<<<<<<< HEAD
+                    <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon">
+=======
+                    <a href="https://instagram.com/sigtur_salto" target="_blank" class="footer-link footer-link--icon">
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
+                        <span class="social-icon">IG</span>Instagram
+                    </a>
+                    <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
+                        <span class="social-icon">FB</span>Facebook
+                    </a>
+                </div>
             </div>
         </div>
         <div class="footer-bottom">
@@ -186,6 +255,7 @@
         </div>
     </footer>
 
+    <script src="/js/script.js" defer></script>
     <script src="/js/eventos.js" defer></script>
 </body>
 

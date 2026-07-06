@@ -1,0 +1,133 @@
+/* ===== ESTILO GENERAL ===== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f5f8fa;
+    color:#333;
+}
+
+/* ===== TÍTULO ===== */
+
+h1{
+    text-align:center;
+    margin:30px;
+    color:#0a4d68;
+    font-size:40px;
+}
+
+h2,h3{
+    text-align:center;
+    color:#0a4d68;
+    margin:20px;
+}
+
+p{
+    text-align:center;
+    font-size:18px;
+    width:80%;
+    margin:auto;
+    line-height:1.6;
+}
+
+/* ===== GALERÍA ===== */
+
+.galeria{
+    width:90%;
+    margin:40px auto;
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:25px;
+}
+
+.galeria img{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.2);
+    transition:.4s;
+}
+
+.galeria img:hover{
+    transform:scale(1.05);
+    box-shadow:0 10px 25px rgba(0,0,0,.3);
+}
+
+/* ===== BOTONES ===== */
+
+button{
+    background:#0a7ea4;
+    color:white;
+    border:none;
+    padding:14px 30px;
+    border-radius:30px;
+    cursor:pointer;
+    font-size:17px;
+    transition:.3s;
+}
+
+button:hover{
+    background:#065b78;
+    transform:scale(1.05);
+}
+
+a{
+    text-decoration:none;
+}
+
+/* ===== TARJETAS ===== */
+
+.card{
+    background:white;
+    border-radius:15px;
+    padding:20px;
+    box-shadow:0 5px 15px rgba(0,0,0,.15);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+}
+
+/* ===== TABLAS ===== */
+
+table{
+    margin:auto;
+    border-spacing:20px;
+}
+
+/* ===== FOOTER ===== */
+
+footer{
+    margin-top:50px;
+    background:#0a4d68;
+    color:white;
+    padding:25px;
+    text-align:center;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media(max-width:768px){
+
+    h1{
+        font-size:30px;
+    }
+
+    p{
+        width:95%;
+        font-size:16px;
+    }
+
+    .galeria{
+        width:95%;
+    }
+
+}

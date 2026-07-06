@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Configuración básica de página -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse | Sigtur Salto</title>
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="/css/login.css"> <!-- Estilos de registro y login -->
+</head>
+<body>
+    <!-- Botón para volver al inicio -->
+    <a class="logo-back" href="index.html" aria-label="Volver al inicio">
+        <img src="/img/logoblanco.png" alt="Volver al inicio">
+    </a>
+
+    <main>
+        <section class="contenedor">
+            <h1>Regístrate</h1>
+            <p class="intro">Completa tus datos para crear tu cuenta y empezar a disfrutar del sitio.</p>
+            <!-- Formulario de registro -->
+            <form>
+                <!-- Campo nombre completo -->
+                <label for="Nombre">Nombre completo</label>
+                <input type="text" id="Nombre" placeholder="Nombre completo" />
+
+                <!-- Campo correo -->
+                <label for="CorreoElectronico">Correo electrónico</label>
+                <input type="email" id="CorreoElectronico" placeholder="Correo electrónico" />
+
+                <!-- Campo contraseña -->
+                <label for="Contraseña">Contraseña</label>
+                <input type="password" id="Contraseña" placeholder="Contraseña" />
+
+                <!-- Campo teléfono -->
+                <label for="Telefono">Número telefónico</label>
+                <input type="tel" id="Telefono" placeholder="Número telefónico" />
+
+                <!-- Botones de acción -->
+                <div class="botones">
+                    <button type="button" id="btnAgregar" class="action-btn">Registrarse</button>
+                    <a class="action-btn" href="login.html">Iniciar Sesión</a>
+                </div>
+
+                <!-- Opción de registro con Google -->
+                <a class="google-button" href="https://accounts.google.com/signin/v2/identifier?service=mail" target="_blank" rel="noopener noreferrer">
+                    <img class="google-icon" src="../img/google-logo.png" alt="Google logo">
+                    Iniciar con Google
+                </a>
+                <!-- Aviso legal -->
+                <p class="google-legal">Al registrarte aceptas los <a href="#">términos y condiciones</a> de la empresa, las <a href="#">reglas de uso</a> y la <a href="#">política de privacidad</a>.</p>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

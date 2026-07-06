@@ -1,6 +1,8 @@
 :root {
     --lugares-bg: linear-gradient(180deg, #fff2ea 0%, #fffdfb 100%);
-    --hero-overlay: rgba(98, 37, 21, 0.66);
+    --amarillo-claro: #ffd84d;
+    --amarillo-fuerte: #f7b500;
+    --hero-overlay: rgba(0, 0, 0, 0.56);
     --card-bg: rgba(255, 255, 255, 0.96);
     --card-border: rgba(220, 123, 92, 0.18);
     --accent-primary: #d36248;
@@ -30,7 +32,7 @@ body {
     display: grid;
     place-items: center;
     margin-bottom: 3rem;
-    background-image: url('../img/lugares.jpeg');
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/7/7c/Plaza_33_-_Espacio_Fuente_central_hacia_acceso_N.E._2.JPG');
     background-size: cover;
     background-position: center;
 }
@@ -62,9 +64,11 @@ body {
 }
 
 .hero-lugares .hero-texto h1 {
-    font-size: clamp(3rem, 5vw, 4.8rem);
+    font-size: clamp(8rem, 10vw, 4.2rem);
+    font-weight: 700;
+    letter-spacing: -0.05em;
     line-height: 1.05;
-    margin-bottom: 1.2rem;
+    color: var(--amarillo-fuerte);
 }
 
 .hero-lugares .hero-texto p {
@@ -173,7 +177,7 @@ body {
     box-shadow: 0 22px 40px rgba(211, 98, 72, 0.30);
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 900px) {
     .destinos-grid,
     .intereses-grid,
     .galeria-lugares {
@@ -185,7 +189,7 @@ body {
     }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 480px) {
     .pagina-lugares {
         padding: 8rem 1.5rem 3rem;
     }
@@ -194,7 +198,23 @@ body {
         font-size: 2.8rem;
     }
 
+    .destinos-grid,
+    .intereses-grid,
     .galeria-lugares {
         grid-template-columns: 1fr;
+    }
+
+    .tarjeta-lugar,
+    .tarjeta-interes,
+    .tarjeta-galeria {
+        min-height: auto;
+    }
+
+    .tarjeta-interes {
+        grid-template-columns: 1fr;
+    }
+
+    .tarjeta-contenido {
+        padding: 1.2rem;
     }
 }

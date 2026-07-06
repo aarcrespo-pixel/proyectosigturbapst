@@ -5,7 +5,7 @@
 }
 
 :root {
-    --site-max-width: 1400px;
+    --site-max-width: 1600px;
     --section-gap: clamp(16px, 1.2vw, 30px);
     --card-padding: clamp(1.8rem, 2vw, 2.5rem);
     --menu-gap: clamp(14px, 1.2vw, 24px);
@@ -53,7 +53,7 @@ img {
     top: clamp(2rem, 2.5vw, 6rem);
     left: 50%;
     transform: translateX(-50%);
-    width: min(92%, 1380px);
+    width: min(92%, var(--site-max-width));
     display: flex;
     justify-content: center;
     align-items: center;
@@ -202,6 +202,45 @@ img {
         0 2px 8px rgba(0, 0, 0, .03);
 }
 
+.clima-widget {
+    position: absolute;
+    left: 0.4rem;
+    top: calc(100% + 40rem);
+    transform: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 160px;
+    padding: 0.8rem 1rem;
+    border-radius: 999px;
+    background: linear-gradient(270deg, #ffffff, #dfcc8d, #ccc9c0, rgb(226, 226, 134));
+    background-size: 300% 300%;
+    animation: hoverGradientShift 6s ease infinite;
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.78);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.48);
+    color: #111;
+    font-weight: 700;
+    font-size: 0.95rem;
+    backdrop-filter: blur(12px);
+    z-index: 101;
+}
+
+.clima-widget .clima-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.clima-widget .clima-temp {
+    font-size: 1rem;
+}
+
+.clima-widget .clima-humedad,
+.clima-widget .clima-ith {
+    font-size: 0.78rem;
+    color: rgba(17, 17, 17, 0.7);
+}
+
 .menu-principal .barra-busqueda {
     position: absolute;
     right: clamp(1px, 4.5vw, 10px);
@@ -226,6 +265,27 @@ img {
     color: rgba(40, 40, 40, .55);
 }
 
+<<<<<<< HEAD
+/* Barra de búsqueda - Modo oscuro */
+body[data-tema="oscuro"] .barra-busqueda input {
+    color: #e5e5e5;
+}
+
+body[data-tema="oscuro"] .barra-busqueda input::placeholder {
+    color: rgba(229, 229, 229, 0.5);
+}
+
+/* Barra de búsqueda - Modo claro */
+body[data-tema="claro"] .barra-busqueda input {
+    color: #111111;
+}
+
+body[data-tema="claro"] .barra-busqueda input::placeholder {
+    color: rgba(17, 17, 17, 0.6);
+}
+
+=======
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
 .barra-busqueda img {
     width: clamp(0.9rem, 1vw, 1rem);
     height: clamp(0.9rem, 1vw, 1rem);
@@ -272,6 +332,24 @@ img {
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, .2), 0 12px 28px rgba(0, 0, 0, .12);
 }
 
+<<<<<<< HEAD
+/* Perfil button - Modo oscuro más brilloso */
+body[data-tema="oscuro"] .perfil-btn {
+    background: rgba(255, 255, 255, .20);
+    border-top: 1px solid rgba(255, 255, 255, .75);
+    border-left: 1px solid rgba(255, 255, 255, .35);
+    border-right: 1px solid rgba(255, 255, 255, .35);
+    border-bottom: 1px solid rgba(255, 255, 255, .45);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, .25), 0 8px 18px rgba(0, 0, 0, .15);
+}
+
+body[data-tema="oscuro"] .perfil-btn:hover {
+    background: rgba(255, 255, 255, .2);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, .3), 0 12px 28px rgba(0, 0, 0, .2);
+}
+
+=======
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
 .perfil-btn img {
     width: 70%;
     height: 70%;
@@ -309,6 +387,29 @@ img {
     background: rgba(255, 255, 255, .25);
 }
 
+<<<<<<< HEAD
+/* Perfil menu - Modo oscuro */
+body[data-tema="oscuro"] .perfil-menu a {
+    color: #e5e5e5;
+}
+
+body[data-tema="oscuro"] .perfil-menu a:hover {
+    background: rgba(255, 255, 255, .3);
+    color: #ffffff;
+}
+
+/* Perfil menu - Modo claro */
+body[data-tema="claro"] .perfil-menu a {
+    color: #111111;
+}
+
+body[data-tema="claro"] .perfil-menu a:hover {
+    background: rgba(0, 0, 0, .1);
+    color: #000000;
+}
+
+=======
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
 .perfil.activo .perfil-menu {
     display: flex;
 }
@@ -364,16 +465,17 @@ img {
 
 .info-btn {
     position: absolute;
-    right: clamp(1.2rem, 2vw, 2rem);
-    bottom: clamp(1rem, 2vw, 1.6rem);
+    right: clamp(1.2rem, 3vw, 4rem);
+    bottom: clamp(5rem, 7vw, 7rem);
     z-index: 3;
     border: none;
     border-radius: 999px;
-    padding: 0.75rem 1.1rem;
+    padding: 1rem 1.7rem;
     background: rgba(255, 255, 255, 0.95);
     color: #18324a;
-    font-weight: 700;
-    font-size: 0.95rem;
+    font-weight: 600;
+    font-size: 0.97rem;
+    letter-spacing: -0.03em;
     cursor: pointer;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -387,7 +489,7 @@ img {
 .info-panel {
     position: absolute;
     right: clamp(1.2rem, 2vw, 2rem);
-    bottom: clamp(4.4rem, 5vw, 5.1rem);
+    bottom: clamp(8.4rem, 12vw, 8.5rem);
     z-index: 3;
     width: min(320px, calc(100% - 2.4rem));
     padding: 1rem 1.1rem;
@@ -542,6 +644,26 @@ img {
     cursor: pointer;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
     transition: transform 0.25s ease, background 0.25s ease;
+    position: relative;
+}
+
+.flecha::before {
+    content: '';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: inherit;
+    line-height: 1;
+}
+
+.flecha.izquierda::before {
+    content: '❮';
+}
+
+.flecha.derecha::before {
+    content: '❯';
 }
 
 .boton-amarillo {
@@ -595,6 +717,7 @@ img {
 .slide.activo {
     display: flex;
     animation: fadeSlide .75s ease;
+    transform: translateY(-8px) scale(1.03);
 }
 
 .slide img {
@@ -728,7 +851,7 @@ img {
     display: grid;
     grid-template-columns: repeat(4, minmax(160px, 1fr));
     gap: clamp(1.75rem, 1.5vw, 2.8rem);
-    max-width: 1320px;
+    max-width: var(--site-max-width);
     margin: 0 auto;
 }
 
@@ -865,6 +988,142 @@ img {
     }
 }
 
+@media (max-width: 900px) {
+    .seccion-features,
+    .destinos-grid,
+    .rutas-grid,
+    .galeria-grid,
+    .galeria-lugares,
+    .intereses-grid,
+    .grilla-galeria {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .seccion-features,
+    .pagina-turismo,
+    .pagina-lugares,
+    .pagina-eventos,
+    .seccion-lugares,
+    .seccion-turismo,
+    .seccion-eventos {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    .feature,
+    .tarjeta-destino,
+    .tarjeta-ruta,
+    .tarjeta-galeria,
+    .tarjeta-lugar,
+    .tarjeta-interes,
+    .tarjeta-contenido,
+    .feature-text,
+    .info-panel article {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .carrusel,
+    .carrusel-eventos,
+    .visor-carrusel {
+        width: 100%;
+    }
+
+    .carrusel,
+    .carrusel-eventos {
+        gap: 1rem;
+    }
+
+    .boton-amarillo,
+    .boton-lugares,
+    .boton-turismo {
+        width: 100%;
+    }
+
+    .hero-texto p,
+    .feature-text p,
+    .tarjeta-contenido p,
+    .info-panel article p {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .seccion-features,
+    .destinos-grid,
+    .rutas-grid,
+    .galeria-grid,
+    .galeria-lugares,
+    .intereses-grid,
+    .grilla-galeria,
+    .contenedor-tarjetas,
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .carrusel,
+    .carrusel-eventos {
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+
+    .visor-carrusel,
+    .carrusel {
+        width: 100%;
+    }
+
+    .contenedor-tarjetas {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.9rem;
+        overflow-x: visible;
+        padding-bottom: 0;
+    }
+
+    .flecha {
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.6rem;
+    }
+
+    .hero-texto {
+        padding: 2rem 1rem;
+    }
+
+    .hero-turismo .hero-texto h1,
+    .hero-lugares .hero-texto h1,
+    .hero-texto h1 {
+        font-size: 2.6rem;
+    }
+
+    .feature,
+    .tarjeta-destino,
+    .tarjeta-ruta,
+    .tarjeta-galeria,
+    .tarjeta-lugar,
+    .tarjeta-interes {
+        padding: 1.2rem;
+    }
+
+    .boton-amarillo,
+    .boton-lugares,
+    .boton-turismo {
+        padding: 1rem 1.2rem;
+    }
+
+    .menu-principal {
+        flex-wrap: wrap;
+        gap: 0.85rem;
+    }
+
+    .menu {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding: 1rem;
+    }
+}
+
 @keyframes fade {
     from {
         opacity: 0;
@@ -909,10 +1168,13 @@ img {
 }
 
 /* responsive */
+.bottom-nav {
+    display: none;
+}
 @media (min-width: 2560px) {
     .menu-principal {
         top: 6.5rem;
-        width: min(86%, 1650px);
+        width: min(86%, var(--site-max-width));
     }
 
     .menu {
@@ -936,7 +1198,7 @@ img {
 @media (min-width: 1921px) and (max-width: 2559px) {
     .menu-principal {
         top: 6rem;
-        width: min(90%, 1500px);
+        width: min(90%, var(--site-max-width));
     }
 
     .menu {
@@ -966,7 +1228,7 @@ img {
 @media (min-width: 901px) and (max-width: 1366px) {
     .menu-principal {
         top: 4rem;
-        width: min(94%, 1240px);
+        width: min(94%, var(--site-max-width));
     }
 
     .seccion-features {
@@ -992,6 +1254,20 @@ img {
 
     .slide img {
         width: clamp(220px, 30vw, 420px);
+    }
+
+    .clima-widget {
+        top: calc(100% + 34rem);
+        left: 0.4rem;
+        right: auto;
+    }
+}
+
+@media (max-width: 1366px) and (max-height: 820px) {
+    .clima-widget {
+        top: calc(100% + 21rem);
+        left: 0.4rem;
+        right: auto;
     }
 }
 
@@ -1031,7 +1307,9 @@ img {
     }
 
     .menu .logo-link {
-        display: none;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 0.85rem;
     }
 
     .menu a:not(.logo-link) {
@@ -1142,5 +1420,136 @@ img {
 
     .footer-bottom {
         font-size: clamp(0.8rem, 1vw, 0.95rem);
+    }
+
+    .menu-principal > .hamburguesa,
+    .menu-principal > .menu,
+    .menu-principal > .barra-busqueda {
+        display: none;
+    }
+
+    .perfil {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        left: auto;
+        transform: none;
+        z-index: 1200;
+    }
+
+    .clima-widget {
+        position: fixed;
+        top: 16px;
+        right: calc(16px + clamp(2.8rem, 4vw, 3.6rem) + 0.8rem);
+        left: auto;
+        min-width: min(180px, 70vw);
+        max-width: 240px;
+        padding: 0.75rem 0.95rem;
+        z-index: 1100;
+    }
+
+    .perfil-menu {
+        position: fixed;
+        top: calc(16px + 3.6rem + 10px);
+        right: 16px;
+        left: auto;
+        width: min(220px, 86vw);
+    }
+
+    .bottom-nav {
+        display: flex;
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        bottom: 0;
+        z-index: 1100;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.75rem 0.5rem calc(0.75rem + env(safe-area-inset-bottom));
+        background: #ffffff;
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .bottom-nav-item {
+        flex: 1 1 0;
+        min-width: 0;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.2rem;
+        padding: 0.5rem 0.2rem 0.18rem;
+        color: #000000;
+        background: #ffffff;
+        border-radius: 18px;
+        text-decoration: none;
+        font-size: 0.68rem;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .bottom-nav-item:hover {
+        background: #f8f8f8;
+    }
+
+    .bottom-nav-item .bottom-nav-icon {
+        display: block;
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+    }
+
+    .bottom-nav-item.active {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    .bottom-nav-item.active .bottom-nav-icon {
+        filter: none;
+    }
+
+    main {
+        padding-bottom: calc(88px + env(safe-area-inset-bottom));
+    }
+}
+
+/* Utilidades globales para móviles pequeños */
+@media (max-width: 480px) {
+    html {
+        font-size: 15px;
+    }
+
+    body {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .menu-principal {
+        width: calc(100% - 16px);
+        left: 50%;
+        transform: translateX(-50%);
+        top: 1.2rem;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        padding: 0 8px;
+    }
+}
+
+/* force search bar to behave in small headers */
+@media (max-width: 768px) {
+    .menu-principal .barra-busqueda {
+        position: static !important;
+        right: auto !important;
+        left: auto !important;
+        transform: none !important;
+        margin: 0.8rem auto 0;
+        width: min(52%, 420px);
     }
 }

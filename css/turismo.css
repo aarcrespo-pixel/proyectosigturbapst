@@ -1,10 +1,10 @@
 :root {
     --turismo-bg: linear-gradient(180deg, #d8e5ff 0%, #f5f7ff 100%);
-    --hero-overlay: rgba(19, 50, 120, 0.70);
+    --amarillo-claro: #ffd84d;
+    --amarillo-fuerte: #f7b500;
+    --hero-overlay: rgba(19, 50, 120, 0.45);
     --card-bg: rgba(255, 255, 255, 0.95);
     --card-border: rgba(75, 113, 255, 0.16);
-    --accent-primary: #3d63ff;
-    --accent-secondary: #84a8ff;
     --texto-oscuro: #1c1c27;
     --gris-suave: #eef2ff;
 }
@@ -30,7 +30,7 @@ body {
     display: grid;
     place-items: center;
     margin-bottom: 3rem;
-    background-image: url('../img/turismo.jpeg');
+    background-image: url('https://turismo.salto.gub.uy/sites/default/files/styles/16_9_lg/public/2024-09/00d9b1e39f02d57be65ad2a9a6eaa3b8.jpg.webp?itok=Vk2Qhil_');
     background-size: cover;
     background-position: center;
 }
@@ -56,15 +56,18 @@ body {
     padding: 0.85rem 1.5rem;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.38);
     letter-spacing: 0.12em;
     font-weight: 700;
     text-transform: uppercase;
 }
 
 .hero-texto h1 {
-    font-size: clamp(3rem, 6vw, 5rem);
+    font-size: clamp(8rem, 10vw, 4.2rem);
+    font-weight: 700;
+    letter-spacing: -0.05em;
     line-height: 1.05;
-    margin-bottom: 1.25rem;
+    color: var(--amarillo-fuerte);
 }
 
 .hero-texto p {
@@ -206,7 +209,8 @@ body {
     color: #4a516d;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 900px) {
+
     .destinos-grid,
     .rutas-grid,
     .galeria-grid,
@@ -219,7 +223,7 @@ body {
     }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 480px) {
     .pagina-turismo {
         padding: 8rem 1.5rem 3rem;
     }
@@ -228,9 +232,29 @@ body {
         font-size: 2.75rem;
     }
 
-    .info-panel,
-    .galeria-grid {
+    .destinos-grid,
+    .rutas-grid,
+    .galeria-grid,
+    .info-panel {
         grid-template-columns: 1fr;
+    }
+
+    .tarjeta-destino,
+    .tarjeta-ruta,
+    .tarjeta-galeria {
+        min-height: auto;
+    }
+
+    .tarjeta-ruta {
+        grid-template-columns: 1fr;
+    }
+
+    .contenido {
+        padding: 1.2rem;
+    }
+
+    .contenido h3 {
+        font-size: 1.35rem;
     }
 
     .hero-turismo {

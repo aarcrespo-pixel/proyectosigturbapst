@@ -2,18 +2,22 @@
 <html lang="es">
 
 <head>
+    <!-- Configuración básica de página -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Turismo | SIGTUR</title>
-    <link rel="icon" href="/img/logoblanco.png">
+    <link rel="icon" href="/img/logoblanco.png"> <!-- Ícono de pestaña -->
+    <!-- Importar fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/estilos.css">
-    <link rel="stylesheet" href="/css/turismo.css">
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="/css/estilos.css"> <!-- Estilos generales -->
+    <link rel="stylesheet" href="/css/turismo.css"> <!-- Estilos específicos de turismo -->
 </head>
 
 <body>
+    <!-- Menú principal -->
     <header class="menu-principal">
         <button class="hamburguesa" aria-label="Abrir menú">☰</button>
         <nav class="menu">
@@ -21,15 +25,17 @@
                 <img src="/img/logoblanco.png" class="logo-menu" alt="SIGTUR">
             </a>
             <a href="eventos.html">Eventos</a>
-            <a href="turismo.html" class="pagina-activa">Turismo</a>
+            <a href="turismo.html" class="pagina-activa">Turismo</a> <!-- Página actual -->
             <a href="lugares.html">Lugares</a>
         </nav>
 
+        <!-- Barra de búsqueda -->
         <div class="barra-busqueda">
             <input type="text" placeholder="Buscar viajes y rutas">
             <img src="/img/lupa.png" alt="Buscar">
         </div>
 
+        <!-- Menú de perfil usuario -->
         <div class="perfil">
             <button class="perfil-btn" aria-label="Abrir perfil">
                 <img src="/img/user.png" alt="Perfil">
@@ -43,20 +49,42 @@
         </div>
     </header>
 
+    <!-- Navegación inferior para móviles -->
+    <nav class="bottom-nav" aria-label="Navegación inferior">
+        <a href="index.html" class="bottom-nav-item">
+            <img src="/img/logoazul.png" class="bottom-nav-icon" alt="Inicio">
+            <span class="bottom-nav-label">Inicio</span>
+        </a>
+        <a href="eventos.html" class="bottom-nav-item active">
+            <img src="/img/nav-eventos.png" class="bottom-nav-icon" alt="Eventos">
+            <span class="bottom-nav-label">Eventos</span>
+        </a>
+        <a href="turismo.html" class="bottom-nav-item">
+            <img src="/img/turismo.png" class="bottom-nav-icon" alt="Turismo">
+            <span class="bottom-nav-label">Turismo</span>
+        </a>
+        <a href="lugares.html" class="bottom-nav-item">
+            <img src="/img/lugares.png" class="bottom-nav-icon" alt="Lugares">
+            <span class="bottom-nav-label">Lugares</span>
+        </a>
+    </nav>
+
     <main class="pagina-turismo">
+        <!-- Sección hero con texto introductorio -->
         <section class="hero-turismo">
             <div class="hero-texto">
-                <span>Descubrí Salto</span>
-                <h1>Rutas únicas para vivir la ciudad desde otro ángulo</h1>
+                <span>Descubrí el turismo en Salto</span>
+                <h1>TURISMO</h1>
                 <p>Explorá propuestas de turismo local, recorridos gastronómicos y experiencias al aire libre diseñadas para cada tipo de visitante.</p>
             </div>
         </section>
 
+        <!-- Escapadas recomendadas -->
         <section class="seccion-turismo">
             <h2>Escapadas recomendadas</h2>
             <div class="destinos-grid">
                 <article class="tarjeta-destino">
-                    <img src="/img/turismo.png" alt="Costanera de Salto">
+                    <img src="/img/Costanera_Norte.jpeg" alt="Costanera de Salto">
                     <div class="contenido">
                         <h3>Costanera Norte</h3>
                         <p>Un paseo al borde del río para disfrutar de arte urbano, música en vivo y atardeceres junto al agua.</p>
@@ -64,15 +92,23 @@
                     </div>
                 </article>
                 <article class="tarjeta-destino">
-                    <img src="/img/porco.avif" alt="Plaza central">
+                    <img src="/img/BaSalto.jpg" alt="Basalto">
                     <div class="contenido">
-                        <h3>Plaza Artigas</h3>
+                        <h3>BaSalto</h3>
+<<<<<<< HEAD
+                        <p>Cafeteria con ambiente amigable y servicio unico en Salto</p>
+=======
                         <p>Centro histórico con monumentos, cafés y espacios culturales que invitan a recorrer la identidad local.</p>
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
                         <div class="meta">Cultura · Centro</div>
                     </div>
                 </article>
                 <article class="tarjeta-destino">
-                    <img src="/img/images (1).jfif" alt="Paisaje natural">
+<<<<<<< HEAD
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjg-9JHcFpofGGj9xRa7eHRVYQTqY2HEnvXLt1zukFszvuITV0DZ5j6Wc&s=10" alt="Parque Solari">
+=======
+                    <img src="/img/Parque_Solari.jpg" alt="Parque Solari">
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
                     <div class="contenido">
                         <h3>Parque Benito Solari</h3>
                         <p>Un lugar verde donde se mezclan senderos, picnic y actividades deportivas al aire libre.</p>
@@ -86,34 +122,50 @@
             <h2>Rutas y experiencias</h2>
             <div class="rutas-grid">
                 <article class="tarjeta-ruta">
-                    <img src="/img/turismo.jpeg" alt="Ruta gastronómica">
+                    <img src="/img/Trouville.jpg" alt="Trouville">
                     <div class="contenido">
-                        <h3>Ruta gastronómica</h3>
+                        <h3>La Trouville</h3>
+<<<<<<< HEAD
+                        <p>Restaurante con comidas típicas del lugar, lindo ambiente climatizado y buen trato hacia los clientes</p>
+=======
                         <p>Probá platos típicos y descubrí sabores locales en mercados, parrillas y cafeterías con encanto.</p>
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
                         <div class="meta">Comida · 5 paradas</div>
                     </div>
                 </article>
                 <article class="tarjeta-ruta">
-                    <img src="/img/evento2.jpg" alt="Experiencia nocturna">
+                    <img src="/img/Cine_Sarandi.jpg" alt="Cine Sarandi">
                     <div class="contenido">
-                        <h3>Noches en Salto</h3>
+                        <h3>Cine Sarandi</h3>
+<<<<<<< HEAD
+                        <p>Cine con funciones de película y buen servicio al cliente, 2 salas grandes y espacio para comer</p>
+=======
                         <p>Itinerarios para vivir la ciudad de noche con espectáculos, bares y rincones de música en vivo.</p>
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
                         <div class="meta">Vida nocturna · 4 horas</div>
                     </div>
                 </article>
                 <article class="tarjeta-ruta">
-                    <img src="/img/lugares.jpeg" alt="Paseo cultural">
+                    <img src="/img/fosa.webp" alt="La Fosa">
                     <div class="contenido">
-                        <h3>Tour cultural</h3>
+                        <h3>La Fosa</h3>
+<<<<<<< HEAD
+                        <p>Circuitos para bicicletas, parque bmx para entusiastas que les gusta hacer trucos</p>
+=======
                         <p>Circuito de museos, galerías y monumentos que muestran la historia y el arte de Salto.</p>
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
                         <div class="meta">Arte · Guía disponible</div>
                     </div>
                 </article>
                 <article class="tarjeta-ruta">
-                    <img src="/img/eventos.webp" alt="Excursión natural">
+                    <img src="/img/Shopping_Salto.jpg" alt="Shopping Salto">
                     <div class="contenido">
-                        <h3>Viaje natural</h3>
+                        <h3>Salto Shopping</h3>
+<<<<<<< HEAD
+                        <p>Centro comercial con diversas tiendas, restaurantes y entretenimiento para toda la familia.</p>
+=======
                         <p>Excursiones a espacios verdes, paseos en bote y miradores para conectar con el paisaje del río.</p>
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
                         <div class="meta">Aventura · Eco</div>
                     </div>
                 </article>
@@ -121,26 +173,21 @@
         </section>
 
         <section class="seccion-turismo">
-            <div class="info-panel">
-                <article>
-                    <h3>Consejos clave</h3>
-                    <p>Reservá con anticipación, llevá ropa cómoda y seguí las recomendaciones locales para aprovechar cada ruta.</p>
-                </article>
-                <article>
-                    <h3>Viajes para todos</h3>
-                    <p>Desde circuitos tranquilos hasta propuestas activas, las rutas de turismo se adaptan a tus expectativas.</p>
-                </article>
-            </div>
             <a href="#" class="boton-turismo">Descubrir más</a>
         </section>
 
         <section class="seccion-turismo">
-            <h2>Galería de recorridos</h2>
+            <h2>Galería turística</h2>
             <div class="galeria-grid">
-                <article class="tarjeta-galeria"><img src="/img/evento1.jpg" alt="Vista panorámica"><div class="contenido"><h3>Panorámica</h3></div></article>
-                <article class="tarjeta-galeria"><img src="/img/eventos.jpeg" alt="Jardín urbano"><div class="contenido"><h3>Jardín urbano</h3></div></article>
-                <article class="tarjeta-galeria"><img src="/img/turismo.jpeg" alt="Río y naturaleza"><div class="contenido"><h3>Río y naturaleza</h3></div></article>
-                <article class="tarjeta-galeria"><img src="/img/lugares.jpeg" alt="Festival local"><div class="contenido"><h3>Festival local</h3></div></article>
+<<<<<<< HEAD
+                <article class="tarjeta-galeria"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjg-9JHcFpofGGj9xRa7eHRVYQTqY2HEnvXLt1zukFszvuITV0DZ5j6Wc&s=10" alt="Parque Solari"><div class="contenido"><h3>Parque Benito Solari</h3></div></article>
+=======
+                <article class="tarjeta-galeria"><img src="/img/Parque_Solari.jpg" alt="Parque Solari"><div class="contenido"><h3>Parque Benito Solari</h3></div></article>
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
+                <article class="tarjeta-galeria"><img src="/img/fosa.webp" alt="La Fosa"><div class="contenido"><h3>La Fosa</h3></div></article>
+                <article class="tarjeta-galeria"><img src="/img/Shopping_Salto.jpg" alt="Shopping Salto"><div class="contenido"><h3>Shopping Salto</h3></div></article>
+                <article class="tarjeta-galeria"><img src="/img/Cine_Sarandi.jpg" alt="Cine Sarandi"><div class="contenido"><h3>Cine Sarandi</h3></div></article>
+                <a href="#" class="boton-turismo">Ver todas las galerias</a>
             </div>
         </section>
     </main>
@@ -210,6 +257,7 @@
             <p>&copy; 2026 SIGTUR SALTO. Todos los derechos reservados.</p>
         </div>
     </footer>
+    <script src="/js/script.js" defer></script>
 </body>
 
 </html>

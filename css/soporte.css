@@ -202,6 +202,91 @@ h1 {
 
 .report-box textarea { min-height: 90px; resize: vertical; }
 
+.config-input,
+.config-select,
+.config-textarea,
+.report-box input,
+.report-box textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.92);
+  color: #18324a;
+  padding: 12px 14px;
+  font: inherit;
+  outline: none;
+}
+
+.config-select {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.config-input:focus,
+.config-select:focus,
+.config-textarea:focus,
+.report-box input:focus,
+.report-box textarea:focus {
+  border-color: rgba(108, 180, 221, 0.45);
+  box-shadow: 0 0 0 4px rgba(108, 180, 221, 0.18);
+}
+
+.card label {
+  display: block;
+  margin-top: 18px;
+  color: #18324a;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.config-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(24, 50, 74, 0.12);
+}
+
+.config-row:first-of-type {
+  border-top: none;
+}
+
+.config-label strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #18324a;
+  letter-spacing: -0.03em;
+}
+
+.config-label span {
+  display: block;
+  color: #4f6780;
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.config-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(108, 180, 221, 0.12);
+  border: 1px solid rgba(108, 180, 221, 0.22);
+  color: #3d6f91;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.config-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 20px;
+}
+
 .btn {
   display: inline-flex;
   justify-content: center;
@@ -338,5 +423,18 @@ h1 {
 
   .footer-grid {
     grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: clamp(3rem, 8vw, 3.4rem);
+    line-height: 1.05;
+  }
+}
+
+@media (max-width: 420px) {
+  h1 {
+    font-size: clamp(3rem, 9vw, 2.6rem);
   }
 }

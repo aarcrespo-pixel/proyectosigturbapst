@@ -106,7 +106,7 @@ h1 {
     font-family: 'Montserrat', sans-serif;
     font-size: clamp(3.2rem, 3.8vw, 4rem);
     line-height: 1.1;
-    text-align: left;
+    text-align: center;
     color: #f7b35c;
     text-shadow: 0 1px 4px rgba(247, 179, 92, 0.12);
     letter-spacing: -0.05em;
@@ -290,5 +290,83 @@ button:focus-visible,
 
     100% {
         background-position: 0% 50%;
+    }
+}
+
+/* Responsive - ajustes para móvil/tablet */
+@media (max-width: 600px) {
+    body {
+        padding: 14px;
+    }
+
+    main {
+        align-items: center;
+        max-width: 460px;
+        padding: 0;
+    }
+
+    h1 {
+        font-size: clamp(2rem, 6vw, 2.6rem);
+        text-align: center;
+    }
+
+    .logo-back {
+        width: 48px;
+        height: 48px;
+        top: 12px;
+        left: 12px;
+    }
+
+    .contenedor {
+        padding: 18px;
+        border-radius: 20px;
+    }
+
+    .back-pill {
+        min-width: unset;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+
+    input,
+    textarea {
+        padding: 12px 8px;
+        font-size: 0.95rem;
+    }
+
+    .botones {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .botones .action-btn {
+        width: 100%;
+    }
+
+    .google-button {
+        padding: 12px 14px;
+    }
+
+    .intro {
+        text-align: center;
+    }
+}
+
+@media (max-width: 380px) {
+    h1 {
+        font-size: clamp(1.6rem, 7vw, 2rem);
+    }
+
+    .logo-back {
+        display: none;
+    }
+
+    .contenedor {
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .back-pill {
+        font-size: 0.88rem;
     }
 }
