@@ -242,6 +242,45 @@ img {
     color: rgba(17, 17, 17, 0.7);
 }
 
+.clima-widget {
+    position: absolute;
+    left: 0.4rem;
+    top: calc(100% + 40rem);
+    transform: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 160px;
+    padding: 0.8rem 1rem;
+    border-radius: 999px;
+    background: linear-gradient(270deg, #ffffff, #dfcc8d, #ccc9c0, rgb(226, 226, 134));
+    background-size: 300% 300%;
+    animation: hoverGradientShift 6s ease infinite;
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.78);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.48);
+    color: #111;
+    font-weight: 700;
+    font-size: 0.95rem;
+    backdrop-filter: blur(12px);
+    z-index: 101;
+}
+
+.clima-widget .clima-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.clima-widget .clima-temp {
+    font-size: 1rem;
+}
+
+.clima-widget .clima-humedad,
+.clima-widget .clima-ith {
+    font-size: 0.78rem;
+    color: rgba(17, 17, 17, 0.7);
+}
+
 .menu-principal .barra-busqueda {
     position: absolute;
     right: clamp(1px, 4.5vw, 10px);
@@ -274,6 +313,27 @@ body[data-tema="oscuro"] .barra-busqueda input::placeholder {
     color: rgba(245, 245, 245, 0.65);
 }
 
+<<<<<<< HEAD
+/* Barra de búsqueda - Modo oscuro */
+body[data-tema="oscuro"] .barra-busqueda input {
+    color: #e5e5e5;
+}
+
+body[data-tema="oscuro"] .barra-busqueda input::placeholder {
+    color: rgba(229, 229, 229, 0.5);
+}
+
+/* Barra de búsqueda - Modo claro */
+body[data-tema="claro"] .barra-busqueda input {
+    color: #111111;
+}
+
+body[data-tema="claro"] .barra-busqueda input::placeholder {
+    color: rgba(17, 17, 17, 0.6);
+}
+
+=======
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
 .barra-busqueda img {
     width: 1rem;
     height: 1rem;
@@ -393,6 +453,29 @@ body[data-tema="oscuro"] .perfil-menu a:hover {
     color: #ffffff;
 }
 
+<<<<<<< HEAD
+/* Perfil menu - Modo oscuro */
+body[data-tema="oscuro"] .perfil-menu a {
+    color: #e5e5e5;
+}
+
+body[data-tema="oscuro"] .perfil-menu a:hover {
+    background: rgba(255, 255, 255, .3);
+    color: #ffffff;
+}
+
+/* Perfil menu - Modo claro */
+body[data-tema="claro"] .perfil-menu a {
+    color: #111111;
+}
+
+body[data-tema="claro"] .perfil-menu a:hover {
+    background: rgba(0, 0, 0, .1);
+    color: #000000;
+}
+
+=======
+>>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
 .perfil.activo .perfil-menu {
     display: flex;
 }

@@ -51,9 +51,8 @@ const galeria = [
     { imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg" },
     { imagen: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/84/ae/39/trouville-pizzeria-y.jpg?w=1200&h=1200&s=1" }
 ];
-
-const pos = {};
-for (const nombre in datos) pos[nombre] = 0;
+const pos = {}; //Crea un objeto vacío.
+for (const nombre in datos) pos[nombre] = 0; //Recorre todas las categorías que existen dentro de datos.
 const maxPorPagina = 3;
 
 /*

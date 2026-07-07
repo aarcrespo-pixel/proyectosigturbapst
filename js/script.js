@@ -203,8 +203,8 @@ const cambiarSlide = (nuevoIndice) => {
     if (slides.length === 0 || indicadores.length === 0) return;
     slides[indiceActivo].classList.remove('activo');
     indicadores[indiceActivo].classList.remove('activo');
-    indiceActivo = (nuevoIndice + slides.length) % slides.length;
-    slides[indiceActivo].classList.add('activo');
+    indiceActivo = (nuevoIndice + slides.length) % slides.length; // Calcula índice con ciclo
+    slides[indiceActivo].classList.add('activo'); // Activa nueva
     indicadores[indiceActivo].classList.add('activo');
 };
 

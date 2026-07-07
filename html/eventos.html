@@ -2,18 +2,22 @@
 <html lang="es">
 
 <head>
+    <!-- Metaetiquetas y configuración -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eventos | SIGTUR</title>
-    <link rel="icon" href="/img/logoblanco.png">
+    <link rel="icon" href="/img/logoblanco.png"> <!-- Ícono de pestaña -->
+    <!-- Importar fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/estilos.css">
-    <link rel="stylesheet" href="/css/eventos.css">
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="/css/estilos.css"> <!-- Estilos generales -->
+    <link rel="stylesheet" href="/css/eventos.css"> <!-- Estilos específicos de eventos -->
 </head>
 
 <body>
+    <!-- Menú principal -->
     <header class="menu-principal">
         <button class="hamburguesa">
             ☰
@@ -22,16 +26,18 @@
             <a href="index.html" class="logo-link">
                 <img src="/img/logoblanco.png" class="logo-menu" alt="SIGTUR">
             </a>
-            <a href="eventos.html" class="pagina-activa">Eventos</a>
+            <a href="eventos.html" class="pagina-activa">Eventos</a> <!-- Página actual marcada -->
             <a href="turismo.html">Turismo</a>
             <a href="lugares.html">Lugares</a>
         </nav>
 
+        <!-- Barra de búsqueda -->
         <div class="barra-busqueda">
             <input type="text" placeholder="Buscar eventos">
             <img src="/img/lupa.png" alt="Buscar">
         </div>
 
+        <!-- Menú de perfil -->
         <div class="perfil">
             <button class="perfil-btn">
                 <img src="/img/user.png" alt="Perfil">
@@ -66,6 +72,7 @@
     </nav>
 
     <main class="pagina-eventos">
+        <!-- Encabezado con imagen de fondo -->
         <section class="encabezado-eventos">
             <div class="fondo-encabezado"></div>
             <div class="texto-encabezado">
@@ -74,21 +81,24 @@
             </div>
         </section>
 
+        <!-- Sección de eventos destacados con carrusel -->
         <section class="seccion seccion-foco">
             <div class="titulo-seccion">
                 <h2 class="titulo-foco">DESTACADOS</h2>
             </div>
             <div class="carrusel-eventos">
-                <button class="flecha izquierda" data-carrusel="destacados"></button>
+                <button class="flecha izquierda" data-carrusel="destacados"></button> <!-- Navegación izquierda -->
                 <div class="visor-carrusel">
-                    <div class="contenedor-tarjetas" id="destacados-contenedor"></div>
+                    <div class="contenedor-tarjetas" id="destacados-contenedor"></div> <!-- Se llena con JavaScript -->
                 </div>
-                <button class="flecha derecha" data-carrusel="destacados"></button>
+                <button class="flecha derecha" data-carrusel="destacados"></button> <!-- Navegación derecha -->
             </div>
-            <div class="indicadores-carrusel" id="destacados-indicadores"></div>
+            <div class="indicadores-carrusel" id="destacados-indicadores"></div> <!-- Puntos de navegación -->
         </section>
 
+        <!-- Categorías: Deportivos, Discotecas, Competencias -->
         <section class="seccion categoria-lista">
+            <!-- Eventos Deportivos -->
             <div class="fila-categoria">
                 <div class="encabezado-categoria">
                     <h3>Deportivos</h3>
@@ -103,6 +113,7 @@
                 <div class="indicadores-carrusel" id="deportivos-indicadores"></div>
             </div>
 
+            <!-- Discotecas -->
             <div class="fila-categoria">
                 <div class="encabezado-categoria">
                     <h3>Discotecas</h3>
@@ -117,6 +128,7 @@
                 <div class="indicadores-carrusel" id="discotecas-indicadores"></div>
             </div>
 
+            <!-- Competencias -->
             <div class="fila-categoria">
                 <div class="encabezado-categoria">
                     <h3>Competencias</h3>
@@ -132,10 +144,12 @@
             </div>
         </section>                  
 
+        <!-- Botón de acción -->
         <div class="accion-boton">
             <a href="#" class="boton-amarillo">Ver todos los eventos</a>
         </div>
 
+        <!-- Eventos anteriores ya realizados -->
         <section class="seccion seccion-foco">
             <div class="titulo-seccion">
                 <h2 class="titulo-foco">EVENTOS ANTERIORES</h2>

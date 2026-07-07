@@ -2,23 +2,29 @@
 <html lang="es">
 
 <head>
+    <!-- Metaetiquetas y configuración inicial -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sigtur Salto</title>
-    <link rel="icon" href="/img/logoblanco.png">
+    <link rel="icon" href="/img/logoblanco.png"> <!-- Ícono de pestaña -->
+    <!-- Importar fuentes de Google -->
     <link rel="preconnect" href="/https://fonts.googleapis.com">
     <link rel="preconnect" href="/https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Instrument+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/css/estilos.css">
-    <link rel="stylesheet" href="/css/intro.css">
+    <!-- Archivos CSS -->
+    <link rel="stylesheet" href="/css/estilos.css"> <!-- Estilos principales -->
+    <link rel="stylesheet" href="/css/intro.css"> <!-- Animación de intro -->
 </head>
 
 <body>
+    <!-- Pantalla de carga inicial -->
     <div class="intro">
         <img src="/img/logoblanco.png">
     </div>
+    
+    <!-- Menú principal de navegación -->
     <header class="menu-principal">
         <button class="hamburguesa">
             ☰
@@ -32,11 +38,13 @@
             <a href="lugares.html">Lugares</a>
         </nav>
 
+        <!-- Barra de búsqueda -->
         <div class="barra-busqueda">
             <input type="text" placeholder="'Eventos Destacados'">
             <img src="/img/lupa.png" alt="Buscar">
         </div>
 
+        <!-- Menú de perfil usuario -->
         <div class="perfil">
             <button class="perfil-btn">
                 <img src="/img/user.png" alt="Perfil">
@@ -75,14 +83,16 @@
 
     <section class="pantalla-inicio">
         <img class="imagen-inicio" src="/img/inicio.jpeg" alt="Salto">
-        <div class="degradado-inferior"></div>
+        <div class="degradado-inferior"></div> <!-- Degradado oscuro inferior -->
         <div class="texto-inicio">
             
         </div>
         <p class="texto-deslizar">
             Desliza para ver más
         </p>
+        <!-- Botón de información -->
         <button class="info-btn" type="button" aria-expanded="false">Información</button>
+        <!-- Panel con información sobre SIGTUR -->
         <div class="info-panel" id="info-panel">
             <h3>¿Qué es SIGTUR?</h3>
             <p>SIGTUR es una guía local de Salto pensada para ayudarte a descubrir eventos, lugares y experiencias únicas de la ciudad.</p>
