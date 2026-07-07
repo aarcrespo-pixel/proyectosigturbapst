@@ -45,11 +45,7 @@ const datos = {
 
 const galeria = [
     { imagen: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Parque_Solari_Estatua.JPG" },
-<<<<<<< HEAD
     { imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwYxQbLi8Q2nRVZPDP9CwDkcYwQsKZ1R2EBF2XXy8nGdPUTnexH4SCTce8&s=10" },
-=======
-    { imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLYlimLpyEAGbkjhkZr3cPP7pON89wJlOJPhKhGMLPM6xUx1nw3Pfj4s&s=10" },
->>>>>>> eb509f0d03c5216cc7af3257494e00f5d235bba9
     { imagen: "https://www.infoturismo19.com.uy/wp-content/uploads/2023/07/SHOPPING-4-2.jpg" },
     { imagen: "https://alba-uy-sarandi.cdn.mediatiquepress.com/wp-content/uploads/2024/08/Life_Cinemas_2.webp" },
     { imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg" },
@@ -67,7 +63,7 @@ const maxPorPagina = 3;
 const tarjeta = (evento, activa = false) => `
   <article class="tarjeta${activa ? ' activa' : ''}">
     <div class="imagen-tarjeta">
-      <img src="${evento.imagen}" alt="${evento.nombre}">
+      <img src="${evento.imagen}" alt="${evento.nombre}" loading="lazy" onerror="this.onerror=null;this.src='/img/porco.avif';">
     </div>
     <div class="detalles-tarjeta">
       <span class="categoria">${evento.categoria}</span>
@@ -90,7 +86,10 @@ function renderSeccion(nombre) {
         .map((evento, index) => tarjeta(evento, inicio + index === actual))
         .join("");
 
-    document.getElementById(`${nombre}-contenedor`).innerHTML = html;
+    const contenedor = document.getElementById(`${nombre}-contenedor`);
+    if (!contenedor) return;
+
+    contenedor.innerHTML = html;
     document.querySelector(`.flecha.izquierda[data-carrusel="${nombre}"]`)?.classList.toggle("oculta", actual === 0);
     document.querySelector(`.flecha.derecha[data-carrusel="${nombre}"]`)?.classList.toggle("oculta", actual === lista.length - 1);
 
@@ -126,10 +125,13 @@ function setPos(nombre, indice) {
   definidas en el objeto datos.
 */
 function renderGaleria() {
-    document.getElementById("galeria-contenedor").innerHTML = galeria
+    const contenedor = document.getElementById("galeria-contenedor");
+    if (!contenedor) return;
+
+    contenedor.innerHTML = galeria
         .map((item, index) => `
       <button class="imagen-galeria galeria-item" type="button" data-index="${index}">
-        <img src="${item.imagen}" alt="Galería ${index + 1}">
+        <img src="${item.imagen}" alt="Galería ${index + 1}" loading="lazy" onerror="this.onerror=null;this.src='/img/porco.avif';">
       </button>
     `)
         .join("");
@@ -148,6 +150,7 @@ function actualizarLightbox() {
     const item = galeria[lightboxIndex];
     const imagen = document.getElementById("lightbox-image");
     const caption = document.getElementById("lightbox-caption");
+    if (!item || !imagen || !caption) return;
     imagen.src = item.imagen;
     imagen.alt = `Imagen de galería ${lightboxIndex + 1}`;
     caption.textContent = `Imagen ${lightboxIndex + 1} de ${galeria.length}`;
@@ -186,10 +189,10 @@ function init() {
 
     renderGaleria();
 
-    document.getElementById("lightbox-close").addEventListener("click", cerrarLightbox);
-    document.getElementById("lightbox-backdrop").addEventListener("click", cerrarLightbox);
-    document.getElementById("lightbox-prev").addEventListener("click", () => cambiarImagen(-1));
-    document.getElementById("lightbox-next").addEventListener("click", () => cambiarImagen(1));
+    document.getElementById("lightbox-close")?.addEventListener("click", cerrarLightbox);
+    document.getElementById("lightbox-backdrop")?.addEventListener("click", cerrarLightbox);
+    document.getElementById("lightbox-prev")?.addEventListener("click", () => cambiarImagen(-1));
+    document.getElementById("lightbox-next")?.addEventListener("click", () => cambiarImagen(1));
 }
 
 document.addEventListener("DOMContentLoaded", init);
