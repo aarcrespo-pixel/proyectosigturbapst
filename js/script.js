@@ -99,7 +99,7 @@ const aplicarTema = (oscuro, botonModoOscuro) => {
         // en eventos cambiamos el h2 de la galería y las cabeceras de seccion según el tema
         const titulosGaleria = document.querySelectorAll('main.pagina-eventos .galeria-eventos h2');
         titulosGaleria.forEach((titulo) => {
-            setStyle(titulo, 'color', colorTexto);
+            setStyle(titulo, 'color', oscuro ? '#ffffff' : '#111111');
         });
 
         const cabecerasSeccion = document.querySelectorAll('main.pagina-eventos .encabezado-categoria h3');

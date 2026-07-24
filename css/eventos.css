@@ -90,7 +90,11 @@ body {
 }
 
 .pagina-eventos .galeria-eventos .titulo-seccion h2 {
-    color: #fff; /* excepto el titulo GALERÍA que va blanco */
+    color: var(--texto-oscuro);
+}
+
+body[data-tema="oscuro"] .pagina-eventos .galeria-eventos .titulo-seccion h2 {
+    color: var(--texto-claro);
 }
 
 .pagina-eventos .encabezado-categoria h3 {

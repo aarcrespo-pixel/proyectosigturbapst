@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todos los eventos | SIGTUR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/todos-eventos.css">
+</head>
+<body>
+    <div class="contenedor-pagina">
+        <header class="barra-superior">
+            <a href="index.html" class="boton-icono boton-inicio" aria-label="Volver al inicio">
+                <img src="../img/logoblanco.png" alt="Inicio">
+            </a>
+
+            <label class="caja-busqueda" for="busquedaInput">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10.5 4a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13Zm0 0 8.5 8.5" />
+                </svg>
+                <input id="busquedaInput" type="text" placeholder="Buscar eventos">
+            </label>
+
+            <label class="contenedor-select" for="categoriaSelect">
+                <select id="categoriaSelect">
+                    <option value="all">Todas</option>
+                </select>
+            </label>
+
+            <div class="contenedor-menu-filtro">
+                <button class="boton-icono boton-filtro" id="filtroToggle" type="button" aria-expanded="false" aria-controls="menuFiltro">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 6h16M7 12h10M10 18h4" />
+                    </svg>
+                </button>
+
+                <div class="menu-desplegable" id="menuFiltro" role="menu">
+                    <button class="opcion-menu" type="button">Más recientes</button>
+                    <button class="opcion-menu" type="button">Recomendados</button>
+                    <button class="opcion-menu" type="button">Gratis</button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="encabezado">
+                <div class="texto-encabezado">
+                    <p class="etiqueta">Explorá lo que pasa</p>
+                    <h1>Todos los eventos</h1>
+                    <p>Descubrí actividades culturales, deportivas y sociales en un solo lugar.</p>
+                </div>
+            </section>
+
+            <section class="seccion-eventos">
+                <div class="lista-categorias">
+                    <div class="fila-categoria">
+                        <h2 class="titulo-categoria">Carreras</h2>
+                        <div class="carrusel-eventos">
+                            <button class="flecha-carrusel" type="button" data-direction="left" aria-label="Eventos anteriores">❮</button>
+                            <div class="visor-carrusel">
+                                <div class="pista-carrusel">
+                                    <a class="tarjeta-evento" href="festival-musica.html" data-titulo="Festival de la Música" data-categoria="Cultural" data-fecha="12 agosto 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/porco.avif" alt="Festival de la Música">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">12 agosto 2026</span>
+                                            <h2 class="nombre-evento">Festival de la Música</h2>
+                                            <p class="categoria-evento">Cultural</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="carrera-costa.html" data-titulo="Carrera de la Costa" data-categoria="Deportivo" data-fecha="19 agosto 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/solari.jfif" alt="Carrera de la Costa">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">19 agosto 2026</span>
+                                            <h2 class="nombre-evento">Carrera de la Costa</h2>
+                                            <p class="categoria-evento">Deportivo</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="noche-arte.html" data-titulo="Noche de Arte" data-categoria="Cultural" data-fecha="24 agosto 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/images (1).jfif" alt="Noche de Arte">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">24 agosto 2026</span>
+                                            <h2 class="nombre-evento">Noche de Arte</h2>
+                                            <p class="categoria-evento">Cultural</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="tarde-parque.html" data-titulo="Tarde en el Parque" data-categoria="Social" data-fecha="2 septiembre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/porco.avif" alt="Tarde en el Parque">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">2 septiembre 2026</span>
+                                            <h2 class="nombre-evento">Tarde en el Parque</h2>
+                                            <p class="categoria-evento">Social</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="muestra-astronomia.html" data-titulo="Muestra de Astronomía" data-categoria="Cultural" data-fecha="5 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/images (1).jfif" alt="Muestra de Astronomía">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">5 octubre 2026</span>
+                                            <h2 class="nombre-evento">Muestra de Astronomía</h2>
+                                            <p class="categoria-evento">Cultural</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="torneo-futbol.html" data-titulo="Torneo de Fútbol" data-categoria="Deportivo" data-fecha="8 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/solari.jfif" alt="Torneo de Fútbol">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">8 octubre 2026</span>
+                                            <h2 class="nombre-evento">Torneo de Fútbol</h2>
+                                            <p class="categoria-evento">Deportivo</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="standup-nocturno.html" data-titulo="Stand Up Nocturno" data-categoria="Social" data-fecha="12 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/porco.avif" alt="Stand Up Nocturno">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">12 octubre 2026</span>
+                                            <h2 class="nombre-evento">Stand Up Nocturno</h2>
+                                            <p class="categoria-evento">Social</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="flecha-carrusel" type="button" data-direction="right" aria-label="Eventos siguientes">❯</button>
+                        </div>
+                    </div>
+
+                    <div class="fila-categoria">
+                        <h2 class="titulo-categoria">Culturales</h2>
+                        <div class="carrusel-eventos">
+                            <button class="flecha-carrusel" type="button" data-direction="left" aria-label="Eventos anteriores">❮</button>
+                            <div class="visor-carrusel">
+                                <div class="pista-carrusel">
+                                    <a class="tarjeta-evento" href="festival-musica.html" data-titulo="Festival de la Música" data-categoria="Cultural" data-fecha="12 agosto 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/porco.avif" alt="Festival de la Música">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">12 agosto 2026</span>
+                                            <h2 class="nombre-evento">Festival de la Música</h2>
+                                            <p class="categoria-evento">Cultural</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="noche-arte.html" data-titulo="Noche de Arte" data-categoria="Cultural" data-fecha="24 agosto 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/images (1).jfif" alt="Noche de Arte">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">24 agosto 2026</span>
+                                            <h2 class="nombre-evento">Noche de Arte</h2>
+                                            <p class="categoria-evento">Cultural</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="expo-gastronomica.html" data-titulo="Expo Gastronómica" data-categoria="Social" data-fecha="18 septiembre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/images (1).jfif" alt="Expo Gastronómica">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">18 septiembre 2026</span>
+                                            <h2 class="nombre-evento">Expo Gastronómica</h2>
+                                            <p class="categoria-evento">Social</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="festival-naranja.html" data-titulo="Festival de la Naranja" data-categoria="Cultural" data-fecha="30 septiembre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/porco.avif" alt="Festival de la Naranja">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">30 septiembre 2026</span>
+                                            <h2 class="nombre-evento">Festival de la Naranja</h2>
+                                            <p class="categoria-evento">Cultural</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="taller-mural.html" data-titulo="Taller de Mural" data-categoria="Cultural" data-fecha="1 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/images (1).jfif" alt="Taller de Mural">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">1 octubre 2026</span>
+                                            <h2 class="nombre-evento">Taller de Mural</h2>
+                                            <p class="categoria-evento">Cultural</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="cine-salon.html" data-titulo="Cine al Aire Libre" data-categoria="Cultural" data-fecha="3 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/porco.avif" alt="Cine al Aire Libre">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">3 octubre 2026</span>
+                                            <h2 class="nombre-evento">Cine al Aire Libre</h2>
+                                            <p class="categoria-evento">Cultural</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="teatro-comunal.html" data-titulo="Teatro Comunal" data-categoria="Cultural" data-fecha="6 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/solari.jfif" alt="Teatro Comunal">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">6 octubre 2026</span>
+                                            <h2 class="nombre-evento">Teatro Comunal</h2>
+                                            <p class="categoria-evento">Cultural</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="flecha-carrusel" type="button" data-direction="right" aria-label="Eventos siguientes">❯</button>
+                        </div>
+                    </div>
+
+                    <div class="fila-categoria">
+                        <h2 class="titulo-categoria">Deportivos</h2>
+                        <div class="carrusel-eventos">
+                            <button class="flecha-carrusel" type="button" data-direction="left" aria-label="Eventos anteriores">❮</button>
+                            <div class="visor-carrusel">
+                                <div class="pista-carrusel">
+                                    <a class="tarjeta-evento" href="carrera-costa.html" data-titulo="Carrera de la Costa" data-categoria="Deportivo" data-fecha="19 agosto 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/solari.jfif" alt="Carrera de la Costa">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">19 agosto 2026</span>
+                                            <h2 class="nombre-evento">Carrera de la Costa</h2>
+                                            <p class="categoria-evento">Deportivo</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="maraton-sol.html" data-titulo="Maratón del Sol" data-categoria="Deportivo" data-fecha="10 septiembre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/solari.jfif" alt="Maratón del Sol">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">10 septiembre 2026</span>
+                                            <h2 class="nombre-evento">Maratón del Sol</h2>
+                                            <p class="categoria-evento">Deportivo</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="triatlon-familiar.html" data-titulo="Triatlón Familiar" data-categoria="Deportivo" data-fecha="16 septiembre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/images (1).jfif" alt="Triatlón Familiar">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">16 septiembre 2026</span>
+                                            <h2 class="nombre-evento">Triatlón Familiar</h2>
+                                            <p class="categoria-evento">Deportivo</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="ciclismo-urbano.html" data-titulo="Ciclismo Urbano" data-categoria="Deportivo" data-fecha="28 septiembre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/porco.avif" alt="Ciclismo Urbano">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">28 septiembre 2026</span>
+                                            <h2 class="nombre-evento">Ciclismo Urbano</h2>
+                                            <p class="categoria-evento">Deportivo</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="clase-yoga.html" data-titulo="Clase de Yoga" data-categoria="Deportivo" data-fecha="9 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/solari.jfif" alt="Clase de Yoga">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">9 octubre 2026</span>
+                                            <h2 class="nombre-evento">Clase de Yoga</h2>
+                                            <p class="categoria-evento">Deportivo</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="copa-mountainbike.html" data-titulo="Copa de Mountain Bike" data-categoria="Deportivo" data-fecha="14 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/images (1).jfif" alt="Copa de Mountain Bike">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">14 octubre 2026</span>
+                                            <h2 class="nombre-evento">Copa de Mountain Bike</h2>
+                                            <p class="categoria-evento">Deportivo</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="marcha-salud.html" data-titulo="Marcha de la Salud" data-categoria="Deportivo" data-fecha="20 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/porco.avif" alt="Marcha de la Salud">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">20 octubre 2026</span>
+                                            <h2 class="nombre-evento">Marcha de la Salud</h2>
+                                            <p class="categoria-evento">Deportivo</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="flecha-carrusel" type="button" data-direction="right" aria-label="Eventos siguientes">❯</button>
+                        </div>
+                    </div>
+
+                    <div class="fila-categoria">
+                        <h2 class="titulo-categoria">Sociales</h2>
+                        <div class="carrusel-eventos">
+                            <button class="flecha-carrusel" type="button" data-direction="left" aria-label="Eventos anteriores">❮</button>
+                            <div class="visor-carrusel">
+                                <div class="pista-carrusel">
+                                    <a class="tarjeta-evento" href="tarde-parque.html" data-titulo="Tarde en el Parque" data-categoria="Social" data-fecha="2 septiembre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/porco.avif" alt="Tarde en el Parque">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">2 septiembre 2026</span>
+                                            <h2 class="nombre-evento">Tarde en el Parque</h2>
+                                            <p class="categoria-evento">Social</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="expo-gastronomica.html" data-titulo="Expo Gastronómica" data-categoria="Social" data-fecha="18 septiembre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/images (1).jfif" alt="Expo Gastronómica">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">18 septiembre 2026</span>
+                                            <h2 class="nombre-evento">Expo Gastronómica</h2>
+                                            <p class="categoria-evento">Social</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="noche-cine.html" data-titulo="Noche de Cine" data-categoria="Social" data-fecha="24 septiembre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/solari.jfif" alt="Noche de Cine">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">24 septiembre 2026</span>
+                                            <h2 class="nombre-evento">Noche de Cine</h2>
+                                            <p class="categoria-evento">Social</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="mercado-vecinos.html" data-titulo="Mercado de Vecinos" data-categoria="Social" data-fecha="7 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/porco.avif" alt="Mercado de Vecinos">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">7 octubre 2026</span>
+                                            <h2 class="nombre-evento">Mercado de Vecinos</h2>
+                                            <p class="categoria-evento">Social</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="tarde-artesania.html" data-titulo="Tarde de Artesanía" data-categoria="Social" data-fecha="11 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/images (1).jfif" alt="Tarde de Artesanía">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">11 octubre 2026</span>
+                                            <h2 class="nombre-evento">Tarde de Artesanía</h2>
+                                            <p class="categoria-evento">Social</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="fiesta-pueblo.html" data-titulo="Fiesta del Pueblo" data-categoria="Social" data-fecha="16 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/solari.jfif" alt="Fiesta del Pueblo">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">16 octubre 2026</span>
+                                            <h2 class="nombre-evento">Fiesta del Pueblo</h2>
+                                            <p class="categoria-evento">Social</p>
+                                        </div>
+                                    </a>
+
+                                    <a class="tarjeta-evento" href="degustacion-vecinos.html" data-titulo="Degustación Vecinal" data-categoria="Social" data-fecha="21 octubre 2026">
+                                        <div class="imagen-evento">
+                                            <img src="../img/porco.avif" alt="Degustación Vecinal">
+                                        </div>
+                                        <div class="contenido-evento">
+                                            <span class="fecha-evento">21 octubre 2026</span>
+                                            <h2 class="nombre-evento">Degustación Vecinal</h2>
+                                            <p class="categoria-evento">Social</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            <button class="flecha-carrusel" type="button" data-direction="right" aria-label="Eventos siguientes">❯</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="estado-vacio" id="estadoVacio">No se encontraron eventos con esos filtros.</div>
+            </section>
+        </main>
+    </div>
+
+    <script src="../js/eventos.js" defer></script>
+    <script src="../js/todos-eventos.js" defer></script>
+</body>
+</html>
