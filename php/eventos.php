@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <!-- Metaetiquetas y configuración -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos | SIGTUR</title>
+    <link rel="icon" href="/img/logoblanco.png"> <!-- Ícono de pestaña -->
+    <!-- Importar fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="/css/estilos.css"> <!-- Estilos generales -->
+    <link rel="stylesheet" href="/css/eventos.css"> <!-- Estilos específicos de eventos -->
+</head>
+
+<body>
+    <!-- Menú principal -->
+    <header class="menu-principal">
+        <button class="hamburguesa">
+            ☰
+        </button>
+        <nav class="menu">
+            <a href="index.html" class="logo-link">
+                <img src="/img/logoblanco.png" class="logo-menu" alt="SIGTUR">
+            </a>
+            <a href="eventos.html" class="pagina-activa">Eventos</a> <!-- Página actual marcada -->
+            <a href="turismo.html">Turismo</a>
+            <a href="lugares.html">Lugares</a>
+        </nav>
+
+        <!-- Barra de búsqueda -->
+        <div class="barra-busqueda">
+            <input type="text" placeholder="Buscar eventos">
+            <img src="/img/lupa.png" alt="Buscar">
+        </div>
+
+        <!-- Menú de perfil -->
+        <div class="perfil">
+            <button class="perfil-btn">
+                <img src="/img/user.png" alt="Perfil">
+            </button>
+
+            <div class="perfil-menu">
+                <a href="login.html">Ingresar Usuario</a>
+                <a href="configuracion.html">Configuración</a>
+                <a href="soporte.html">Soporte</a>
+                <a href="cerrar-sesion.html">Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bottom-nav" aria-label="Navegación inferior">
+        <a href="index.html" class="bottom-nav-item">
+            <img src="/img/logoazul.png" class="bottom-nav-icon" alt="Inicio">
+            <span class="bottom-nav-label">Inicio</span>
+        </a>
+        <a href="eventos.html" class="bottom-nav-item active">
+            <img src="/img/nav-eventos.png" class="bottom-nav-icon" alt="Eventos">
+            <span class="bottom-nav-label">Eventos</span>
+        </a>
+        <a href="turismo.html" class="bottom-nav-item">
+            <img src="/img/turismo.png" class="bottom-nav-icon" alt="Turismo">
+            <span class="bottom-nav-label">Turismo</span>
+        </a>
+        <a href="lugares.html" class="bottom-nav-item">
+            <img src="/img/lugares.png" class="bottom-nav-icon" alt="Lugares">
+            <span class="bottom-nav-label">Lugares</span>
+        </a>
+    </nav>
+
+    <main class="pagina-eventos">
+        <!-- Encabezado con imagen de fondo -->
+        <section class="encabezado-eventos">
+            <div class="fondo-encabezado"></div>
+            <div class="texto-encabezado">
+                <h1 class="subtitulo-encabezado">EVENTOS</h1>
+                <p>Este apartado reúne los diferentes eventos turísticos, deportivos y culturales de Salto para que puedas informarte y participar en actividades divertidas.</p>
+            </div>
+        </section>
+
+        <!-- Sección de eventos destacados con carrusel -->
+        <section class="seccion seccion-foco">
+            <div class="titulo-seccion">
+                <h2 class="titulo-foco">Destacados</h2>
+            </div>
+            <div class="carrusel-eventos">
+                <button class="flecha izquierda" data-carrusel="destacados"></button> <!-- Navegación izquierda -->
+                <div class="visor-carrusel">
+                    <div class="contenedor-tarjetas" id="destacados-contenedor"></div> <!-- Se llena con JavaScript -->
+                </div>
+                <button class="flecha derecha" data-carrusel="destacados"></button> <!-- Navegación derecha -->
+            </div>
+            <div class="indicadores-carrusel" id="destacados-indicadores"></div> <!-- Puntos de navegación -->
+        </section>
+
+        <!-- Categorías: Deportivos, Discotecas, Competencias -->
+        <section class="seccion categoria-lista">
+            <!-- Eventos Deportivos -->
+            <div class="fila-categoria">
+                <div class="encabezado-categoria">
+                    <h3>Deportivos</h3>
+                </div>
+                <div class="carrusel-eventos">
+                    <button class="flecha izquierda" data-carrusel="deportivos"></button>
+                    <div class="visor-carrusel">
+                        <div class="contenedor-tarjetas" id="deportivos-contenedor"></div>
+                    </div>
+                    <button class="flecha derecha" data-carrusel="deportivos"></button>
+                </div>
+                <div class="indicadores-carrusel" id="deportivos-indicadores"></div>
+            </div>
+
+            <!-- Discotecas -->
+            <div class="fila-categoria">
+                <div class="encabezado-categoria">
+                    <h3>Discotecas</h3>
+                </div>
+                <div class="carrusel-eventos">
+                    <button class="flecha izquierda" data-carrusel="discotecas"></button>
+                    <div class="visor-carrusel">
+                        <div class="contenedor-tarjetas" id="discotecas-contenedor"></div>
+                    </div>
+                    <button class="flecha derecha" data-carrusel="discotecas"></button>
+                </div>
+                <div class="indicadores-carrusel" id="discotecas-indicadores"></div>
+            </div>
+
+            <!-- Competencias -->
+            <div class="fila-categoria">
+                <div class="encabezado-categoria">
+                    <h3>Competencias</h3>
+                </div>
+                <div class="carrusel-eventos">
+                    <button class="flecha izquierda" data-carrusel="competencias"></button>
+                    <div class="visor-carrusel">
+                        <div class="contenedor-tarjetas" id="competencias-contenedor"></div>
+                    </div>
+                    <button class="flecha derecha" data-carrusel="competencias"></button>
+                </div>
+                <div class="indicadores-carrusel" id="competencias-indicadores"></div>
+            </div>
+        </section>                  
+
+        <!-- Botón de acción -->
+        <div class="accion-boton">
+            <a href="todos-eventos.html" class="boton-amarillo">Ver todos los eventos</a>
+        </div>
+
+        <!-- Eventos anteriores ya realizados -->
+        <section class="seccion seccion-foco">
+            <div class="titulo-seccion">
+                <h2 class="titulo-foco">Eventos Anteriores</h2>
+            </div>
+            <div class="carrusel-eventos">
+                <button class="flecha izquierda" data-carrusel="anteriores"></button>
+                <div class="visor-carrusel">
+                    <div class="contenedor-tarjetas" id="anteriores-contenedor"></div>
+                </div>
+                <button class="flecha derecha" data-carrusel="anteriores"></button>
+            </div>  
+            <div class="indicadores-carrusel" id="anteriores-indicadores"></div>
+            <div class="accion-boton secundaria">
+                <a href="#" class="boton-amarillo">Ver eventos anteriores</a>
+            </div>
+        </section>
+
+        <section class="seccion reseñas-eventos">
+            <div class="reviews-grid">
+                <article class="review-card">
+                    <div class="review-estrellas" aria-label="5 estrellas">★★★★★</div>
+                    <h3>Benjamin R.</h3>
+                    <p>La energía del evento fue increíble y todo estuvo muy bien organizado.</p>
+                </article>
+                <article class="review-card">
+                    <div class="review-estrellas" aria-label="4 estrellas">★★★★☆</div>
+                    <h3>Aaron C.</h3>
+                    <p>Muy buena propuesta, con un ambiente agradable y excelente atención.</p>
+                </article>
+                <article class="review-card">
+                    <div class="review-estrellas" aria-label="3 estrellas">★★★☆☆</div>
+                    <h3>Santiago D.</h3>
+                    <p>El lugar y la música fueron geniales, aunque hubo un poco de espera.</p>
+                </article>
+                <article class="review-card">
+                    <div class="review-estrellas" aria-label="5 estrellas">★★★★★</div>
+                    <h3>Federico S.</h3>
+                    <p>Una experiencia muy divertida, con detalles que hicieron la noche especial.</p>
+                </article>
+                <article class="review-card">
+                    <div class="review-estrellas" aria-label="4 estrellas">★★★★☆</div>
+                    <h3>Pio M.</h3>
+                    <p>El ambiente fue muy agradable y la organización se notó en cada detalle.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="seccion galeria-eventos">
+            <div class="titulo-seccion">
+                <h2>Galería</h2>
+            </div>
+            <div class="grilla-galeria" id="galeria-contenedor"></div>
+        </section>
+    </main>
+
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+        <div class="lightbox-content">
+            <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar imagen">×</button>
+            <button class="lightbox-arrow left" id="lightbox-prev" aria-label="Imagen anterior">❮</button>
+            <img id="lightbox-image" src="" alt="Vista ampliada de galería">
+            <button class="lightbox-arrow right" id="lightbox-next" aria-label="Siguiente imagen">❯</button>
+            <div class="lightbox-caption" id="lightbox-caption"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>EVENTOS</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="eventos.html" class="footer-link">Eventos destacados</a>
+                    <a href="eventos.html" class="footer-link">Próximos eventos</a>
+                    <a href="eventos.html" class="footer-link">Eventos anteriores</a>
+                    <a href="eventos.html" class="footer-link">Todos los eventos</a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>LUGARES</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Plaza Artigas</a>
+                    <a href="#" class="footer-link">Plaza Treinta y Tres</a>
+                    <a href="#" class="footer-link">Costanera Norte</a>
+                    <a href="#" class="footer-link">Costanera Sur</a>
+                    <a href="#" class="footer-link">Parque Benito Solari</a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>TURISMO</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Hoteles</a>
+                    <a href="#" class="footer-link">Actividades</a>
+                    <a href="#" class="footer-link">Lugares turísticos</a>
+                    <a href="#" class="footer-link">Experiencias</a>
+                </div>
+            </div>
+
+            <div class="footer-col footer-col--social">
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4>SIGTUR</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Sobre nosotros</a>
+                    <a href="#" class="footer-link">Contacto</a>
+                    <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon">
+                        <span class="social-icon">IG</span>Instagram
+                    </a>
+                    <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
+                        <span class="social-icon">FB</span>Facebook
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <a href="https://bapst.netlify.app">SIGTUR</a> © 2026 by <a href="https://instagram.com/bapstuy">Bapst</a>
+            is licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a><img
+                src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt=""
+                style="max-width: 1em;max-height:1em;margin-left: .2em;"><img
+                src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt=""
+                style="max-width: 1em;max-height:1em;margin-left: .2em;"><img
+                src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt=""
+                style="max-width: 1em;max-height:1em;margin-left: .2em;"><img
+                src="https://mirrors.creativecommons.org/presskit/icons/nd.svg" alt=""
+                style="max-width: 1em;max-height:1em;margin-left: .2em;">
+        </div>
+    </footer>
+
+    <script src="/js/script.js" defer></script>
+    <script src="/js/eventos.js" defer></script>
+</body>
+
+</html>

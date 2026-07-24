@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuración | Sigtur Salto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/css/soporte.css" />
+</head>
+<body>
+  <main class="support-page">
+    <section class="support-container">
+      <header class="hero">
+        <div class="hero-top">
+          <a class="back-pill" href="index.html" aria-label="Volver al inicio">← Volver</a>
+          <span class="eyebrow">⚙️ Configuración</span>
+        </div> 
+        <h1>Personaliza la experiencia de tu sitio</h1>
+        <p>
+          Aquí tienes una base visual y estructural para administrar los datos del
+          sitio, las preferencias de usuario y las opciones de apariencia.
+        </p>
+      </header>
+      
+
+      <section class="grid">
+        <article class="card">
+          <h2>Datos generales</h2>
+          <p>Define la identidad y la información principal de la página.</p>
+
+          <label for="nombre-sitio">Nombre del sitio</label>
+          <input id="nombre-sitio" class="config-input" type="text" value="Sigtur Salto" />
+
+          <label for="email-admin">Correo de contacto</label>
+          <input id="email-admin" class="config-input" type="email" value="contacto@sigtur.com" />
+
+          <label for="ciudad">Ciudad</label>
+          <input id="ciudad" class="config-input" type="text" value="Salto, Uruguay" />
+        </article>
+
+        <article class="card">
+          <h2>Preferencias de visualización</h2>
+          <p>Controla la forma en que se presenta la información al usuario.</p>
+
+          <label for="tema">Tema</label>
+          <select id="tema" class="config-select">
+            <option>Oscuro</option>
+            <option>Claro</option>
+          </select>
+
+          <label for="idioma">Idioma</label>
+          <select id="idioma" class="config-select">
+            <option>Español</option>
+            <option>English</option>
+            <option>Português</option>
+          </select>
+
+          <label for="descripcion">Descripción breve</label>
+          <textarea id="descripcion" class="config-textarea">Explora eventos, turismo y recomendaciones de Salto en una experiencia moderna e intuitiva.</textarea>
+        </article>
+
+        <article class="card">
+          <h2>Notificaciones</h2>
+          <p>Activa o desactiva los avisos importantes del proyecto.</p>
+
+          <div class="config-row">
+            <div class="config-label">
+              <strong>Eventos destacados</strong>
+              <span>Recibe alertas de actividades nuevas o próximas.</span>
+            </div>
+            <span class="config-chip">Activado</span>
+          </div>
+          <div class="config-row">
+            <div class="config-label">
+              <strong>Recordatorios</strong>
+              <span>Envío de avisos de actualización o mantenimiento.</span>
+            </div>
+            <span class="config-chip">Opcional</span>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Seguridad y acceso</h2>
+          <p>Gestiona los accesos y el control de la plataforma.</p>
+
+          <div class="config-row">
+            <div class="config-label">
+              <strong>Acceso público</strong>
+              <span>Permite ver el contenido sin iniciar sesión.</span>
+            </div>
+            <span class="config-chip">Sí</span>
+          </div>
+
+          <div class="config-row">
+            <div class="config-label">
+              <strong>Panel de administración</strong>
+              <span>Acceso privado para editar contenido y configuraciones.</span>
+            </div>
+            <span class="config-chip">Protegido</span>
+          </div>
+        </article>
+      </section>
+
+      <div class="config-actions">
+        <button class="btn btn-primary" type="button">Guardar cambios</button>
+        <button class="btn btn-secondary" type="button">Restablecer</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

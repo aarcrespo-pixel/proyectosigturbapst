@@ -160,6 +160,9 @@ body {
 
 .boton-lugares {
     display: inline-flex;
+    margin: 0 auto;
+    align-items: center;
+    justify-content: center;
     padding: 1rem 2rem;
     border-radius: 999px;
     background: linear-gradient(90deg, #d36248, #ff8e6d);
@@ -175,6 +178,21 @@ body {
 .boton-lugares:hover {
     transform: translateY(-2px);
     box-shadow: 0 22px 40px rgba(211, 98, 72, 0.30);
+}
+
+.seccion-lugares > .boton-lugares,
+.galeria-lugares > .boton-lugares,
+.accion-boton > .boton-lugares {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.galeria-lugares > .boton-lugares {
+    grid-column: 1 / -1;
+    justify-self: center;
 }
 
 @media (max-width: 900px) {

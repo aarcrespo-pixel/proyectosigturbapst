@@ -68,12 +68,14 @@ img {
     padding: var(--menu-padding);
     border-radius: 999px;
     background: rgba(255, 255, 255, .07);
+    /* // Efecto glass: desenfoque del fondo detrás del elemento (backdrop-filter) */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid rgba(255, 255, 255, 0.65);
     border-left: 1px solid rgba(255, 255, 255, .20);
     border-right: 1px solid rgba(255, 255, 255, .20);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    /* // Sombra compuesta: 'inset' para brillo interior + sombra externa para profundidad */
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, .15), 0 8px 18px rgba(0, 0, 0, .04);
     margin: auto;
 }
@@ -91,6 +93,7 @@ img {
     border-left: 1px solid rgba(255, 255, 255, .20);
     border-right: 1px solid rgba(255, 255, 255, .20);
     border-bottom: 1px solid rgba(255, 255, 255, .3);
+    /* // Sombra múltiple con inset + externa para botón compacto */
     box-shadow:
         inset 0 1px 1px rgba(255, 255, 255, .15),
         0 8px 18px rgba(0, 0, 0, .04);
@@ -152,11 +155,13 @@ img {
     letter-spacing: -0.05em;
     color: #000000;
     background: rgba(255, 255, 255, .03);
+    /* // Backdrop blur más fuerte en botones para diferenciar del fondo */
     backdrop-filter: blur(24px);
     border-top: 1px solid rgba(255, 255, 255, 0.65);
     border-left: 1px solid rgba(255, 255, 255, .20);
     border-right: 1px solid rgba(255, 255, 255, .20);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    /* // Sombra combinada: inset para brillo y ligera sombra externa */
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, .92), 0 3px 8px rgba(0, 0, 0, .05);
     overflow: hidden;
     transition: .4s ease;
@@ -177,6 +182,7 @@ img {
 .menu a.pagina-activa {
     background: linear-gradient(270deg, #f7b500, #ffc400, #ffd84d, #ffea70);
     background-size: 300% 300%;
+    /* // Animación que desplaza el gradiente para efecto dinámico */
     animation: hoverGradientShift 3s ease infinite;
     color: black;
     transform: scale(1.1);
@@ -216,6 +222,7 @@ img {
     border-radius: 999px;
     background: linear-gradient(270deg, #ffffff, #dfcc8d, #ccc9c0, rgb(226, 226, 134));
     background-size: 300% 300%;
+    /* // Animación larga que desplaza el gradiente de fondo */
     animation: hoverGradientShift 6s ease infinite;
     box-shadow: 0 18px 32px rgba(0, 0, 0, 0.12);
     border-top: 1px solid rgba(255, 255, 255, 0.78);
@@ -223,6 +230,7 @@ img {
     color: #111;
     font-weight: 700;
     font-size: 0.95rem;
+    /* // Desenfoque de fondo para suavizar el contenido detrás del widget */
     backdrop-filter: blur(12px);
     z-index: 101;
 }
@@ -398,6 +406,7 @@ body[data-tema="oscuro"] .perfil-btn:hover {
     flex-direction: column;
     gap: 0.35rem;
     z-index: 1600;
+    /* // Sombra profunda para menu desplegable (elevation) */
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
 }
 
@@ -452,7 +461,7 @@ body[data-tema="oscuro"] .perfil-menu a:hover {
 .degradado-inferior {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, .75), rgba(0, 0, 0, .25), transparent);
+    background: linear-gradient(to top, rgba(0, 0, 0, .35), rgba(0, 0, 0, .15), transparent);
 }
 
 .texto-inicio {
@@ -514,6 +523,7 @@ body[data-tema="oscuro"] .perfil-menu a:hover {
     right: clamp(1.2rem, 2vw, 2rem);
     bottom: clamp(8.4rem, 12vw, 8.5rem);
     z-index: 3;
+    /* // Ancho responsivo: usar min() con calc() para respetar márgenes */
     width: min(320px, calc(100% - 2.4rem));
     padding: 1rem 1.1rem;
     border-radius: 18px;
@@ -690,7 +700,7 @@ body[data-tema="oscuro"] .perfil-menu a:hover {
 }
 
 .boton-amarillo {
-    margin-top: 20px;
+    margin: 20px auto 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -967,11 +977,20 @@ body[data-tema="oscuro"] .perfil-menu a:hover {
     text-align: center;
     padding-top: clamp(1.5rem, 1.8vw, 2.4rem);
     border-top: 1px solid rgba(255, 255, 255, .08);
-    color: rgba(245, 232, 216, .7);
+    color: #ffffff;
     font-size: clamp(0.9rem, 0.95vw, 1rem);
     letter-spacing: .12em;
     opacity: .92;
-    font-family: Poppins, sans-serif;
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 400;
+}
+
+.footer-bottom a,
+.footer-bottom a:visited,
+.footer-bottom a:hover,
+.footer-bottom a:active {
+    color: #ffffff;
+    text-decoration: none;
 }
 
 @media(max-width:1120px) {
@@ -1176,6 +1195,7 @@ body[data-tema="oscuro"] .perfil-menu a:hover {
     }
 }
 
+/* // Keyframes que desplazan la posición del fondo para un gradiente animado */
 @keyframes hoverGradientShift {
     0% {
         background-position: 0% 50%;
@@ -1565,7 +1585,7 @@ body[data-tema="oscuro"] .perfil-menu a:hover {
     }
 }
 
-/* force search bar to behave in small headers */
+/* barra de busqueda para celulares */
 @media (max-width: 768px) {
     .menu-principal .barra-busqueda {
         position: static !important;

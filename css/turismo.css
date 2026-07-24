@@ -157,6 +157,30 @@ body {
     color: #314066;
 }
 
+.hotel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin-top: 0.8rem;
+}
+
+.estrellas {
+    color: #f7b500;
+    font-size: 1.05rem;
+    letter-spacing: 0.15rem;
+}
+
+.precio {
+    font-weight: 700;
+    color: #1f3c88;
+    font-size: 1rem;
+}
+
+.ubicacion {
+    color: #5a6487;
+    font-size: 0.95rem;
+}
+
 .meta {
     display: inline-flex;
     gap: 0.75rem;
@@ -167,6 +191,9 @@ body {
 
 .boton-turismo {
     display: inline-flex;
+    margin: 0 auto;
+    align-items: center;
+    justify-content: center;
     padding: 1rem 2rem;
     border-radius: 999px;
     background: linear-gradient(90deg, #4b63ff, #82a4ff);
@@ -182,6 +209,20 @@ body {
 .boton-turismo:hover {
     transform: translateY(-2px);
     box-shadow: 0 22px 40px rgba(75, 99, 255, 0.30);
+}
+
+.seccion-turismo > .boton-turismo,
+.galeria-grid > .boton-turismo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.galeria-grid > .boton-turismo {
+    grid-column: 1 / -1;
+    justify-self: center;
 }
 
 .info-panel {

@@ -148,6 +148,12 @@ body[data-tema="oscuro"] .pagina-eventos .galeria-eventos .titulo-seccion h2 {
     min-height: 360px;
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
     transition: transform 0.35s ease, box-shadow 0.35s ease, filter 0.35s ease, opacity 0.35s ease;
+    cursor: pointer;
+}
+
+.tarjeta:focus-visible {
+    outline: 2px solid #111;
+    outline-offset: 4px;
 }
 
 .tarjeta:not(.activa) {
@@ -330,6 +336,14 @@ body[data-tema="claro"] .indicador-netflix.activo {
     margin-top: 1.8rem;
 }
 
+.accion-boton .boton-amarillo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin: 0 auto;
+}
+
 .accion-boton.secundaria {
     justify-content: center;
 }
@@ -339,6 +353,7 @@ body[data-tema="claro"] .indicador-netflix.activo {
     align-items: center;
     justify-content: center;
     padding: 1rem 2rem;
+    margin: 0 auto;
     border-radius: 999px;
     border-top: 1px solid rgba(255, 255, 255, .85);
     border-left: 1px solid rgba(255, 255, 255, .40);
@@ -360,7 +375,49 @@ body[data-tema="claro"] .indicador-netflix.activo {
     transform: scale(1.05);
     transition: .3s;
 }
+.reseñas-eventos {
+    margin-bottom: 2rem;
+}
 
+.reviews-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1.25rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scroll-snap-type: x proximity;
+}
+
+.review-card {
+    flex: 0 0 min(280px, calc(100% / 3));
+    min-width: 240px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    border-radius: 24px;
+    padding: 1.25rem;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.06);
+    scroll-snap-align: start;
+}
+
+.review-estrellas {
+    color: var(--amarillo-fuerte);
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.7rem;
+}
+
+.review-card h3 {
+    margin: 0 0 0.45rem;
+    font-size: 1.08rem;
+    color: #111;
+}
+
+.review-card p {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
 .galeria-eventos .grilla-galeria {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -518,6 +575,7 @@ body[data-tema="claro"] .indicador-netflix.activo {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .reviews-grid,
     .galeria-eventos .grilla-galeria {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -614,6 +672,15 @@ body[data-tema="claro"] .indicador-netflix.activo {
     .encabezado-categoria h3 {
         font-size: 1.4rem;
         margin-bottom: 1rem;
+    }
+
+    .reviews-grid {
+        flex-wrap: nowrap;
+    }
+
+    .review-card {
+        flex-basis: 85%;
+        min-width: 220px;
     }
 
     .galeria-eventos .grilla-galeria {

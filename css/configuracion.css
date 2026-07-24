@@ -1,4 +1,5 @@
 :root {
+  /* // Gradiente complejo: ángulo y paradas de color para fondo principal */
   --cfg-bg: linear-gradient(145deg, #f5f7fb 0%, #edf3f9 42%, #fffaf6 100%);
   --cfg-panel: rgba(255, 255, 255, 0.76);
   --cfg-card: rgba(255, 255, 255, 0.82);
@@ -32,6 +33,7 @@ body {
   content: "";
   position: absolute;
   border-radius: 50%;
+  /* // Desenfoque grande para halos difusos (filter: blur) */
   filter: blur(90px);
   opacity: 0.22;
   z-index: 0;
@@ -79,7 +81,9 @@ body {
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  /* // Sombra compuesta para relieve: desplazamiento Y, blur y color */
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+  /* // Efecto vidrio (backdrop-filter) para aspecto translúcido */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
@@ -139,10 +143,12 @@ body {
 }
 
 .config-card {
+  /* // Fondo en capas con transparencia para dar profundidad (linear-gradient) */
   background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.72));
   border: 1px solid var(--cfg-border);
   border-radius: 26px;
   padding: 1.15rem;
+  /* // Sombra reutilizable desde variable y blur de fondo para efecto glass */
   box-shadow: var(--cfg-shadow);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
