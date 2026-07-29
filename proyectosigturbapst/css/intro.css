@@ -1,0 +1,47 @@
+﻿.intro {
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100vh;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ z-index: 9999;
+ /* animacion gradient */
+ background: linear-gradient(270deg, #0c0c0c, #2b4346, #1a2a3a, #0c0c0c);
+ background-size: 800% 800%;
+ animation: gradientShift 8s linear infinite, fadeOut 0.8s forwards;
+ animation-delay: 0s, 0.8s;
+}
+
+.intro img {
+ width: clamp(200px, 14vw, 250px);
+ animation: logoAnim 1.5s ease;
+}
+
+@keyframes fadeOut {
+ to {
+ opacity: 0;
+ visibility: hidden;
+ }
+}
+
+@keyframes logoAnim {
+ from {
+ opacity: 0;
+ transform: scale(0.4);
+ }
+
+ to {
+ opacity: 1;
+ transform: scale(1.5);
+ }
+}
+
+@keyframes gradientShift {
+ 0% { background-position: 0% 50%; }
+ 50% { background-position: 100% 50%; }
+ 100% { background-position: 0% 50%; }
+}
+
