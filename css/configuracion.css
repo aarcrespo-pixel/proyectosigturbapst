@@ -118,7 +118,7 @@ body {
 .config-hero h1 {
   font-weight: 500;
   font-family: 'Instrument Sans', sans-serif;
-  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
   line-height: 1.05;
   color: #22354a;
 }

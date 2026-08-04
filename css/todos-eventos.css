@@ -27,6 +27,13 @@ img {
     max-width: 100%;
 }
 
+main img:not(.boton-inicio img):not(.logo-menu):not([class*="icon"]):not([class*="logo"]) {
+    width: 100%;
+    height: clamp(220px, 28vw, 320px);
+    object-fit: cover;
+    object-position: center;
+}
+
 button,
 input,
 select {

@@ -19,55 +19,53 @@
 <body>
     <!-- Menú principal -->
     <header class="menu-principal">
-        <button class="hamburguesa">
+        <button class="hamburguesa" aria-label="Abrir menú" data-i18n-aria-label="navMenuOpen">
             ☰
         </button>
         <nav class="menu">
             <a href="index.php" class="logo-link">
                 <img src="../img/logoblanco.png" class="logo-menu" alt="SIGTUR">
             </a>
-            <a href="eventos.php" class="pagina-activa">Eventos</a> <!-- Página actual marcada -->
-            <a href="turismo.php">Turismo</a>
-            <a href="lugares.php">Lugares</a>
+            <a href="eventos.php" class="pagina-activa" data-i18n="navEvents">Eventos</a>
+            <a href="turismo.php" data-i18n="navTourism">Turismo</a>
+            <a href="lugares.php" data-i18n="navPlaces">Lugares</a>
         </nav>
 
-        <!-- Barra de búsqueda -->
         <div class="barra-busqueda">
-            <input type="text" placeholder="Buscar eventos">
-            <img src="../img/lupa.png" alt="Buscar">
+            <input type="text" placeholder="Buscar eventos" data-i18n-placeholder="searchPlaceholder">
+            <img src="../img/lupa.png" alt="Buscar" data-i18n-alt="navSearch">
         </div>
 
-        <!-- Menú de perfil -->
         <div class="perfil">
-            <button class="perfil-btn">
-                <img src="../img/user.png" alt="Perfil">
+            <button class="perfil-btn" aria-label="Abrir perfil" data-i18n-aria-label="navProfile">
+                <img src="../img/userb.png" alt="Perfil" data-i18n-alt="navProfile">
             </button>
 
             <div class="perfil-menu">
-                <a href="login.php">Ingresar Usuario</a>
-                <a href="configuracion.php">Configuración</a>
-                <a href="soporte.php">Soporte</a>
-                <a href="cerrar-sesion.php">Cerrar Sesión</a>
+                <a href="login.php" data-i18n="navLogin">Ingresar Usuario</a>
+                <a href="configuracion.php" data-i18n="navSettings">Configuración</a>
+                <a href="soporte.php" data-i18n="navSupport">Soporte</a>
+                <a href="cerrar-sesion.php" data-i18n="navLogout">Cerrar Sesión</a>
             </div>
         </div>
     </header>
 
     <nav class="bottom-nav" aria-label="Navegación inferior">
         <a href="index.php" class="bottom-nav-item">
-            <img src="../img/logoazul.png" class="bottom-nav-icon" alt="Inicio">
-            <span class="bottom-nav-label">Inicio</span>
+            <img src="../img/logoazul.png" class="bottom-nav-icon" alt="Inicio" data-i18n-alt="navHome">
+            <span class="bottom-nav-label" data-i18n="navHome">Inicio</span>
         </a>
         <a href="eventos.php" class="bottom-nav-item active">
-            <img src="../img/nav-eventos.png" class="bottom-nav-icon" alt="Eventos">
-            <span class="bottom-nav-label">Eventos</span>
+            <img src="../img/nav-eventos.png" class="bottom-nav-icon" alt="Eventos" data-i18n-alt="navEvents">
+            <span class="bottom-nav-label" data-i18n="navEvents">Eventos</span>
         </a>
         <a href="turismo.php" class="bottom-nav-item">
-            <img src="../img/turismo.png" class="bottom-nav-icon" alt="Turismo">
-            <span class="bottom-nav-label">Turismo</span>
+            <img src="../img/turismo.png" class="bottom-nav-icon" alt="Turismo" data-i18n-alt="navTourism">
+            <span class="bottom-nav-label" data-i18n="navTourism">Turismo</span>
         </a>
         <a href="lugares.php" class="bottom-nav-item">
-            <img src="../img/lugares.png" class="bottom-nav-icon" alt="Lugares">
-            <span class="bottom-nav-label">Lugares</span>
+            <img src="../img/lugares.png" class="bottom-nav-icon" alt="Lugares" data-i18n-alt="navPlaces">
+            <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
         </a>
     </nav>
 
@@ -76,15 +74,15 @@
         <section class="encabezado-eventos">
             <div class="fondo-encabezado"></div>
             <div class="texto-encabezado">
-                <h1 class="subtitulo-encabezado">EVENTOS</h1>
-                <p>Este apartado reúne los diferentes eventos turísticos, deportivos y culturales de Salto para que puedas informarte y participar en actividades divertidas.</p>
+                <h1 class="subtitulo-encabezado" data-i18n="eventsHeroTitle">EVENTOS</h1>
+                <p data-i18n="eventsHeroText">Este apartado reúne los diferentes eventos turísticos, deportivos y culturales de Salto para que puedas informarte y participar en actividades divertidas.</p>
             </div>
         </section>
 
         <!-- Sección de eventos destacados con carrusel -->
         <section class="seccion seccion-foco">
             <div class="titulo-seccion">
-                <h2 class="titulo-foco">Destacados</h2>
+                <h2 class="titulo-foco" data-i18n="eventsFeaturedLabel">Destacados</h2>
             </div>
             <div class="carrusel-eventos">
                 <button class="flecha izquierda" data-carrusel="destacados"></button> <!-- Navegación izquierda -->
@@ -263,9 +261,6 @@
                     <h4>SIGTUR</h4>
                     <span class="footer-toggle-icon">▾</span>
                 </button>
-                <div class="footer-links">
-                    <a href="#" class="footer-link">Sobre nosotros</a>
-                    <a href="#" class="footer-link">Contacto</a>
                     <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon">
                         <span class="social-icon">IG</span>Instagram
                     </a>

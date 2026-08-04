@@ -17,16 +17,13 @@
             <p class="intro">Completa tus datos para crear tu cuenta y empezar a disfrutar del sitio.</p>
             <form>
                 <label for="Nombre">Nombre completo</label>
-                <input type="text" id="Nombre" placeholder="Nombre completo" />
+                <input type="text" id="Nombre" placeholder="Juan Perez" />
 
                 <label for="CorreoElectronico">Correo electrónico</label>
-                <input type="email" id="CorreoElectronico" placeholder="Correo electrónico" />
+                <input type="email" id="CorreoElectronico" placeholder="juanperez@gmail.com" />
 
                 <label for="Contraseña">Contraseña</label>
-                <input type="password" id="Contraseña" placeholder="Contraseña" />
-
-                <label for="Telefono">Número telefónico</label>
-                <input type="tel" id="Telefono" placeholder="Número telefónico" />
+                <input type="password" id="Contraseña" placeholder="Nombre10394." />
 
                 <div class="botones">
                     <button type="button" id="btnAgregar" class="action-btn">Registrarse</button>
