@@ -1,3 +1,46 @@
+<?php
+require_once 'conexion.php';
+
+$message = '';
+$messageType = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nombre = trim($_POST['nombre'] ?? '');
+    $correo = trim($_POST['correo'] ?? '');
+    $contraseña = trim($_POST['contraseña'] ?? '');
+    $telefono = trim($_POST['telefono'] ?? '');
+
+    if ($nombre === '' || $correo === '' || $contraseña === '') {
+        $message = 'Completa nombre, correo y contraseña para registrarte.';
+        $messageType = 'error';
+    } elseif (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+        $message = 'Ingresa un correo electrónico válido.';
+        $messageType = 'error';
+    } else {
+        $verificar = $conexion->prepare('SELECT id FROM usuario WHERE correo = ?');
+        $verificar->bind_param('s', $correo);
+        $verificar->execute();
+        $verificar->store_result();
+
+        if ($verificar->num_rows > 0) {
+            $message = 'Ya existe una cuenta con ese correo.';
+            $messageType = 'error';
+        } else {
+            $hash = password_hash($contraseña, PASSWORD_DEFAULT);
+            $stmt = $conexion->prepare('INSERT INTO usuario (correo, contraseña, nombre) VALUES (?, ?, ?)');
+            $stmt->bind_param('sss', $correo, $hash, $nombre);
+
+            if ($stmt->execute()) {
+                $message = '¡Registro correcto! Ya puedes iniciar sesión.';
+                $messageType = 'success';
+            } else {
+                $message = 'No se pudo completar el registro: ' . $stmt->error;
+                $messageType = 'error';
+            }
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,18 +58,28 @@
         <section class="contenedor">
             <h1>Regístrate</h1>
             <p class="intro">Completa tus datos para crear tu cuenta y empezar a disfrutar del sitio.</p>
-            <form>
+
+            <?php if ($message !== ''): ?>
+                <p class="<?php echo $messageType === 'success' ? 'success-message' : 'error-message'; ?>">
+                    <?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?>
+                </p>
+            <?php endif; ?>
+
+            <form method="post" action="registrarse.php">
                 <label for="Nombre">Nombre completo</label>
-                <input type="text" id="Nombre" placeholder="Juan Perez" />
+                <input type="text" id="Nombre" name="nombre" placeholder="Nombre completo" required />
 
                 <label for="CorreoElectronico">Correo electrónico</label>
-                <input type="email" id="CorreoElectronico" placeholder="juanperez@gmail.com" />
+                <input type="email" id="CorreoElectronico" name="correo" placeholder="Correo electrónico" required />
 
                 <label for="Contraseña">Contraseña</label>
-                <input type="password" id="Contraseña" placeholder="Nombre10394." />
+                <input type="password" id="Contraseña" name="contraseña" placeholder="Contraseña" required />
+
+                <label for="Telefono">Número telefónico</label>
+                <input type="tel" id="Telefono" name="telefono" placeholder="Número telefónico" />
 
                 <div class="botones">
-                    <button type="button" id="btnAgregar" class="action-btn">Registrarse</button>
+                    <button type="submit" id="btnAgregar" class="action-btn">Registrarse</button>
                     <a class="action-btn" href="login.php">Iniciar Sesión</a>
                 </div>
 

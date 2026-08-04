@@ -45,7 +45,7 @@ CREATE TABLE `card` (
 CREATE TABLE `usuario` (
   `id` int(11) NOT NULL,
   `correo` varchar(50) DEFAULT NULL,
-  `contraseña` varchar(50) DEFAULT NULL,
+  `contraseña` varchar(255) DEFAULT NULL,
   `nombre` varchar(30) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
