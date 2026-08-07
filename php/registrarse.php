@@ -7,10 +7,10 @@ $messageType = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = trim($_POST['nombre'] ?? '');
     $correo = trim($_POST['correo'] ?? '');
-    $contraseña = trim($_POST['contraseña'] ?? '');
+    $contrasena = trim($_POST['contrasena'] ?? '');
     $telefono = trim($_POST['telefono'] ?? '');
 
-    if ($nombre === '' || $correo === '' || $contraseña === '') {
+    if ($nombre === '' || $correo === '' || $contrasena === '') {
         $message = 'Completa nombre, correo y contraseña para registrarte.';
         $messageType = 'error';
     } elseif (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
@@ -26,8 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = 'Ya existe una cuenta con ese correo.';
             $messageType = 'error';
         } else {
-            $hash = password_hash($contraseña, PASSWORD_DEFAULT);
-            $stmt = $conexion->prepare('INSERT INTO usuario (correo, contraseña, nombre) VALUES (?, ?, ?)');
+            $hash = password_hash($contrasena, PASSWORD_DEFAULT);
+            $stmt = $conexion->prepare('INSERT INTO usuario (correo, contrasena, nombre) VALUES (?, ?, ?)');
             $stmt->bind_param('sss', $correo, $hash, $nombre);
 
             if ($stmt->execute()) {
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="email" id="CorreoElectronico" name="correo" placeholder="Correo electrónico" required />
 
                 <label for="Contraseña">Contraseña</label>
-                <input type="password" id="Contraseña" name="contraseña" placeholder="Contraseña" required />
+                <input type="password" id="Contraseña" name="contrasena" placeholder="Contraseña" required />
 
                 <label for="Telefono">Número telefónico</label>
                 <input type="tel" id="Telefono" name="telefono" placeholder="Número telefónico" />

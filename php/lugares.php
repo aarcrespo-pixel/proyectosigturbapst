@@ -1,3 +1,7 @@
+<?php
+session_start();
+$loggedIn = isset($_SESSION['user_id']);
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -38,10 +42,14 @@
                 <img src="../img/userb.png" alt="Perfil" data-i18n-alt="navProfile">
             </button>
             <div class="perfil-menu">
-                <a href="login.php" data-i18n="navLogin">Ingresar Usuario</a>
+                <?php if (!isset($loggedIn) || !$loggedIn): ?>
+                    <a href="login.php" data-i18n="navLogin">Ingresar Usuario</a>
+                <?php endif; ?>
                 <a href="configuracion.php" data-i18n="navSettings">Configuración</a>
                 <a href="soporte.php" data-i18n="navSupport">Soporte</a>
-                <a href="cerrar-sesion.php" data-i18n="navLogout">Cerrar Sesión</a>
+                <?php if (isset($loggedIn) && $loggedIn): ?>
+                    <a href="cerrar-sesion.php" data-i18n="navLogout">Cerrar Sesión</a>
+                <?php endif; ?>
             </div>
         </div>
     </header>

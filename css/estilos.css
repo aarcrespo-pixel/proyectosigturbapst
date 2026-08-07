@@ -333,11 +333,13 @@ body[data-tema="oscuro"] .barra-busqueda input::placeholder {
     left: 3%;
     top: 50%;
     transform: translateY(-50%);
+    z-index: 1600;
 }
 
 .perfil-btn {
     width: clamp(3.5rem, 4vw, 5.3rem);
     height: clamp(3.5rem, 4vw, 5.3rem);
+    z-index: 1601;
     display: flex;
     justify-content: center;
     align-items: center;

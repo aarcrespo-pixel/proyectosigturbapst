@@ -1009,7 +1009,7 @@ const traduccionesExtra = {
         eventsGalleryTitle: 'Galería',
         eventsViewAll: 'Ver todos los eventos',
         eventsViewPrevious: 'Ver eventos anteriores',
-        eventsReviewNames: ['Benjamín R.', 'Aaron C.', 'Santiago D.', 'Federico S.', 'Pío M.']
+        eventsReviewNames: ['Benjamín R.', 'Aaron C.', 'Santiago D.', 'Federico S.', 'Pío M.'],
         tourismSectionEscapadasTitle: 'Escapadas recomendadas',
         tourismSectionRoutesTitle: 'Rutas y experiencias',
         tourismDiscoverMore: 'Descubrir más',
@@ -1176,7 +1176,7 @@ const traduccionesExtra = {
         eventsGalleryTitle: 'Gallery',
         eventsViewAll: 'See all events',
         eventsViewPrevious: 'See previous events',
-        eventsReviewNames: ['Benjamin R.', 'Aaron C.', 'Santiago D.', 'Federico S.', 'Pio M.']
+        eventsReviewNames: ['Benjamin R.', 'Aaron C.', 'Santiago D.', 'Federico S.', 'Pio M.'],
         tourismSectionEscapadasTitle: 'Recommended escapes',
         tourismSectionRoutesTitle: 'Routes and experiences',
         tourismDiscoverMore: 'Discover more',

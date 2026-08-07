@@ -11,6 +11,4 @@ if ($conexion->connect_error) {
     echo "No se pudo conectar a la base de datos.";
     exit;
 }
-
-echo "Conexión realizada correctamente.";
 ?>
