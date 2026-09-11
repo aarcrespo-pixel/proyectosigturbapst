@@ -17,7 +17,7 @@
     <?php
     $headerCurrentPage = 'gastronomia';
     $headerActivePage = 'gastronomia';
-    include __DIR__ . '/../includes/header.php';
+    include __DIR__ . '/header.php';
     ?>
 
     <main class="pagina-gastronomia">

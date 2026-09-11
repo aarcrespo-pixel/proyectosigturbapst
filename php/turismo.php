@@ -18,7 +18,7 @@
     <?php
     $headerCurrentPage = 'turismo';
     $headerActivePage = 'turismo';
-    include __DIR__ . '/../includes/header.php';
+    include __DIR__ . '/header.php';
     ?>
 
     <nav class="bottom-nav" aria-label="Navegación inferior">

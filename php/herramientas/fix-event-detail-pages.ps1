@@ -1,4 +1,5 @@
-﻿$files = Get-ChildItem php/eventos/*.php
+﻿$projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$files = Get-ChildItem (Join-Path $projectRoot 'php/eventos/*.php')
 foreach ($f in $files) {
     $text = Get-Content -Raw $f
     $text = [regex]::Replace($text, '</html>[\s\S]*$', '', [System.Text.RegularExpressions.RegexOptions]::Singleline)

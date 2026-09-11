@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 
-root = Path('.')
+root = Path(__file__).resolve().parents[2]
 js_file = root / 'js' / 'eventos.js'
 php_dir = root / 'php' / 'eventos'
 text = js_file.read_text(encoding='utf-8')
