@@ -1,0 +1,20 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^php -l php/index\\.php ; php -l php/conexion\\.php ; php -l php/login\\.php ; php -l php/registrarse\\.php ; php -l php/eventos\\.php ; php -l php/todos-eventos\\.php ; php -l php/turismo\\.php ; php -l php/lugares\\.php ; php -l php/soporte\\.php ; php -l php/configuracion\\.php$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^where\\.exe php; if \\(Test-Path \"C:\\\\xampp\\\\php\\\\php\\.exe\"\\) \\{ Write-Host \"XAMPP PHP at C:\\\\xampp\\\\php\\\\php\\.exe\" \\} elseif \\(Test-Path \"C:\\\\wamp64\\\\bin\\\\php\\\\php\\*\\.exe\"\\) \\{ Get-ChildItem \"C:\\\\wamp64\\\\bin\\\\php\" -Filter php\\*\\.exe -Name \\} elseif \\(Test-Path \"C:\\\\Program Files\\\\php\\\\php\\.exe\"\\) \\{ Write-Host \"PHP at C:\\\\Program Files\\\\php\\\\php\\.exe\" \\}$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd /d c:\\\\Users\\\\Aaron\\\\Downloads\\\\proyectosigturbapst-main\\(3\\)-20260805T195532Z-1-001\\\\proyectosigturbapst-main\\(3\\)\\\\proyectosigturbapst-main && python - <<'PY'\nfrom pathlib import Path\nfolder = Path\\('php/eventos'\\)\nfor path in folder\\.glob\\('\\*\\.php'\\):\n    text = path\\.read_text\\(encoding='utf-8'\\)\n    if \"<\\?php // include\\('\\.\\./nav\\.php'\\); \\?>\" in text:\n        text = text\\.replace\\(\"<\\?php // include\\('\\.\\./nav\\.php'\\); \\?>\", \"<\\?php\\\\n\\$navBase = '\\.\\./';\\\\n\\$activePage = 'eventos';\\\\ninclude __DIR__ \\. '/\\.\\./nav\\.php';\\\\n\\?>\", 1\\)\n        text = text\\.replace\\('<link rel=\"stylesheet\" href=\"\\.\\./\\.\\./css/detalle-evento\\.css\">', '<link rel=\"stylesheet\" href=\"\\.\\./\\.\\./css/estilos\\.css\">\\\\n    <link rel=\"stylesheet\" href=\"\\.\\./\\.\\./css/detalle-evento\\.css\">', 1\\)\n        path\\.write_text\\(text, encoding='utf-8'\\)\n        print\\(path\\.name\\)\nPY$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^php -l php/nav\\.php; php -l php/turismo\\.php; php -l php/lugares\\.php; php -l php/gastronomia\\.php; php -l php/eventos\\.php; php -l index\\.php$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

@@ -1,0 +1,84 @@
+*{box-sizing:border-box}
+body{margin:0;font-family:'Instrument Sans',sans-serif;background:#FAFAF7;color:#1A1A24;font-weight:400;letter-spacing:-0.01em}
+
+.detalle-hero{
+  min-height:100vh;
+  width:100vw;
+  margin-left:calc(50% - 50vw);
+  position:relative;
+  background-size:cover;
+  background-position:center;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:3.5rem 4rem;
+}
+
+.overlay{
+  position:absolute;inset:0;
+  background: linear-gradient(90deg, rgba(10,10,10,0.62) 10%, rgba(10,10,10,0.34) 40%, rgba(10,10,10,0.1) 100%);
+}
+
+.detalle-contenido{
+  position:relative;z-index:2;max-width:1020px;color:#fff;padding-bottom:4rem;
+}
+
+.meta-tags{color:rgba(255,255,255,0.82);font-size:1.05rem;font-weight:500;line-height:1.5;margin-bottom:1.15rem}
+.detalle-titulo{font-size:clamp(2.8rem,6vw,5.8rem);margin:0 0 1.15rem;font-weight:600;line-height:1.05;letter-spacing:-0.02em;color:#fff}
+.detalle-descripcion{max-width:720px;color:rgba(255,255,255,0.9);line-height:1.7;font-size:1.18rem;margin-bottom:1.75rem}
+
+.detalle-acciones{display:flex;flex-wrap:wrap;gap:.75rem}
+.btn{padding:.75rem 1.15rem;border-radius:999px;font:inherit;font-weight:600;line-height:1.3;letter-spacing:0;cursor:pointer;border:1px solid rgba(255,255,255,0.78);background:rgba(255,255,255,.08);color:#fff;transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.btn:hover{background:rgba(255,255,255,.18);border-color:#fff;transform:translateY(-1px)}
+.btn-outline{background:transparent}
+.btn-primary{background:linear-gradient(90deg,#FF6A3D,#FFD86A);border:none;color:#111}
+.btn-salir-evento{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+
+.detalle-comentarios {
+  padding: 3rem 4rem 5rem;
+  background: #f4f1eb;
+}
+
+.detalle-comentarios__contenido {
+  width: min(100%, 900px);
+  margin: 0 auto;
+}
+
+.detalle-comentarios h2 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 600;
+  color: #1a1a24;
+}
+
+.detalle-comentarios .card-engagement {
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-radius: 14px;
+  background: #fff;
+}
+
+body[data-tema="oscuro"] .detalle-comentarios {
+  background: #151210;
+}
+
+body[data-tema="oscuro"] .detalle-comentarios h2 {
+  color: #f6ead8;
+}
+
+
+/* Responsive */
+@media (max-width:900px){
+  .detalle-hero{padding:2rem 1.5rem}
+  .detalle-descripcion{max-width:100%;font-size:1.08rem}
+  .detalle-acciones{flex-wrap:wrap}
+  .btn{flex:1 1 180px;text-align:center}
+  .detalle-comentarios{padding:2rem 1.25rem 4rem}
+}
+
+@media (max-width:480px){
+  .detalle-hero{padding:1.25rem}
+  .detalle-titulo{font-size:2.35rem}
+  .detalle-descripcion{font-size:1rem}
+}
