@@ -11,7 +11,7 @@ const isEventos = !!document.querySelector("main.pagina-eventos"); // pagina de 
 const isTurismo = !!document.querySelector("main.pagina-turismo"); // pagina de turismo
 const isLugares = !!document.querySelector("main.pagina-lugares"); // pagina de lugares
 
-const infoButton = document.querySelector('.info-btn'); // boton info en el index
+const infoButton = document.querySelector('.footer-info-button'); // boton info en el footer
 const infoPanel = document.querySelector('.info-panel'); // panel info en el index
 const bottomNavUsuario = document.querySelector('.bottom-nav-item[href$="login.html"]'); // boton usuario en menu inferior
 
@@ -964,12 +964,6 @@ const aplicarTema = (oscuro, botonModoOscuro) => {
         setStyle(feature, 'color', oscuro ? '#ffffff' : '');
     });
 
-    const iconoPerfil = document.querySelector('.perfil-btn img');
-    if (iconoPerfil) {
-        const rutaIcono = 'img/userb.png';
-        iconoPerfil.setAttribute('src', rutaIcono);
-    }
-
     if (menu) {
         setStyle(menu, 'backgroundColor', oscuro ? 'rgba(0, 0, 0, 0.38)' : 'rgba(12, 18, 24, 0.24)');
     }
@@ -1096,12 +1090,7 @@ const activarModalPerfil = () => {
         inputAvatar.addEventListener('change', () => {
             const archivo = inputAvatar.files?.[0];
             if (!archivo) return;
-
-            const lector = new FileReader();
-            lector.onload = () => {
-                preview.src = lector.result;
-            };
-            lector.readAsDataURL(archivo);
+            preview.src = URL.createObjectURL(archivo);
         });
     }
 };

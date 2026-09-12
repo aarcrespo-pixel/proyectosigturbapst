@@ -1,6 +1,10 @@
 (function () {
     const STORAGE_KEY = 'sigtur-card-engagement';
     const USER_STORAGE_KEY = 'sigtur-usuario';
+    const projectPhpPath = window.location.pathname.includes('/php/')
+        ? `${window.location.pathname.split('/php/')[0]}/php/`
+        : 'php/';
+    const COMMENTS_API_URL = `${projectPhpPath}comentarios.php`;
     const cardSelectors = '.tarjeta, .evento-card, .anteriores-card, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria, .tarjeta-destino, .tarjeta-ruta, .gallery-engagement-card';
     const commentsDisabled = document.querySelector('main.pagina-turismo, main.pagina-lugares');
 
@@ -33,6 +37,10 @@
 
     function getCurrentUserName() {
         return localStorage.getItem(USER_STORAGE_KEY)?.trim() || 'Usuario SIGTUR';
+    }
+
+    function getCommentAvatar(comment) {
+        return comment.avatar_url || '../img/user.png';
     }
 
     function readState(key) {
@@ -99,8 +107,7 @@
         container.innerHTML = visibleComments
             .map(({ comment, index }) => `
                 <li class="card-engagement__comment-item">
-                    <img class="card-engagement__comment-avatar avatar-claro" src="/img/userb.png" alt="">
-                    <img class="card-engagement__comment-avatar avatar-oscuro" src="/img/user.png" alt="">
+                    <img class="card-engagement__comment-avatar" src="${escapeHtml(getCommentAvatar(comment))}" alt="Avatar de ${escapeHtml(comment.name)}">
                     <div class="card-engagement__comment-body">
                         <strong class="card-engagement__comment-name">${escapeHtml(comment.name)}</strong>
                         <span>${escapeHtml(comment.text)}</span>
@@ -127,7 +134,9 @@
         const state = readState(key);
         const likeOnly = card.dataset.engagement === 'like-only';
         const commentsOnly = card.dataset.engagement === 'comments-only';
-        let commentsExpanded = false;
+        let commentsOffset = 0;
+        let commentsHasMore = true;
+        let commentsLoading = false;
 
         const wrapper = document.createElement('div');
         wrapper.className = 'card-engagement';
@@ -138,11 +147,9 @@
             </button>
             <div class="card-engagement__panel" hidden>
                 <ul class="card-engagement__comments"></ul>
-                <div class="card-engagement__more">
-                    <button type="button" class="card-engagement__show-more" hidden>Ver más</button>
-                </div>
+                <p class="card-engagement__loading" hidden>Cargando comentarios...</p>
                 <form class="card-engagement__form">
-                    <textarea class="card-engagement__textarea" rows="2" maxlength="140" placeholder="Escribe un comentario..."></textarea>
+                    <textarea class="card-engagement__textarea" rows="1" maxlength="140" placeholder="Escribe un comentario..."></textarea>
                     <button type="submit" class="card-engagement__submit">Comentar</button>
                 </form>
             </div>`;
@@ -161,7 +168,7 @@
         const commentButton = wrapper.querySelector('[data-action="comment"]');
         const panel = wrapper.querySelector('.card-engagement__panel');
         const commentsList = wrapper.querySelector('.card-engagement__comments');
-        const showMoreButton = wrapper.querySelector('.card-engagement__show-more');
+        const commentsLoadingLabel = wrapper.querySelector('.card-engagement__loading');
         const form = wrapper.querySelector('.card-engagement__form');
         const textarea = wrapper.querySelector('.card-engagement__textarea');
 
@@ -184,16 +191,38 @@
                 commentButton.setAttribute('aria-expanded', String(!panel.hidden));
             }
 
-            renderComments(comments, commentsList, commentsExpanded);
+            const scrollTop = commentsList?.scrollTop || 0;
+            renderComments(comments, commentsList, true);
+            if (commentsList) commentsList.scrollTop = scrollTop;
+        };
 
-            if (showMoreButton) {
-                if (comments.length > 1) {
-                    showMoreButton.hidden = false;
-                    showMoreButton.textContent = commentsExpanded ? 'Ver menos' : `Ver más (${comments.length - 1})`;
-                } else {
-                    showMoreButton.hidden = true;
-                    commentsExpanded = false;
-                }
+        const applyCommentsPage = (data, reset) => {
+            const currentState = readState(key);
+            const nuevosComentarios = Array.isArray(data.comments) ? data.comments : [];
+            currentState.comments = reset
+                ? nuevosComentarios
+                : [...currentState.comments, ...nuevosComentarios];
+            commentsOffset = reset ? nuevosComentarios.length : commentsOffset + nuevosComentarios.length;
+            commentsHasMore = data.has_more === true;
+            writeState(key, currentState);
+            updateView();
+        };
+
+        const loadComments = async (reset = false) => {
+            if (commentsLoading || (!reset && !commentsHasMore)) return;
+            commentsLoading = true;
+            if (commentsLoadingLabel) commentsLoadingLabel.hidden = false;
+
+            try {
+                const offset = reset ? 0 : commentsOffset;
+                const response = await fetch(`${COMMENTS_API_URL}?item_key=${encodeURIComponent(key)}&limit=10&offset=${offset}`);
+                if (!response.ok) throw new Error('No se pudieron cargar los comentarios');
+                applyCommentsPage(await response.json(), reset);
+            } catch (error) {
+                // Mantener la vista local si el endpoint no está disponible.
+            } finally {
+                commentsLoading = false;
+                if (commentsLoadingLabel) commentsLoadingLabel.hidden = true;
             }
         };
 
@@ -217,11 +246,9 @@
             updateView();
         });
 
-        showMoreButton?.addEventListener('click', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            commentsExpanded = !commentsExpanded;
-            updateView();
+        commentsList?.addEventListener('scroll', () => {
+            const cercaDelFinal = commentsList.scrollTop + commentsList.clientHeight >= commentsList.scrollHeight - 20;
+            if (cercaDelFinal) loadComments();
         });
 
         commentsList?.addEventListener('click', (event) => {
@@ -245,9 +272,6 @@
             const currentState = readState(key);
             currentState.comments = currentState.comments.filter((_, i) => i !== index);
             writeState(key, currentState);
-            if (currentState.comments.length <= 1) {
-                commentsExpanded = false;
-            }
             updateView();
         });
 
@@ -267,25 +291,31 @@
             updateView();
         });
 
-        form?.addEventListener('submit', (event) => {
+        form?.addEventListener('submit', async (event) => {
             event.preventDefault();
             event.stopPropagation();
             const text = textarea?.value?.trim();
             if (!text) return;
-            const currentState = readState(key);
-            currentState.comments = [...(currentState.comments || []), {
-                name: getCurrentUserName(),
-                text,
-                likes: 0,
-                replies: []
-            }];
-            writeState(key, currentState);
-            textarea.value = '';
-            commentsExpanded = false;
-            updateView();
+            const datos = new URLSearchParams({ item_key: key, texto: text });
+
+            try {
+                const response = await fetch(COMMENTS_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                    body: datos
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'No se pudo publicar el comentario');
+
+                applyCommentsPage(data, true);
+                textarea.value = '';
+            } catch (error) {
+                window.alert(error.message);
+            }
         });
 
         updateView();
+        loadComments(true);
     }
 
     function initInteractiveCards(root = document) {

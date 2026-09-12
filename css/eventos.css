@@ -1012,13 +1012,14 @@ body[data-tema="oscuro"] .detalles-tarjeta h3 {
 
 .lightbox-content {
     position: relative;
-    width: min(96vw, 1400px);
-    max-height: calc(100vh - 6rem);
+    width: min(96vw, 1200px);
+    height: 85vh;
+    max-height: 85vh;
     padding: 2rem 1rem;
     z-index: 1;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
-    align-items: center;
+    grid-template-columns: minmax(0, 1.6fr) minmax(380px, 420px);
+    align-items: stretch;
     gap: 1rem;
     background: #111;
     border-radius: 18px;
@@ -1084,20 +1085,97 @@ body[data-tema="oscuro"] .detalles-tarjeta h3 {
 }
 
 .lightbox-comments {
+    display: flex;
+    flex-direction: column;
     align-self: stretch;
     min-width: 0;
-    overflow-y: auto;
+    min-height: 0;
+    overflow: hidden;
     background: #fff;
     border-radius: 14px;
 }
 
 .gallery-engagement-card {
+    display: flex;
+    flex: 1;
+    min-height: 0;
     padding: 0 1rem 1rem;
 }
 
 .gallery-engagement-card .card-engagement {
+    display: flex;
+    flex: 1;
+    min-height: 0;
     margin-top: 0;
+    padding-top: 0.55rem;
     border-top: 0;
+}
+
+.lightbox-comments .card-engagement__panel {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+}
+
+.lightbox-comments .card-engagement__comments {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    padding-right: 0.35rem;
+}
+
+.lightbox-comments .card-engagement__form {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+.lightbox-comments .card-engagement__textarea {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    min-height: 38px;
+    max-height: 38px;
+    resize: none;
+    padding: 0.5rem 0.7rem;
+    border-radius: 10px;
+}
+
+.lightbox-comments .card-engagement__submit {
+    flex: 0 0 auto;
+    align-self: center;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.gallery-engagement-card .card-engagement__comment-item {
+    padding: 0.45rem 0.55rem;
+    gap: 0.55rem;
+}
+
+.gallery-engagement-card .card-engagement__comment-avatar {
+    width: 1.8rem;
+    height: 1.8rem;
+}
+
+.gallery-engagement-card .card-engagement__comment-body {
+    font-size: 0.9rem;
+}
+
+.gallery-engagement-card .card-engagement__comment-actions {
+    gap: 0.35rem;
+}
+
+.gallery-engagement-card .card-engagement__reply-form {
+    margin-top: 0.35rem;
+}
+
+.gallery-engagement-card .card-engagement__replies {
+    margin-top: 0.35rem;
 }
 
 body[data-tema="oscuro"] .lightbox-comments {

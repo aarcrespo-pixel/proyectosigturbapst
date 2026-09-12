@@ -3,7 +3,11 @@ $scriptPath = ltrim($_SERVER['PHP_SELF'] ?? '', '/');
 $scriptDir = dirname($scriptPath);
 $segments = array_values(array_filter(explode('/', $scriptDir), fn($segment) => $segment !== ''));
 
-$rootBase = str_repeat('../', count($segments));
+$documentRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+$projectRoot = str_replace('\\', '/', dirname(__DIR__));
+$projectWebPath = $documentRoot !== '' ? trim(str_ireplace($documentRoot, '', $projectRoot), '/') : '';
+$projectSegments = $projectWebPath === '' ? [] : array_values(array_filter(explode('/', $projectWebPath), fn($segment) => $segment !== ''));
+$rootBase = str_repeat('../', max(0, count($segments) - count($projectSegments)));
 $phpBase = $segments[0] === 'php'
     ? str_repeat('../', max(0, count($segments) - 1))
     : '';
@@ -17,7 +21,7 @@ $activePage = $activePage ?? '';
     </button>
     <nav class="menu">
         <a href="<?= $rootBase ?>index.php" class="logo-link">
-            <img src="../img/logoblanco.png" class="logo-menu" alt="SIGTUR">
+            <img src="<?= $rootBase ?>img/logoblanco.png" class="logo-menu" alt="SIGTUR">
         </a>
         <a href="<?= $navBase ?>eventos.php" class="<?= $activePage === 'eventos' ? 'pagina-activa' : '' ?>" data-i18n="navEvents">Eventos</a>
         <a href="<?= $navBase ?>turismo.php" data-i18n="navTourism">Turismo</a>
@@ -31,9 +35,10 @@ $activePage = $activePage ?? '';
     $usuarioEmailActual = $_SESSION['usuario_email'] ?? '';
     $usuarioNicknameActual = $_SESSION['usuario_nickname'] ?? (!empty($usuarioEmailActual) ? strtolower(strstr($usuarioEmailActual, '@', true) ?: $usuarioEmailActual) : 'usuario');
     $usuarioAvatarActual = $_SESSION['usuario_avatar'] ?? 'default-avatar.png';
-    $avatarActualRuta = (!empty($usuarioAvatarActual) && $usuarioAvatarActual !== 'default-avatar.png' && file_exists(__DIR__ . '/../uploads/avatars/' . basename($usuarioAvatarActual)))
-        ? '../uploads/avatars/' . basename($usuarioAvatarActual)
-        : '../img/user.png';
+    $avatarFilename = basename($usuarioAvatarActual);
+    $avatarActualRuta = (!empty($usuarioAvatarActual) && $usuarioAvatarActual !== 'default-avatar.png' && $usuarioAvatarActual !== 'user-default.png' && file_exists(__DIR__ . '/../uploads/avatars/' . $avatarFilename))
+        ? $rootBase . 'uploads/avatars/' . $avatarFilename
+        : $rootBase . 'img/user.png';
     $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
     ?>
     <div class="perfil">
@@ -59,7 +64,7 @@ $activePage = $activePage ?? '';
                 <a class="perfil-item perfil-item-logout" href="<?= $navBase ?>cerrar-sesion.php" data-i18n="navLogout">Cerrar Sesión</a>
             <?php else: ?>
                 <div class="perfil-user-header">
-                    <img class="perfil-user-avatar" src="../img/user.png" alt="Avatar invitado">
+                    <img class="perfil-user-avatar" src="<?= htmlspecialchars($rootBase . 'img/user.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar invitado">
                     <div class="perfil-user-meta">
                         <strong>Invitado</strong>
                         <span class="perfil-nickname">@visitante</span>
@@ -124,7 +129,7 @@ $activePage = $activePage ?? '';
 
 <nav class="bottom-nav" aria-label="Navegación inferior">
     <a href="<?= $rootBase ?>index.php" class="bottom-nav-item">
-        <img src="../img/logoazul.png" class="bottom-nav-icon" alt="Inicio" data-i18n-alt="navHome">
+        <img src="<?= $rootBase ?>img/logoazul.png" class="bottom-nav-icon" alt="Inicio" data-i18n-alt="navHome">
         <span class="bottom-nav-label" data-i18n="navHome">Inicio</span>
     </a>
     <a href="<?= $navBase ?>eventos.php" class="bottom-nav-item <?= $activePage === 'eventos' ? 'active' : '' ?>">

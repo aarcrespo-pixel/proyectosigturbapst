@@ -93,9 +93,29 @@ body[data-tema="oscuro"] {
     display: flex;
     flex-direction: column;
     gap: 0.55rem;
-    max-height: 10rem;
+    max-height: 280px;
     overflow-y: auto;
     padding-right: 0.2rem;
+}
+
+.card-engagement__comments::-webkit-scrollbar {
+    width: 4px;
+}
+
+.card-engagement__comments::-webkit-scrollbar-thumb {
+    background: rgba(24, 50, 74, 0.35);
+    border-radius: 999px;
+}
+
+.card-engagement__comments::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.card-engagement__loading {
+    margin: 0;
+    color: rgba(24, 50, 74, 0.65);
+    font-size: 0.82rem;
+    text-align: center;
 }
 
 .card-engagement__comment-item {
@@ -209,21 +229,6 @@ body:not([data-tema="oscuro"]) .card-engagement__comment-avatar.avatar-oscuro {
     padding: 0.35rem 0.55rem;
     border-radius: 999px;
     cursor: pointer;
-}
-
-.card-engagement__more {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.card-engagement__show-more {
-    border: none;
-    background: transparent;
-    color: #0071e3;
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 0.25rem 0.35rem;
-    font-size: 0.9rem;
 }
 
 .card-engagement__form {

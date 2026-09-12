@@ -4,7 +4,10 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 if (!defined('BASE_URL')) {
-    define('BASE_URL', '/');
+    $documentRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+    $projectRoot = str_replace('\\', '/', dirname(__DIR__));
+    $projectBasePath = $documentRoot !== '' ? str_ireplace($documentRoot, '', $projectRoot) : '';
+    define('BASE_URL', rtrim($projectBasePath, '/') . '/');
 }
 
 $headerPageBase = $_SERVER['PHP_SELF'] ?? '';
@@ -14,12 +17,13 @@ $headerUserEmail = $_SESSION['usuario_email'] ?? '';
 $headerUserNickname = $_SESSION['usuario_nickname'] ?? (!empty($headerUserEmail) ? strtolower(strstr($headerUserEmail, '@', true) ?: $headerUserEmail) : 'usuario');
 $headerUserAvatar = $_SESSION['usuario_avatar'] ?? 'user-default.png';
 
-$headerAvatarRoute = BASE_URL . 'img/user.png';
-if (!empty($headerUserAvatar) && $headerUserAvatar !== 'user-default.png') {
+$headerAssetPrefix = basename(dirname($headerPageBase)) === 'php' ? '../' : '';
+$headerAvatarRoute = $headerAssetPrefix . 'img/user.png';
+if (!empty($headerUserAvatar) && $headerUserAvatar !== 'user.png' && $headerUserAvatar !== 'user-default.png') {
     $avatarFilename = basename($headerUserAvatar);
-    $avatarAbsolutePath = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', DIRECTORY_SEPARATOR) . '/uploads/avatars/' . $avatarFilename;
+    $avatarAbsolutePath = __DIR__ . '/../uploads/avatars/' . $avatarFilename;
     if (file_exists($avatarAbsolutePath)) {
-        $headerAvatarRoute = BASE_URL . 'uploads/avatars/' . $avatarFilename;
+        $headerAvatarRoute = $headerAssetPrefix . 'uploads/avatars/' . $avatarFilename;
     }
 }
 
@@ -58,7 +62,7 @@ $headerLinks = [
 
     <div class="perfil">
         <button class="perfil-btn" aria-label="Abrir perfil" data-i18n-aria-label="navProfile">
-            <img src="<?php echo htmlspecialchars($headerAvatarRoute, ENT_QUOTES, 'UTF-8'); ?>" alt="Perfil" data-i18n-alt="navProfile">
+            <img src="<?php echo htmlspecialchars($headerAvatarRoute, ENT_QUOTES, 'UTF-8'); ?>" alt="Perfil">
         </button>
 
         <div class="perfil-menu">
@@ -71,7 +75,7 @@ $headerLinks = [
                         <span class="perfil-email"><?php echo htmlspecialchars($headerUserEmail, ENT_QUOTES, 'UTF-8'); ?></span>
                     </div>
                 </div>
-                <a class="perfil-item" href="#" data-open-profile-modal>Personalizar Perfil</a>
+                <a class="perfil-item" href="<?= BASE_URL ?>php/personalizar-perfil.php" data-open-profile-modal>Personalizar Perfil</a>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/eventos.php">Mis Eventos / Favoritos</a>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/configuracion.php" data-i18n="navSettings">Configuración</a>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/soporte.php" data-i18n="navSupport">Soporte</a>
@@ -79,7 +83,7 @@ $headerLinks = [
                 <a class="perfil-item perfil-item-logout" href="<?= BASE_URL ?>php/cerrar-sesion.php" data-i18n="navLogout">Cerrar Sesión</a>
             <?php else: ?>
                 <div class="perfil-user-header">
-                    <img class="perfil-user-avatar" src="<?= BASE_URL ?>img/user.png" alt="Avatar invitado">
+                    <img class="perfil-user-avatar" src="<?php echo htmlspecialchars($headerAssetPrefix . 'img/user.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar invitado">
                     <div class="perfil-user-meta">
                         <strong>Invitado</strong>
                         <span class="perfil-nickname">@visitante</span>

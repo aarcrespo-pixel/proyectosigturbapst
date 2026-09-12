@@ -65,8 +65,6 @@ session_start();
         <p class="texto-deslizar" data-i18n="homeScroll">
             Desliza para ver más
         </p>
-        <!-- Botón de información -->
-        <button class="info-btn" type="button" aria-expanded="false" data-i18n="homeInfoButton">Información</button>
         <!-- Panel con información sobre SIGTUR -->
         <div class="info-panel" id="info-panel">
             <h3 data-i18n="homeInfoTitle">¿Qué es SIGTUR?</h3>
@@ -332,6 +330,7 @@ session_start();
                     <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
                         <span class="social-icon">FB</span>Facebook
                     </a>
+                    <button class="footer-bapst-button footer-info-button" type="button" aria-expanded="false" data-i18n="homeInfoButton">Información</button>
                 </div>
             </div>
         </div>

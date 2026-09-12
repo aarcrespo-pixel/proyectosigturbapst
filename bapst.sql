@@ -20,4 +20,16 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   UNIQUE KEY `uniq_cedula` (`cedula`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `comentarios` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_key` varchar(255) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `texto` varchar(140) NOT NULL,
+  `fecha_creacion` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_comentarios_item` (`item_key`),
+  KEY `idx_comentarios_usuario` (`usuario_id`),
+  CONSTRAINT `fk_comentarios_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 COMMIT;

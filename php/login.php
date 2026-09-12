@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['usuario_nombre'] = $usuario['nombre_completo'];
             $_SESSION['usuario_email'] = $usuario['email'];
             $_SESSION['usuario_avatar'] = !empty($usuario['avatar']) ? $usuario['avatar'] : 'default-avatar.png';
+            $_SESSION['usuario_banner'] = !empty($usuario['banner']) ? $usuario['banner'] : 'default-banner.png';
             $_SESSION['usuario_nickname'] = !empty($usuario['nickname']) ? $usuario['nickname'] : strtolower(str_replace(' ', '', $usuario['nombre_completo']));
             $_SESSION['usuario_biografia'] = $usuario['biografia'] ?? '';
             $_SESSION['usuario_ubicacion'] = $usuario['ubicacion'] ?? '';
