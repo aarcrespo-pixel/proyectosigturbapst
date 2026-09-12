@@ -2,10 +2,12 @@
 body{margin:0;font-family:'Instrument Sans',sans-serif;background:#FAFAF7;color:#1A1A24;font-weight:400;letter-spacing:-0.01em}
 
 .detalle-hero{
-  min-height:100vh;
+  min-height:100svh;
+  height:100svh;
   width:100vw;
   margin-left:calc(50% - 50vw);
   position:relative;
+  overflow:hidden;
   background-size:cover;
   background-position:center;
   display:flex;
@@ -15,8 +17,11 @@ body{margin:0;font-family:'Instrument Sans',sans-serif;background:#FAFAF7;color:
 }
 
 .overlay{
-  position:absolute;inset:0;
-  background: linear-gradient(90deg, rgba(10,10,10,0.62) 10%, rgba(10,10,10,0.34) 40%, rgba(10,10,10,0.1) 100%);
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.48) 45%, rgba(0,0,0,0.88) 100%);
 }
 
 .detalle-contenido{

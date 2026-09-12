@@ -76,7 +76,7 @@ $headerLinks = [
                     </div>
                 </div>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/personalizar-perfil.php" data-open-profile-modal>Personalizar Perfil</a>
-                <a class="perfil-item" href="<?= BASE_URL ?>php/eventos.php">Mis Eventos / Favoritos</a>
+                <a class="perfil-item" href="<?= BASE_URL ?>php/mis-eventos.php">Mis Eventos / Favoritos</a>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/configuracion.php" data-i18n="navSettings">Configuración</a>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/soporte.php" data-i18n="navSupport">Soporte</a>
                 <div class="perfil-divider"></div>

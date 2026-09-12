@@ -14,23 +14,24 @@ require_once __DIR__ . '/conexion.php';
 
 /**
  * Procesa la subida de un archivo de imagen con logging detallado
- * 
+ *
  * @param string $fileKey Clave del archivo en $_FILES
  * @param string $type Tipo de archivo ('avatar' o 'banner')
  * @param int $userId ID del usuario
  * @param string $sessionKey Clave de sesión actual
  * @return string Nombre del archivo guardado o valor anterior
  */
-function processImageUpload($fileKey, $type, $userId, $sessionKey) {
+function processImageUpload($fileKey, $type, $userId, $sessionKey)
+{
     // Directorio según tipo
     $uploadDirs = [
         'avatar' => __DIR__ . '/../uploads/avatars/',
         'banner' => __DIR__ . '/../uploads/banners/',
     ];
-    
+
     $dirUpload = $uploadDirs[$type] ?? null;
     error_log("[{$type}] Directorio configurado: {$dirUpload}");
-    
+
     if (!$dirUpload) {
         error_log("[{$type}] ERROR: Tipo de archivo inválido");
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
@@ -76,7 +77,7 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey) {
     $nombreOriginal = basename($file['name']);
     $extension = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
     $permitidas = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-    
+
     if (!in_array($extension, $permitidas, true)) {
         error_log("[{$type}] ERROR: Extensión no permitida '{$extension}'. Permitidas: " . implode(', ', $permitidas));
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
@@ -86,7 +87,7 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey) {
     // ===== CREAR DIRECTORIO SI NO EXISTE =====
     if (!is_dir($dirUpload)) {
         error_log("[{$type}] Directorio no existe: {$dirUpload}");
-        
+
         if (!@mkdir($dirUpload, 0755, true)) {
             error_log("[{$type}] ERROR: No se pudo crear directorio");
             return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
@@ -131,16 +132,16 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey) {
         error_log("[{$type}] ERROR: Archivo no encontrado después de move_uploaded_file");
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
     }
-    
+
     $tamaño = filesize($rutaDestino);
     error_log("[{$type}] ✓ Archivo verificado. Tamaño: {$tamaño} bytes");
 
     // ===== ELIMINAR ARCHIVO ANTERIOR =====
     $archivoAnterior = $_SESSION[$sessionKey] ?? 'default-' . $type . '.png';
-    
+
     if (!empty($archivoAnterior) && strpos($archivoAnterior, 'default-') === false) {
         $rutaAnterior = $dirUpload . basename($archivoAnterior);
-        
+
         if (file_exists($rutaAnterior)) {
             error_log("[{$type}] Eliminando archivo anterior: {$archivoAnterior}");
             if (@unlink($rutaAnterior)) {
@@ -162,12 +163,12 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey) {
 // ========================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = (int) $_SESSION['usuario_id'];
-    
+
     // LOGGING: Inicio de procesamiento
     error_log("=== INICIO PROCESAMIENTO POST - Usuario: {$userId} ===");
     error_log("_FILES: " . json_encode(array_keys($_FILES)));
     error_log("_POST keys: " . json_encode(array_keys($_POST)));
-    
+
     // Validar y limpiar datos de texto
     $nombre = trim($_POST['nombre'] ?? '');
     $nickname = trim($_POST['nickname'] ?? '');
@@ -201,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     error_log("Procesando avatar...");
     $avatarNombre = processImageUpload('avatar', 'avatar', $userId, 'usuario_avatar');
     error_log("Avatar resultante: {$avatarNombre}");
-    
+
     error_log("Procesando banner...");
     $bannerNombre = processImageUpload('banner', 'banner', $userId, 'usuario_banner');
     error_log("Banner resultante: {$bannerNombre}");
@@ -216,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Actualizar base de datos
     try {
         error_log("Preparando UPDATE SQL...");
-        
+
         $stmt = $pdo->prepare(
             'UPDATE usuarios SET
                 nombre_completo = :nombre,
@@ -286,7 +287,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 try {
     $userId = (int) $_SESSION['usuario_id'];
     error_log("=== CARGANDO PERFIL - Usuario ID: {$userId} ===");
-    
+
     $stmt = $pdo->prepare('SELECT nombre_completo, nickname, biografia, ubicacion, sitio_web, avatar, banner FROM usuarios WHERE id = :id');
     $stmt->execute([':id' => $userId]);
     $usuario = $stmt->fetch();
@@ -295,14 +296,14 @@ try {
         error_log("ERROR: Usuario no encontrado en BD");
         die("Error: Usuario no encontrado.");
     }
-    
+
     error_log("✓ Usuario cargado. Datos: " . json_encode([
         'nombre_completo' => $usuario['nombre_completo'] ?? 'NULL',
         'avatar' => $usuario['avatar'] ?? 'NULL',
         'banner' => $usuario['banner'] ?? 'NULL',
         'nickname' => $usuario['nickname'] ?? 'NULL',
     ]));
-    
+
 } catch (PDOException $e) {
     error_log("ERROR PDO al cargar usuario: " . $e->getMessage());
     die("Error al cargar datos del usuario.");

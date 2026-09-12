@@ -1,4 +1,5 @@
 <?php
+
 $host = '127.0.0.1';
 $dbname = 'bapst';
 $dbUser = 'root';
@@ -70,4 +71,3 @@ try {
     http_response_code(503);
     exit('No se pudo conectar a la base de datos.');
 }
-?>

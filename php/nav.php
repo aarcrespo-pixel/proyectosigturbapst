@@ -1,12 +1,12 @@
 <?php
 $scriptPath = ltrim($_SERVER['PHP_SELF'] ?? '', '/');
 $scriptDir = dirname($scriptPath);
-$segments = array_values(array_filter(explode('/', $scriptDir), fn($segment) => $segment !== ''));
+$segments = array_values(array_filter(explode('/', $scriptDir), fn ($segment) => $segment !== ''));
 
 $documentRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
 $projectRoot = str_replace('\\', '/', dirname(__DIR__));
 $projectWebPath = $documentRoot !== '' ? trim(str_ireplace($documentRoot, '', $projectRoot), '/') : '';
-$projectSegments = $projectWebPath === '' ? [] : array_values(array_filter(explode('/', $projectWebPath), fn($segment) => $segment !== ''));
+$projectSegments = $projectWebPath === '' ? [] : array_values(array_filter(explode('/', $projectWebPath), fn ($segment) => $segment !== ''));
 $rootBase = str_repeat('../', max(0, count($segments) - count($projectSegments)));
 $phpBase = $segments[0] === 'php'
     ? str_repeat('../', max(0, count($segments) - 1))
@@ -30,17 +30,19 @@ $activePage = $activePage ?? '';
     </nav>
 
     <?php
-    session_start();
-    $usuarioActual = $_SESSION['usuario_nombre'] ?? 'Usuario';
-    $usuarioEmailActual = $_SESSION['usuario_email'] ?? '';
-    $usuarioNicknameActual = $_SESSION['usuario_nickname'] ?? (!empty($usuarioEmailActual) ? strtolower(strstr($usuarioEmailActual, '@', true) ?: $usuarioEmailActual) : 'usuario');
-    $usuarioAvatarActual = $_SESSION['usuario_avatar'] ?? 'default-avatar.png';
-    $avatarFilename = basename($usuarioAvatarActual);
-    $avatarActualRuta = (!empty($usuarioAvatarActual) && $usuarioAvatarActual !== 'default-avatar.png' && $usuarioAvatarActual !== 'user-default.png' && file_exists(__DIR__ . '/../uploads/avatars/' . $avatarFilename))
-        ? $rootBase . 'uploads/avatars/' . $avatarFilename
-        : $rootBase . 'img/user.png';
-    $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
-    ?>
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+$usuarioActual = $_SESSION['usuario_nombre'] ?? 'Usuario';
+$usuarioEmailActual = $_SESSION['usuario_email'] ?? '';
+$usuarioNicknameActual = $_SESSION['usuario_nickname'] ?? (!empty($usuarioEmailActual) ? strtolower(strstr($usuarioEmailActual, '@', true) ?: $usuarioEmailActual) : 'usuario');
+$usuarioAvatarActual = $_SESSION['usuario_avatar'] ?? 'default-avatar.png';
+$avatarFilename = basename($usuarioAvatarActual);
+$avatarActualRuta = (!empty($usuarioAvatarActual) && $usuarioAvatarActual !== 'default-avatar.png' && $usuarioAvatarActual !== 'user-default.png' && file_exists(__DIR__ . '/../uploads/avatars/' . $avatarFilename))
+    ? $rootBase . 'uploads/avatars/' . $avatarFilename
+    : $rootBase . 'img/user.png';
+$usuarioLogueadoActual = isset($_SESSION['usuario_id']);
+?>
     <div class="perfil">
         <button class="perfil-btn" aria-label="Abrir perfil" data-i18n-aria-label="navProfile">
             <img src="<?= htmlspecialchars($avatarActualRuta, ENT_QUOTES, 'UTF-8'); ?>" alt="Perfil" data-i18n-alt="navProfile">
@@ -57,7 +59,7 @@ $activePage = $activePage ?? '';
                     </div>
                 </div>
                 <a class="perfil-item" href="#" data-open-profile-modal>Personalizar Perfil</a>
-                <a class="perfil-item" href="<?= $navBase ?>eventos.php">Mis Eventos / Favoritos</a>
+                <a class="perfil-item" href="<?= $navBase ?>mis-eventos.php">Mis Eventos / Favoritos</a>
                 <a class="perfil-item" href="<?= $navBase ?>configuracion.php" data-i18n="navSettings">Configuración</a>
                 <a class="perfil-item" href="<?= $navBase ?>soporte.php" data-i18n="navSupport">Soporte</a>
                 <div class="perfil-divider"></div>

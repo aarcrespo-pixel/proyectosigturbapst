@@ -29,9 +29,9 @@ session_start();
 
     <?php
     $headerCurrentPage = 'index';
-    $headerActivePage = 'index';
-    include __DIR__ . '/php/header.php';
-    ?>
+$headerActivePage = 'index';
+include __DIR__ . '/php/header.php';
+?>
 
     <nav class="bottom-nav" aria-label="Navegación inferior">
         <a href="index.php" class="bottom-nav-item">
