@@ -10,7 +10,11 @@ if (isset($_SESSION['usuario_id'])) {
 $message = '';
 $messageType = '';
 
+/* El registro concentra validación, comprobación de unicidad e inserción en un
+    único flujo para que una cuenta incompleta nunca llegue a MySQL. */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    /* Normalizamos y validamos todos los campos antes de tocar la base de
+       datos para rechazar entradas incompletas o con formato inválido. */
     $nombreCompleto = trim($_POST['nombre_completo'] ?? '');
     $cedula = trim($_POST['cedula'] ?? '');
     $email = trim(strtolower($_POST['email'] ?? ''));
@@ -35,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = 'El número telefónico no es válido.';
         $messageType = 'error';
     } else {
+        // La consulta parametrizada evita inyección y detecta duplicados antes del INSERT.
         $existe = $pdo->prepare('SELECT id FROM usuarios WHERE email = :email OR cedula = :cedula LIMIT 1');
         $existe->execute([':email' => $email, ':cedula' => $cedula]);
         $usuarioExiste = $existe->fetch();
@@ -43,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = 'Ya existe una cuenta con ese email o cédula.';
             $messageType = 'error';
         } else {
+            // Nunca guardamos la contraseña plana: password_hash genera un hash verificable.
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare('INSERT INTO usuarios (nombre_completo, cedula, email, telefono, password) VALUES (:nombre_completo, :cedula, :email, :telefono, :password)');
             $stmt->execute([
@@ -141,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <p class="register-prompt">
                     ¿Ya tenés una cuenta?
-                    <a href="registrarse.php" class="register-link" data-i18n="loginRegister">Registrate acá</a>
+                    <a href="login.php" class="register-link" data-i18n="loginRegister">Inicia sesión acá</a>
                 </p>
 
                 <a class="google-button" href="https://accounts.google.com/signin/v2/identifier?service=mail" target="_blank" rel="noopener noreferrer">
@@ -152,6 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </section>
     </main>
 
-    <script src="../js/login.js"></script>
+    <script src="../js/script.js" defer></script>
+    <script src="../js/login.js" defer></script>
 </body>
 </html>

@@ -10,6 +10,7 @@ const setMessage = (message, type = 'error') => {
     container.className = `form-message ${type}`;
     container.style.display = 'block';
 };
+        // Centralizamos el feedback para que login y registro compartan el mismo componente visual.
 
 const togglePasswordVisibility = (button) => {
     const targetId = button.dataset.target;
@@ -24,6 +25,8 @@ const togglePasswordVisibility = (button) => {
         icon.textContent = isPassword ? '🙈' : '👁';
     }
 };
+        /* Alternamos el type del input sin modificar el valor: el usuario puede
+           revisar lo escrito y volver al modo protegido en el mismo control. */
 
 document.querySelectorAll('.toggle-password').forEach((button) => {
     button.addEventListener('click', () => togglePasswordVisibility(button));
@@ -40,6 +43,7 @@ loginForm?.addEventListener('submit', function (event) {
 
     this.submit();
 });
+        // Guardamos una referencia local para mostrar el nombre del usuario en interacciones posteriores.
 
 const registerForm = document.getElementById('registroForm');
 const submitButton = document.getElementById('btnAgregar');
@@ -90,3 +94,5 @@ registerForm?.addEventListener('submit', function (event) {
     setMessage('Validando información...', 'success');
     this.submit();
 });
+        /* La validación cliente evita viajes innecesarios al servidor, aunque el PHP
+           repite las reglas porque el navegador nunca es una frontera de seguridad. */

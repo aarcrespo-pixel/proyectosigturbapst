@@ -29,7 +29,7 @@
             </div>
         </section>
 
-        <section class="seccion-gastronomia">
+        <section class="seccion-gastronomia" id="propuestas-gastronomicas">
             <h2>Propuestas para disfrutar</h2>
             <div class="gastronomia-grid">
                 <article class="tarjeta-gastronomia">

@@ -757,6 +757,30 @@ body[data-tema="oscuro"] .detalles-tarjeta h3 {
     background: rgba(255, 255, 255, 0.95);
 }
 
+/* Reseteamos la cascada de las píldoras y tarjetas, que nacen con fondos
+   claros, para conservar borde, texto y foco visibles en el tema oscuro. */
+body.dark-mode .filtro-pill,
+body[data-tema="oscuro"] .filtro-pill,
+[data-theme="dark"] .filtro-pill {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e5e7eb;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+body.dark-mode .filtro-pill.activa,
+body[data-tema="oscuro"] .filtro-pill.activa,
+[data-theme="dark"] .filtro-pill.activa {
+    background: var(--accent-blue, #00a8ff);
+    color: #ffffff;
+}
+
+body.dark-mode .buscador-eventos,
+body[data-tema="oscuro"] .buscador-eventos,
+[data-theme="dark"] .buscador-eventos {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
 .eventos-lista {
     display: grid;
     gap: 1rem;
@@ -778,6 +802,29 @@ body[data-tema="oscuro"] .detalles-tarjeta h3 {
 .evento-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 18px 38px rgba(26, 38, 60, 0.08);
+}
+
+body.dark-mode .evento-card,
+body[data-tema="oscuro"] .evento-card,
+[data-theme="dark"] .evento-card {
+    background-color: var(--bg-card, #1e1e22) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #f9fafb;
+}
+
+body.dark-mode .evento-card-body .categoria,
+body.dark-mode .evento-card-body .lugar,
+body[data-tema="oscuro"] .evento-card-body .categoria,
+body[data-tema="oscuro"] .evento-card-body .lugar,
+[data-theme="dark"] .evento-card-body .categoria,
+[data-theme="dark"] .evento-card-body .lugar {
+    color: #9ca3af;
+}
+
+body.dark-mode .evento-card-body h3,
+body[data-tema="oscuro"] .evento-card-body h3,
+[data-theme="dark"] .evento-card-body h3 {
+    color: #f9fafb;
 }
 
 .evento-card-media {
@@ -843,61 +890,126 @@ body[data-tema="oscuro"] .detalles-tarjeta h3 {
     font-size: 0.9rem;
 }
 
-.anteriores-grid {
+/* El grid fluido crea dos o tres columnas según el ancho disponible y evita
+   que una tarjeta horizontal deje una franja vacía junto a su contenido. */
+.eventos-anteriores-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
 }
 
-.anteriores-card {
-    display: grid;
-    grid-template-columns: 280px minmax(0, 1fr) auto;
-    gap: 1.25rem;
-    align-items: center;
-    padding: 0;
-    border-radius: 28px;
+.evento-card-pasado {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 16px;
     background: #ffffff;
-    border: 1px solid rgba(17, 17, 17, 0.04);
-    box-shadow: 0 20px 50px rgba(26, 38, 60, 0.06);
+    border: 1px solid rgba(17, 17, 17, 0.06);
+    box-shadow: 0 12px 30px rgba(26, 38, 60, 0.08);
     cursor: pointer;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
     text-decoration: none;
     color: inherit;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.anteriores-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 18px 38px rgba(17, 17, 17, 0.12);
+.evento-card-pasado:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
 }
 
-.anteriores-media {
-    width: 280px;
-    min-height: 220px;
-    min-width: 280px;
+.card-img-container {
+    width: 100%;
+    height: 200px;
     overflow: hidden;
-    border-radius: 28px 0 0 28px;
 }
 
-.anteriores-media img {
+.card-img-container img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 12px;
+    display: block;
 }
 
-.anteriores-texto h3 {
+.evento-card-pasado .anteriores-texto {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.evento-card-pasado .anteriores-texto h3 {
     margin: 0;
-    font-size: 1.1rem;
+    color: #1f2937;
+    font-size: 1.2rem;
+    line-height: 1.25;
+}
+
+.evento-card-pasado .anteriores-texto .categoria,
+.evento-card-pasado .anteriores-texto .lugar {
+    color: #4b5563;
 }
 
 .anteriores-action {
     display: flex;
     align-items: center;
-    padding-right: 1.5rem;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 1.25rem 1.25rem;
+}
+
+.evento-status {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
 }
 
 .anteriores-action .boton-amarillo {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
     white-space: nowrap;
     font-size: 0.9rem;
+}
+
+/* Las tarjetas históricas también abandonan el blanco fijo al activar el
+   tema oscuro; la especificidad adicional vence a sus colores de tema claro
+   y conserva contraste en título, categoría, ubicación y estado. */
+body.dark-mode .evento-card-pasado,
+body[data-tema="oscuro"] .evento-card-pasado,
+[data-theme="dark"] .evento-card-pasado {
+    background-color: var(--bg-card, #1e1e22) !important;
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #f9fafb;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+}
+
+body.dark-mode .evento-card-pasado .anteriores-texto h3,
+body[data-tema="oscuro"] .evento-card-pasado .anteriores-texto h3,
+[data-theme="dark"] .evento-card-pasado .anteriores-texto h3 {
+    color: #f9fafb;
+}
+
+body.dark-mode .evento-card-pasado .anteriores-texto .categoria,
+body.dark-mode .evento-card-pasado .anteriores-texto .lugar,
+body[data-tema="oscuro"] .evento-card-pasado .anteriores-texto .categoria,
+body[data-tema="oscuro"] .evento-card-pasado .anteriores-texto .lugar,
+[data-theme="dark"] .evento-card-pasado .anteriores-texto .categoria,
+[data-theme="dark"] .evento-card-pasado .anteriores-texto .lugar {
+    color: #9ca3af;
+}
+
+body.dark-mode .evento-card-pasado .evento-status,
+body[data-tema="oscuro"] .evento-card-pasado .evento-status,
+[data-theme="dark"] .evento-card-pasado .evento-status {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.32);
 }
 
 .galeria-header {
@@ -1021,7 +1133,7 @@ body[data-tema="oscuro"] .detalles-tarjeta h3 {
     grid-template-columns: minmax(0, 1.6fr) minmax(380px, 420px);
     align-items: stretch;
     gap: 1rem;
-    background: #111;
+    background: var(--bg-card, #1e1e22);
     border-radius: 18px;
     overflow: hidden;
 }
@@ -1044,6 +1156,7 @@ body[data-tema="oscuro"] .detalles-tarjeta h3 {
 .lightbox-close,
 .lightbox-arrow {
     position: absolute;
+    z-index: 10;
     border: none;
     background: rgba(255, 255, 255, 0.94);
     color: #111;
@@ -1073,7 +1186,7 @@ body[data-tema="oscuro"] .detalles-tarjeta h3 {
 }
 
 .lightbox-arrow.right {
-    right: 360px;
+    right: min(360px, 31vw);
 }
 
 .lightbox-caption {
@@ -1082,6 +1195,40 @@ body[data-tema="oscuro"] .detalles-tarjeta h3 {
     text-align: center;
     line-height: 1.4;
     padding: 1rem 1rem 0;
+}
+
+.lightbox-info {
+    padding: 1.4rem 1.25rem 0.7rem;
+    border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+}
+
+.lightbox-kicker {
+    color: #d56b2d;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.lightbox-info h2 {
+    margin: 0.35rem 0 0.3rem;
+    color: #161616;
+    font-size: 1.25rem;
+}
+
+.lightbox-info p {
+    margin: 0 0 0.8rem;
+    color: #5f625f;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.lightbox-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    color: #777;
+    font-size: 0.78rem;
 }
 
 .lightbox-comments {
@@ -1187,6 +1334,14 @@ body[data-tema="oscuro"] .lightbox-caption {
     color: #f5eadc;
 }
 
+body[data-tema="oscuro"] .lightbox-info {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+body[data-tema="oscuro"] .lightbox-info h2 { color: #fff7ed; }
+body[data-tema="oscuro"] .lightbox-info p,
+body[data-tema="oscuro"] .lightbox-meta { color: #c8bfb5; }
+
 @media (max-width: 480px) {
     .lightbox-close,
     .lightbox-arrow {
@@ -1236,6 +1391,96 @@ body[data-tema="oscuro"] .lightbox-caption {
 .eventos-header h2 {
     margin: 0;
     color: #111111;
+}
+
+/* El drawer vive fuera del flujo del listado para entrar desde la derecha sin
+   mover las tarjetas; el backdrop conserva el foco visual en los filtros. */
+.eventos-header-actions {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    flex-wrap: wrap;
+}
+
+.btn-filtros {
+    border: 1px solid rgba(17, 17, 17, .18);
+    background: rgba(255, 255, 255, .82);
+    color: #171717;
+    padding: .85rem 1.1rem;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.filtros-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.filtros-drawer.open {
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.filtros-drawer__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 10, 14, .48);
+    opacity: 0;
+    transition: opacity .3s ease;
+}
+
+.filtros-drawer.open .filtros-drawer__backdrop { opacity: 1; }
+
+/* translateX(-100%) mantiene el panel fuera de pantalla; al abrir se desliza
+   hasta el borde derecho con una transición breve y predecible. */
+.filtros-drawer__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: min(420px, 92vw);
+    height: 100%;
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, .96);
+    box-shadow: -20px 0 50px rgba(0, 0, 0, .22);
+    transform: translateX(100%);
+    transition: transform .3s ease;
+}
+
+.filtros-drawer.open .filtros-drawer__panel { transform: translateX(0); }
+
+.filtros-drawer__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.filtros-drawer__header h2 { margin: 0; color: #171717; }
+.filtros-drawer__header button { border: 0; background: #eeeeee; border-radius: 50%; width: 2.25rem; height: 2.25rem; font-size: 1.3rem; cursor: pointer; }
+.drawer-field { display: grid; gap: .4rem; margin-bottom: 1rem; color: #333; font-weight: 700; }
+.drawer-field input, .drawer-field select { width: 100%; min-height: 2.7rem; border: 1px solid #d7d7d7; border-radius: 10px; padding: .65rem .75rem; background: #fff; color: #171717; font: inherit; }
+.drawer-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.filtros-drawer__actions { display: flex; gap: .75rem; margin-top: 1.5rem; }
+.filtros-drawer__actions button { flex: 1; }
+
+body[data-tema="oscuro"] .btn-filtros,
+body[data-tema="oscuro"] .filtros-drawer__panel { background: #18191d; color: #f4f4f5; }
+body[data-tema="oscuro"] .filtros-drawer__header h2,
+body[data-tema="oscuro"] .drawer-field { color: #f4f4f5; }
+body[data-tema="oscuro"] .drawer-field input,
+body[data-tema="oscuro"] .drawer-field select { background: #24252a; border-color: #3d3e45; color: #f4f4f5; }
+
+@media (max-width: 600px) {
+    .eventos-header-actions { width: 100%; }
+    .eventos-header-actions button { flex: 1; }
+    .drawer-fields { grid-template-columns: 1fr; }
 }
 
 .btn-crear-evento {
@@ -1868,23 +2113,12 @@ body[data-tema="oscuro"] .lightbox-caption {
         min-height: 160px;
     }
 
-    .anteriores-card {
-        grid-template-columns: 1fr;
-    }
-
-    .anteriores-media {
-        width: 100%;
-        min-width: 0;
-        min-height: 160px;
-        border-radius: 28px 28px 0 0;
+    .eventos-anteriores-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     }
 
     .anteriores-action {
-        padding: 0 1rem 1rem;
-    }
-
-    .anteriores-action .boton-amarillo {
-        width: 100%;
+        padding: 0.5rem 1rem 1rem;
     }
 
     .evento-card-action {

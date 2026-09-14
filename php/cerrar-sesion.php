@@ -2,6 +2,8 @@
 
 session_start();
 
+/* Vaciamos la sesión y después invalidamos su cookie para cerrar también el
+    identificador persistido en el navegador. */
 $_SESSION = [];
 
 if (ini_get('session.use_cookies')) {

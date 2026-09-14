@@ -1,3 +1,47 @@
+<?php
+require_once __DIR__ . '/conexion.php';
+
+/* Esta página tiene dos salidas: HTML para la vista normal y JSON cuando
+    ajax=1. Mantener ambas en el mismo controlador evita duplicar filtros. */
+/* La consulta base excluye eventos finalizados y ordena por fecha para que el
+   listado principal sea una agenda real, no una copia del catálogo JS. */
+$eventosDesdeBd = $pdo->query('SELECT * FROM eventos WHERE es_pasado = 0 AND fecha >= CURDATE() ORDER BY fecha ASC, id DESC')->fetchAll();
+$eventoIdsPorSlug = [];
+foreach ($pdo->query('SELECT id, slug FROM eventos')->fetchAll() as $eventoCatalogo) {
+    $eventoIdsPorSlug[(string) $eventoCatalogo['slug']] = (int) $eventoCatalogo['id'];
+}
+
+if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
+    /* Los parámetros del drawer llegan por query string; se normalizan antes
+       de formar las condiciones SQL para evitar comparar valores ambiguos. */
+    header('Content-Type: application/json; charset=utf-8');
+    $texto = trim($_GET['texto'] ?? '');
+    $categoria = trim($_GET['categoria'] ?? '');
+    $tipoEntrada = trim($_GET['tipo_entrada'] ?? '');
+    $desde = trim($_GET['desde'] ?? '');
+    $hasta = trim($_GET['hasta'] ?? '');
+    $minPrecio = $_GET['min_precio'] ?? '';
+    $maxPrecio = $_GET['max_precio'] ?? '';
+
+    /* Cada filtro se agrega con parámetros nombrados para mantener la consulta
+       segura y permitir que el drawer reutilice este mismo controlador. */
+    $condiciones = ['es_pasado = 0', 'fecha >= CURDATE()'];
+    $parametros = [];
+     /* Cada condición es opcional: el array solo recibe filtros que el usuario
+         completó, y luego se unen con AND para obtener el resultado final. */
+     if ($texto !== '') { $condiciones[] = '(titulo LIKE :texto OR ubicacion LIKE :texto)'; $parametros[':texto'] = '%' . $texto . '%'; }
+    if ($categoria !== '') { $condiciones[] = 'categoria = :categoria'; $parametros[':categoria'] = $categoria; }
+    if ($tipoEntrada !== '') { $condiciones[] = 'tipo_entrada = :tipo_entrada'; $parametros[':tipo_entrada'] = $tipoEntrada; }
+    if ($desde !== '') { $condiciones[] = 'fecha >= :desde'; $parametros[':desde'] = $desde; }
+    if ($hasta !== '') { $condiciones[] = 'fecha <= :hasta'; $parametros[':hasta'] = $hasta; }
+    if (is_numeric($minPrecio)) { $condiciones[] = 'COALESCE(precio, 0) >= :min_precio'; $parametros[':min_precio'] = (float) $minPrecio; }
+    if (is_numeric($maxPrecio)) { $condiciones[] = 'COALESCE(precio, 0) <= :max_precio'; $parametros[':max_precio'] = (float) $maxPrecio; }
+    $consultaFiltrada = $pdo->prepare('SELECT * FROM eventos WHERE ' . implode(' AND ', $condiciones) . ' ORDER BY fecha ASC, id DESC');
+    $consultaFiltrada->execute($parametros);
+    echo json_encode($consultaFiltrada->fetchAll(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -57,6 +101,7 @@
             </div>
         </section>
 
+        <!-- El destacado permanece separado del listado dinámico general. -->
         <section class="seccion seccion-foco destacados-section" id="eventos-destacados">
             <div class="titulo-seccion">
                 <h2>Eventos Destacados</h2>
@@ -81,18 +126,28 @@
                     <button type="button" class="filtro-pill activa" data-filtro="todos">Todos</button>
                     <button type="button" class="filtro-pill" data-filtro="competencia">Competencias</button>
                     <button type="button" class="filtro-pill" data-filtro="carrera">Carreras</button>
-                    <button type="button" class="filtro-pill" data-filtro="deportivo">Deportivo</button>
+                    <button type="button" class="filtro-pill" data-filtro="gratuito">Gratuito</button>
+                    <button type="button" class="filtro-pill" data-filtro="de-pago">De Pago</button>
                     <button type="button" class="filtro-pill" data-filtro="discoteca">Discotecas</button>
                 </div>
             </div>
         </section>
 
+        <!-- El grid recibe un render PHP inicial y luego puede ser actualizado por JS. -->
         <section class="seccion eventos-principales">
             <div class="titulo-seccion eventos-header">
                 <h2>Listado de Eventos</h2>
-                <button type="button" class="btn-crear-evento" id="btn-crear-evento">Crear Evento +</button>
+                <div class="eventos-header-actions"><button type="button" class="btn-filtros" id="btn-filtros" aria-expanded="false">Filtros ⚙️</button><button type="button" class="btn-crear-evento" id="btn-crear-evento">Crear Evento +</button></div>
             </div>
-            <div class="eventos-lista" id="eventos-principales-contenedor"></div>
+            <div class="eventos-lista" id="eventos-principales-contenedor">
+                <?php foreach ($eventosDesdeBd as $evento): ?>
+                    <article class="evento-card" data-item-key="evento-<?= htmlspecialchars($evento['slug'], ENT_QUOTES, 'UTF-8') ?>" data-engagement="like-only">
+                        <div class="evento-card-media"><img src="<?= htmlspecialchars($evento['imagen_portada'] ?: '../img/porco.avif', ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy"></div>
+                        <div class="evento-card-body"><span class="categoria"><?= htmlspecialchars($evento['categoria'] . ' · ' . ($evento['tipo_entrada'] ?? 'Gratuito'), ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><p class="lugar"><?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></p></div>
+                        <div class="evento-card-action"><div class="fecha-protagonista"><span class="fecha-mes"><?= htmlspecialchars(strtoupper(date('M', strtotime($evento['fecha']))), ENT_QUOTES, 'UTF-8') ?></span><span class="fecha-dia"><?= htmlspecialchars(date('d', strtotime($evento['fecha'])), ENT_QUOTES, 'UTF-8') ?></span></div><a href="evento.php?id=<?= (int) $evento['id'] ?>" class="boton-amarillo">Ver más</a></div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
         </section>
 
         <div class="form-evento-overlay" id="form-evento-overlay" aria-hidden="true">
@@ -102,7 +157,7 @@
                     <h3 id="form-evento-title">Crear nuevo evento</h3>
                     <p>Completa los datos para agregar un nuevo evento a la plataforma.</p>
                 </div>
-                <form id="form-nuevo-evento" class="form-evento" novalidate>
+                <form id="form-nuevo-evento" class="form-evento" method="post" action="crear-evento.php" novalidate>
                     <div class="form-error" id="form-error" role="alert"></div>
 
                     <div class="form-section">
@@ -169,7 +224,8 @@
                             <select id="categoria-evento" name="categoria">
                                 <option value="Competencias">Competencias</option>
                                 <option value="Carreras">Carreras</option>
-                                <option value="Deportivo">Deportivo</option>
+                                <option value="Gratuito">Gratuito</option>
+                                <option value="De Pago">De Pago</option>
                                 <option value="Discotecas">Discotecas</option>
                                 <option value="Cultural">Cultural</option>
                                 <option value="Feria">Feria</option>
@@ -238,11 +294,25 @@
             </div>
         </div>
 
+        <!-- El drawer se mantiene fuera del flujo del grid para animarse sin desplazar tarjetas. -->
+        <aside class="filtros-drawer" id="filtros-drawer" aria-hidden="true" aria-labelledby="filtros-title">
+            <div class="filtros-drawer__backdrop" data-cerrar-filtros></div>
+            <section class="filtros-drawer__panel" role="dialog" aria-modal="true">
+                <header class="filtros-drawer__header"><h2 id="filtros-title">Filtrar eventos</h2><button type="button" data-cerrar-filtros aria-label="Cerrar filtros">×</button></header>
+                <label class="drawer-field">Buscar<input id="filtro-texto" type="search" placeholder="Título o ubicación"></label>
+                <label class="drawer-field">Categoría<select id="filtro-categoria"><option value="">Todas</option><option value="Competencias">Competencias</option><option value="Carreras">Carreras</option><option value="Discotecas">Discotecas</option><option value="Cultural">Cultural</option><option value="Feria">Feria</option></select></label>
+                <label class="drawer-field">Tipo de entrada<select id="filtro-tipo"><option value="">Todos</option><option value="Gratuito">Gratuito</option><option value="De Pago">De Pago</option></select></label>
+                <div class="drawer-fields"><label class="drawer-field">Precio mínimo<input id="filtro-min-precio" type="number" min="0" placeholder="0"></label><label class="drawer-field">Precio máximo<input id="filtro-max-precio" type="number" min="0" placeholder="Sin límite"></label></div>
+                <div class="drawer-fields"><label class="drawer-field">Desde<input id="filtro-desde" type="date"></label><label class="drawer-field">Hasta<input id="filtro-hasta" type="date"></label></div>
+                <div class="filtros-drawer__actions"><button type="button" class="btn-crear-form" id="aplicar-filtros">Aplicar filtros</button><button type="button" class="btn-cancelar" id="limpiar-filtros">Limpiar</button></div>
+            </section>
+        </aside>
+
         <section class="seccion anteriores-eventos">
             <div class="titulo-seccion">
                 <h2>Eventos Anteriores</h2>
             </div>
-            <div class="anteriores-grid" id="anteriores-contenedor"></div>
+            <div class="eventos-anteriores-grid" id="anteriores-contenedor"></div>
         </section>
 
         <section class="seccion galeria-eventos">
@@ -372,6 +442,8 @@
 
     <script src="../js/script.js" defer></script>
     <script src="../js/interacciones-tarjetas.js" defer></script>
+    <script>window.sigturEventoIds = <?= json_encode($eventoIdsPorSlug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
+    <script>window.eventosDesdeBd = <?= json_encode($eventosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script src="../js/eventos.js" defer></script>
 </body>
 

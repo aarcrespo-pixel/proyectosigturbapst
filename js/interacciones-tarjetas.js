@@ -4,9 +4,11 @@
     const projectPhpPath = window.location.pathname.includes('/php/')
         ? `${window.location.pathname.split('/php/')[0]}/php/`
         : 'php/';
+            /* Derivamos la base PHP desde la URL actual porque este script se carga
+               desde index.php, /php/ y subcarpetas de eventos. */
     const COMMENTS_API_URL = `${projectPhpPath}comentarios.php`;
-    const cardSelectors = '.tarjeta, .evento-card, .anteriores-card, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria, .tarjeta-destino, .tarjeta-ruta, .gallery-engagement-card';
-    const commentsDisabled = document.querySelector('main.pagina-turismo, main.pagina-lugares');
+    const DELETE_COMMENT_API_URL = `${projectPhpPath}comentarios.php`;
+    const cardSelectors = '.tarjeta, .evento-card, .evento-card-pasado, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria, .tarjeta-destino, .tarjeta-ruta, .gallery-engagement-card';
 
     function slugifyText(value) {
         return (value || '')
@@ -26,6 +28,7 @@
             return {};
         }
     }
+                // localStorage conserva likes y una copia de UI, pero la BD sigue siendo la fuente de comentarios.
 
     function saveStoredData(data) {
         try {
@@ -46,13 +49,17 @@
     function readState(key) {
         const storage = getStoredData();
         const state = storage[key] || { likes: 0, comments: [] };
+        /* Conservamos id y avatar al hidratar el estado: el ID vincula el
+           nodo visual con la fila exacta que debe borrar el backend. */
         state.comments = (state.comments || []).map((comment) => typeof comment === 'string'
             ? { name: 'Usuario SIGTUR', text: comment, likes: 0, replies: [] }
-            : { name: comment.name || 'Usuario SIGTUR', text: comment.text || '', likes: comment.likes || 0, replies: comment.replies || [] });
+            : { id: comment.id || null, user_id: comment.user_id || null, profile_url: comment.profile_url || '', name: comment.name || 'Usuario SIGTUR', avatar_url: comment.avatar_url || '', text: comment.text || '', likes: comment.likes || 0, replies: comment.replies || [] });
         return state;
     }
 
     function writeState(key, state) {
+        /* Guardamos la representación de UI; cada recarga vuelve a pedir
+           comentarios al backend y corrige cualquier estado obsoleto. */
         const storage = getStoredData();
         storage[key] = state;
         saveStoredData(storage);
@@ -86,12 +93,14 @@
                             ? 'ruta'
                             : card.classList.contains('evento-card')
                                 ? 'evento'
-                                : card.classList.contains('anteriores-card')
+                                : card.classList.contains('evento-card-pasado')
                                     ? 'anterior'
                                     : 'tarjeta';
 
         return `${prefix}-${slugifyText(text)}`;
     }
+                /* Cada tarjeta necesita una clave estable para que sus comentarios no
+                   se mezclen con los de otra página o fotografía. */
 
     function renderComments(list, container, expanded) {
         if (!container) return;
@@ -100,35 +109,39 @@
             return;
         }
 
-        const visibleComments = (expanded ? list : list.slice(0, 1)).map((comment, index) => ({
-            comment,
-            index: expanded ? index : list.indexOf(comment)
-        }));
-        container.innerHTML = visibleComments
-            .map(({ comment, index }) => `
-                <li class="card-engagement__comment-item">
-                    <img class="card-engagement__comment-avatar" src="${escapeHtml(getCommentAvatar(comment))}" alt="Avatar de ${escapeHtml(comment.name)}">
-                    <div class="card-engagement__comment-body">
-                        <strong class="card-engagement__comment-name">${escapeHtml(comment.name)}</strong>
-                        <span>${escapeHtml(comment.text)}</span>
-                        <div class="card-engagement__comment-actions">
-                            <button type="button" class="card-engagement__comment-action ${comment.likes ? 'active' : ''}" data-comment-action="like" data-index="${index}">♥ ${comment.likes || 0}</button>
-                            <button type="button" class="card-engagement__comment-action" data-comment-action="reply" data-index="${index}">Comentar</button>
-                            <button type="button" class="card-engagement__delete" data-index="${index}" aria-label="Eliminar comentario">Eliminar</button>
-                        </div>
+        const comentariosPorId = new Map(list.filter(comment => comment.id).map(comment => [comment.id, { ...comment, replies: [] }]));
+        comentariosPorId.forEach(comment => {
+            if (comment.parent_id && comentariosPorId.has(comment.parent_id)) comentariosPorId.get(comment.parent_id).replies.push(comment);
+        });
+        const arbol = [...comentariosPorId.values()].filter(comment => !comment.parent_id);
+        const visibles = expanded ? arbol : arbol.slice(0, 1);
+        const renderOne = (comment, index, isReply = false) => `
+            <li id="comentario-${comment.id || ''}" class="card-engagement__comment-item comentario-item ${isReply ? 'comentario-item--respuesta' : ''}" data-comment-id="${comment.id || ''}">
+                <div class="comentario-header-user">
+                    <a class="comentario-usuario-link" href="${escapeHtml(comment.profile_url || `${projectPhpPath}perfil.php?id=${encodeURIComponent(comment.user_id || '')}`)}" aria-label="Ver perfil de ${escapeHtml(comment.name)}">
+                        <img class="comentario-avatar card-engagement__comment-avatar" src="${escapeHtml(getCommentAvatar(comment))}" alt="Avatar de ${escapeHtml(comment.name)}">
+                        <span class="comentario-nombre">${escapeHtml(comment.name)}</span>
+                    </a>
+                </div>
+                <div class="comentario-cuerpo card-engagement__comment-body">
+                    <div class="comentario-texto">${escapeHtml(comment.text)}</div>
+                    <div class="comentario-footer-actions comentario-footer comentario-actions">
+                        <button type="button" class="card-engagement__comment-action ${comment.likes ? 'active' : ''}" data-comment-action="like" data-index="${index}">♥ ${comment.likes || 0}</button>
+                        ${!isReply ? `<button type="button" class="card-engagement__comment-action" data-comment-action="reply" data-index="${index}">Responder</button>` : ''}
+                        <button type="button" class="card-engagement__delete" data-index="${index}" aria-label="Eliminar comentario">Eliminar</button>
                     </div>
-                    <div class="card-engagement__replies">${(comment.replies || []).map((reply) => `<div class="card-engagement__reply"><strong>${escapeHtml(reply.name || 'Usuario SIGTUR')}</strong> ${escapeHtml(reply.text || reply)}</div>`).join('')}</div>
-                    <form class="card-engagement__reply-form" data-index="${index}">
-                        <input class="card-engagement__reply-input" maxlength="140" placeholder="Responder a este comentario">
-                        <button class="card-engagement__reply-submit" type="submit">Responder</button>
-                    </form>
-                </li>`)
-            .join('');
+                    ${!isReply ? `<form class="card-engagement__reply-form" data-index="${index}"><textarea class="card-engagement__reply-input" rows="1" maxlength="140" placeholder="Escribe una respuesta..."></textarea><button type="submit" class="card-engagement__reply-submit">Responder</button></form>` : ''}
+                </div>
+            </li>
+            ${(comment.replies || []).map(reply => renderOne(reply, list.indexOf(reply), true)).join('')}`;
+        /* El árbol se reconstruye desde parent_id; la consulta SQL sigue siendo
+           plana y esta relación visualiza cada respuesta junto a su comentario. */
+        container.innerHTML = visibles.map(comment => renderOne(comment, list.findIndex(item => item.id === comment.id))).join('');
     }
 
     function attachCardInteractions(card) {
         if (!card || card.querySelector('.card-engagement')) return;
-        if (commentsDisabled) return;
+        if (card.dataset.engagement === 'none') return;
 
         const key = getItemKey(card);
         const state = readState(key);
@@ -140,7 +153,7 @@
 
         const wrapper = document.createElement('div');
         wrapper.className = 'card-engagement';
-        const commentControls = likeOnly || commentsDisabled ? '' : `
+        const commentControls = likeOnly ? '' : `
             <button type="button" class="card-engagement__button card-engagement__button--comment" data-action="comment" aria-expanded="false">
                 <span class="card-engagement__icon">💬</span>
                 <span class="card-engagement__count">${state.comments.length}</span>
@@ -173,6 +186,8 @@
         const textarea = wrapper.querySelector('.card-engagement__textarea');
 
         const updateView = () => {
+            /* Una única función deriva contadores, likes y lista visible para
+               mantener consistencia después de cualquier interacción. */
             const currentState = readState(key);
             const likes = currentState.likes || 0;
             const comments = currentState.comments || [];
@@ -214,6 +229,7 @@
             if (commentsLoadingLabel) commentsLoadingLabel.hidden = false;
 
             try {
+                // Fetch obtiene la página persistida y reemplaza la copia local cuando reset es true.
                 const offset = reset ? 0 : commentsOffset;
                 const response = await fetch(`${COMMENTS_API_URL}?item_key=${encodeURIComponent(key)}&limit=10&offset=${offset}`);
                 if (!response.ok) throw new Error('No se pudieron cargar los comentarios');
@@ -261,18 +277,41 @@
                     writeState(key, currentState);
                     updateView();
                 } else {
+                    const commentIndex = Number(actionButton.dataset.index);
                     updateView();
-                    actionButton.closest('.card-engagement__comment-item')?.querySelector('.card-engagement__reply-form')?.classList.toggle('open');
+                    commentsList.querySelector(`.card-engagement__reply-form[data-index="${commentIndex}"]`)?.classList.toggle('open');
                 }
                 return;
             }
             const button = event.target.closest('.card-engagement__delete');
             if (!button) return;
             const index = Number(button.dataset.index);
-            const currentState = readState(key);
-            currentState.comments = currentState.comments.filter((_, i) => i !== index);
-            writeState(key, currentState);
-            updateView();
+            const comment = readState(key).comments[index];
+            if (!comment?.id) return;
+            const comentarioElement = button.closest('.card-engagement__comment-item');
+            button.disabled = true;
+                /* Confirmamos el borrado en el servidor antes de tocar el estado
+                    local; así una respuesta fallida no oculta datos persistidos. */
+                fetch(DELETE_COMMENT_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                body: new URLSearchParams({ accion: 'eliminar', id: String(comment.id), item_key: key })
+            })
+                .then(async (response) => {
+                    const data = await response.json();
+                    if (!response.ok || data.success !== true) throw new Error(data.error || 'No se pudo eliminar el comentario');
+                    document.getElementById(`comentario-${comment.id}`)?.remove();
+                    comentarioElement?.remove();
+                    const currentState = readState(key);
+                    currentState.comments = currentState.comments.filter((item) => item.id !== comment.id);
+                    writeState(key, currentState);
+                    commentsOffset = Math.max(0, commentsOffset - 1);
+                    updateView();
+                })
+                .catch((error) => {
+                    button.disabled = false;
+                    window.sigturAlert?.(error.message);
+                });
         });
 
         commentsList?.addEventListener('submit', (event) => {
@@ -286,9 +325,15 @@
             const currentState = readState(key);
             const comment = currentState.comments[Number(replyForm.dataset.index)];
             if (!comment) return;
-            comment.replies = [...(comment.replies || []), { name: getCurrentUserName(), text }];
-            writeState(key, currentState);
-            updateView();
+            fetch(COMMENTS_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                body: new URLSearchParams({ item_key: key, texto: text, parent_id: String(comment.id) })
+            }).then(async response => {
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'No se pudo publicar la respuesta');
+                applyCommentsPage(data, true);
+            }).catch(error => window.sigturAlert?.(error.message));
         });
 
         form?.addEventListener('submit', async (event) => {
@@ -310,9 +355,11 @@
                 applyCommentsPage(data, true);
                 textarea.value = '';
             } catch (error) {
-                window.alert(error.message);
+                window.sigturAlert?.(error.message);
             }
         });
+                        /* Publicamos por AJAX y reemplazamos el estado local con la respuesta
+                           del servidor para evitar que comentarios viejos reaparezcan. */
 
         updateView();
         loadComments(true);

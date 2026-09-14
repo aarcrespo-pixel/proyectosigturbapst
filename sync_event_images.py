@@ -1,16 +1,14 @@
 from pathlib import Path
 import re
 
-root = Path('.')
+root = Path(__file__).resolve().parents[2]
 js_file = root / 'js' / 'eventos.js'
 php_dir = root / 'php' / 'eventos'
 text = js_file.read_text(encoding='utf-8')
 
-# Extract mapping using the event listing data
 entries = re.findall(r"\{[^\}]*nombre:\s*\"([^\"]+)\"[^\}]*imagen:\s*\"([^\"]+)\"", text)
 entries += re.findall(r"\{[^\}]*nombre:\s*\"([^\"]+)\"[^\}]*imagen:\s*'([^']+)'", text)
 
-# Normalize slugs to compare with filenames
 import unicodedata
 
 def slug(value):
@@ -21,7 +19,6 @@ def slug(value):
 
 mapping = {slug(name): img for name, img in entries}
 
-# Manual overrides for file names not matching exact event names
 manual = {
     'bambola': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRh8BnVQ1qdPDXqoHVHylKrGhwk3guImN0d1ZRYbBNmSXoKPhqmCE-pMsE&s=10',
     'carrera-de-bicicleta': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7b44_MpWq3Wzray5_wVaB-4meo0Tam3gwbPNK_1AJ74I1Xo5EhmUKhTIE&s=10',

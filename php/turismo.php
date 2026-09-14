@@ -262,6 +262,7 @@
     </footer>
     <script src="../js/script.js" defer></script>
     <script src="../js/interacciones-tarjetas.js" defer></script>
+    <script src="../js/lugar-links.js" defer></script>
 </body> 
 
 </html>

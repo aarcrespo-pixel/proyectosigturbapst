@@ -38,6 +38,11 @@
         script.onload = iniciar;
         document.head.appendChild(script);
     }
+                /* Inyectamos el módulo una sola vez y después delegamos la interacción
+                   al motor común de tarjetas para conservar persistencia y paginación. */
+    detalle.insertAdjacentElement('afterend', section);
+    // Inicializamos el componente después de insertarlo para que encuentre su card.
+    if (typeof window.initInteractiveCards === 'function') {
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {

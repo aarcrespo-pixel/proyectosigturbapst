@@ -29,6 +29,11 @@ $activePage = $activePage ?? '';
         <a href="<?= $navBase ?>gastronomia.php" class="<?= $activePage === 'gastronomia' ? 'pagina-activa' : '' ?>" data-i18n="navGastronomy">Gastronomía</a>
     </nav>
 
+    <div class="barra-busqueda" data-search-endpoint="<?= $rootBase ?>php/api/buscar.php" data-search-results="<?= $rootBase ?>php/buscar.php">
+        <input id="global-search" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder" placeholder="Buscar eventos" aria-label="Buscar eventos">
+        <img src="<?= $rootBase ?>img/lupa.png" alt="Buscar">
+    </div>
+
     <?php
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
@@ -79,7 +84,20 @@ $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
             <?php endif; ?>
         </div>
     </div>
+
+    <div class="weather-widget" id="weather-widget" aria-live="polite" aria-label="Clima actual en Salto">
+        <span class="weather-icon" id="weather-icon" aria-hidden="true">☁️</span>
+        <span class="weather-condition" id="weather-condition">Cargando...</span>
+        <span class="weather-temperature" id="weather-temperature">--°C</span>
+        <span class="weather-humidity" id="weather-humidity">Humedad: --%</span>
+        <span class="weather-ith ith-badge" id="weather-ith">ITH: --</span>
+    </div>
 </header>
+
+<script src="<?= $rootBase ?>js/weather.js" defer></script>
+<script src="<?= $rootBase ?>js/translator.js" defer></script>
+<script src="<?= $rootBase ?>js/search.js" defer></script>
+<?php $mensajesWidgetRoot = $rootBase; include __DIR__ . '/mensajes-widget.php'; ?>
 
 <div class="perfil-modal-backdrop" id="perfilModal" aria-hidden="true">
     <div class="perfil-modal" role="dialog" aria-modal="true" aria-labelledby="perfilModalTitle">

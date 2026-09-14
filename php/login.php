@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/conexion.php';
 
+// Evitamos que una sesión activa vuelva a mostrar el formulario de login.
 if (isset($_SESSION['usuario_id'])) {
     header('Location: ../index.php');
     exit;
@@ -10,7 +11,11 @@ if (isset($_SESSION['usuario_id'])) {
 $message = '';
 $messageType = '';
 
+/* El POST se procesa antes del HTML para poder redirigir tras autenticar o
+    conservar un mensaje de error en la misma pantalla. */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    /* El mismo valor se acepta como email o cédula y se consulta con un
+       Prepared Statement para impedir inyección SQL. */
     $loginInput = trim($_POST['login'] ?? '');
     $password = $_POST['password'] ?? '';
 
@@ -26,7 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $usuario = $stmt->fetch();
 
         if ($usuario && password_verify($password, $usuario['password'])) {
+                /* Guardamos los datos mínimos de identidad y perfil para que el
+                    resto de controladores pueda autorizar y personalizar la UI. */
             $_SESSION['usuario_id'] = (int) $usuario['id'];
+            $_SESSION['rol'] = $usuario['rol'] ?? 'usuario';
             $_SESSION['usuario_nombre'] = $usuario['nombre_completo'];
             $_SESSION['usuario_email'] = $usuario['email'];
             $_SESSION['usuario_avatar'] = !empty($usuario['avatar']) ? $usuario['avatar'] : 'default-avatar.png';
@@ -105,6 +113,7 @@ if (isset($_GET['registro']) && $_GET['registro'] === 'exito') {
         </section>
     </main>
 
+    <script src="../js/translator.js"></script>
     <script src="../js/script.js"></script>
     <script src="../js/login.js"></script>
 </body>

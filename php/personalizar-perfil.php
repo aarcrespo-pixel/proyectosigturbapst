@@ -23,6 +23,8 @@ require_once __DIR__ . '/conexion.php';
  */
 function processImageUpload($fileKey, $type, $userId, $sessionKey)
 {
+    /* Centralizamos avatar/banner para reutilizar validaciones, generar nombres
+       únicos y evitar guardar rutas controladas por el usuario. */
     // Directorio según tipo
     $uploadDirs = [
         'avatar' => __DIR__ . '/../uploads/avatars/',
@@ -52,6 +54,7 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
     ]));
 
     // ===== VALIDAR ERRORES DE UPLOAD =====
+    // El código de upload distingue archivo ausente, parcial, grande o bloqueado.
     if ($file['error'] !== UPLOAD_ERR_OK) {
         $errores = [
             UPLOAD_ERR_INI_SIZE => 'Archivo supera post_max_size',
@@ -78,6 +81,7 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
     $extension = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
     $permitidas = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 
+    // La whitelist de extensiones limita el tipo de contenido aceptado.
     if (!in_array($extension, $permitidas, true)) {
         error_log("[{$type}] ERROR: Extensión no permitida '{$extension}'. Permitidas: " . implode(', ', $permitidas));
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
@@ -118,6 +122,7 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
     error_log("[{$type}] ✓ tmp_name válido: " . $file['tmp_name']);
 
     // ===== MOVER ARCHIVO =====
+    // move_uploaded_file verifica que el origen provenga del mecanismo de upload de PHP.
     if (!move_uploaded_file($file['tmp_name'], $rutaDestino)) {
         error_log("[{$type}] ERROR: move_uploaded_file() falló");
         error_log("[{$type}] - Fuente: " . $file['tmp_name']);
@@ -214,7 +219,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ubicacionFinal = $ubicacion !== '' ? $ubicacion : null;
     $sitioWebFinal = $sitioWeb !== '' ? $sitioWeb : null;
 
-    // Actualizar base de datos
+     /* El UPDATE usa parámetros nombrados para actualizar perfil y archivos en
+         una sola operación; después sincronizamos la sesión con esos valores. */
+     // Actualizar base de datos
     try {
         error_log("Preparando UPDATE SQL...");
 
@@ -288,6 +295,7 @@ try {
     $userId = (int) $_SESSION['usuario_id'];
     error_log("=== CARGANDO PERFIL - Usuario ID: {$userId} ===");
 
+    // Cargamos el perfil con una consulta parametrizada para evitar exponer otro usuario.
     $stmt = $pdo->prepare('SELECT nombre_completo, nickname, biografia, ubicacion, sitio_web, avatar, banner FROM usuarios WHERE id = :id');
     $stmt->execute([':id' => $userId]);
     $usuario = $stmt->fetch();
@@ -626,6 +634,9 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
         </section>
     </main>
 
+    <script src="../js/translator.js"></script>
+    <script src="../js/script.js" defer></script>
+    <script src="../js/login.js" defer></script>
     <script>
         // Actualizar contadores de caracteres
         function setupCharCounter(inputId, countId, maxLength) {

@@ -16,6 +16,8 @@ const infoPanel = document.querySelector('.info-panel'); // panel info en el ind
 const bottomNavUsuario = document.querySelector('.bottom-nav-item[href$="login.html"]'); // boton usuario en menu inferior
 
 
+/* Esta utilidad concentra las escrituras de estilo para que el cambio de tema
+    pueda reutilizar la misma operación en body, textos y controles. */
 const setStyle = (elemento, propiedad, valor) => {
     if (elemento) {
         elemento.style[propiedad] = valor; // cambia estilo directo con .style
@@ -847,6 +849,7 @@ Object.entries(traduccionesExtra).forEach(([idioma, valores]) => {
     }
 });
 
+// Persistimos la preferencia para restaurarla automáticamente entre páginas.
 const guardarTema = (oscuro) => {
     localStorage.setItem(storageClaveTema, oscuro ? '1' : '0'); // persistencia en el navegador
 };
@@ -875,6 +878,9 @@ const aplicarIdioma = (idioma = leerIdioma()) => {
     const traduccion = traducciones[idiomaActivo] || traducciones.es;
 
     document.querySelectorAll('[data-i18n]').forEach((elemento) => {
+        if (!elemento.dataset.translatorSource && elemento.children.length === 0 && elemento.textContent.trim()) {
+            elemento.dataset.translatorSource = elemento.textContent.trim();
+        }
         const clave = elemento.getAttribute('data-i18n');
         if (!clavesTraducibles.has(clave)) return;
         const valor = traduccion[clave] ?? traducciones.es[clave] ?? traducciones.en[clave];
@@ -894,6 +900,9 @@ const aplicarIdioma = (idioma = leerIdioma()) => {
     });
 
     document.querySelectorAll('[data-i18n-placeholder]').forEach((elemento) => {
+        if (!elemento.dataset.translatorPlaceholderSource && elemento.hasAttribute('placeholder')) {
+            elemento.dataset.translatorPlaceholderSource = elemento.getAttribute('placeholder');
+        }
         const clave = elemento.getAttribute('data-i18n-placeholder');
         if (!clavesTraducibles.has(clave)) return;
         const valor = traduccion[clave] ?? traducciones.es[clave] ?? traducciones.en[clave];
@@ -901,6 +910,9 @@ const aplicarIdioma = (idioma = leerIdioma()) => {
     });
 
     document.querySelectorAll('[data-i18n-title]').forEach((elemento) => {
+        if (!elemento.dataset.translatorTitleSource && elemento.textContent.trim()) {
+            elemento.dataset.translatorTitleSource = elemento.textContent.trim();
+        }
         const clave = elemento.getAttribute('data-i18n-title');
         if (!clavesTraducibles.has(clave)) return;
         const valor = traduccion[clave] ?? traducciones.es[clave] ?? traducciones.en[clave];
@@ -920,6 +932,9 @@ const aplicarIdioma = (idioma = leerIdioma()) => {
     });
 
     document.querySelectorAll('[data-i18n-alt]').forEach((elemento) => {
+        if (!elemento.dataset.translatorAltSource && elemento.hasAttribute('alt')) {
+            elemento.dataset.translatorAltSource = elemento.getAttribute('alt');
+        }
         const clave = elemento.getAttribute('data-i18n-alt');
         if (!clavesTraducibles.has(clave)) return;
         const valor = traduccion[clave] ?? traducciones.es[clave] ?? traducciones.en[clave];
@@ -937,6 +952,10 @@ const aplicarIdioma = (idioma = leerIdioma()) => {
     if (selectorIdioma) {
         selectorIdioma.value = idiomaActivo;
     }
+
+    document.dispatchEvent(new CustomEvent('sigtur:language-changed', {
+        detail: { language: idiomaActivo }
+    }));
 };
 
 // chequea si el nodo esta dentro de la barra de navegacion o el perfil
@@ -949,6 +968,8 @@ const esInfo = (elemento) => {
     return elemento && elemento.classList.contains('info-btn');
 };
 
+/* El tema recorre componentes compartidos y excluye navegación/paneles con
+    identidad propia para no sobrescribir estilos específicos. */
 const aplicarTema = (oscuro, botonModoOscuro) => {
     const colorTexto = oscuro ? '#ffffff' : ''; // si estamos en modo oscuro, el texto debe ser blanco
     const colorFondo = oscuro ? '#050505' : ''; // fondo negro mate para toda la pagina
@@ -1057,6 +1078,8 @@ const activarPerfil = () => {
     });
 };
 
+/* Este módulo controla el modal de perfil, el menú responsive y las preferencias
+    globales; se mantiene en un único script porque varias páginas lo comparten. */
 const activarModalPerfil = () => {
     const modal = document.getElementById('perfilModal');
     if (!modal) return;
@@ -1079,6 +1102,7 @@ const activarModalPerfil = () => {
         });
     });
 
+    // El backdrop cierra el modal solo cuando el clic no ocurrió dentro del diálogo.
     modal.addEventListener('click', (event) => {
         if (event.target === modal) {
             modal.classList.remove('active');
@@ -1120,6 +1144,7 @@ const activarNavAutoHide = () => {
         navOculto = true;
     };
 
+    // Ocultamos la navegación al bajar y la devolvemos al subir para maximizar espacio útil.
     window.addEventListener('scroll', () => {
         const actual = window.pageYOffset;
         if (actual > 150 && actual > ultimoScroll + 10) {
@@ -1254,7 +1279,9 @@ const activarInformacionBapst = () => {
     const modal = document.createElement('div');
     modal.className = 'bapst-modal';
     modal.hidden = true;
-    modal.innerHTML = `
+     /* El modal se construye una vez con HTML controlado y luego recibe listeners
+         para cierre, teclado y apertura desde los distintos botones de información. */
+     modal.innerHTML = `
         <div class="bapst-modal__backdrop" data-bapst-close></div>
         <section class="bapst-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="bapst-modal-title">
             <button class="bapst-modal__close" type="button" aria-label="Cerrar información" data-bapst-close>×</button>

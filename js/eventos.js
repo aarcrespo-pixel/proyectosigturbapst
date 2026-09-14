@@ -44,6 +44,21 @@ const datos = {
     ...listadoEventos
 };
 
+/* Normalizamos las filas de MySQL al mismo contrato visual de las tarjetas;
+   así el grid puede renderizar eventos nuevos sin cambiar su maquetación. */
+const eventosPersistidos = Array.isArray(window.eventosDesdeBd) ? window.eventosDesdeBd.map((evento) => ({
+    id: Number(evento.id),
+    nombre: evento.titulo,
+    slug: evento.slug,
+    descripcion: evento.descripcion,
+    categoria: evento.categoria,
+    tipoEntrada: evento.tipo_entrada || 'Gratuito',
+    precio: evento.precio,
+    lugar: evento.ubicacion,
+    fecha: evento.fecha,
+    imagen: evento.imagen_portada || '../img/porco.avif'
+})) : [];
+
 const galeria = [
     { imagen: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Parque_Solari_Estatua.JPG" },
     { imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwYxQbLi8Q2nRVZPDP9CwDkcYwQsKZ1R2EBF2XXy8nGdPUTnexH4SCTce8&s=10" },
@@ -55,12 +70,16 @@ const galeria = [
 
 // Construir lista principal con slugs únicos para cada evento
 let eventosPrincipales = (() => {
-  const list = [
+    /* Unimos filas persistidas y catálogo legacy, eliminando duplicados por
+       slug para que el listado no repita un evento ya migrado a MySQL. */
+    const eventosEstaticos = [
     ...datos.destacados,
     ...datos.deportivos,
     ...datos.discotecas,
     ...datos.competencias
-  ];
+    ];
+    const slugsPersistidos = new Set(eventosPersistidos.map((evento) => evento.slug));
+    const list = [...eventosPersistidos, ...eventosEstaticos.filter((evento) => !slugsPersistidos.has(slugify(evento.nombre)))];
   const slugCounts = {};
   const fechasProtagonistas = [
     { mes: 'ENE', dia: '05' },
@@ -115,7 +134,7 @@ const maxPorPagina = 3;
 */
 // // Plantilla compleja: template literal con condicional (evento.lugar) y atributo inline onerror
 const tarjeta = (evento, activa = false) => `
-    <article class="tarjeta${activa ? ' activa' : ''}" data-engagement="like-only" role="button" tabindex="0" aria-label="Evento ${evento.nombre}">
+    <a class="tarjeta${activa ? ' activa' : ''}" href="${obtenerRutaEvento(evento)}" data-engagement="none" aria-label="Evento ${evento.nombre}">
     <div class="imagen-tarjeta">
       <img src="${evento.imagen}" alt="${evento.nombre}" loading="lazy" onerror="this.onerror=null;this.src='/img/porco.avif';">
     </div>
@@ -124,7 +143,7 @@ const tarjeta = (evento, activa = false) => `
       <h3>${evento.nombre}</h3>
       ${evento.lugar ? `<span class="lugar">${evento.lugar}</span>` : ""}
     </div>
-  </article>
+    </a>
 `;
 
 /*
@@ -133,6 +152,8 @@ const tarjeta = (evento, activa = false) => `
   `destacados-contenedor`, `deportivos-contenedor`, etc.
 */
 function renderSeccion(nombre) {
+    /* El carrusel calcula una ventana visible de tres elementos y reemplaza
+       solo el contenedor correspondiente, manteniendo los indicadores sincronizados. */
     const lista = datos[nombre];
     const actual = pos[nombre];
   // // Cálculo de ventana visible con protección de límites (Math.max/Math.min)
@@ -150,20 +171,6 @@ function renderSeccion(nombre) {
     if (typeof window.initInteractiveCards === 'function') {
       window.initInteractiveCards(contenedor);
     }
-
-    contenedor.querySelectorAll('.tarjeta').forEach((card) => {
-      const noAction = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-      };
-
-      card.addEventListener('click', noAction);
-      card.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          noAction(event);
-        }
-      });
-    });
 
     // // Optional chaining + toggle: ocultar flechas cuando estamos en los extremos
     document.querySelector(`.flecha.izquierda[data-carrusel="${nombre}"]`)?.classList.toggle("oculta", actual === 0);
@@ -204,6 +211,7 @@ function setPos(nombre, indice) {
   definidas en el objeto datos.
 */
 function renderGaleria() {
+    // Filtramos fotos antes de construir HTML para que búsqueda y categoría compartan el mismo renderer.
     const contenedor = document.getElementById("galeria-contenedor");
     if (!contenedor) return;
 
@@ -237,11 +245,23 @@ function renderGaleria() {
     });
 }
 
+/* Priorizamos ID para registros de MySQL y usamos slugify como fallback para
+    tarjetas legacy que todavía solo tienen nombre. */
 function obtenerRutaEvento(evento) {
+    const slugEvento = evento.slug || slugify(evento.nombre);
+    const idCatalogado = evento.id || window.sigturEventoIds?.[slugEvento];
+    if (idCatalogado) {
+        const pathname = window.location.pathname || '';
+        const projectBase = pathname.includes('/php/') ? pathname.split('/php/')[0] : pathname.replace(/\/[^/]*$/, '');
+        return `${projectBase}/php/evento.php?id=${encodeURIComponent(idCatalogado)}`;
+    }
+    /* Los destacados base se renderizan antes de enriquecer el catálogo con
+       slug; derivamos la ruta desde el nombre para impedir undefined.php. */
+    const slug = evento.slug || slugify(evento.nombre);
     const pathname = window.location.pathname || '';
     const enSubcarpetaEventos = pathname.includes('/php/eventos/');
     const prefijo = enSubcarpetaEventos ? '' : 'eventos/';
-    return `${prefijo}${evento.slug}.php`;
+    return `${prefijo}${slug}.php`;
 }
 
 function tarjetaPrincipal(evento) {
@@ -252,7 +272,7 @@ function tarjetaPrincipal(evento) {
         <img src="${evento.imagen}" alt="${evento.nombre}" loading="lazy" onerror="this.onerror=null;this.src='../img/porco.avif';">
       </div>
       <div class="evento-card-body">
-        <span class="categoria">${evento.categoria}</span>
+        <span class="categoria">${evento.categoria}${evento.tipoEntrada ? ` · ${evento.tipoEntrada}` : ''}</span>
         <h3>${evento.nombre}</h3>
         ${evento.lugar ? `<p class="lugar">${evento.lugar}</p>` : ""}
       </div>
@@ -382,6 +402,8 @@ function cerrarCalendario() {
 }
 
 function configurarFormularioEventos() {
+    /* Este controlador coordina overlay, calendario, validaciones y envío al
+       endpoint PHP; cada subcontrol actualiza una parte del formulario. */
     const overlay = document.getElementById('form-evento-overlay');
     const botonAbrir = document.getElementById('btn-crear-evento');
     const botonCerrar = document.getElementById('form-evento-close');
@@ -521,7 +543,7 @@ function configurarFormularioEventos() {
         }
     });
 
-    form?.addEventListener('submit', (event) => {
+    form?.addEventListener('submit', async (event) => {
         event.preventDefault();
         limpiarError();
 
@@ -539,7 +561,6 @@ function configurarFormularioEventos() {
         const recordatorio = document.getElementById('recordatorio')?.value || '1 hora antes';
         const cuerpoCorreo = document.getElementById('correo-cuerpo')?.value.trim() || '';
         const archivo = document.getElementById('evento-imagen')?.files?.[0];
-        const imagenSrc = archivo ? URL.createObjectURL(archivo) : '';
 
         if (!titulo) {
             mostrarError('El título del evento es obligatorio.');
@@ -583,41 +604,35 @@ function configurarFormularioEventos() {
             return;
         }
 
-        eventosPrincipales.unshift({
-            nombre: titulo,
-            categoria,
-            lugar: ubicacion,
-            imagen: imagenSrc,
-            fecha: `${fecha} · ${hora}`,
-            descripcion,
-            edadMinima,
-            edadMaxima,
-            canal,
-            recordatorio,
-            cuerpoCorreo,
-            slug: slugify(titulo)
-        });
-
-        renderEventosPrincipales();
-        resetFormulario();
-        cerrarFormulario();
-        window.alert('Evento creado con éxito.');
+        // FormData conserva nombres y tipos de inputs para enviar el formulario sin serialización manual.
+        const datosFormulario = new FormData(form);
+        try {
+            const respuesta = await fetch(form.action, { method: 'POST', body: datosFormulario });
+            if (!respuesta.ok) throw new Error((await respuesta.text()) || 'No se pudo guardar el evento.');
+            window.location.assign(respuesta.url);
+        } catch (error) {
+            mostrarError(error.message);
+        }
     });
 }
 
+/* El filtro rápido compara texto, categoría, tipo de entrada y ubicación; el
+    drawer usa además el endpoint SQL para filtros de rango. */
 function filtrarEventosPrincipales() {
     const busqueda = document.getElementById('buscador-eventos')?.value.trim().toLowerCase() || '';
     return eventosPrincipales.filter((evento) => {
         const categoria = evento.categoria?.toString().toLowerCase() || '';
+        const tipoEntrada = evento.tipoEntrada?.toString().toLowerCase() || '';
         const nombre = evento.nombre?.toString().toLowerCase() || '';
         const lugar = evento.lugar?.toString().toLowerCase() || '';
-        const matchesFiltro = eventoFiltro === 'todos' || categoria.includes(eventoFiltro) || nombre.includes(eventoFiltro) || lugar.includes(eventoFiltro);
+        const matchesFiltro = eventoFiltro === 'todos' || categoria.includes(eventoFiltro) || tipoEntrada.includes(eventoFiltro.replace('-', ' ')) || nombre.includes(eventoFiltro) || lugar.includes(eventoFiltro);
         const matchesBusqueda = !busqueda || nombre.includes(busqueda) || categoria.includes(busqueda) || lugar.includes(busqueda);
         return matchesFiltro && matchesBusqueda;
     });
 }
 
 function renderEventosPrincipales() {
+    // El grid se vuelve a pintar después de búsqueda, filtros rápidos o respuesta AJAX del drawer.
     const contenedor = document.getElementById('eventos-principales-contenedor');
     if (!contenedor) return;
 
@@ -634,11 +649,11 @@ function renderEventosPrincipales() {
 }
 
 function tarjetaAnterior(evento) {
-    const ruta = obtenerRutaEvento(evento);
+    const ruta = `evento-pasado.php?id=${encodeURIComponent(evento.slug || slugify(evento.nombre))}`;
     const itemKey = evento.slug ? `evento-${evento.slug}` : `evento-${slugify(evento.nombre)}`;
     return `
-    <a href="${ruta}" class="anteriores-card" data-item-key="${itemKey}" data-engagement="like-only">
-      <div class="anteriores-media">
+        <a href="${ruta}" class="evento-card-pasado" data-item-key="${itemKey}" data-engagement="like-only">
+            <div class="card-img-container">
         <img src="${evento.imagen}" alt="${evento.nombre}" loading="lazy" onerror="this.onerror=null;this.src='../img/porco.avif';">
       </div>
       <div class="anteriores-texto">
@@ -647,6 +662,7 @@ function tarjetaAnterior(evento) {
         ${evento.lugar ? `<p class="lugar">${evento.lugar}</p>` : ""}
       </div>
             <div class="anteriores-action">
+                <span class="evento-status">FINALIZADO</span>
                 <span class="boton-amarillo">Ver más</span>
             </div>
     </a>
@@ -684,6 +700,79 @@ function configurarFiltrosEventos() {
     });
 }
 
+// URLSearchParams serializa controles vacíos sin concatenar query strings manualmente.
+function obtenerFiltrosDrawer() {
+    return new URLSearchParams({
+        ajax: '1',
+        texto: document.getElementById('filtro-texto')?.value.trim() || '',
+        categoria: document.getElementById('filtro-categoria')?.value || '',
+        tipo_entrada: document.getElementById('filtro-tipo')?.value || '',
+        min_precio: document.getElementById('filtro-min-precio')?.value || '',
+        max_precio: document.getElementById('filtro-max-precio')?.value || '',
+        desde: document.getElementById('filtro-desde')?.value || '',
+        hasta: document.getElementById('filtro-hasta')?.value || ''
+    });
+}
+
+function mapearEventoPersistido(evento) {
+    return {
+        id: Number(evento.id),
+        nombre: evento.titulo,
+        slug: evento.slug,
+        descripcion: evento.descripcion,
+        categoria: evento.categoria,
+        tipoEntrada: evento.tipo_entrada || 'Gratuito',
+        precio: evento.precio,
+        lugar: evento.ubicacion,
+        fecha: evento.fecha,
+        imagen: evento.imagen_portada || '../img/porco.avif'
+    };
+}
+
+function configurarDrawerFiltros() {
+    /* El drawer mantiene el formulario montado y alterna una clase para animar
+       transform; así no recalcula el layout de las tarjetas al abrirse. */
+    const drawer = document.getElementById('filtros-drawer');
+    const abrir = document.getElementById('btn-filtros');
+    const cerrar = drawer?.querySelectorAll('[data-cerrar-filtros]') || [];
+    const aplicar = document.getElementById('aplicar-filtros');
+    const limpiar = document.getElementById('limpiar-filtros');
+    if (!drawer || !abrir) return;
+
+    const cambiarDrawer = (abierto) => {
+        /* aria-hidden y la clase CSS sincronizan accesibilidad con la animación
+           transform: el panel se desliza sin desmontarse del DOM. */
+        drawer.classList.toggle('open', abierto);
+        drawer.setAttribute('aria-hidden', String(!abierto));
+        abrir.setAttribute('aria-expanded', String(abierto));
+    };
+
+    abrir.addEventListener('click', () => cambiarDrawer(true));
+    cerrar.forEach((elemento) => elemento.addEventListener('click', () => cambiarDrawer(false)));
+    aplicar?.addEventListener('click', async () => {
+        try {
+            /* Fetch consulta nuevamente eventos.php con filtros; el servidor
+               aplica WHERE parametrizados y devuelve solo filas publicables. */
+            const respuesta = await fetch(`eventos.php?${obtenerFiltrosDrawer().toString()}`, { headers: { Accept: 'application/json' } });
+            if (!respuesta.ok) throw new Error('No se pudieron aplicar los filtros.');
+            const resultados = (await respuesta.json()).map(mapearEventoPersistido);
+            eventosPrincipales = resultados;
+            renderEventosPrincipales();
+            cambiarDrawer(false);
+        } catch (error) {
+            window.sigturAlert?.(error.message);
+        }
+    });
+    limpiar?.addEventListener('click', () => {
+        drawer.querySelectorAll('input, select').forEach((campo) => { campo.value = ''; });
+        eventosPrincipales = (() => {
+            const slugsPersistidos = new Set(eventosPersistidos.map((evento) => evento.slug));
+            return [...eventosPersistidos, ...[...datos.destacados, ...datos.deportivos, ...datos.discotecas, ...datos.competencias].filter((evento) => !slugsPersistidos.has(slugify(evento.nombre)))];
+        })();
+        renderEventosPrincipales();
+    });
+}
+
 function configurarFiltrosGaleria() {
     document.querySelectorAll('[data-galeria-filtro]').forEach((boton) => {
         boton.addEventListener('click', () => {
@@ -705,10 +794,16 @@ function actualizarLightbox() {
     const item = galeria[lightboxIndex];
     const imagen = document.getElementById("lightbox-image");
     const caption = document.getElementById("lightbox-caption");
+    const title = document.getElementById('lightbox-title');
+    const description = document.getElementById('lightbox-description');
+    const date = document.getElementById('lightbox-date');
     if (!item || !imagen || !caption) return;
     imagen.src = item.imagen;
     imagen.alt = `Imagen de galería ${lightboxIndex + 1}`;
     caption.textContent = `Imagen ${lightboxIndex + 1} de ${galeria.length}`;
+    if (title) title.textContent = item.titulo || 'Cobertura de Salto';
+    if (description) description.textContent = item.descripcion || 'Imágenes de lugares y actividades de la ciudad.';
+    if (date) date.textContent = item.fecha || 'Publicado recientemente';
 
     const engagementCard = document.getElementById('lightbox-engagement-card');
     if (engagementCard) {
@@ -753,6 +848,7 @@ function init() {
     });
 
     configurarFiltrosEventos();
+    configurarDrawerFiltros();
     configurarFiltrosGaleria();
     renderEventosPrincipales();
     renderEventosAnteriores();

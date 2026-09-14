@@ -1,5 +1,17 @@
 <?php
 session_start();
+require_once __DIR__ . '/php/conexion.php';
+
+// La portada precarga eventos para que las tarjetas puedan enlazar a IDs reales.
+/* La portada consulta por ID descendente para que el último evento publicado
+   esté disponible antes de renderizar cualquier tarjeta destacada. */
+$eventosPublicados = $pdo->query('SELECT * FROM eventos ORDER BY id DESC')->fetchAll();
+$eventosPorSlug = [];
+foreach ($eventosPublicados as $eventoPublicado) {
+    $eventosPorSlug[$eventoPublicado['slug']] = $eventoPublicado;
+}
+$rutaPorco = isset($eventosPorSlug['porco-negro']) ? 'php/evento.php?id=' . (int) $eventosPorSlug['porco-negro']['id'] : 'php/eventos.php';
+$rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) $eventosPorSlug['bambola']['id'] : 'php/eventos.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -29,9 +41,9 @@ session_start();
 
     <?php
     $headerCurrentPage = 'index';
-$headerActivePage = 'index';
-include __DIR__ . '/php/header.php';
-?>
+    $headerActivePage = 'index';
+    include __DIR__ . '/php/header.php';
+    ?>
 
     <nav class="bottom-nav" aria-label="Navegación inferior">
         <a href="index.php" class="bottom-nav-item">
@@ -65,6 +77,8 @@ include __DIR__ . '/php/header.php';
         <p class="texto-deslizar" data-i18n="homeScroll">
             Desliza para ver más
         </p>
+        <!-- Botón de información -->
+        <button class="info-btn" type="button" aria-expanded="false" data-i18n="homeInfoButton">Información</button>
         <!-- Panel con información sobre SIGTUR -->
         <div class="info-panel" id="info-panel">
             <h3 data-i18n="homeInfoTitle">¿Qué es SIGTUR?</h3>
@@ -135,7 +149,7 @@ include __DIR__ . '/php/header.php';
                         <h3>PorcoNegro</h3>
                         <p>Todos los sabados de las 00:00 a 06:00!</p>
                         <div class="accion-boton">
-                            <a href="php/eventos.php" class="boton-amarillo">Ver mas</a>
+                            <a href="<?= htmlspecialchars($rutaPorco, ENT_QUOTES, 'UTF-8') ?>" class="boton-amarillo">Ver mas</a>
                         </div>
                     </div>
                     <img src="img/porco.avif" alt="Evento">
@@ -145,7 +159,7 @@ include __DIR__ . '/php/header.php';
                         <h3>La Bambola</h3>
                         <p>Todos los fines de semana!</p>
                         <div class="accion-boton">
-                            <a href="php/eventos.php" class="boton-amarillo">Ver mas</a>
+                            <a href="<?= htmlspecialchars($rutaBambola, ENT_QUOTES, 'UTF-8') ?>" class="boton-amarillo">Ver mas</a>
                         </div>
                     </div>
 
@@ -330,7 +344,6 @@ include __DIR__ . '/php/header.php';
                     <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
                         <span class="social-icon">FB</span>Facebook
                     </a>
-                    <button class="footer-bapst-button footer-info-button" type="button" aria-expanded="false" data-i18n="homeInfoButton">Información</button>
                 </div>
             </div>
         </div>
@@ -398,14 +411,6 @@ include __DIR__ . '/php/header.php';
             </form>
         </div>
     </div>
-    <div class="clima-widget-flotante" aria-live="polite">
-        <span id="clima-icon" class="clima-icon">☁️</span>
-        <span id="clima-temp" class="clima-temp">16.0°C</span>
-        <span id="clima-humedad" class="clima-detalle">Humedad: 70%</span>
-        <span id="clima-ith" class="clima-detalle">ITH: 15.8</span>
-    </div>
-
-    <script src="js/ith.js"></script>
 </body>
 
 </html>

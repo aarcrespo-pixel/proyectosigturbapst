@@ -101,8 +101,11 @@
       </div>
     </section>
   </main>
+  <script src="../js/translator.js"></script>
   <script src="../js/script.js"></script>
   <script>
+    /* Estos selectores conectan preferencias visuales, idioma y tamaño de
+       fuente con las funciones compartidas del script global. */
     const selectorTema = document.getElementById('tema');
     const selectorIdioma = document.getElementById('idioma');
     const selectorTamanoLetra = document.getElementById('tamano-letra');

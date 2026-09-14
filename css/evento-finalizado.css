@@ -1,0 +1,91 @@
+/* El estado finalizado cambia el lenguaje visual a un archivo oscuro: el
+	filtro mantiene legible la fotografía y evita que parezca una convocatoria activa. */
+body.event-finished{background:#0d1117;color:#e5e7eb}
+body.past-event{background:#0d1117;color:#e5e7eb}
+body.event-finished .event-hero::before{filter:grayscale(20%) brightness(.6)}
+body.event-finished .event-badge--finished{background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.5);color:#f87171;box-shadow:0 0 24px rgba(248,113,113,.12)}
+body.event-finished .event-meta::before{content:'EVENTO FINALIZADO';display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.5);color:#f87171;letter-spacing:.04em;font-size:.8rem;font-weight:700}
+/* El pseudo-elemento permite mostrar el mensaje de cierre sin conservar un
+	botón de inscripción que ya no tendría una acción válida. */
+body.event-finished .event-actions::before{content:'Este evento ya concluyó. ¡Revive los mejores momentos en la galería de fotos!';display:block;max-width:680px;margin-bottom:1rem;padding:1.1rem 1.25rem;border:1px solid rgba(148,163,184,.22);border-radius:16px;background:rgba(15,23,42,.78);color:#dbe4ef;line-height:1.55}
+body.event-finished .event-panel{background:#151b24;border-color:#273244;color:#dbe4ef}
+body.past-event .past-main{color:#dbe4ef}
+body.past-event .past-intro,.past-event .past-gallery{max-width:1180px;margin-left:auto;margin-right:auto}
+body.past-event .past-gallery-grid button{border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+body.past-event .past-gallery-grid img{border-radius:16px}
+body.event-finished .event-panel h2{color:#f8fafc}
+body.event-finished .event-fact{background:#1d2633}
+body.event-finished .event-fact strong{color:#9caabd}
+body.event-finished #registerButton{display:none}
+.finished-message{max-width:680px;padding:1.1rem 1.25rem;border:1px solid rgba(148,163,184,.22);border-radius:16px;background:rgba(15,23,42,.78);color:#dbe4ef;line-height:1.55}
+.finished-message strong{display:block;color:#f8fafc;margin-bottom:.25rem}
+.finished-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2rem}
+.finished-metric{padding:1.25rem;border:1px solid #2b3748;border-radius:18px;background:#151b24}
+.finished-metric strong{display:block;font-size:1.8rem;color:#f87171}
+.finished-metric span{color:#9caabd;font-size:.82rem}
+.finished-gallery{margin-top:2rem}
+/* Grid asimétrico: la primera foto ocupa dos filas para crear una portada y
+	las restantes forman un mosaico adaptable sin JavaScript adicional. */
+.finished-gallery-grid{display:grid;grid-template-columns:1.35fr .8fr .8fr;grid-auto-rows:190px;gap:1rem}
+.finished-gallery-grid a{display:block;overflow:hidden;border-radius:16px}
+.finished-gallery-grid img{width:100%;height:100%;object-fit:cover;border-radius:16px;filter:grayscale(12%);transition:transform .25s,box-shadow .25s}
+.finished-gallery-grid img:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 12px 24px rgba(0,0,0,.5)}
+.finished-gallery-grid a:first-child{grid-row:span 2}
+@media(max-width:700px){.finished-metrics{grid-template-columns:1fr}.finished-gallery-grid{grid-template-columns:1fr 1fr;grid-auto-rows:150px}.finished-gallery-grid a:first-child{grid-row:span 1}}
+
+/* Fondo oscuro global: elimina el contraste roto de texto claro sobre blanco. */
+body.event-finished,
+body.past-event{background-color:#121214 !important;color:#f3f4f6 !important}
+
+/* Overlay independiente: oscurece la imagen y conserva el texto por encima. */
+body.event-finished .event-hero::before{filter:grayscale(20%) brightness(.65)}
+body.past-event .past-hero{position:relative;isolation:isolate;background-color:#121214 !important;color:#f3f4f6 !important}
+body.past-event .past-hero::before{content:'';position:absolute;inset:0;z-index:0;background:linear-gradient(180deg,rgba(18,18,20,.4) 0%,rgba(18,18,20,.95) 100%);pointer-events:none}
+body.past-event .past-hero__content{position:relative;z-index:1}
+
+/* Flexbox separa los badges y permite que se adapten al ancho móvil. */
+body.event-finished .event-meta,
+body.past-event .past-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+body.event-finished .event-badge,
+body.past-event .past-badge{background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border-radius:20px;padding:4px 12px;border:1px solid rgba(255,255,255,.15);color:#f3f4f6}
+
+/* Cápsula semántica para indicar que el evento terminó, sin simular un botón. */
+body.past-event .past-status{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.4);padding:8px 18px;border-radius:24px;font-weight:600;font-size:.9rem;display:inline-flex;align-items:center;gap:6px;box-shadow:none}
+
+/* Panel informativo que reemplaza la inscripción en eventos finalizados. */
+body.event-finished .event-actions::before,
+body.past-event .past-intro::after{content:'Este evento ya concluyó. Explora la galería fotográfica a continuación.';display:block;max-width:680px;margin-bottom:1rem;padding:1.1rem 1.25rem;border:1px solid rgba(148,163,184,.22);border-radius:16px;background:#1b1b20;color:#e5e7eb;line-height:1.55}
+
+/* Secciones secundarias con contraste explícito para títulos y párrafos. */
+body.event-finished .event-panel p,
+body.event-finished .event-panel span,
+body.past-event .past-main,
+body.past-event .past-main h2,
+body.past-event .past-main p{color:#e5e7eb}
+body.past-event .past-main{background:#121214}
+
+/* Grid fluido: auto-fill crea columnas de 280px según el espacio disponible. */
+body.event-finished .finished-gallery-grid,
+body.past-event .past-gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:24px}
+body.past-event .past-gallery-grid button{border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.4);transition:transform .3s ease;min-height:220px}
+body.past-event .past-gallery-grid button:hover{transform:scale(1.03)}
+
+/* El nav es fixed/absolute y queda por encima del hero; este espacio superior
+	compensa su altura para que badges, título y descripción no se superpongan. */
+body.event-detail .event-hero__content,
+body.past-event .past-hero__content{
+	 padding-top:140px;
+	 padding-bottom:60px;
+	 display:flex;
+	 flex-direction:column;
+	 gap:16px;
+}
+
+/* El menú conserva la capa interactiva superior, mientras el overlay queda
+	debajo y no intercepta clics ni tapa visualmente la navegación. */
+body.event-detail .menu-principal,
+body.past-event .menu-principal{z-index:100 !important}
+body.event-detail .event-hero::before,
+body.past-event .past-hero::before{z-index:0}
+body.event-detail .event-hero__content,
+body.past-event .past-hero__content{z-index:2}

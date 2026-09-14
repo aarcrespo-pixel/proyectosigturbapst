@@ -113,12 +113,31 @@ body[data-tema="oscuro"] .config-select {
 }
 body[data-tema="oscuro"] .card {
   background: linear-gradient(180deg, rgba(27, 23, 18, 0.96), rgba(28, 20, 12, 0.96));
-  color:#111111
+  color: #f9fafb;
 }
 body[data-tema="oscuro"] .back-pill,
 body[data-tema="oscuro"] .eyebrow,
 body[data-tema="oscuro"] .sub-title {
   color: #ffffff;
+}
+
+/* El formulario de soporte usa controles propios, por eso estos selectores
+   corrigen fondo, borde y texto sin depender de la hoja de login. */
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select,
+body[data-tema="oscuro"] input,
+body[data-tema="oscuro"] textarea,
+body[data-tema="oscuro"] select,
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select,
+body.dark-mode .card,
+body[data-tema="oscuro"] .card,
+[data-theme="dark"] .card {
+  background-color: #27272a;
+  color: #f9fafb;
+  border-color: #3f3f46;
 }
 
 h1 {
@@ -174,6 +193,8 @@ html[data-tamano-letra="muyGrande"] .support-page .hero h1 {
   backdrop-filter: blur(14px);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
+
+.faq-link { display: inline-flex; width: fit-content; margin: 0 0 18px; text-decoration: none; }
 
 .card:hover {
   transform: translateY(-3px);

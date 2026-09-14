@@ -30,6 +30,7 @@
         <article class="card">
           <h2 data-i18n="supportFaqTitle">Preguntas frecuentes</h2>
           <p data-i18n="supportFaqText">Respuestas rápidas a las dudas más comunes.</p>
+          <a class="btn faq-link" href="faq.php">Enviar una pregunta</a>
           <div class="faq-list">
             <div class="faq-item">
               <strong data-i18n="supportFaq1Question">¿Cómo accedo al panel?</strong>
@@ -88,6 +89,7 @@
       </section>
     </section>
   </main>
+  <script src="../js/translator.js"></script>
   <script src="../js/script.js"></script>
 </body>
 </html>

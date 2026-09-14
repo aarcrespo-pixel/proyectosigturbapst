@@ -119,13 +119,45 @@ body[data-tema="oscuro"] {
 }
 
 .card-engagement__comment-item {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: flex-start;
-    gap: 0.75rem;
+    display: block;
     padding: 0.65rem 0.75rem;
     border-radius: 14px;
     background: rgba(17, 17, 17, 0.04);
+}
+
+.comentario-item {
+    background: var(--bg-card, #1e1e22) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+}
+
+.comentario-item--respuesta {
+    margin-left: 24px;
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.comentario-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+/* El flujo vertical separa identidad, cuerpo y acciones para que el mensaje
+   siempre aparezca debajo del nombre, incluso en tarjetas estrechas. */
+.comentario-header-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.comentario-cuerpo {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
 }
 
 .card-engagement__comment-avatar {
@@ -133,6 +165,54 @@ body[data-tema="oscuro"] {
     height: 2rem;
     border-radius: 50%;
     object-fit: cover;
+}
+
+.comentario-usuario-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    align-self: start;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer !important;
+    transition: opacity 160ms ease, text-decoration-color 160ms ease;
+}
+
+.comentario-usuario-link:hover {
+    opacity: 0.78;
+    text-decoration: underline;
+    text-decoration-color: currentColor;
+    text-underline-offset: 0.16em;
+}
+
+.comentario-nombre {
+    color: var(--text-primary, #f9fafb) !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.comentario-texto {
+    display: block;
+    color: var(--text-secondary, #d1d5db);
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+}
+
+.mensajes-widget__chat-header img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.comentario-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
 }
 
 .card-engagement__comment-body {
@@ -147,10 +227,14 @@ body[data-tema="oscuro"] {
     color: #111;
 }
 
-.card-engagement__comment-actions {
+.card-engagement__comment-actions,
+.comentario-actions {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 0.65rem;
-    margin-top: 0.45rem;
+    margin-top: 8px;
+    font-size: 0.85rem;
 }
 
 .card-engagement__comment-action,
@@ -167,6 +251,75 @@ body[data-tema="oscuro"] {
 
 .card-engagement__comment-action.active {
     color: #d62828;
+}
+
+.card-engagement__reply-form {
+    display: none;
+    gap: 0.45rem;
+    margin-top: 0.65rem;
+}
+
+.card-engagement__reply-form.open {
+    display: flex;
+}
+
+.card-engagement__reply-input {
+    min-width: 0;
+    flex: 1;
+    border: 1px solid rgba(24, 34, 45, 0.18);
+    border-radius: 8px;
+    padding: 0.45rem;
+    font: inherit;
+}
+
+.modal-galeria-content,
+.modal-comments-sidebar,
+.lightbox-content,
+.lightbox-comments {
+    /* La sobreescritura con variables evita que el panel blanco fijo rompa el
+       contraste del tema oscuro cuando el modal se abre desde una galería. */
+    background-color: var(--bg-card, #1e1e22) !important;
+    color: var(--text-primary, #f9fafb) !important;
+}
+
+.modal-comments-sidebar textarea,
+.modal-comments-sidebar input[type="text"],
+.lightbox-comments textarea,
+.lightbox-comments input[type="text"] {
+    resize: none !important;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-primary, #f9fafb);
+}
+
+/* El tema oscuro fuerza variables legibles en modales y placeholders, aunque
+   otra hoja haya definido un fondo fijo para el componente del evento. */
+body.dark-mode .modal-comments-sidebar,
+[data-theme="dark"] .modal-comments-sidebar,
+body[data-tema="oscuro"] .modal-comments-sidebar {
+    background-color: var(--bg-card, #1e1e22) !important;
+    color: #f9fafb !important;
+}
+
+body.dark-mode .no-comentarios-msg,
+body.dark-mode .modal-comments-sidebar p,
+[data-theme="dark"] .no-comentarios-msg,
+[data-theme="dark"] .modal-comments-sidebar p,
+body[data-tema="oscuro"] .no-comentarios-msg,
+body[data-tema="oscuro"] .modal-comments-sidebar p,
+.card-engagement__placeholder {
+    color: #9ca3af !important;
+}
+
+body.dark-mode .modal-comments-sidebar h3,
+body.dark-mode .modal-comments-sidebar .evento-titulo,
+[data-theme="dark"] .modal-comments-sidebar h3,
+[data-theme="dark"] .modal-comments-sidebar .evento-titulo,
+body[data-tema="oscuro"] .modal-comments-sidebar h3,
+body[data-tema="oscuro"] .modal-comments-sidebar .evento-titulo {
+    color: #fff !important;
+    font-weight: 600;
+    letter-spacing: -0.02em;
 }
 
 .card-engagement__reply-form {
@@ -214,7 +367,8 @@ body:not([data-tema="oscuro"]) .card-engagement__comment-avatar.avatar-oscuro {
     display: none;
 }
 
-.card-engagement__comment-item span {
+.card-engagement__comment-item > span,
+.card-engagement__comment-body > span {
     flex: 1;
     font-size: 0.92rem;
     line-height: 1.4;
@@ -504,6 +658,44 @@ body:has(main.detalle-hero) .menu a:not(.logo-link):not(.pagina-activa):hover {
     gap: 0.6rem;
 }
 
+.barra-busqueda .search-results-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 360px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: rgba(30, 30, 34, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer !important;
+    transition: background 0.2s ease;
+    text-decoration: none;
+    color: #f9fafb;
+}
+
+.search-result-item:hover { background: rgba(255, 255, 255, 0.08); }
+.search-result-item img { width: 44px; height: 44px; flex: 0 0 44px; object-fit: cover; border-radius: 10px; }
+.search-result-copy { min-width: 0; display: grid; gap: 4px; }
+.search-result-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.search-result-badge { width: fit-content; padding: 2px 7px; border-radius: 999px; background: rgba(0, 168, 255, 0.2); color: #7dd3fc; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em; }
+.search-results-state { padding: 18px 16px; color: #d1d5db; font-size: 0.9rem; }
+
+@media (max-width: 600px) {
+    .barra-busqueda .search-results-dropdown { right: -8px; width: min(360px, calc(100vw - 2rem)); }
+}
+
 .clima-widget {
     position: absolute;
     left: 50%;
@@ -541,6 +733,85 @@ body:has(main.detalle-hero) .menu a:not(.logo-link):not(.pagina-activa):hover {
 .clima-widget .clima-ith {
     font-size: 0.78rem;
     color: rgba(17, 17, 17, 0.7);
+}
+
+/* La cápsula queda anclada al header para que cualquier vista que incluya el
+   layout global pueda mostrar el clima sin alterar el flujo de su contenido. */
+.weather-widget {
+    position: absolute;
+    right: clamp(4.5rem, 15vw, 14rem);
+    top: calc(100% + 0.75rem);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    max-width: min(42rem, 52vw);
+    padding: 6px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    z-index: 101;
+}
+
+.weather-icon { font-size: 1.15rem; line-height: 1; }
+.weather-condition { text-transform: capitalize; }
+.weather-temperature { font-weight: 700; }
+.weather-humidity,
+.weather-ith { color: rgba(255, 255, 255, 0.82); }
+.weather-ith { padding: 3px 8px; border-radius: 999px; font-weight: 700; }
+.weather-comfort { background: rgba(34, 197, 94, 0.25); }
+.weather-caution { background: rgba(245, 158, 11, 0.3); }
+.weather-alert { background: rgba(239, 68, 68, 0.3); }
+.weather-unavailable { opacity: 0.78; }
+
+/* Cada elemento posicionado participa en un contexto de apilamiento. El
+   buscador crea el contexto superior y su dropdown queda delante del clima;
+   el widget conserva su posición absoluta visual, pero usa una capa baja. */
+.menu-principal .barra-busqueda {
+    position: absolute;
+    z-index: 1000;
+}
+
+.menu-principal .barra-busqueda .search-results-dropdown {
+    z-index: 1001 !important;
+}
+
+.menu-principal .weather-widget {
+    z-index: 10;
+}
+
+/* El fondo opaco restablece el contraste en modo oscuro y evita que el
+   backdrop-filter deje la información climática perdida sobre el hero. */
+body.dark-mode .weather-widget,
+body[data-tema="oscuro"] .weather-widget,
+[data-theme="dark"] .weather-widget {
+    background: rgba(24, 24, 27, 0.85) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f9fafb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .weather-widget .ith-badge,
+body[data-tema="oscuro"] .weather-widget .ith-badge,
+[data-theme="dark"] .weather-widget .ith-badge {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+@media (max-width: 900px) {
+    .weather-widget {
+        right: 0;
+        max-width: calc(100vw - 2rem);
+        overflow-x: auto;
+    }
 }
 
 .menu-principal .barra-busqueda {
@@ -2319,3 +2590,10 @@ body[data-tema="oscuro"] .mapa-lugares a {
         width: min(52%, 420px);
     }
 }
+
+/* Esta regla queda al final de la cascada para vencer los ajustes responsive
+   anteriores: el contexto del buscador siempre supera al clima y el dropdown
+   conserva la primera posición aunque el header cambie de layout. */
+.menu-principal .barra-busqueda { z-index: 1000 !important; }
+.menu-principal .barra-busqueda .search-results-dropdown { z-index: 1001 !important; }
+.menu-principal .weather-widget { z-index: 10 !important; }

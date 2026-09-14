@@ -201,6 +201,35 @@ textarea:focus {
     transform: translateY(-1px);
 }
 
+/* Las vistas de registro y perfil comparten este formulario. Restablecemos
+   explícitamente sus campos para que el tema oscuro no herede blancos del
+   navegador ni pierda contraste en la cascada de los estilos base. */
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select,
+body[data-tema="oscuro"] input,
+body[data-tema="oscuro"] textarea,
+body[data-tema="oscuro"] select,
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    background-color: #27272a;
+    color: #f9fafb;
+    border: 1px solid #3f3f46;
+}
+
+body.dark-mode input:focus,
+body.dark-mode textarea:focus,
+body[data-tema="oscuro"] input:focus,
+body[data-tema="oscuro"] textarea:focus,
+body[data-tema="oscuro"] select:focus,
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+    background-color: #27272a;
+    color: #f9fafb;
+}
+
 textarea {
     resize: vertical;
     min-height: 110px;
