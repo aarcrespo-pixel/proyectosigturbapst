@@ -11,8 +11,9 @@ const isEventos = !!document.querySelector("main.pagina-eventos"); // pagina de 
 const isTurismo = !!document.querySelector("main.pagina-turismo"); // pagina de turismo
 const isLugares = !!document.querySelector("main.pagina-lugares"); // pagina de lugares
 
-const infoButton = document.querySelector('.footer-info-button'); // boton info en el footer
+const infoButton = document.querySelector('.info-btn'); // boton info del hero del index
 const infoPanel = document.querySelector('.info-panel'); // panel info en el index
+const footerInfoButton = document.querySelector('.footer-info-button'); // boton info del footer
 const bottomNavUsuario = document.querySelector('.bottom-nav-item[href$="login.html"]'); // boton usuario en menu inferior
 
 
@@ -1273,45 +1274,74 @@ const activarToggleFooter = () => {
 };
 
 const activarInformacionBapst = () => {
-    const columnasSociales = document.querySelectorAll('.footer-col--social');
-    if (!columnasSociales.length) return;
+    const footerInfoButton = document.querySelector('.footer-info-button');
+    const footerBapstButton = document.querySelector('.footer-bapst-button');
+    if (!footerInfoButton && !footerBapstButton) return;
 
     const modal = document.createElement('div');
     modal.className = 'bapst-modal';
     modal.hidden = true;
-     /* El modal se construye una vez con HTML controlado y luego recibe listeners
-         para cierre, teclado y apertura desde los distintos botones de información. */
-     modal.innerHTML = `
+    modal.innerHTML = `
         <div class="bapst-modal__backdrop" data-bapst-close></div>
         <section class="bapst-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="bapst-modal-title">
             <button class="bapst-modal__close" type="button" aria-label="Cerrar información" data-bapst-close>×</button>
             <span class="bapst-modal__eyebrow">Proyecto estudiantil</span>
             <h2 id="bapst-modal-title">BAPST</h2>
-            <p>Somos estudiantes de 3ro MC de Informática de la Escuela Catalina Harriague de Castaños de Salto.</p>
-            <p>El equipo está formado por Benjamín Reina, Aaron Crespo, Santiago Diez, Pío Monetta y Federico Sarmiento.</p>
-            <p>Diseñamos y desarrollamos esta página como una propuesta para conectar a la comunidad con lo mejor de nuestra ciudad.</p>
-            <a href="https://instagram.com/bapstuy" target="_blank" rel="noopener noreferrer">Conocer BAPST en Instagram</a>
+            <div class="bapst-modal__content"></div>
         </section>`;
     document.body.appendChild(modal);
+
+    const eyebrow = modal.querySelector('.bapst-modal__eyebrow');
+    const title = modal.querySelector('#bapst-modal-title');
+    const content = modal.querySelector('.bapst-modal__content');
 
     const cerrar = () => {
         modal.hidden = true;
         document.body.classList.remove('bapst-modal-open');
     };
-    const abrir = () => {
+
+    const abrir = ({ eyebrowText, titleText, paragraphs, link }) => {
+        if (eyebrow) eyebrow.textContent = eyebrowText;
+        if (title) title.textContent = titleText;
+        if (content) {
+            content.innerHTML = paragraphs.map((texto) => `<p>${texto}</p>`).join('');
+            if (link) {
+                content.insertAdjacentHTML('beforeend', `<a href="${link.href}" target="_blank" rel="noopener noreferrer">${link.label}</a>`);
+            }
+        }
         modal.hidden = false;
         document.body.classList.add('bapst-modal-open');
         modal.querySelector('.bapst-modal__close')?.focus();
     };
 
-    columnasSociales.forEach((columna) => {
-        const boton = document.createElement('button');
-        boton.className = 'footer-bapst-button';
-        boton.type = 'button';
-        boton.textContent = 'Sobre BAPST';
-        boton.addEventListener('click', abrir);
-        columna.appendChild(boton);
+    footerInfoButton?.addEventListener('click', () => {
+        abrir({
+            eyebrowText: 'Información',
+            titleText: 'SIGTUR',
+            paragraphs: [
+                'SIGTUR es una guía local de Salto pensada para ayudarte a descubrir eventos, lugares y experiencias únicas de la ciudad.',
+                'La plataforma reúne recomendaciones culturales, turísticas y de ocio para que cada visita sea más simple, informada y memorable.'
+            ],
+            link: null
+        });
     });
+
+    footerBapstButton?.addEventListener('click', () => {
+        abrir({
+            eyebrowText: 'Proyecto estudiantil',
+            titleText: 'BAPST',
+            paragraphs: [
+                'Somos estudiantes de 3ro MC de Informática de la Escuela Catalina Harriague de Castaños de Salto.',
+                'El equipo está formado por Benjamín Reina, Aaron Crespo, Santiago Diez, Pío Monetta y Federico Sarmiento.',
+                'Diseñamos y desarrollamos esta página como una propuesta para conectar a la comunidad con lo mejor de nuestra ciudad.'
+            ],
+            link: {
+                href: 'https://instagram.com/bapstuy',
+                label: 'Conocer BAPST en Instagram'
+            }
+        });
+    });
+
     modal.addEventListener('click', (evento) => {
         if (evento.target.closest('[data-bapst-close]')) cerrar();
     });

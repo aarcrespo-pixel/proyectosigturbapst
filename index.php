@@ -77,16 +77,6 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
         <p class="texto-deslizar" data-i18n="homeScroll">
             Desliza para ver más
         </p>
-        <!-- Botón de información -->
-        <button class="info-btn" type="button" aria-expanded="false" data-i18n="homeInfoButton">Información</button>
-        <!-- Panel con información sobre SIGTUR -->
-        <div class="info-panel" id="info-panel">
-            <h3 data-i18n="homeInfoTitle">¿Qué es SIGTUR?</h3>
-            <p data-i18n="homeInfoText1">SIGTUR es una guía local de Salto pensada para ayudarte a descubrir eventos, lugares y experiencias
-                únicas de la ciudad.</p>
-            <p data-i18n="homeInfoText2">La plataforma reúne recomendaciones culturales, turísticas y de ocio para que cada visita sea más simple,
-                informada y memorable.</p>
-        </div>
     </section>
 
 
@@ -336,17 +326,19 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
             <div class="footer-col footer-col--social">
                 <button class="footer-toggle" type="button" aria-expanded="false">
                     <h4 data-i18n="footerSigtur">SIGTUR</h4>
-                    <span class="footer-toggle-icon"></span>
+                    <span class="footer-toggle-icon">▾</span>
                 </button>
-                    <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon">
-                        <span class="social-icon">IG</span>Instagram
-                    </a>
-                    <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
-                        <span class="social-icon">FB</span>Facebook
-                    </a>
+                <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon">
+                    <span class="social-icon">IG</span>Instagram
+                </a>
+                <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
+                    <span class="social-icon">FB</span>Facebook
+                </a>
+                <div class="footer-info-actions">
+                    <button class="footer-info-button" type="button">Información</button>
+                    <button class="footer-bapst-button" type="button">Sobre BAPST</button>
                 </div>
             </div>
-        </div>
         </div>
 
 

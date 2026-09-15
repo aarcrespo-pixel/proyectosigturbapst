@@ -18,4 +18,4 @@ if ($mensajesWidgetUserId <= 0) {
         </div>
     </section>
 </div>
-<script src="<?= htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') ?>js/mensajes.js" defer></script>
+<script src="<?= htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') ?>js/mensajes.js?v=20260914-2" defer></script>

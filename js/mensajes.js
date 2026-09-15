@@ -78,7 +78,6 @@ window.chatIntervalId = window.chatIntervalId || null;
 
         const rutas = [
             `${historyApi}?receptor_id=${encodeURIComponent(idValido)}`,
-            `/php/api/obtener_mensajes.php?receptor_id=${encodeURIComponent(idValido)}`,
             `${api}?accion=conversacion&receptor_id=${encodeURIComponent(idValido)}`,
         ].filter((ruta, indice, lista) => lista.indexOf(ruta) === indice);
         let ultimoError = 'No se pudo obtener una respuesta del servidor.';

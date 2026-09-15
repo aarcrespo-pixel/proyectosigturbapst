@@ -1765,9 +1765,16 @@ body[data-tema="oscuro"] .perfil-form-grid textarea {
     letter-spacing: .18em;
 }
 
+.footer-info-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 0.75rem;
+}
+
+.footer-info-button,
 .footer-bapst-button {
     width: fit-content;
-    margin-top: 0.35rem;
     padding: 0.55rem 0.9rem;
     border: 1px solid rgba(245, 232, 216, .3);
     border-radius: 999px;
@@ -1776,13 +1783,15 @@ body[data-tema="oscuro"] .perfil-form-grid textarea {
     font: inherit;
     font-size: 0.88rem;
     cursor: pointer;
-    transition: background .25s ease, color .25s ease, transform .25s ease;
+    transition: background .25s ease, color .25s ease, transform .25s ease, box-shadow .25s ease;
 }
 
+.footer-info-button:hover,
 .footer-bapst-button:hover {
     background: #f5e8d7;
     color: #111;
     transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, .18);
 }
 
 .mapa-seccion {
@@ -1902,6 +1911,7 @@ body[data-tema="oscuro"] .mapa-lugares a {
     display: grid;
     place-items: center;
     padding: 1.25rem;
+    opacity: 1;
 }
 
 .bapst-modal__backdrop {
@@ -1920,6 +1930,18 @@ body[data-tema="oscuro"] .mapa-lugares a {
     background: linear-gradient(145deg, #24201c, #111);
     color: #f5e8d7;
     box-shadow: 0 24px 80px rgba(0, 0, 0, .4);
+    animation: bapst-modal-in .28s ease;
+}
+
+@keyframes bapst-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .bapst-modal__close {
@@ -1951,7 +1973,13 @@ body[data-tema="oscuro"] .mapa-lugares a {
     color: #fff;
 }
 
+.bapst-modal__content {
+    display: grid;
+    gap: .2rem;
+}
+
 .bapst-modal__dialog p {
+    margin: 0;
     color: rgba(245, 232, 216, .82);
     line-height: 1.7;
 }
