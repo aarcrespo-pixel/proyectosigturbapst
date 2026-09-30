@@ -1,0 +1,13 @@
+# Local database exports and MySQL data files
+/bapst.sql
+/bapst/
+
+# User-uploaded content and local runtime data
+/uploads/
+
+# Local environment and editor noise
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
