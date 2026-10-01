@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 session_start();
 require_once __DIR__ . '/conexion.php';
@@ -7,6 +8,8 @@ $configUsuario = sigtur_usuario_actual($pdo);
 $configBaseUrl = rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/'))), '/') . '/';
 $configCsrfToken = sigtur_csrf_token();
 ?>
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -19,7 +22,11 @@ $configCsrfToken = sigtur_csrf_token();
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
+<<<<<<< HEAD
   <link rel="stylesheet" href="../css/soporte.css?v=<?= time() ?>" />
+=======
+  <link rel="stylesheet" href="../css/soporte.css" />
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 </head>
 <body>
   <main class="support-page">
@@ -64,6 +71,7 @@ $configCsrfToken = sigtur_csrf_token();
 
         <article class="card">
           <h2 data-i18n="configNotificationsTitle">Notificaciones</h2>
+<<<<<<< HEAD
           <p data-i18n="configNotificationsText">Activá los avisos del navegador y enterate cuando se publique un evento nuevo en SIGTUR.</p>
 
           <?php if ($configUsuario): ?>
@@ -103,6 +111,24 @@ $configCsrfToken = sigtur_csrf_token();
               <a class="btn btn-primary" href="login.php">Iniciar sesión</a>
             </div>
           <?php endif; ?>
+=======
+          <p data-i18n="configNotificationsText">Activa o desactiva los avisos importantes del proyecto.</p>
+
+          <div class="config-row">
+            <div class="config-label">
+              <strong class="sub-title" data-i18n="configNotificationEventsTitle">Eventos destacados</strong>
+              <span data-i18n="configNotificationEventsText">Recibe alertas de actividades nuevas o próximas.</span>
+            </div>
+            <span class="config-chip">Activado</span>
+          </div>
+          <div class="config-row">
+            <div class="config-label">
+              <strong class="sub-title" data-i18n="configNotificationRemindersTitle">Recordatorios</strong>
+              <span data-i18n="configNotificationRemindersText">Envío de avisos de actualización o mantenimiento.</span>
+            </div>
+            <span class="config-chip">Opcional</span>
+          </div>
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
         </article>
 
         <article class="card">
@@ -133,17 +159,26 @@ $configCsrfToken = sigtur_csrf_token();
       </div>
     </section>
   </main>
+<<<<<<< HEAD
   <script src="../js/translator.js?v=20261001-1"></script>
   <script src="../js/script.js?v=20261001-1"></script>
   <script src="../js/notificaciones.js?v=<?= time() ?>"></script>
+=======
+  <script src="../js/translator.js"></script>
+  <script src="../js/script.js"></script>
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
   <script>
     /* Estos selectores conectan preferencias visuales, idioma y tamaño de
        fuente con las funciones compartidas del script global. */
     const selectorTema = document.getElementById('tema');
     const selectorIdioma = document.getElementById('idioma');
     const selectorTamanoLetra = document.getElementById('tamano-letra');
+<<<<<<< HEAD
     const botonGuardar = document.querySelector('.config-actions .btn-primary');
     const botonRestablecer = document.querySelector('.config-actions .btn-secondary');
+=======
+    const botonGuardar = document.querySelector('.btn-primary');
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 
     const aplicarTemaDesdeConfiguracion = (oscuro) => {
       guardarTema(oscuro);
@@ -183,6 +218,7 @@ $configCsrfToken = sigtur_csrf_token();
         if (selectorTamanoLetra) {
           guardarTamanoLetra(selectorTamanoLetra.value);
         }
+<<<<<<< HEAD
         window.location.assign('../index.php');
       });
     }
@@ -195,6 +231,8 @@ $configCsrfToken = sigtur_csrf_token();
         guardarTamanoLetra('normal');
         if (selectorIdioma) selectorIdioma.value = 'es';
         if (selectorTamanoLetra) selectorTamanoLetra.value = 'normal';
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
       });
     }
 

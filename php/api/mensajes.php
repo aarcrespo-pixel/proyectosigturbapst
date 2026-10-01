@@ -34,9 +34,12 @@ try {
     if ($accion !== 'consulta' && $usuarioActual['rol'] !== 'administrador') {
         responderMensajes(['success' => false, 'status' => 'error', 'message' => 'La mensajería directa es exclusiva para administradores.'], 403);
     }
+<<<<<<< HEAD
     if ($accion === 'consulta' && !sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
         responderMensajes(['success' => false, 'status' => 'error', 'message' => 'La sesión expiró. Recargá la página e intentá otra vez.'], 403);
     }
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
     // CAMBIO APLICADO: aceptamos los nombres usados por el widget y por los
     // formularios de soporte/eventos, normalizándolos a un único destinatario.
     $otroUsuarioId = (int) ($_GET['usuario_id'] ?? $_POST['usuario_id'] ?? $_GET['destinatario_id'] ?? $_POST['destinatario_id'] ?? $_POST['destinatario'] ?? $_GET['receptor_id'] ?? $_POST['receptor_id'] ?? 0);

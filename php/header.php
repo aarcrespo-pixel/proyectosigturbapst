@@ -1,5 +1,8 @@
 <?php
+<<<<<<< HEAD
 require_once __DIR__ . '/helpers/autorizacion.php';
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 /* El header es un componente compartido: se ejecuta dentro de varias páginas,
    por eso primero garantiza una sesión disponible sin iniciar una duplicada. */
 if (session_status() === PHP_SESSION_NONE) {
@@ -24,7 +27,10 @@ $headerPageBase = $_SERVER['PHP_SELF'] ?? '';
 $headerUserLoggedIn = isset($_SESSION['usuario_id']);
 $headerUserName = $_SESSION['usuario_nombre'] ?? 'Usuario';
 $headerUserEmail = $_SESSION['usuario_email'] ?? '';
+<<<<<<< HEAD
 $headerUserRole = sigtur_normalizar_rol($_SESSION['rol'] ?? null);
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 $headerUserNickname = $_SESSION['usuario_nickname'] ?? (!empty($headerUserEmail) ? strtolower(strstr($headerUserEmail, '@', true) ?: $headerUserEmail) : 'usuario');
 $headerUserAvatar = $_SESSION['usuario_avatar'] ?? 'user-default.png';
 
@@ -133,6 +139,7 @@ $headerLinks = [
 <script src="<?= BASE_URL ?>js/weather.js" defer></script>
 <script src="<?= BASE_URL ?>js/translator.js" defer></script>
 <script src="<?= BASE_URL ?>js/search.js" defer></script>
+<<<<<<< HEAD
 <script src="<?= BASE_URL ?>js/notificaciones.js" defer></script>
 <script src="<?= BASE_URL ?>js/copilot_ai.js?v=20260930-1" defer></script>
 <?php $mensajesWidgetRoot = BASE_URL; include __DIR__ . '/mensajes-widget.php'; ?>
@@ -173,6 +180,10 @@ $headerLinks = [
 </div>
 <?php endif; ?>
 
+=======
+<?php $mensajesWidgetRoot = BASE_URL; include __DIR__ . '/mensajes-widget.php'; ?>
+
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 <?php /* El modal solo se monta para usuarios autenticados; así no se exponen
          controles de edición de perfil a visitantes anónimos. */
 if ($headerUserLoggedIn): ?>

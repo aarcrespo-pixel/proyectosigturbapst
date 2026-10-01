@@ -2,7 +2,10 @@
 session_start();
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
+<<<<<<< HEAD
 require_once __DIR__ . '/helpers/notificaciones.php';
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     // El endpoint solo crea eventos por POST; cualquier acceso directo vuelve al listado.
@@ -144,6 +147,7 @@ if ($accion === 'editar') {
 $insertar = $pdo->prepare('INSERT INTO eventos (titulo, slug, descripcion, fecha, ubicacion, lugar_id, categoria, tipo_entrada, precio, imagen_portada, es_pasado, organizador_id) VALUES (:titulo, :slug, :descripcion, :fecha, :ubicacion, :lugar_id, :categoria, :tipo_entrada, :precio, :imagen, :es_pasado, :organizador)');
 $insertar->execute($parametrosEvento);
 
+<<<<<<< HEAD
 sigtur_notificar_turistas(
     $pdo,
     'Nuevo evento en SIGTUR',
@@ -151,6 +155,8 @@ sigtur_notificar_turistas(
     'evento'
 );
 
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 /* Redirigimos usando el ID generado por MySQL, no el slug recibido, para abrir
     exactamente la fila recién creada aunque el slug haya sido numerado. */
 header('Location: evento.php?id=' . (int) $pdo->lastInsertId());

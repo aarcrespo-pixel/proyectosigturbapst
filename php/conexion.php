@@ -230,6 +230,7 @@ try {
     foreach (['foto_url' => "ALTER TABLE `mensajes` ADD COLUMN `foto_url` VARCHAR(255) DEFAULT NULL", 'audio_url' => "ALTER TABLE `mensajes` ADD COLUMN `audio_url` VARCHAR(255) DEFAULT NULL"] as $campoMensaje => $sqlMensaje) {
         if (!in_array($campoMensaje, $columnasMensajes, true)) $pdo->exec($sqlMensaje);
     }
+<<<<<<< HEAD
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS `notificaciones` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -290,6 +291,8 @@ try {
         CONSTRAINT `fk_recordatorios_evento` FOREIGN KEY (`evento_id`) REFERENCES `eventos` (`id`) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
     /* CAMBIO APLICADO: normalizamos instalaciones antiguas. El proyecto usa
        mensaje/fecha_creacion, pero algunas bases pueden traer texto/fecha;
        agregamos las columnas actuales y copiamos los datos existentes. */

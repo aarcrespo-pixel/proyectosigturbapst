@@ -1041,6 +1041,7 @@ body[data-tema="oscuro"] .perfil-btn:hover {
     color: #ffc1c1;
 }
 
+<<<<<<< HEAD
 .notificaciones-widget {
     position: relative;
     display: flex;
@@ -1192,6 +1193,8 @@ body[data-tema="oscuro"] .perfil-btn:hover {
     margin-top: 0.75rem;
 }
 
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 .perfil.activo .perfil-menu {
     display: flex;
 }
@@ -2192,6 +2195,7 @@ body[data-tema="oscuro"] .mapa-lugares a {
     color: inherit;
 }
 
+<<<<<<< HEAD
 .copilot-assistant {
     position: fixed;
     right: 1.25rem;
@@ -2372,6 +2376,8 @@ body[data-tema="oscuro"] .mapa-lugares a {
     cursor: wait;
 }
 
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 @media(max-width:1120px) {
     .footer-grid {
         grid-template-columns: repeat(2, minmax(160px, 1fr));

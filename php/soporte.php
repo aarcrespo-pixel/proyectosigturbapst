@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 session_start();
 require_once __DIR__ . '/conexion.php';
@@ -6,6 +7,9 @@ require_once __DIR__ . '/helpers/autorizacion.php';
 $soporteUsuario = sigtur_usuario_actual($pdo);
 $soporteCsrfToken = $soporteUsuario ? sigtur_csrf_token() : '';
 ?>
+=======
+<?php session_start(); ?>
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -58,6 +62,7 @@ $soporteCsrfToken = $soporteUsuario ? sigtur_csrf_token() : '';
         <article class="card">
           <h2 data-i18n="supportReportTitle">Reportes</h2>
           <p data-i18n="supportReportText">Describe el problema para que el equipo lo revise.</p>
+<<<<<<< HEAD
           <?php if ($soporteUsuario): ?>
             <form class="report-box" data-soporte-mensajes action="api/mensajes.php" method="post">
               <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($soporteCsrfToken, ENT_QUOTES, 'UTF-8') ?>">
@@ -72,6 +77,14 @@ $soporteCsrfToken = $soporteUsuario ? sigtur_csrf_token() : '';
               <a class="btn" href="login.php">Iniciar sesión</a>
             </div>
           <?php endif; ?>
+=======
+          <form class="report-box" data-soporte-mensajes action="api/mensajes.php" method="post">
+            <input type="text" name="contexto" value="Soporte general" placeholder="Asunto del reporte" data-i18n-placeholder="supportReportSubject" />
+            <textarea name="mensaje" placeholder="Describe el problema o la incidencia..." data-i18n-placeholder="supportReportTextarea" required></textarea>
+            <button class="btn" type="submit" data-i18n="supportReportButton">Enviar reporte</button>
+            <p data-soporte-estado role="status" aria-live="polite"></p>
+          </form>
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
         </article>
 
         <article class="card">
@@ -105,7 +118,11 @@ $soporteCsrfToken = $soporteUsuario ? sigtur_csrf_token() : '';
       </section>
     </section>
   </main>
+<<<<<<< HEAD
   <script src="../js/mensajes.js?v=20261001-1"></script>
+=======
+  <script src="../js/mensajes.js?v=20260915-1"></script>
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
   <script src="../js/translator.js"></script>
   <script src="../js/script.js"></script>
 </body>

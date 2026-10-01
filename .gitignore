@@ -6,7 +6,10 @@
 /uploads/
 
 # Local environment and editor noise
+<<<<<<< HEAD
 .env
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 .vscode/
 .DS_Store
 Thumbs.db

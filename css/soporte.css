@@ -4,7 +4,11 @@
   --text: #18324a;
   --muted: #4f6780;
   --accent: #6caedb;
+<<<<<<< HEAD
   --accent-deep: #28536b;
+=======
+  --accent-deep: #f3a24b;
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
   --border: rgba(24, 50, 74, 0.12);
   --shadow: 0 18px 36px rgba(82, 126, 163, 0.16);
 }
@@ -15,7 +19,11 @@ body[data-tema="oscuro"] {
   --text: #f6ead8;
   --muted: #e0c9a8;
   --accent: #ffd39a;
+<<<<<<< HEAD
   --accent-deep: #7fb4c8;
+=======
+  --accent-deep: #f5a84a;
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
   --border: rgba(255, 216, 165, 0.14);
   --shadow: 0 24px 44px rgba(0, 0, 0, 0.34);
 }
@@ -75,7 +83,11 @@ body {
   border-radius: 999px;
   background: rgba(122, 122, 122, 0.16);
   color: #111111;
+<<<<<<< HEAD
   border: 1px solid rgba(40, 83, 107, 0.24);
+=======
+  border: 1px solid rgb(247, 179, 92, 0.40);
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 700;
@@ -99,7 +111,11 @@ body {
   border-radius: 999px;
   background: rgba(122, 122, 122, 0.16);
   color: #111111;
+<<<<<<< HEAD
   border: 1px solid rgba(40, 83, 107, 0.24);
+=======
+  border: 1px solid rgb(247, 179, 92, 0.40);
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
   font-size: 0.85rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -148,8 +164,13 @@ h1 {
   font-size: clamp(2.2rem, 5.2vw, 4rem);
   font-weight: 500;
   margin: 14px 0 10px;
+<<<<<<< HEAD
   color: #28536b;
   text-shadow: 0 1px 4px rgba(40, 83, 107, 0.12);
+=======
+  color: #f7b35c;
+  text-shadow: 0 1px 4px rgba(247, 179, 92, 0.12);
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
   letter-spacing: 0;
 }
 
@@ -199,6 +220,7 @@ html[data-tamano-letra="muyGrande"] .support-page .hero h1 {
 
 .faq-link { display: inline-flex; width: fit-content; margin: 0 0 18px; text-decoration: none; }
 
+<<<<<<< HEAD
 .config-notificaciones { display: grid; gap: 16px; margin-top: 20px; }
 .config-notificaciones__summary { margin-top: 0; }
 .config-notificaciones__toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
@@ -218,6 +240,8 @@ html[data-tamano-letra="muyGrande"] .support-page .hero h1 {
 .support-login-prompt { display: grid; gap: 12px; justify-items: start; }
 .report-box button:disabled { cursor: wait; opacity: .65; }
 
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 .card:hover {
   transform: translateY(-3px);
   box-shadow: 0 24px 40px rgba(15, 23, 42, 0.16);
@@ -382,14 +406,23 @@ html[data-tamano-letra="muyGrande"] .support-page .hero h1 {
   padding: 10px 14px;
   font-weight: 700;
   cursor: pointer;
+<<<<<<< HEAD
   color: #ffffff;
   background: #28536b;
   box-shadow: 0 8px 16px rgba(40, 83, 107, 0.18);
+=======
+  color: #111827;
+  background: linear-gradient(270deg, #f7b500, #ffc400, #ffd84d, #ffea70);
+  background-size: 300% 300%;
+  animation: hoverGradientShift 3.5s ease infinite;
+  box-shadow: 0 10px 18px rgba(247, 181, 0, 0.18);
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .btn:hover {
   transform: translateY(-1px) scale(1.02);
+<<<<<<< HEAD
   background: #1f4358;
   box-shadow: 0 12px 20px rgba(40, 83, 107, 0.24);
 }
@@ -398,6 +431,11 @@ html[data-tamano-letra="muyGrande"] .support-page .hero h1 {
 .btn-secondary { color: #28536b; background: rgba(40, 83, 107, .08); border-color: rgba(40, 83, 107, .18); box-shadow: none; }
 .btn-secondary:hover { color: #1f4358; background: rgba(40, 83, 107, .14); box-shadow: none; }
 
+=======
+  box-shadow: 0 14px 22px rgba(247, 181, 0, 0.25);
+}
+
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 .contact-list {
   display: grid;
   gap: 10px;

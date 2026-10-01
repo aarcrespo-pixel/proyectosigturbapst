@@ -2,7 +2,10 @@
 session_start();
 require_once __DIR__ . '/../conexion.php';
 require_once __DIR__ . '/../helpers/autorizacion.php';
+<<<<<<< HEAD
 require_once __DIR__ . '/../helpers/notificaciones.php';
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 $usuario = sigtur_requerir_rol($pdo, ['organizador', 'administrador'], '../login.php', '../eventos.php');
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
@@ -21,7 +24,11 @@ if ($preguntaId <= 0 || $respuesta === '' || mb_strlen($respuesta) > 2000) {
     exit('La respuesta debe tener entre 1 y 2000 caracteres.');
 }
 
+<<<<<<< HEAD
 $consulta = $pdo->prepare('SELECT p.evento_slug, p.usuario_id, p.pregunta, e.organizador_id, e.titulo FROM preguntas_eventos p INNER JOIN eventos e ON e.slug = p.evento_slug WHERE p.id = :id LIMIT 1');
+=======
+$consulta = $pdo->prepare('SELECT p.evento_slug, e.organizador_id FROM preguntas_eventos p INNER JOIN eventos e ON e.slug = p.evento_slug WHERE p.id = :id LIMIT 1');
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 $consulta->execute([':id' => $preguntaId]);
 $pregunta = $consulta->fetch();
 if (!$pregunta) {
@@ -35,6 +42,7 @@ if ($usuario['rol'] === 'organizador' && (int) $pregunta['organizador_id'] !== (
 
 $actualizar = $pdo->prepare('UPDATE preguntas_eventos SET respuesta = :respuesta WHERE id = :id');
 $actualizar->execute([':respuesta' => $respuesta, ':id' => $preguntaId]);
+<<<<<<< HEAD
 
 $destinatarioId = (int) ($pregunta['usuario_id'] ?? 0);
 if ($destinatarioId > 0) {
@@ -47,5 +55,7 @@ if ($destinatarioId > 0) {
     );
 }
 
+=======
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 header('Location: ../' . ($usuario['rol'] === 'administrador' ? 'panel-admin.php' : 'panel-organizador.php') . '#consultas');
 exit;

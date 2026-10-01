@@ -268,6 +268,23 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
         </div>
     </section>
 
+<<<<<<< HEAD
+=======
+    <section class="seccion-notificaciones">
+        <h2 data-i18n="homeNewsTitle">Noticias en Salto</h2>
+        <div class="contenedor-carta">
+            <img src="img/peñ.jpg" alt="Carta" class="imagen-carta">
+            <div class="texto-carta">
+                <h2>El Clásico Salteño se juega este fin de semana, Peñarol vs. Nacional</h2>
+                <p>Este sabado 18 de julio se disputará el clásico entre Peñarol y Nacional en el Estadio de Peñarol</p>
+                <div class="accion-boton">
+                    <a href="php/eventos.php" class="boton-amarillo" data-i18n="homeNewsButton">Ver noticia</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+>>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
     <footer class="footer">
         <div class="footer-grid">
             <div class="footer-col">
