@@ -1,0 +1,64 @@
+:root {
+    --bg-main: #f5f7fb;
+    --bg-card: #ffffff;
+    --text-primary: #172033;
+    --text-secondary: #5f6b7a;
+    --accent-blue: #00a8ff;
+}
+
+body.lugar-page { margin: 0; background: var(--bg-main); color: var(--text-primary); }
+body[data-tema="oscuro"].lugar-page { --bg-main: #101114; --bg-card: #1e1e22; --text-primary: #f9fafb; --text-secondary: #a1a1aa; }
+
+.lugar-hero { position: relative; height: 400px; background: var(--lugar-image) center/cover; display: flex; align-items: flex-end; }
+.lugar-hero__overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8, 12, 20, .12), rgba(8, 12, 20, .88)); }
+.lugar-hero__content { position: relative; z-index: 1; width: min(1000px, calc(100% - 48px)); margin: 0 auto; padding: 40px 24px; color: #fff; }
+/* El tracking negativo compacta los títulos sin reducir su tamaño visual,
+   una decisión tipográfica útil para encabezados largos de lugares. */
+.lugar-seccion-titulo,
+.lugar-hero-titulo { font-weight: 600; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--text-primary); margin-bottom: 12px; }
+.lugar-hero-titulo { margin: 12px 0 8px; color: #fff; font-size: 2.5rem; font-weight: 800; line-height: 1.05; }
+.lugar-badge { display: inline-flex; padding: 6px 12px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; background: rgba(255,255,255,.16); text-transform: uppercase; font-size: .78rem; font-weight: 700; }
+.lugar-location { margin: 0; color: rgba(255,255,255,.86); }
+.lugar-content { max-width: 1000px; margin: 0 auto; padding: 40px 24px; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; }
+.lugar-copy, .lugar-useful { min-width: 0; }
+.lugar-module { padding: 0 0 28px; border-bottom: 1px solid rgba(127,127,127,.18); margin-bottom: 28px; }
+.lugar-module h2, .lugar-useful h2, .lugar-events h2 { margin: 0 0 14px; color: var(--text-primary); font-size: 1.55rem; }
+.lugar-descripcion,
+.lugar-historia-texto { font-weight: 400; font-size: 1rem; line-height: 1.6; letter-spacing: -0.01em; color: var(--text-secondary); }
+.lugar-module p { color: var(--text-secondary); line-height: 1.75; }
+.lugar-kicker { margin: 0 0 8px; color: var(--accent-blue); font-size: .78rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.lugar-attractions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.lugar-attraction { padding: 14px; border: 1px solid rgba(127,127,127,.18); border-radius: 12px; background: var(--bg-card); color: var(--text-secondary); }
+.lugar-attraction:first-letter { color: var(--accent-blue); }
+.lugar-useful { align-self: start; padding: 24px; border: 1px solid rgba(127,127,127,.18); border-radius: 18px; background: var(--bg-card); box-shadow: 0 14px 32px rgba(0,0,0,.08); }
+.useful-item { display: grid; gap: 6px; padding: 16px 0; border-bottom: 1px solid rgba(127,127,127,.18); color: var(--text-secondary); line-height: 1.5; }
+.useful-item strong { color: var(--text-primary); }
+.map-link, .event-more { display: inline-flex; justify-content: center; margin-top: 18px; padding: 11px 16px; border-radius: 10px; background: var(--accent-blue); color: #06131c; font-weight: 800; text-decoration: none; }
+.lugar-events { max-width: 1000px; margin: 0 auto; padding: 12px 24px 72px; }
+.lugar-events__heading { margin-bottom: 20px; }
+.lugar-events-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+/* El enlace envuelve toda la tarjeta para que la interacción sea semántica y
+    accesible por teclado, no dependiente de un onclick sobre un contenedor. */
+a.card-evento-sugerido-link { display: block; color: inherit; text-decoration: none; cursor: pointer !important; }
+
+/* Forzamos la manito también en los descendientes: algunos estilos globales
+    pueden restablecer el cursor en títulos, textos o imágenes. La imagen no
+    captura eventos propios y deja que el enlace padre gestione todo el click. */
+.card-evento-sugerido,
+.card-evento-sugerido * { cursor: pointer !important; }
+.card-evento-sugerido img { pointer-events: none; }
+.card-evento-sugerido { overflow: hidden; border: 1px solid rgba(127,127,127,.18); border-radius: 16px; background: var(--bg-card); box-shadow: 0 12px 28px rgba(0,0,0,.08); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+.card-img-container { height: 170px; overflow: hidden; }
+.card-img-container img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform 0.3s ease; }
+a.card-evento-sugerido-link:hover .card-evento-sugerido { transform: translateY(-6px); box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.4); border-color: rgba(255, 255, 255, 0.2); }
+a.card-evento-sugerido-link:hover .card-img-container img { transform: scale(1.04); transition: transform 0.3s ease; }
+.lugar-event-card__body { display: grid; gap: 20px; padding: 18px; }
+.lugar-event-card h3 { margin: 0; color: var(--text-primary); font-size: 1.1rem; }
+.event-category, .event-date { color: var(--text-secondary); font-size: .86rem; }
+.event-category { color: var(--accent-blue); font-weight: 700; }
+.event-more { width: fit-content; margin-top: 8px; }
+.empty-events { padding: 24px; border: 1px dashed rgba(127,127,127,.35); border-radius: 14px; color: var(--text-secondary); }
+
+/* En pantallas estrechas la información útil baja debajo del texto y la
+   cuadrícula de eventos conserva tarjetas legibles sin desbordamiento. */
+@media (max-width: 760px) { .lugar-content { grid-template-columns: 1fr; } .lugar-attractions, .lugar-events-grid { grid-template-columns: 1fr; } .lugar-hero h1 { font-size: 2rem; } }
