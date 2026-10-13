@@ -27,10 +27,12 @@ try {
             `email` varchar(100) NOT NULL,
             `telefono` varchar(20) DEFAULT NULL,
             `password` varchar(255) NOT NULL,
+            `rol` varchar(30) NOT NULL DEFAULT 'turista',
             `avatar` varchar(255) NOT NULL DEFAULT 'default-avatar.png',
             `banner` varchar(255) NOT NULL DEFAULT 'default-banner.png',
             `nickname` varchar(50) DEFAULT NULL,
             `biografia` text DEFAULT NULL,
+            `perfil_publico` TINYINT(1) NOT NULL DEFAULT 1,
             `ubicacion` varchar(100) DEFAULT NULL,
             `sitio_web` varchar(255) DEFAULT NULL,
             `fecha_registro` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -39,6 +41,11 @@ try {
             UNIQUE KEY `uniq_cedula` (`cedula`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     ");
+
+    $columnasUsuarios = $pdo->query("SHOW COLUMNS FROM `usuarios`")->fetchAll(PDO::FETCH_COLUMN, 0);
+    if (!in_array('perfil_publico', $columnasUsuarios, true)) {
+        $pdo->exec("ALTER TABLE `usuarios` ADD COLUMN `perfil_publico` TINYINT(1) NOT NULL DEFAULT 1 AFTER `biografia`");
+    }
 
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS `comentarios` (
@@ -88,6 +95,33 @@ try {
         `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `favoritos_eventos` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `usuario_id` INT NOT NULL,
+        `evento_slug` VARCHAR(255) NOT NULL,
+        `evento_id` INT NULL,
+        `titulo` VARCHAR(255) NOT NULL,
+        `descripcion` TEXT NULL,
+        `fecha` DATE NULL,
+        `ubicacion` VARCHAR(255) NULL,
+        `categoria` VARCHAR(100) NULL,
+        `imagen_portada` VARCHAR(255) NULL,
+        `fecha_registro` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY `uniq_favorito_evento_usuario` (`usuario_id`, `evento_slug`),
+        KEY `idx_favoritos_usuario` (`usuario_id`),
+        CONSTRAINT `fk_favoritos_eventos_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `preguntas_eventos` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `evento_slug` VARCHAR(120) NOT NULL,
+        `usuario_id` INT NOT NULL,
+        `pregunta` TEXT NOT NULL,
+        `respuesta` TEXT NULL,
+        `fecha_creacion` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX `idx_preguntas_evento` (`evento_slug`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
     // La introspección permite migrar instalaciones existentes sin borrar datos.
     $columnasEventos = $pdo->query("SHOW COLUMNS FROM `eventos`")->fetchAll(PDO::FETCH_COLUMN, 0);
     $migracionesEventos = [
@@ -108,10 +142,19 @@ try {
         $pdo->exec("UPDATE `eventos` SET `imagen_portada` = `imagen` WHERE (`imagen_portada` IS NULL OR `imagen_portada` = 'default.jpg') AND `imagen` IS NOT NULL AND `imagen` <> ''");
     }
 
-    $columnasUsuarios = $pdo->query("SHOW COLUMNS FROM `usuarios`")->fetchAll(PDO::FETCH_COLUMN, 0);
-    if (!in_array('rol', $columnasUsuarios, true)) {
-        $pdo->exec("ALTER TABLE `usuarios` ADD COLUMN `rol` VARCHAR(30) NOT NULL DEFAULT 'usuario'");
+    $columnaRol = $pdo->query("SHOW COLUMNS FROM `usuarios` LIKE 'rol'")->fetch();
+    if (!$columnaRol) {
+        $pdo->exec("ALTER TABLE `usuarios` ADD COLUMN `rol` VARCHAR(30) NOT NULL DEFAULT 'turista'");
+        $columnaRol = ['Default' => 'turista'];
     }
+    if (($columnaRol['Default'] ?? null) !== 'turista') {
+        $pdo->exec("ALTER TABLE `usuarios` MODIFY `rol` VARCHAR(30) NOT NULL DEFAULT 'turista'");
+    }
+    $pdo->exec("UPDATE `usuarios` SET `rol` = CASE
+        WHEN LOWER(TRIM(`rol`)) IN ('administrador', 'admin', 'moderador') THEN 'administrador'
+        WHEN LOWER(TRIM(`rol`)) = 'organizador' THEN 'organizador'
+        ELSE 'turista'
+    END WHERE `rol` IS NULL OR LOWER(TRIM(`rol`)) NOT IN ('turista', 'organizador', 'administrador') OR `rol` <> LOWER(TRIM(`rol`))");
 
     $columnas = $pdo->query("SHOW COLUMNS FROM `usuarios`")->fetchAll(PDO::FETCH_COLUMN, 0);
     $camposNuevos = [
@@ -194,6 +237,82 @@ try {
         if (!in_array($campoMensaje, $columnasMensajes, true)) $pdo->exec($sqlMensaje);
     }
 
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `notificaciones` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `usuario_id` INT NOT NULL,
+        `titulo` VARCHAR(150) NOT NULL,
+        `mensaje` TEXT NOT NULL,
+        `tipo` VARCHAR(50) NOT NULL DEFAULT 'general',
+        `leida` TINYINT(1) NOT NULL DEFAULT 0,
+        `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        KEY `idx_notificaciones_usuario` (`usuario_id`),
+        KEY `idx_notificaciones_leida` (`usuario_id`, `leida`),
+        CONSTRAINT `fk_notificaciones_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `notificaciones_suscripciones` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `usuario_id` INT NOT NULL,
+        `endpoint` TEXT NOT NULL,
+        `p256dh` VARCHAR(255) NOT NULL,
+        `auth` VARCHAR(255) NOT NULL,
+        `user_agent` VARCHAR(255) DEFAULT NULL,
+        `activo` TINYINT(1) NOT NULL DEFAULT 1,
+        `creado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        `actualizado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY `uniq_suscripcion_endpoint` (`usuario_id`, `endpoint`(255)),
+        KEY `idx_suscripciones_usuario` (`usuario_id`),
+        CONSTRAINT `fk_notificaciones_suscripciones_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `copilot_ai_historial` (
+        `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        `usuario_id` INT NOT NULL,
+        `mensaje` TEXT NOT NULL,
+        `respuesta` TEXT NOT NULL,
+        `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        KEY `idx_copilot_historial_usuario_fecha` (`usuario_id`, `fecha_creacion`),
+        CONSTRAINT `fk_copilot_historial_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `inscripciones_eventos` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `evento_slug` VARCHAR(120) NOT NULL,
+        `usuario_id` INT NOT NULL,
+        `fecha_registro` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY `unica_inscripcion` (`evento_slug`, `usuario_id`),
+        INDEX `idx_inscripciones_evento` (`evento_slug`),
+        CONSTRAINT `fk_inscripciones_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `notificaciones_recordatorios` (
+        `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        `usuario_id` INT NOT NULL,
+        `evento_id` INT NOT NULL,
+        `tipo` VARCHAR(50) NOT NULL,
+        `creado_en` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY `uniq_recordatorio_usuario_evento_tipo` (`usuario_id`, `evento_id`, `tipo`),
+        CONSTRAINT `fk_recordatorios_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+        CONSTRAINT `fk_recordatorios_evento` FOREIGN KEY (`evento_id`) REFERENCES `eventos` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    /* CAMBIO APLICADO: normalizamos instalaciones antiguas. El proyecto usa
+       mensaje/fecha_creacion, pero algunas bases pueden traer texto/fecha;
+       agregamos las columnas actuales y copiamos los datos existentes. */
+    if (!in_array('mensaje', $columnasMensajes, true)) {
+        $pdo->exec("ALTER TABLE `mensajes` ADD COLUMN `mensaje` VARCHAR(500) NOT NULL DEFAULT '' AFTER `destinatario_id`");
+        if (in_array('texto', $columnasMensajes, true)) $pdo->exec("UPDATE `mensajes` SET `mensaje` = `texto` WHERE `texto` IS NOT NULL");
+    }
+    if (!in_array('fecha_creacion', $columnasMensajes, true)) {
+        $pdo->exec("ALTER TABLE `mensajes` ADD COLUMN `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP");
+        if (in_array('fecha', $columnasMensajes, true)) $pdo->exec("UPDATE `mensajes` SET `fecha_creacion` = `fecha` WHERE `fecha` IS NOT NULL");
+    }
+    if (!in_array('contexto', $columnasMensajes, true)) {
+        // CAMBIO APLICADO: permite guardar si la consulta proviene de soporte
+        // general o de un evento específico sin cambiar los mensajes previos.
+        $pdo->exec("ALTER TABLE `mensajes` ADD COLUMN `contexto` VARCHAR(255) NULL AFTER `mensaje`");
+    }
+
     /* La tabla de lugares normaliza los puntos turísticos y permite que una
        misma vista detalle reciba cualquier slug sin duplicar contenido en
        turismo.php o lugares.php. Los textos se guardan en español, idioma
@@ -227,6 +346,7 @@ try {
         ['parque-benito-solari', 'Parque Benito Solari', 'Naturaleza', 'Parque Benito Solari, Salto, Uruguay', '../img/solari.jfif', 'Gran parque urbano con áreas verdes para descansar, caminar y realizar actividades familiares.', 'El parque representa uno de los espacios verdes más importantes de Salto y conserva un fuerte valor social como lugar de reunión, deporte y contacto con la naturaleza.', 'Picnic y descanso|Caminatas|Juegos y actividades familiares|Fotografía de flora y paisaje', 'Acceso libre; preferentemente de día', 'Respetar los espacios verdes, retirar residuos y llevar repelente en temporada cálida.', -31.3900000, -57.9700000],
         ['plaza-artigas', 'Plaza Artigas', 'Cultura', 'Plaza Artigas, Salto, Uruguay', '../img/Plaza_artigas.webp', 'Plaza central de Salto, rodeada de actividad urbana, cultura y arquitectura tradicional.', 'La Plaza Artigas es un punto cívico y simbólico de la ciudad, vinculada a la vida pública, los actos y la identidad histórica de Salto.', 'Observar monumentos|Caminar por el centro|Visitar ferias y actividades|Conocer edificios cercanos', 'Espacio público de acceso libre', 'Ideal para combinar con un recorrido por el centro y la gastronomía local.', -31.3840000, -57.9610000],
         ['plaza-treinta-y-tres-orientales', 'Plaza Treinta y Tres Orientales', 'Cultura', 'Plaza Treinta y Tres Orientales, Salto, Uruguay', '../img/plazab.jpeg', 'Paseo urbano con espacios verdes, miradores y zonas de descanso.', 'La plaza integra la memoria cívica y la vida cotidiana de Salto, ofreciendo un espacio de encuentro que conecta patrimonio, paisaje urbano y recreación.', 'Paseo y descanso|Observar arquitectura|Fotografía urbana|Conectar con otros puntos del centro', 'Acceso libre durante todo el día', 'Visitar durante la mañana o el atardecer y respetar las áreas de descanso.', -31.3860000, -57.9620000],
+        ['costanera-sur', 'Costanera Sur', 'Naturaleza', 'Costanera Sur, Salto, Uruguay', '../img/Naturaleza.webp', 'Paseo junto al río Uruguay para disfrutar del paisaje y recorrer la zona costera de Salto.', 'La Costanera Sur integra el recorrido ribereño de Salto y ofrece un espacio público para pasear y contemplar el entorno.', 'Pasear junto al río|Disfrutar el paisaje|Recorrer la zona costera', 'Espacio público de acceso libre', 'Consultar las condiciones del lugar y recorrerlo con precaución.', null, null],
         ['la-trouville', 'La Trouville', 'Gastronomía', 'La Trouville, Salto, Uruguay', '../img/Trouville.jpg', 'Propuesta gastronómica local para descubrir sabores y encuentros en la ciudad.', 'La Trouville representa la tradición de los espacios gastronómicos como lugares de reunión, conversación y construcción de experiencias locales.', 'Probar platos regionales|Compartir una comida|Conocer productos locales|Disfrutar la vida nocturna', 'Consultar horarios del establecimiento', 'Se recomienda verificar disponibilidad y horarios antes de asistir.', -31.3860000, -57.9600000],
         ['cine-sarandi', 'Cine Sarandí', 'Cultura', 'Cine Sarandí, Salto, Uruguay', '../img/Cine_Sarandi.jpg', 'Sala y punto cultural para disfrutar cine, espectáculos y propuestas de la ciudad.', 'El Cine Sarandí forma parte de la memoria cultural de Salto y de la tradición de las salas como espacios de encuentro, arte y participación comunitaria.', 'Consultar cartelera|Asistir a funciones|Participar de actividades culturales|Recorrer la zona céntrica', 'Según cartelera y función programada', 'Consultar la programación oficial y llegar con anticipación a las funciones.', -31.3850000, -57.9600000],
         ['la-fosa', 'La Fosa', 'Deporte', 'La Fosa, Salto, Uruguay', '../img/fosa.webp', 'Circuito urbano para bicicleta, skate y actividades deportivas al aire libre.', 'La Fosa se consolidó como un punto de encuentro para jóvenes y familias, integrando deporte, recreación y apropiación comunitaria del espacio público.', 'Bicicleta y skate|Calistenia|Fotografía urbana|Actividades al aire libre', 'Acceso libre durante el día', 'Usar protección, hidratarse y respetar a quienes comparten el circuito.', -31.3970000, -57.9670000],
@@ -239,7 +359,7 @@ try {
         ['muelle-negro', 'Muelle Negro', 'Naturaleza', 'Muelle Negro, Salto, Uruguay', '../img/Costanera_Norte.jpeg', 'Punto ribereño para contemplar el río y disfrutar del paisaje.', 'El borde del río Uruguay conserva un valor paisajístico y afectivo central para la identidad de Salto y sus recorridos urbanos.', 'Vistas al río|Atardecer|Pesca recreativa|Fotografía', 'Acceso libre; verificar condiciones del muelle', 'Caminar con precaución y revisar el estado del río antes de acercarse.', -31.3800000, -57.9520000],
     ];
 
-    $guardarLugar = $pdo->prepare('INSERT INTO lugares (slug, nombre, categoria, direccion, imagen, descripcion, historia, atractivos, horarios, recomendaciones, latitud, longitud) VALUES (:slug, :nombre, :categoria, :direccion, :imagen, :descripcion, :historia, :atractivos, :horarios, :recomendaciones, :latitud, :longitud) ON DUPLICATE KEY UPDATE nombre = VALUES(nombre), categoria = VALUES(categoria), direccion = VALUES(direccion), imagen = VALUES(imagen), descripcion = VALUES(descripcion), historia = VALUES(historia), atractivos = VALUES(atractivos), horarios = VALUES(horarios), recomendaciones = VALUES(recomendaciones), latitud = VALUES(latitud), longitud = VALUES(longitud)');
+    $guardarLugar = $pdo->prepare('INSERT INTO lugares (slug, nombre, categoria, direccion, imagen, descripcion, historia, atractivos, horarios, recomendaciones, latitud, longitud) VALUES (:slug, :nombre, :categoria, :direccion, :imagen, :descripcion, :historia, :atractivos, :horarios, :recomendaciones, :latitud, :longitud) ON DUPLICATE KEY UPDATE slug = VALUES(slug)');
     foreach ($lugares as [$slug, $nombre, $categoria, $direccion, $imagen, $descripcion, $historia, $atractivos, $horarios, $recomendaciones, $latitud, $longitud]) {
         $guardarLugar->execute(compact('slug', 'nombre', 'categoria', 'direccion', 'imagen', 'descripcion', 'historia', 'atractivos', 'horarios', 'recomendaciones', 'latitud', 'longitud'));
     }
@@ -249,5 +369,14 @@ try {
     $pdo->exec("UPDATE eventos e INNER JOIN lugares l ON e.ubicacion LIKE CONCAT('%', l.nombre, '%') SET e.lugar_id = l.id WHERE e.lugar_id IS NULL");
 } catch (PDOException $e) {
     http_response_code(503);
+    /* CAMBIO APLICADO: los endpoints JSON no pueden devolver texto HTML/plain
+       cuando MySQL falla, porque el cliente usa response.json(). Conservamos
+       la respuesta textual para las páginas PHP tradicionales. */
+    $rutaSolicitud = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+    if (str_contains($rutaSolicitud, '/api/')) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'error' => 'Servicio de mensajería no disponible.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     exit('No se pudo conectar a la base de datos.');
 }

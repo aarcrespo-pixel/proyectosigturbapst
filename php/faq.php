@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="../css/faq.css">
 </head>
 <body class="faq-page">
-<?php $headerCurrentPage = 'soporte'; $headerActivePage = ''; include __DIR__ . '/header.php'; ?>
 <main class="faq-container">
     <section class="faq-hero">
         <p class="faq-kicker">Centro de ayuda</p>
@@ -25,13 +24,13 @@
                 <label for="faq-email">Email para recibir respuesta</label>
                 <input id="faq-email" type="email" name="email" placeholder="tu@email.com" required>
             <?php endif; ?>
-            <button id="faq-submit" class="faq-submit" type="submit"><span class="faq-spinner" aria-hidden="true"></span><span class="faq-submit-label">Enviar pregunta</span></button>
+            <button id="faq-submit" class="faq-submit" type="submit"><span class="faq-submit-label">Enviar pregunta</span></button>
             <p id="faq-feedback" class="faq-feedback" role="status" aria-live="polite"></p>
         </form>
     </section>
 </main>
 <div id="faq-toast" class="faq-toast" role="status" aria-live="polite" hidden></div>
 <script src="../js/translator.js"></script>
-<script src="../js/faq.js" defer></script>
+<script src="../js/faq.js?v=20261013-1" defer></script>
 </body>
 </html>

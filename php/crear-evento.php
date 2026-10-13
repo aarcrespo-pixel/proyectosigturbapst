@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/autorizacion.php';
+require_once __DIR__ . '/helpers/notificaciones.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     // El endpoint solo crea eventos por POST; cualquier acceso directo vuelve al listado.
@@ -8,11 +10,63 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$organizadorId = (int) ($_SESSION['usuario_id'] ?? 0);
-if ($organizadorId <= 0) {
-    // El organizador debe estar autenticado antes de insertar contenido persistente.
-    http_response_code(401);
-    exit('Debes iniciar sesión para crear un evento.');
+$usuarioActual = sigtur_requerir_rol($pdo, ['organizador', 'administrador']);
+$usuarioId = (int) $usuarioActual['id'];
+$esAdministrador = $usuarioActual['rol'] === 'administrador';
+if (!sigtur_validar_csrf($_POST['csrf_token'] ?? null)) {
+    http_response_code(403);
+    exit('La solicitud expiró. Recarga la página e inténtalo de nuevo.');
+}
+$accion = (string) ($_POST['accion'] ?? 'crear');
+$eventoId = (int) ($_POST['evento_id'] ?? 0);
+
+if (!in_array($accion, ['crear', 'editar', 'eliminar'], true)) {
+    http_response_code(422);
+    exit('La acción solicitada no es válida.');
+}
+
+if ($accion !== 'crear') {
+    $consultaEventoExistente = $pdo->prepare('SELECT id, slug, organizador_id FROM eventos WHERE id = :id LIMIT 1');
+    $consultaEventoExistente->execute([':id' => $eventoId]);
+    $eventoExistente = $consultaEventoExistente->fetch();
+    if (!$eventoExistente) {
+        http_response_code(404);
+        exit('El evento no existe.');
+    }
+    if (!$esAdministrador && (int) $eventoExistente['organizador_id'] !== $usuarioId) {
+        http_response_code(403);
+        exit('No tienes permiso para modificar este evento.');
+    }
+}
+$nuevoOrganizadorId = $accion === 'crear' ? $usuarioId : (int) $eventoExistente['organizador_id'];
+if ($accion === 'editar' && $esAdministrador && isset($_POST['organizador_id'])) {
+    $nuevoOrganizadorId = (int) $_POST['organizador_id'];
+    if ($nuevoOrganizadorId > 0) {
+        $rolOrganizador = $pdo->prepare('SELECT rol FROM usuarios WHERE id = :id LIMIT 1');
+        $rolOrganizador->execute([':id' => $nuevoOrganizadorId]);
+        if (sigtur_normalizar_rol($rolOrganizador->fetchColumn() ?: null) !== 'organizador') {
+            http_response_code(422);
+            exit('El propietario asignado debe tener rol de organizador.');
+        }
+    }
+}
+
+if ($accion === 'eliminar') {
+    $pdo->beginTransaction();
+    try {
+        foreach (['inscripciones_eventos' => 'evento_slug', 'preguntas_eventos' => 'evento_slug', 'favoritos_eventos' => 'evento_slug'] as $tabla => $columna) {
+            $borrarRelacionados = $pdo->prepare("DELETE FROM `{$tabla}` WHERE `{$columna}` = :slug");
+            $borrarRelacionados->execute([':slug' => $eventoExistente['slug']]);
+        }
+        $borrarEvento = $pdo->prepare('DELETE FROM eventos WHERE id = :id');
+        $borrarEvento->execute([':id' => $eventoId]);
+        $pdo->commit();
+    } catch (Throwable $error) {
+        $pdo->rollBack();
+        throw $error;
+    }
+    header('Location: ' . ($esAdministrador ? 'panel-admin.php' : 'panel-organizador.php'));
+    exit;
 }
 
 $titulo = trim($_POST['titulo'] ?? '');
@@ -38,13 +92,17 @@ $slugBase = trim(preg_replace('/-+/', '-', preg_replace('/[^a-z0-9]+/', '-', str
 $slugBase = $slugBase !== '' ? $slugBase : 'evento';
 $slug = $slugBase;
 $contador = 2;
-$buscarSlug = $pdo->prepare('SELECT id FROM eventos WHERE slug = :slug LIMIT 1');
-while (true) {
-    $buscarSlug->execute([':slug' => $slug]);
-    if (!$buscarSlug->fetchColumn()) {
-        break;
+$buscarSlug = $pdo->prepare('SELECT id FROM eventos WHERE slug = :slug AND id <> :evento_id LIMIT 1');
+if ($accion === 'crear') {
+    while (true) {
+        $buscarSlug->execute([':slug' => $slug, ':evento_id' => 0]);
+        if (!$buscarSlug->fetchColumn()) {
+            break;
+        }
+        $slug = $slugBase . '-' . $contador++;
     }
-    $slug = $slugBase . '-' . $contador++;
+} else {
+    $slug = $eventoExistente['slug'];
 }
 
 /* El Prepared Statement separa datos y SQL, evitando inyección y dejando
@@ -59,8 +117,7 @@ $buscarLugar = $pdo->prepare('SELECT id FROM lugares WHERE nombre = :ubicacion O
 $buscarLugar->execute([':ubicacion' => $ubicacion, ':direccion' => '%' . $ubicacion . '%']);
 $lugarId = $buscarLugar->fetchColumn();
 
-$insertar = $pdo->prepare('INSERT INTO eventos (titulo, slug, descripcion, fecha, ubicacion, lugar_id, categoria, tipo_entrada, precio, imagen_portada, es_pasado, organizador_id) VALUES (:titulo, :slug, :descripcion, :fecha, :ubicacion, :lugar_id, :categoria, :tipo_entrada, :precio, :imagen, :es_pasado, :organizador)');
-$insertar->execute([
+$parametrosEvento = [
     ':titulo' => $titulo,
     ':slug' => $slug,
     ':descripcion' => $descripcion,
@@ -72,8 +129,27 @@ $insertar->execute([
     ':precio' => $precio,
     ':imagen' => $imagen !== '' ? $imagen : 'default.jpg',
     ':es_pasado' => strtotime($fecha) < strtotime(date('Y-m-d')) ? 1 : 0,
-    ':organizador' => $organizadorId,
-]);
+    ':organizador' => $accion === 'crear' ? $usuarioId : $nuevoOrganizadorId,
+];
+
+if ($accion === 'editar') {
+    $actualizar = $pdo->prepare('UPDATE eventos SET titulo = :titulo, descripcion = :descripcion, fecha = :fecha, ubicacion = :ubicacion, lugar_id = :lugar_id, categoria = :categoria, tipo_entrada = :tipo_entrada, precio = :precio, imagen_portada = :imagen, es_pasado = :es_pasado, organizador_id = :organizador WHERE id = :id');
+    $parametrosEvento[':id'] = $eventoId;
+    unset($parametrosEvento[':slug']);
+    $actualizar->execute($parametrosEvento);
+    header('Location: evento.php?id=' . $eventoId);
+    exit;
+}
+
+$insertar = $pdo->prepare('INSERT INTO eventos (titulo, slug, descripcion, fecha, ubicacion, lugar_id, categoria, tipo_entrada, precio, imagen_portada, es_pasado, organizador_id) VALUES (:titulo, :slug, :descripcion, :fecha, :ubicacion, :lugar_id, :categoria, :tipo_entrada, :precio, :imagen, :es_pasado, :organizador)');
+$insertar->execute($parametrosEvento);
+
+sigtur_notificar_turistas(
+    $pdo,
+    'Nuevo evento en SIGTUR',
+    $titulo . ' se agregó a la agenda de Salto. Fecha: ' . $fecha . '. Lugar: ' . $ubicacion . '.',
+    'evento'
+);
 
 /* Redirigimos usando el ID generado por MySQL, no el slug recibido, para abrir
     exactamente la fila recién creada aunque el slug haya sido numerado. */

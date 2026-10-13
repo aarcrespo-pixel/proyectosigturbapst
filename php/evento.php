@@ -58,6 +58,9 @@ if ($esEventoDinamico) {
     [$nombre, $categoria, $edad, $lugar, $descripcion, $imagen, $fecha, $aireLibre, $latitud, $longitud] = $evento;
 }
 $usuarioId = (int) ($_SESSION['usuario_id'] ?? 0);
+$favoritoQuery = $pdo->prepare('SELECT 1 FROM favoritos_eventos WHERE usuario_id = :usuario AND evento_slug = :slug');
+$favoritoQuery->execute([':usuario' => $usuarioId, ':slug' => $slug]);
+$esFavorito = $usuarioId > 0 && (bool) $favoritoQuery->fetchColumn();
 $esPasado = strtotime($fecha) < strtotime(date('Y-m-d')) || (!empty($eventoDb['es_pasado'] ?? 0));
 $assetBase = $esEventoDinamico ? '../' : '../../';
 
@@ -65,8 +68,8 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS inscripciones_eventos (id INT AUTO_INCREM
 $pdo->exec("CREATE TABLE IF NOT EXISTS preguntas_eventos (id INT AUTO_INCREMENT PRIMARY KEY, evento_slug VARCHAR(120) NOT NULL, usuario_id INT NOT NULL, pregunta TEXT NOT NULL, respuesta TEXT NULL, fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX (evento_slug)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 if (!$esEventoDinamico) {
     // Los wrappers legacy se catalogan al vuelo para convivir con la tabla nueva.
-    $catalogo = $pdo->prepare('INSERT INTO eventos (slug, titulo, descripcion, fecha, ubicacion, categoria, imagen_portada, es_pasado, organizador_id) VALUES (:slug, :titulo, :descripcion, :fecha, :ubicacion, :categoria, :imagen, :pasado, :organizador) ON DUPLICATE KEY UPDATE titulo = VALUES(titulo), descripcion = VALUES(descripcion), fecha = VALUES(fecha), ubicacion = VALUES(ubicacion), categoria = VALUES(categoria), imagen_portada = VALUES(imagen_portada), es_pasado = VALUES(es_pasado)');
-    $catalogo->execute([':slug' => $slug, ':titulo' => $nombre, ':descripcion' => $descripcion, ':fecha' => $fecha, ':ubicacion' => $lugar, ':categoria' => $categoria, ':imagen' => $imagen, ':pasado' => $esPasado ? 1 : 0, ':organizador' => $usuarioId]);
+    $catalogo = $pdo->prepare('INSERT INTO eventos (slug, titulo, descripcion, fecha, ubicacion, categoria, imagen_portada, es_pasado, organizador_id) VALUES (:slug, :titulo, :descripcion, :fecha, :ubicacion, :categoria, :imagen, :pasado, :organizador) ON DUPLICATE KEY UPDATE slug = VALUES(slug)');
+    $catalogo->execute([':slug' => $slug, ':titulo' => $nombre, ':descripcion' => $descripcion, ':fecha' => $fecha, ':ubicacion' => $lugar, ':categoria' => $categoria, ':imagen' => $imagen, ':pasado' => $esPasado ? 1 : 0, ':organizador' => 0]);
     $consultaIdEvento = $pdo->prepare('SELECT id FROM eventos WHERE slug = :slug LIMIT 1');
     $consultaIdEvento->execute([':slug' => $slug]);
     $eventoId = (int) $consultaIdEvento->fetchColumn();
@@ -153,6 +156,7 @@ $faq = [['¿Hay estacionamiento?', 'Sí, revisá las indicaciones del lugar ante
 .event-hero h1,.event-hero p,.event-badge,.event-social{position:relative;z-index:2;text-shadow:0 2px 10px rgba(0,0,0,.8)}
 .event-actions{position:relative;z-index:2}
 .event-exit{display:none!important}
+.event-favorite{background:#fff;color:#17110a!important}.event-favorite.is-favorite{background:#ffe4dc;color:#8f3024!important}.event-social{display:none!important}
 </style>
 </head>
 <body class="event-detail <?= $esPasado ? 'event-finished' : '' ?>">
@@ -161,7 +165,7 @@ $activePage = 'eventos';
 require __DIR__.'/nav.php'; ?>
 <main>
 <section class="event-hero"><a class="event-back" href="../eventos.php">← Volver a eventos</a><a class="event-exit" href="../eventos.php">Salir del evento</a><div class="event-hero__content"><div class="event-meta"><span class="event-badge"><?= htmlspecialchars($fechaLegible) ?></span><span class="event-badge"><?= htmlspecialchars($categoria) ?></span><span class="event-badge"><?= htmlspecialchars($edad) ?></span><a class="event-badge" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📍 <?= htmlspecialchars($lugar) ?></a></div><h1><?= htmlspecialchars($nombre) ?></h1><p><?= htmlspecialchars($descripcion) ?></p><div class="event-social"><div class="event-avatars"><?php foreach ($avatares as $avatar):$avatarFile = basename($avatar['avatar'] ?? '');
-    $avatarSrc = ($avatarFile && $avatarFile !== 'default-avatar.png' && file_exists(__DIR__.'/../uploads/avatars/'.$avatarFile)) ? '../uploads/avatars/'.$avatarFile : '../img/user.png'; ?><img class="event-avatar" src="<?= htmlspecialchars($avatarSrc, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($avatar['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>"><?php endforeach; ?></div><span><?= $asistentes ?> <?= $asistentes === 1 ? 'persona asistirá' : 'personas asistirán' ?></span></div><div class="event-actions"><button id="registerButton" class="event-primary <?= $inscripto ? 'is-registered' : '' ?>" data-registered="<?= $inscripto ? 'true' : 'false' ?>" type="button"><?= $inscripto ? 'Inscripto ✓' : 'Inscribirse' ?></button><?php if ($inscripto): ?><button id="ticketButton" class="event-secondary" type="button">Ver mi Pase / QR</button><?php endif; ?><a class="event-secondary" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Cómo llegar</a></div></div></section>
+    $avatarSrc = ($avatarFile && $avatarFile !== 'default-avatar.png' && file_exists(__DIR__.'/../uploads/avatars/'.$avatarFile)) ? '../uploads/avatars/'.$avatarFile : '../img/user.png'; ?><img class="event-avatar" src="<?= htmlspecialchars($avatarSrc, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($avatar['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>"><?php endforeach; ?></div><span><?= $asistentes ?> <?= $asistentes === 1 ? 'persona asistirá' : 'personas asistirán' ?></span></div><div class="event-actions"><button id="favoriteEventButton" class="event-primary event-favorite<?= $esFavorito ? ' is-favorite' : '' ?>" type="button" aria-pressed="<?= $esFavorito ? 'true' : 'false' ?>" data-endpoint="<?= htmlspecialchars($apiBase . 'favoritos_eventos.php', ENT_QUOTES, 'UTF-8') ?>" data-slug="<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>" data-evento-id="<?= (int) $eventoId ?>" data-titulo="<?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>" data-descripcion="<?= htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8') ?>" data-fecha="<?= htmlspecialchars($fecha, ENT_QUOTES, 'UTF-8') ?>" data-ubicacion="<?= htmlspecialchars($lugar, ENT_QUOTES, 'UTF-8') ?>" data-categoria="<?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>" data-imagen="<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>"><?= $esFavorito ? '★ Guardado en favoritos' : '☆ Guardar en favoritos' ?></button><?php if ($inscripto): ?><button id="ticketButton" class="event-secondary" type="button">Ver mi Pase / QR</button><?php endif; ?><a class="event-secondary" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Cómo llegar</a></div></div></section>
 <section class="event-main"><div class="event-grid"><div><article class="event-panel"><h2>Sobre el evento</h2><p><?= htmlspecialchars($descripcion) ?> Fecha: <?= htmlspecialchars($fechaLegible) ?>. Encontrá todos los detalles y preparate para vivir la experiencia.</p><div class="event-facts"><div class="event-fact"><strong>Fecha</strong><?= htmlspecialchars($fechaLegible) ?></div><div class="event-fact"><strong>Ubicación</strong><?= htmlspecialchars($lugar) ?></div></div><div id="forecast" class="event-panel event-forecast"><span id="forecastIcon">☀️</span><strong id="forecastText">Clima estimado</strong></div></article><article class="event-panel event-faq"><h2>Preguntas frecuentes</h2><?php foreach ($faq as [$pregunta,$respuesta]): ?><details><summary><?= htmlspecialchars($pregunta) ?></summary><p><?= htmlspecialchars($respuesta) ?></p></details><?php endforeach; ?><form class="event-question" id="form-comentario-evento" data-endpoint="<?= htmlspecialchars($apiBase . 'agregar_comentario_evento.php', ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="evento_id" value="<?= (int) $eventoId ?>"><input name="comentario" maxlength="500" placeholder="¿Tenés otra pregunta?" <?= !$usuarioId ? 'disabled' : '' ?>><button type="submit" <?= !$usuarioId ? 'disabled' : '' ?>>Enviar</button></form><?php if (!$usuarioId): ?><small>Iniciá sesión para preguntar al organizador.</small><?php endif; ?><p class="event-question-feedback" id="event-question-feedback" role="status" aria-live="polite"></p></article><?php if ($preguntasRespondidas): ?><article class="event-panel event-faq"><h2>Preguntas respondidas</h2><?php foreach ($preguntasRespondidas as $q): ?><details><summary><?= htmlspecialchars($q['pregunta']) ?></summary><p><?= htmlspecialchars($q['respuesta']) ?></p></details><?php endforeach; ?></article><?php endif; ?></div><aside><article class="event-panel"><h2>Planificá tu visita</h2><p>Guardá el evento, consultá el mapa y revisá el pronóstico antes de salir.</p><a class="event-secondary" style="display:inline-block;background:var(--event-ink);color:white" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Abrir en Google Maps</a></article></aside></div><section style="margin-top:3rem"><h2>Eventos similares que te pueden interesar</h2><div class="event-rec"><?php $recs = array_values(array_filter($eventos, fn ($item) => $item[1] === $categoria || $item[3] === $lugar));
 foreach (array_slice($recs, 0, 3) as $rec):$recSlug = array_search($rec, $eventos, true); $recIdQuery = $pdo->prepare('SELECT id FROM eventos WHERE slug = :slug LIMIT 1'); $recIdQuery->execute([':slug' => $recSlug]); $recId = (int) $recIdQuery->fetchColumn(); ?><a href="<?= htmlspecialchars(($esEventoDinamico ? '' : '../') . 'evento.php?id=' . $recId, ENT_QUOTES, 'UTF-8') ?>"><img src="<?= htmlspecialchars($rec[5], ENT_QUOTES, 'UTF-8') ?>" alt=""><span><?= htmlspecialchars($rec[0], ENT_QUOTES, 'UTF-8') ?></span></a><?php endforeach; ?></div></section></section>
 <?php if ($esPasado): ?>
@@ -181,6 +185,43 @@ foreach (array_slice($recs, 0, 3) as $rec):$recSlug = array_search($rec, $evento
 <script src="<?= $assetBase ?>js/evento.js" defer></script>
 <?php if ($esEventoDinamico): ?><script>document.querySelectorAll('.event-back,.event-exit').forEach((link) => { link.href = 'eventos.php'; });</script><?php endif; ?>
 <script>
-const registerButton=document.getElementById('registerButton');registerButton?.addEventListener('click',async()=>{if(registerButton.dataset.busy==='true')return;registerButton.dataset.busy='true';registerButton.classList.add('pulse');try{const r=await fetch(location.href,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({accion:'toggle_inscripcion'})});const d=await r.json();if(!r.ok)throw new Error(d.error);registerButton.textContent=d.registered?'Inscripto ✓':'Inscribirse';registerButton.classList.toggle('is-registered',d.registered);registerButton.dataset.registered=d.registered?'true':'false';setTimeout(()=>location.reload(),450)}catch(e){registerButton.dataset.busy='false';registerButton.classList.remove('pulse');alert(e.message)}});registerButton?.addEventListener('mouseenter',()=>{if(registerButton.dataset.registered==='true')registerButton.textContent='Cancelar inscripción'});registerButton?.addEventListener('mouseleave',()=>{if(registerButton.dataset.registered==='true')registerButton.textContent='Inscripto ✓'});const ticketModal=document.getElementById('ticketModal');document.getElementById('ticketButton')?.addEventListener('click',()=>ticketModal.hidden=false);document.getElementById('ticketClose')?.addEventListener('click',()=>ticketModal.hidden=true);ticketModal?.addEventListener('click',e=>{if(e.target===ticketModal)ticketModal.hidden=true});document.getElementById('questionForm')?.addEventListener('submit',async e=>{e.preventDefault();const r=await fetch(location.href,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(e.currentTarget))});if(r.ok){e.currentTarget.reset();alert('Pregunta enviada al organizador')}else alert('No se pudo enviar')});const eventDate='<?= $fecha ?>',openAir=<?= $aireLibre ? 'true' : 'false'?>,lat=<?= $latitud ?>,lon=<?= $longitud ?>,days=(new Date(eventDate)-new Date())/86400000;if(openAir&&days>=0&&days<=7)fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`).then(r=>r.json()).then(d=>{document.getElementById('forecast').classList.add('visible');document.getElementById('forecastText').textContent=`${Math.round(d.current.temperature_2m)}°C · Pronóstico estimado`;document.getElementById('forecastIcon').textContent=d.current.weather_code<3?'☀️':d.current.weather_code<60?'🌥️':'🌧️'}).catch(()=>{});
+const favoriteEventButton = document.getElementById('favoriteEventButton');
+favoriteEventButton?.addEventListener('click', async () => {
+    if (favoriteEventButton.disabled) return;
+    const guardado = favoriteEventButton.getAttribute('aria-pressed') === 'true';
+    const datos = new URLSearchParams({
+        accion: guardado ? 'quitar' : 'guardar',
+        slug: favoriteEventButton.dataset.slug,
+        evento_id: favoriteEventButton.dataset.eventoId,
+        titulo: favoriteEventButton.dataset.titulo,
+        descripcion: favoriteEventButton.dataset.descripcion,
+        fecha: favoriteEventButton.dataset.fecha,
+        ubicacion: favoriteEventButton.dataset.ubicacion,
+        categoria: favoriteEventButton.dataset.categoria,
+        imagen: favoriteEventButton.dataset.imagen
+    });
+    favoriteEventButton.disabled = true;
+    try {
+        const response = await fetch(favoriteEventButton.dataset.endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: datos
+        });
+        const result = await response.json();
+        if (response.status === 401) {
+            alert(result.error || 'Iniciá sesión para guardar favoritos.');
+            window.location.href = 'login.php';
+            return;
+        }
+        if (!response.ok) throw new Error(result.error || 'No se pudo actualizar el favorito.');
+        favoriteEventButton.setAttribute('aria-pressed', String(result.favorito));
+        favoriteEventButton.classList.toggle('is-favorite', result.favorito);
+        favoriteEventButton.textContent = result.favorito ? '★ Guardado en favoritos' : '☆ Guardar en favoritos';
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        favoriteEventButton.disabled = false;
+    }
+});
 </script>
 </body></html>

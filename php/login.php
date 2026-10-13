@@ -1,6 +1,32 @@
 <?php
 session_start();
 require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/autorizacion.php';
+
+/* CAMBIO APLICADO: el cierre de sesión vive junto al inicio de sesión para
+   evitar un controlador PHP separado. Se procesa antes de redirigir a los
+   usuarios activos hacia la pantalla de login. */
+if (($_GET['accion'] ?? '') === 'cerrar-sesion') {
+    $_SESSION = [];
+
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params['path'],
+            $params['domain'],
+            $params['secure'],
+            $params['httponly']
+        );
+    }
+
+    session_unset();
+    session_destroy();
+    header('Location: ../index.php');
+    exit;
+}
 
 // Evitamos que una sesión activa vuelva a mostrar el formulario de login.
 if (isset($_SESSION['usuario_id'])) {
@@ -33,8 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($usuario && password_verify($password, $usuario['password'])) {
                 /* Guardamos los datos mínimos de identidad y perfil para que el
                     resto de controladores pueda autorizar y personalizar la UI. */
+            session_regenerate_id(true);
             $_SESSION['usuario_id'] = (int) $usuario['id'];
-            $_SESSION['rol'] = $usuario['rol'] ?? 'usuario';
+            $_SESSION['rol'] = sigtur_normalizar_rol($usuario['rol'] ?? null);
             $_SESSION['usuario_nombre'] = $usuario['nombre_completo'];
             $_SESSION['usuario_email'] = $usuario['email'];
             $_SESSION['usuario_avatar'] = !empty($usuario['avatar']) ? $usuario['avatar'] : 'default-avatar.png';
@@ -102,11 +129,6 @@ if (isset($_GET['registro']) && $_GET['registro'] === 'exito') {
                     ¿No tenés una cuenta?
                     <a href="registrarse.php" class="register-link" data-i18n="loginRegister">Registrate acá</a>
                 </p>
-
-                <a class="google-button" href="https://accounts.google.com/signin/v2/identifier?service=mail" target="_blank" rel="noopener noreferrer">
-                    <img class="google-icon" src="../img/google-logo.png" alt="Google logo" data-i18n-alt="loginGoogleAlt">
-                    <span data-i18n="loginGoogle">Iniciar con Google</span>
-                </a>
 
                 <p class="google-legal" data-i18n="loginLegal">Al iniciar sesión aceptas los términos y condiciones de la empresa, las reglas de uso y la política de privacidad.</p>
             </form>

@@ -52,8 +52,8 @@
         /* Conservamos id y avatar al hidratar el estado: el ID vincula el
            nodo visual con la fila exacta que debe borrar el backend. */
         state.comments = (state.comments || []).map((comment) => typeof comment === 'string'
-            ? { name: 'Usuario SIGTUR', text: comment, likes: 0, replies: [] }
-            : { id: comment.id || null, user_id: comment.user_id || null, profile_url: comment.profile_url || '', name: comment.name || 'Usuario SIGTUR', avatar_url: comment.avatar_url || '', text: comment.text || '', likes: comment.likes || 0, replies: comment.replies || [] });
+            ? { id: null, parent_id: null, name: 'Usuario SIGTUR', text: comment, likes: 0, replies: [] }
+            : { id: comment.id || null, parent_id: comment.parent_id || null, user_id: comment.user_id || null, profile_url: comment.profile_url || '', name: comment.name || 'Usuario SIGTUR', avatar_url: comment.avatar_url || '', text: comment.text || '', likes: comment.likes || 0, replies: comment.replies || [] });
         return state;
     }
 
@@ -115,7 +115,11 @@
         });
         const arbol = [...comentariosPorId.values()].filter(comment => !comment.parent_id);
         const visibles = expanded ? arbol : arbol.slice(0, 1);
-        const renderOne = (comment, index, isReply = false) => `
+        const renderOne = (comment, index, depth = 0) => {
+            const isReply = depth > 0;
+            return `
+            ${/* CAMBIO APLICADO: el árbol conserva cualquier nivel de respuesta
+                 y cada formulario identifica al padre por ID, no por posición. */ ''}
             <li id="comentario-${comment.id || ''}" class="card-engagement__comment-item comentario-item ${isReply ? 'comentario-item--respuesta' : ''}" data-comment-id="${comment.id || ''}">
                 <div class="comentario-header-user">
                     <a class="comentario-usuario-link" href="${escapeHtml(comment.profile_url || `${projectPhpPath}perfil.php?id=${encodeURIComponent(comment.user_id || '')}`)}" aria-label="Ver perfil de ${escapeHtml(comment.name)}">
@@ -126,14 +130,15 @@
                 <div class="comentario-cuerpo card-engagement__comment-body">
                     <div class="comentario-texto">${escapeHtml(comment.text)}</div>
                     <div class="comentario-footer-actions comentario-footer comentario-actions">
-                        <button type="button" class="card-engagement__comment-action ${comment.likes ? 'active' : ''}" data-comment-action="like" data-index="${index}">♥ ${comment.likes || 0}</button>
-                        ${!isReply ? `<button type="button" class="card-engagement__comment-action" data-comment-action="reply" data-index="${index}">Responder</button>` : ''}
-                        <button type="button" class="card-engagement__delete" data-index="${index}" aria-label="Eliminar comentario">Eliminar</button>
+                        <button type="button" class="card-engagement__comment-action ${comment.likes ? 'active' : ''}" data-comment-action="like" data-comment-id="${comment.id || ''}">♥ ${comment.likes || 0}</button>
+                        <button type="button" class="card-engagement__comment-action" data-comment-action="reply" data-comment-id="${comment.id || ''}">Responder</button>
+                        <button type="button" class="card-engagement__delete" data-comment-id="${comment.id || ''}" aria-label="Eliminar comentario">Eliminar</button>
                     </div>
-                    ${!isReply ? `<form class="card-engagement__reply-form" data-index="${index}"><textarea class="card-engagement__reply-input" rows="1" maxlength="140" placeholder="Escribe una respuesta..."></textarea><button type="submit" class="card-engagement__reply-submit">Responder</button></form>` : ''}
+                    <form class="card-engagement__reply-form" data-parent-id="${comment.id || ''}"><textarea class="card-engagement__reply-input" rows="1" maxlength="140" placeholder="Escribe una respuesta..."></textarea><button type="submit" class="card-engagement__reply-submit">Responder</button></form>
                 </div>
             </li>
-            ${(comment.replies || []).map(reply => renderOne(reply, list.indexOf(reply), true)).join('')}`;
+            ${(comment.replies || []).map(reply => renderOne(reply, list.indexOf(reply), depth + 1)).join('')}`;
+            };
         /* El árbol se reconstruye desde parent_id; la consulta SQL sigue siendo
            plana y esta relación visualiza cada respuesta junto a su comentario. */
         container.innerHTML = visibles.map(comment => renderOne(comment, list.findIndex(item => item.id === comment.id))).join('');
@@ -270,23 +275,24 @@
         commentsList?.addEventListener('click', (event) => {
             const actionButton = event.target.closest('[data-comment-action]');
             if (actionButton) {
-                const index = Number(actionButton.dataset.index);
                 const currentState = readState(key);
+                const commentId = Number(actionButton.dataset.commentId);
+                const comment = currentState.comments.find((item) => Number(item.id) === commentId);
+                if (!comment) return;
                 if (actionButton.dataset.commentAction === 'like') {
-                    currentState.comments[index].likes = currentState.comments[index].likes ? 0 : 1;
+                    comment.likes = comment.likes ? 0 : 1;
                     writeState(key, currentState);
                     updateView();
                 } else {
-                    const commentIndex = Number(actionButton.dataset.index);
                     updateView();
-                    commentsList.querySelector(`.card-engagement__reply-form[data-index="${commentIndex}"]`)?.classList.toggle('open');
+                    commentsList.querySelector(`.card-engagement__reply-form[data-parent-id="${commentId}"]`)?.classList.toggle('open');
                 }
                 return;
             }
             const button = event.target.closest('.card-engagement__delete');
             if (!button) return;
-            const index = Number(button.dataset.index);
-            const comment = readState(key).comments[index];
+            const commentId = Number(button.dataset.commentId);
+            const comment = readState(key).comments.find((item) => Number(item.id) === commentId);
             if (!comment?.id) return;
             const comentarioElement = button.closest('.card-engagement__comment-item');
             button.disabled = true;
@@ -323,8 +329,14 @@
             const text = input?.value?.trim();
             if (!text) return;
             const currentState = readState(key);
-            const comment = currentState.comments[Number(replyForm.dataset.index)];
+            // CAMBIO APLICADO: parent_id identifica al comentario real aunque
+            // el árbol cambie de orden al insertar una nueva respuesta.
+            const parentId = Number(replyForm.dataset.parentId);
+            const comment = currentState.comments.find((item) => Number(item.id) === parentId);
             if (!comment) return;
+            // CAMBIO APLICADO: URLSearchParams envía el padre como POST
+            // application/x-www-form-urlencoded, formato que PHP puede leer
+            // de forma consistente junto con item_key y texto.
             fetch(COMMENTS_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },

@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           $rolConsulta = $pdo->prepare('SELECT rol FROM usuarios WHERE id = :usuario_id LIMIT 1');
           $rolConsulta->execute([':usuario_id' => $usuarioId]);
           $rol = (string) ($rolConsulta->fetchColumn() ?: 'usuario');
-        $eliminar = $pdo->prepare("DELETE FROM comentarios WHERE id = :id AND (usuario_id = :usuario_id OR :rol = 'moderador')");
+        $eliminar = $pdo->prepare("DELETE FROM comentarios WHERE id = :id AND (usuario_id = :usuario_id OR :rol = 'administrador')");
         $eliminar->execute([
             ':id' => $comentarioId,
             ':usuario_id' => $usuarioId,
@@ -51,6 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // CAMBIO APLICADO: parent_id identifica opcionalmente el comentario padre;
+    // cero se convierte en NULL para conservar los comentarios raíz.
     $texto = censurarTexto(trim($_POST['texto'] ?? ''));
     $parentId = max(0, (int) ($_POST['parent_id'] ?? 0));
 
@@ -67,6 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($parentId > 0) {
+        // CAMBIO APLICADO: solo aceptamos padres del mismo hilo para impedir
+        // respuestas cruzadas entre tarjetas o recursos distintos.
         $padre = $pdo->prepare('SELECT id FROM comentarios WHERE id = :id AND item_key = :item_key LIMIT 1');
         $padre->execute([':id' => $parentId, ':item_key' => $itemKey]);
         if (!$padre->fetchColumn()) {
@@ -94,8 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $limit = 1000;
 }
 
-/* JOIN combina comentario, usuario y avatar en una sola respuesta para que el
-    frontend pueda renderizar cada ítem sin hacer consultas adicionales. */
+/* CAMBIO APLICADO: parent_id se devuelve junto con cada fila. El frontend arma
+    el árbol anidado sin una segunda consulta y conserva la relación padre-hijo. */
 $consulta = $pdo->prepare(
         'SELECT comentarios.id, comentarios.usuario_id, comentarios.parent_id, comentarios.texto, comentarios.fecha_creacion,
             usuarios.nombre_completo, usuarios.nickname, COALESCE(usuarios.foto_perfil, usuarios.avatar) AS avatar

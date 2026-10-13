@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `banner` varchar(255) NOT NULL DEFAULT 'default-banner.png',
   `nickname` varchar(50) DEFAULT NULL,
   `biografia` text DEFAULT NULL,
+  `perfil_publico` tinyint(1) NOT NULL DEFAULT 1,
   `ubicacion` varchar(100) DEFAULT NULL,
   `sitio_web` varchar(255) DEFAULT NULL,
   `fecha_registro` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

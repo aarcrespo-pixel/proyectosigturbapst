@@ -22,6 +22,16 @@ try {
         responderPerfilStats(['success' => false, 'message' => 'Perfil inválido'], 422);
     }
 
+    $consultaPrivacidad = $pdo->prepare('SELECT perfil_publico FROM usuarios WHERE id = :id LIMIT 1');
+    $consultaPrivacidad->execute([':id' => $perfilId]);
+    $perfilPublico = $consultaPrivacidad->fetchColumn();
+    if ($perfilPublico === false) {
+        responderPerfilStats(['success' => false, 'message' => 'Usuario no encontrado'], 404);
+    }
+    if (!(bool) $perfilPublico && (int) ($_SESSION['usuario_id'] ?? 0) !== $perfilId) {
+        responderPerfilStats(['success' => false, 'message' => 'Este perfil es privado'], 403);
+    }
+
     /* COUNT(*) sobre la relación seguido_id cuenta únicamente las filas que
        apuntan al perfil consultado; es una agregación relacional eficiente y
        evita cargar seguidores completos solo para obtener un número. */

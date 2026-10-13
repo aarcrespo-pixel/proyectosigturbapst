@@ -168,6 +168,15 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
 // ========================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = (int) $_SESSION['usuario_id'];
+    $consultaImagenesActuales = $pdo->prepare('SELECT avatar, banner FROM usuarios WHERE id = :id LIMIT 1');
+    $consultaImagenesActuales->execute([':id' => $userId]);
+    $imagenesActuales = $consultaImagenesActuales->fetch();
+    if (!$imagenesActuales) {
+        http_response_code(404);
+        exit('Usuario no encontrado.');
+    }
+    $_SESSION['usuario_avatar'] = (string) ($imagenesActuales['avatar'] ?? 'default-avatar.png');
+    $_SESSION['usuario_banner'] = (string) ($imagenesActuales['banner'] ?? 'default-banner.png');
 
     // LOGGING: Inicio de procesamiento
     error_log("=== INICIO PROCESAMIENTO POST - Usuario: {$userId} ===");
@@ -323,12 +332,17 @@ $nickname = htmlspecialchars($usuario['nickname'] ?? '', ENT_QUOTES, 'UTF-8');
 $biografia = htmlspecialchars($usuario['biografia'] ?? '', ENT_QUOTES, 'UTF-8');
 $ubicacion = htmlspecialchars($usuario['ubicacion'] ?? '', ENT_QUOTES, 'UTF-8');
 $sitioWeb = htmlspecialchars($usuario['sitio_web'] ?? '', ENT_QUOTES, 'UTF-8');
-$avatar = htmlspecialchars($usuario['avatar'] ?? 'default-avatar.png', ENT_QUOTES, 'UTF-8');
-$banner = htmlspecialchars($usuario['banner'] ?? 'default-banner.png', ENT_QUOTES, 'UTF-8');
 
-// URLs de los archivos
-$avatarUrl = '../uploads/avatars/' . $avatar;
-$bannerUrl = '../uploads/banners/' . $banner;
+$avatarFilename = basename((string) ($usuario['avatar'] ?? ''));
+$bannerFilename = basename((string) ($usuario['banner'] ?? ''));
+$avatarPath = __DIR__ . '/../uploads/avatars/' . $avatarFilename;
+$bannerPath = __DIR__ . '/../uploads/banners/' . $bannerFilename;
+$avatarUrl = $avatarFilename !== '' && is_file($avatarPath)
+    ? '../uploads/avatars/' . rawurlencode($avatarFilename)
+    : '../img/userb.png';
+$bannerUrl = $bannerFilename !== '' && is_file($bannerPath)
+    ? '../uploads/banners/' . rawurlencode($bannerFilename)
+    : '../img/banner-default-white.svg';
 
 error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
 ?>
@@ -339,217 +353,8 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personalizar Perfil</title>
-    <link rel="stylesheet" href="../css/login.css">
-    <style>
-        /* Override y estilos adicionales para el perfil */
-        main {
-            align-items: center;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        .intro {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-
-        /* Banner Section */
-        .banner-section {
-            position: relative;
-            width: 100%;
-            height: 140px;
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 8px;
-            background-color: rgba(148, 163, 184, 0.2);
-            cursor: pointer;
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-        }
-
-        .banner-section:hover {
-            transform: translateY(-2px);
-        }
-
-        .banner-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .banner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-        }
-
-        .banner-section:hover .banner-overlay {
-            background: rgba(0, 0, 0, 0.4);
-        }
-
-        .banner-overlay-text {
-            color: white;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 700;
-            opacity: 0;
-            transition: opacity 0.3s;
-            line-height: 1.4;
-        }
-
-        .banner-section:hover .banner-overlay-text {
-            opacity: 1;
-        }
-
-        /* Avatar Section */
-        .profile-avatar-section {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 28px;
-            position: relative;
-            z-index: 10;
-        }
-
-        .avatar-container {
-            position: relative;
-            width: 100px;
-            height: 100px;
-        }
-
-        .avatar-image {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            background-color: rgba(148, 163, 184, 0.2);
-            border: 4px solid var(--card);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        .avatar-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .avatar-container:hover .avatar-overlay {
-            background: rgba(0, 0, 0, 0.4);
-        }
-
-        .avatar-overlay-text {
-            color: white;
-            font-size: 12px;
-            font-weight: 700;
-            opacity: 0;
-            transition: opacity 0.3s;
-            text-align: center;
-            line-height: 1.3;
-        }
-
-        .avatar-container:hover .avatar-overlay-text {
-            opacity: 1;
-        }
-
-        /* Form adjustments */
-        .field-group {
-            display: grid;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .form-row-2 {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-            margin-bottom: 2px;
-        }
-
-        .form-row-2 .field-group {
-            margin-bottom: 0;
-        }
-
-        .char-counter {
-            font-size: 0.85rem;
-            color: var(--muted);
-            margin-top: 4px;
-            display: block;
-        }
-
-        .char-counter.warning {
-            color: var(--danger);
-            font-weight: 600;
-        }
-
-        .action-btn.primary {
-            width: 100%;
-            margin-top: 12px;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .button-group .action-btn {
-            flex: 1;
-        }
-
-        .button-group .action-btn.primary {
-            margin-top: 0;
-        }
-
-        .back-link {
-            text-decoration: none;
-            color: var(--text);
-        }
-
-        #avatarInput,
-        #bannerInput {
-            display: none;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .contenedor {
-                padding: 20px;
-                border-radius: 18px;
-            }
-
-            .banner-section {
-                height: 110px;
-                border-radius: 12px;
-                margin-bottom: 6px;
-            }
-
-            .avatar-image {
-                border-width: 3px;
-            }
-
-            .form-row-2 {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="../css/login.css?v=20261013-2">
+    <link rel="stylesheet" href="../css/perfil.css?v=20261013-2">
 </head>
 <body>
     <a class="logo-back" href="../index.php" aria-label="Volver al inicio">
@@ -563,7 +368,7 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
 
             <!-- Banner -->
             <div class="banner-section" id="bannerContainer" onclick="document.getElementById('bannerInput').click()">
-                <img id="bannerImage" src="<?php echo $bannerUrl; ?>" alt="Banner de perfil" class="banner-image" onerror="this.src='../uploads/banners/default-banner.png'">
+                <img id="bannerImage" src="<?php echo htmlspecialchars($bannerUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="Banner de perfil" class="banner-image">
                 <div class="banner-overlay">
                     <div class="banner-overlay-text">
                         <div style="font-size: 24px; margin-bottom: 2px;">📷</div>
@@ -575,7 +380,7 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
             <!-- Avatar -->
             <div class="profile-avatar-section">
                 <div class="avatar-container" id="avatarContainer" onclick="document.getElementById('avatarInput').click()">
-                    <img id="avatarImage" src="<?php echo $avatarUrl; ?>" alt="Avatar de perfil" class="avatar-image" onerror="this.src='../uploads/avatars/default-avatar.png'">
+                    <img id="avatarImage" src="<?php echo htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar de perfil" class="avatar-image">
                     <div class="avatar-overlay">
                         <div class="avatar-overlay-text">
                             <div style="font-size: 20px; margin-bottom: 1px;">📷</div>

@@ -3,7 +3,6 @@
         const form = document.getElementById('faq-form');
         const submit = document.getElementById('faq-submit');
         const label = submit?.querySelector('.faq-submit-label');
-        const spinner = submit?.querySelector('.faq-spinner');
         const feedback = document.getElementById('faq-feedback');
         const toast = document.getElementById('faq-toast');
         if (!form || !submit) return;
@@ -18,8 +17,8 @@
             submit.classList.add('is-loading');
             submit.setAttribute('aria-busy', 'true');
             label.textContent = 'Enviando...';
-            spinner.hidden = false;
             feedback.textContent = '';
+            feedback.classList.remove('is-error');
 
             try {
                 /* La respuesta JSON permite diferenciar validación del servidor,
@@ -34,6 +33,7 @@
 
                 form.reset();
                 feedback.textContent = '';
+                feedback.classList.remove('is-error');
                 toast.textContent = '¡Tu pregunta ha sido enviada! Un administrador la revisará pronto.';
                 toast.hidden = false;
                 window.setTimeout(() => { toast.hidden = true; }, 5000);
@@ -45,7 +45,6 @@
                 submit.classList.remove('is-loading');
                 submit.removeAttribute('aria-busy');
                 label.textContent = 'Enviar pregunta';
-                spinner.hidden = true;
             }
         });
     });

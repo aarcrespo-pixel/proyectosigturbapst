@@ -49,14 +49,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $messageType = 'error';
         } else {
             // Nunca guardamos la contraseña plana: password_hash genera un hash verificable.
-            $hash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare('INSERT INTO usuarios (nombre_completo, cedula, email, telefono, password) VALUES (:nombre_completo, :cedula, :email, :telefono, :password)');
+            $hash = password_hash($password, PASSWORD_BCRYPT);
+            $stmt = $pdo->prepare('INSERT INTO usuarios (nombre_completo, cedula, email, telefono, password, rol) VALUES (:nombre_completo, :cedula, :email, :telefono, :password, :rol)');
             $stmt->execute([
                 ':nombre_completo' => $nombreCompleto,
                 ':cedula' => $cedula,
                 ':email' => $email,
                 ':telefono' => $telefono,
                 ':password' => $hash,
+                ':rol' => 'turista',
             ]);
 
             header('Location: login.php?registro=exito');

@@ -59,4 +59,77 @@
 .mensaje-modal textarea { min-height: 130px; resize: vertical; border: 1px solid var(--perfil-line); border-radius: 16px; padding: .8rem; font: inherit; }
 .mensaje-modal__close { position: absolute; top: .7rem; right: .8rem; border: 0; background: transparent; color: var(--perfil-muted); font-size: 1.5rem; cursor: pointer; }
 .mensaje-modal__status { min-height: 1.2em; margin: 0; color: var(--perfil-muted); font-size: .85rem; }
+
+/* Estilos de la pantalla privada de personalización de perfil. */
+.mis-perfil-page main { align-items: center; }
+main:has(#editForm) { align-items: center; }
+main:has(#editForm) h1 { text-align: center; margin-bottom: 12px; }
+main:has(#editForm) .intro { text-align: center; margin-bottom: 28px; }
+
+.banner-section { position: relative; width: 100%; height: 140px; border-radius: 16px; overflow: hidden; margin-bottom: 8px; background-color: #fff; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease; }
+.banner-section:hover { transform: translateY(-2px); }
+.banner-image { width: 100%; height: 100%; object-fit: cover; }
+.banner-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0); display: flex; align-items: center; justify-content: center; transition: background .3s; }
+.banner-section:hover .banner-overlay { background: rgba(0, 0, 0, .4); }
+.banner-overlay-text { color: #fff; text-align: center; font-size: 13px; font-weight: 700; opacity: 0; transition: opacity .3s; line-height: 1.4; }
+.banner-section:hover .banner-overlay-text { opacity: 1; }
+
+.profile-avatar-section { display: flex; justify-content: center; margin-bottom: 28px; position: relative; z-index: 10; }
+.avatar-container { position: relative; width: 100px; height: 100px; }
+.avatar-image { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background-color: #fff; border: 4px solid var(--card); box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
+.avatar-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .3s; }
+.avatar-container:hover .avatar-overlay { background: rgba(0, 0, 0, .4); }
+.avatar-overlay-text { color: #fff; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity .3s; text-align: center; line-height: 1.3; }
+.avatar-container:hover .avatar-overlay-text { opacity: 1; }
+
+.field-group { display: grid; gap: 8px; margin-bottom: 16px; }
+.form-row-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 2px; }
+.form-row-2 .field-group { margin-bottom: 0; }
+.char-counter { font-size: .85rem; color: var(--muted); margin-top: 4px; display: block; }
+.char-counter.warning { color: var(--danger); font-weight: 600; }
+.action-btn.primary { width: 100%; margin-top: 12px; }
+.button-group { display: flex; gap: 12px; margin-top: 20px; }
+.button-group .action-btn { flex: 1; }
+.button-group .action-btn.primary { margin-top: 0; }
+.back-link { text-decoration: none; color: var(--text); }
+#avatarInput, #bannerInput { display: none; }
+
+@media (max-width: 600px) {
+    main:has(#editForm) .contenedor { padding: 20px; border-radius: 18px; }
+    .banner-section { height: 110px; border-radius: 12px; margin-bottom: 6px; }
+    .avatar-image { border-width: 3px; }
+    .form-row-2 { grid-template-columns: 1fr; gap: 12px; }
+}
 @media (max-width: 720px) { .perfil-publico { padding-top: 5rem; } .perfil-publico__banner { height: 180px; } .perfil-publico__identity { grid-template-columns: 86px 1fr; gap: 1rem; padding: 0 1rem 1.4rem; } .perfil-publico__avatar { width: 86px; height: 86px; margin-top: -42px; border-width: 4px; } .perfil-publico__details { padding-top: .5rem; } .perfil-publico__details h1 { font-size: 1.5rem; } .perfil-publico__actions { grid-column: 1 / -1; } .perfil-action { flex: 1; } .perfil-stats-container { grid-column: 1 / -1; width: auto; margin: 8px 0; } }
+
+@media (max-width: 420px) {
+    .perfil-publico {
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+
+    .perfil-publico__identity {
+        grid-template-columns: minmax(64px, 76px) minmax(0, 1fr);
+        gap: 0.75rem;
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+
+    .perfil-publico__details h1 {
+        font-size: clamp(1.2rem, 6vw, 1.5rem);
+    }
+
+    .perfil-stats-container {
+        justify-content: space-around;
+        gap: 0.5rem;
+        padding: 0.65rem;
+    }
+
+    .stat-item {
+        min-width: 0;
+    }
+
+    main:has(#editForm) .contenedor {
+        padding: 12px;
+    }
+}

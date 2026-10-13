@@ -8,12 +8,41 @@ if (!$usuarioId) {
     exit('Perfil no especificado.');
 }
 
-$consultaUsuario = $pdo->prepare('SELECT id, nombre_completo, nickname, biografia, avatar, banner, fecha_registro FROM usuarios WHERE id = :id LIMIT 1');
+$consultaUsuario = $pdo->prepare('SELECT id, nombre_completo, nickname, biografia, avatar, banner, fecha_registro, perfil_publico FROM usuarios WHERE id = :id LIMIT 1');
 $consultaUsuario->execute([':id' => $usuarioId]);
 $usuario = $consultaUsuario->fetch();
 if (!$usuario) {
     http_response_code(404);
     exit('Usuario no encontrado.');
+}
+
+$esPropio = !empty($_SESSION['usuario_id']) && (int) $_SESSION['usuario_id'] === $usuarioId;
+if (!(bool) $usuario['perfil_publico'] && !$esPropio) {
+    http_response_code(403);
+    $nombrePrivado = htmlspecialchars((string) $usuario['nombre_completo'], ENT_QUOTES, 'UTF-8');
+    ?>
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Perfil privado | SIGTUR</title>
+        <link rel="stylesheet" href="../css/estilos.css">
+        <link rel="stylesheet" href="../css/perfil.css">
+    </head>
+    <body class="perfil-publico-page">
+        <?php $headerCurrentPage = 'perfil'; $headerActivePage = ''; include __DIR__ . '/header.php'; ?>
+        <main class="perfil-publico">
+            <section class="perfil-empty" aria-live="polite">
+                <h1>Este perfil es privado</h1>
+                <p><?= $nombrePrivado ?> eligió limitar la visibilidad de su perfil.</p>
+                <a href="../index.php">Volver al inicio</a>
+            </section>
+        </main>
+    </body>
+    </html>
+    <?php
+    exit;
 }
 
 /* La relación usuario-galería usa una consulta parametrizada y ordena por fecha:
@@ -43,7 +72,6 @@ $avatarUrl = perfilAssetUrl((string) ($usuario['avatar'] ?? ''), 'avatars', '../
 $bannerUrl = perfilAssetUrl((string) ($usuario['banner'] ?? ''), 'banners', '');
 $nombre = (string) $usuario['nombre_completo'];
 $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
-$esPropio = !empty($_SESSION['usuario_id']) && (int) $_SESSION['usuario_id'] === $usuarioId;
 ?>
 <!DOCTYPE html>
 <html lang="es">

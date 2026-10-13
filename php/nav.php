@@ -65,10 +65,12 @@ $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
                 </div>
                 <a class="perfil-item" href="#" data-open-profile-modal>Personalizar Perfil</a>
                 <a class="perfil-item" href="<?= $navBase ?>mis-eventos.php">Mis Eventos / Favoritos</a>
+                <?php if (($_SESSION['rol'] ?? '') === 'administrador'): ?><a class="perfil-item" href="<?= $navBase ?>panel-admin.php">Panel de administración</a><?php elseif (($_SESSION['rol'] ?? '') === 'organizador'): ?><a class="perfil-item" href="<?= $navBase ?>panel-organizador.php">Panel de organizador</a><?php endif; ?>
                 <a class="perfil-item" href="<?= $navBase ?>configuracion.php" data-i18n="navSettings">Configuración</a>
                 <a class="perfil-item" href="<?= $navBase ?>soporte.php" data-i18n="navSupport">Soporte</a>
                 <div class="perfil-divider"></div>
-                <a class="perfil-item perfil-item-logout" href="<?= $navBase ?>cerrar-sesion.php" data-i18n="navLogout">Cerrar Sesión</a>
+                <!-- El cierre comparte controlador con login.php para reducir endpoints duplicados. -->
+                <a class="perfil-item perfil-item-logout" href="<?= $navBase ?>login.php?accion=cerrar-sesion" data-i18n="navLogout">Cerrar Sesión</a>
             <?php else: ?>
                 <div class="perfil-user-header">
                     <img class="perfil-user-avatar" src="<?= htmlspecialchars($rootBase . 'img/user.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar invitado">

@@ -10,10 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-/* Normalizamos la pregunta antes de persistirla. htmlspecialchars evita que
-   una futura pantalla administrativa interprete HTML enviado por el usuario. */
+/* Se guarda texto plano; las vistas administrativas deben escaparlo al mostrarlo. */
 $pregunta = trim((string) ($_POST['pregunta'] ?? ''));
-$pregunta = htmlspecialchars($pregunta, ENT_QUOTES, 'UTF-8');
 $usuarioId = isset($_SESSION['usuario_id']) ? (int) $_SESSION['usuario_id'] : null;
 $email = trim((string) ($_POST['email'] ?? ($_SESSION['usuario_email'] ?? '')));
 

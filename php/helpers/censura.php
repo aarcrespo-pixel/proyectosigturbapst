@@ -14,7 +14,7 @@ function censurarTexto(string $texto): string
         'carajo', 'concha', 'puta', 'pija', 'verga', 'boludo',
         'pelotudo', 'maricon', 'hijo de puta', 'bastardo', 'tarado',
         'mogolico', 'mongolico', 'estupido', 'down', 'retrasado',
-        'idiota', 'conchudo', 'chupaverga', 'pajero',
+        'idiota', 'conchudo', 'chupaverga', 'pajero', 
     ];
 
     foreach ($palabrasProhibidas as $palabra) {

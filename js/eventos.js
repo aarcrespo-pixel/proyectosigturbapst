@@ -60,12 +60,14 @@ const eventosPersistidos = Array.isArray(window.eventosDesdeBd) ? window.eventos
 })) : [];
 
 const galeria = [
-    { imagen: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Parque_Solari_Estatua.JPG" },
-    { imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwYxQbLi8Q2nRVZPDP9CwDkcYwQsKZ1R2EBF2XXy8nGdPUTnexH4SCTce8&s=10" },
-    { imagen: "https://www.infoturismo19.com.uy/wp-content/uploads/2023/07/SHOPPING-4-2.jpg" },
-    { imagen: "https://alba-uy-sarandi.cdn.mediatiquepress.com/wp-content/uploads/2024/08/Life_Cinemas_2.webp" },
-    { imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg" },
-    { imagen: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/84/ae/39/trouville-pizzeria-y.jpg?w=1200&h=1200&s=1" }
+    // Cada foto lleva metadatos propios para que el lightbox pueda renderizar
+    // el título y la descripción en lugar de mostrar un panel vacío.
+    { imagen: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Parque_Solari_Estatua.JPG", titulo: "Parque Benito Solari", descripcion: "Un espacio verde de Salto para caminar, descansar y disfrutar al aire libre." },
+    { imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwYxQbLi8Q2nRVZPDP9CwDkcYwQsKZ1R2EBF2XXy8nGdPUTnexH4SCTce8&s=10", titulo: "Costanera Norte", descripcion: "Un recorrido junto al río para disfrutar el paisaje y los atardeceres de la ciudad." },
+    { imagen: "https://www.infoturismo19.com.uy/wp-content/uploads/2023/07/SHOPPING-4-2.jpg", titulo: "Salto Shopping", descripcion: "Un punto de encuentro urbano con propuestas para pasear, comprar y compartir." },
+    { imagen: "https://alba-uy-sarandi.cdn.mediatiquepress.com/wp-content/uploads/2024/08/Life_Cinemas_2.webp", titulo: "Cine Sarandí", descripcion: "Una sala histórica para disfrutar cine, espectáculos y actividades culturales." },
+    { imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg", titulo: "Actividades en Salto", descripcion: "Propuestas y encuentros para vivir la ciudad y compartir con la comunidad." },
+    { imagen: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/84/ae/39/trouville-pizzeria-y.jpg?w=1200&h=1200&s=1", titulo: "La Trouville", descripcion: "Una propuesta gastronómica para descubrir sabores locales y disfrutar una buena salida." }
 ];
 
 // Construir lista principal con slugs únicos para cada evento
@@ -265,7 +267,8 @@ function obtenerRutaEvento(evento) {
 }
 
 function tarjetaPrincipal(evento) {
-    const itemKey = evento.slug ? `evento-${evento.slug}` : `evento-${slugify(evento.nombre)}`;
+    const slug = evento.slug || slugify(evento.nombre);
+    const itemKey = `evento-${slug}`;
     return `
     <article class="evento-card" data-item-key="${itemKey}" data-engagement="like-only">
       <div class="evento-card-media">
@@ -631,21 +634,42 @@ function filtrarEventosPrincipales() {
     });
 }
 
-function renderEventosPrincipales() {
+const EVENTOS_POR_PAGINA = 4;
+let limiteEventosVisibles = EVENTOS_POR_PAGINA;
+
+function renderEventosPrincipales({ reiniciarLimite = true } = {}) {
     // El grid se vuelve a pintar después de búsqueda, filtros rápidos o respuesta AJAX del drawer.
     const contenedor = document.getElementById('eventos-principales-contenedor');
     if (!contenedor) return;
 
+    if (reiniciarLimite) limiteEventosVisibles = EVENTOS_POR_PAGINA;
     const eventos = filtrarEventosPrincipales();
+    const botonVerMas = document.getElementById('ver-mas-eventos');
     if (!eventos.length) {
         contenedor.innerHTML = '<p class="sin-resultados">No se encontraron eventos con esa búsqueda.</p>';
+        if (botonVerMas) botonVerMas.hidden = true;
         return;
     }
 
-    contenedor.innerHTML = eventos.map((evento) => tarjetaPrincipal(evento)).join('');
+    contenedor.innerHTML = eventos.slice(0, limiteEventosVisibles).map((evento) => tarjetaPrincipal(evento)).join('');
+    if (botonVerMas) {
+        const restantes = Math.max(0, eventos.length - limiteEventosVisibles);
+        botonVerMas.hidden = eventos.length <= EVENTOS_POR_PAGINA;
+        botonVerMas.textContent = restantes > 0 ? `Ver más eventos (${restantes})` : 'Ver menos';
+    }
     if (typeof window.initInteractiveCards === 'function') {
         window.initInteractiveCards(contenedor);
     }
+}
+
+function configurarVerMasEventos() {
+    document.getElementById('ver-mas-eventos')?.addEventListener('click', () => {
+        const totalEventosFiltrados = filtrarEventosPrincipales().length;
+        limiteEventosVisibles = limiteEventosVisibles >= totalEventosFiltrados
+            ? EVENTOS_POR_PAGINA
+            : Math.min(limiteEventosVisibles + EVENTOS_POR_PAGINA, totalEventosFiltrados);
+        renderEventosPrincipales({ reiniciarLimite: false });
+    });
 }
 
 function tarjetaAnterior(evento) {
@@ -799,7 +823,9 @@ function actualizarLightbox() {
     const date = document.getElementById('lightbox-date');
     if (!item || !imagen || !caption) return;
     imagen.src = item.imagen;
-    imagen.alt = `Imagen de galería ${lightboxIndex + 1}`;
+    // Los datos viajan desde el objeto de galería hasta los nodos visibles del
+    // modal en cada cambio de foto, evitando títulos y descripciones obsoletos.
+    imagen.alt = item.titulo || `Imagen de galería ${lightboxIndex + 1}`;
     caption.textContent = `Imagen ${lightboxIndex + 1} de ${galeria.length}`;
     if (title) title.textContent = item.titulo || 'Cobertura de Salto';
     if (description) description.textContent = item.descripcion || 'Imágenes de lugares y actividades de la ciudad.';
@@ -848,6 +874,7 @@ function init() {
     });
 
     configurarFiltrosEventos();
+    configurarVerMasEventos();
     configurarDrawerFiltros();
     configurarFiltrosGaleria();
     renderEventosPrincipales();

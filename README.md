@@ -15,4 +15,14 @@ Pagina web destinada al turismo en Salto con: un formulario de inicio, secciones
 - Federico Sarmiento
 - Benjamin Reina
 
+## Roles y primer administrador
+
+Las cuentas nuevas reciben el rol `turista`. La primera cuenta administradora se asigna una sola vez desde una consola local, usando el correo de una cuenta ya registrada:
+
+```powershell
+C:\xampp\php\php.exe php\herramientas\promover-primer-administrador.php correo@dominio.com
+```
+
+El comando solo funciona por CLI y se cancela si ya existe un administrador. Luego, esa persona puede promover turistas a organizadores desde `Panel de administración`.
+
 

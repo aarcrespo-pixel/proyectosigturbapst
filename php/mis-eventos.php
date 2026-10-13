@@ -39,7 +39,7 @@ $catalogo = [
 /* La tabla de inscripciones relaciona usuarios y eventos con una clave única
     para impedir reservas duplicadas. */
 $pdo->exec("CREATE TABLE IF NOT EXISTS inscripciones_eventos (id INT AUTO_INCREMENT PRIMARY KEY, evento_slug VARCHAR(120) NOT NULL, usuario_id INT NOT NULL, fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP, UNIQUE KEY unica_inscripcion (evento_slug, usuario_id), INDEX (evento_slug)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-$guardarEvento = $pdo->prepare('INSERT INTO eventos (slug, titulo, descripcion, fecha, ubicacion, categoria, tipo_entrada, precio, imagen_portada, es_pasado, organizador_id) VALUES (:slug, :titulo, :descripcion, :fecha, :ubicacion, :categoria, :tipo_entrada, :precio, :imagen, :pasado, :organizador) ON DUPLICATE KEY UPDATE titulo = VALUES(titulo), descripcion = VALUES(descripcion), categoria = VALUES(categoria), ubicacion = VALUES(ubicacion), imagen_portada = VALUES(imagen_portada), fecha = VALUES(fecha), es_pasado = VALUES(es_pasado)');
+$guardarEvento = $pdo->prepare('INSERT INTO eventos (slug, titulo, descripcion, fecha, ubicacion, categoria, tipo_entrada, precio, imagen_portada, es_pasado, organizador_id) VALUES (:slug, :titulo, :descripcion, :fecha, :ubicacion, :categoria, :tipo_entrada, :precio, :imagen, :pasado, :organizador) ON DUPLICATE KEY UPDATE slug = VALUES(slug)');
 foreach ($catalogo as [$slug, $titulo, $categoria, $ubicacion, $imagen, $fecha]) {
     // Sincronizamos el catálogo legacy con el esquema persistente actual.
     $guardarEvento->execute([
@@ -53,7 +53,7 @@ foreach ($catalogo as [$slug, $titulo, $categoria, $ubicacion, $imagen, $fecha])
         ':precio' => null,
         ':imagen' => $imagen,
         ':pasado' => strtotime($fecha) < strtotime(date('Y-m-d')) ? 1 : 0,
-        ':organizador' => $usuarioId,
+        ':organizador' => 0,
     ]);
 }
 
@@ -73,11 +73,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'cance
 $stmt = $pdo->prepare('SELECT e.*, i.id AS inscripcion_id FROM eventos e INNER JOIN inscripciones_eventos i ON i.evento_slug = e.slug WHERE i.usuario_id = :usuario ORDER BY e.fecha ASC');
 $stmt->execute([':usuario' => $usuarioId]);
 $inscripciones = $stmt->fetchAll();
-/* Esta vista vive dentro de /php/. Por eso los enlaces del nav deben resolverse
-    desde esa carpeta: usar ../eventos.php saldría del directorio PHP y produce
-    un 404. Dejamos el prefijo vacío para generar /php/eventos.php, /php/turismo.php,
-    /php/lugares.php y /php/gastronomia.php mediante nav.php. */
-$navBase = '';
+$favoritosStmt = $pdo->prepare('SELECT * FROM favoritos_eventos WHERE usuario_id = :usuario ORDER BY fecha ASC, fecha_registro DESC');
+$favoritosStmt->execute([':usuario' => $usuarioId]);
+$favoritosEventos = $favoritosStmt->fetchAll();
+/* CAMBIO APLICADO: Mis Eventos ya no incluye nav.php, porque esa plantilla
+   agrega categorías, búsqueda y clima que no pertenecen a esta vista. */
+$misAvatar = basename((string) ($_SESSION['usuario_avatar'] ?? ''));
+$misAvatarRuta = '../img/user.png';
+if ($misAvatar !== '' && $misAvatar !== 'default-avatar.png' && $misAvatar !== 'user-default.png' && file_exists(__DIR__ . '/../uploads/avatars/' . $misAvatar)) {
+    $misAvatarRuta = '../uploads/avatars/' . $misAvatar;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -110,17 +115,132 @@ body[data-tema="oscuro"] .mis-empty p,
 [data-theme="dark"] .mis-empty p {
     color: #9ca3af;
 }
+
+/* CAMBIO APLICADO: el header minimalista ocupa el flujo normal, por eso el
+   contenido ya no necesita reservar espacio para un navbar fijo o el clima. */
+.mis-eventos-wrap {
+    padding-top: 1.5rem;
+}
+
+.mis-favoritos {
+    margin: 2rem 0 3rem;
+}
+
+.mis-favoritos-head {
+    display: flex;
+    align-items: baseline;
+    gap: .8rem;
+    margin-bottom: 1rem;
+}
+
+.mis-favoritos-head h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.mis-favoritos-head span,
+.mis-favoritos-empty {
+    color: #6b7480;
+}
+
+/* CAMBIO APLICADO: este header reemplaza nav.php en esta vista y solo deja
+   logo, regreso y acceso al perfil, sin categorías, búsqueda ni clima. */
+.mis-minimal-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 1.25rem 1.25rem 0;
+}
+
+.mis-minimal-header__logo img {
+    display: block;
+    width: 7rem;
+    height: auto;
+}
+
+.mis-minimal-header__back {
+    color: #151b22;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.mis-minimal-header__back:hover {
+    text-decoration: underline;
+}
+
+.mis-minimal-header__profile {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #151b22;
+    cursor: default;
+}
+
+.mis-minimal-header__profile img {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+@media (max-width: 600px) {
+    .mis-minimal-header {
+        padding-top: 1rem;
+    }
+
+    .mis-minimal-header__logo img {
+        width: 5.75rem;
+    }
+}
 </style>
 </head>
 <body class="mis-eventos-page">
-<?php $activePage = 'eventos';
-include __DIR__ . '/nav.php'; ?>
-<main class="mis-eventos-wrap"><header class="mis-eventos-head"><div><h1>Mis Eventos</h1><p>Tu agenda de experiencias, encuentros y actividades.</p></div><a class="mis-explorar" href="../index.php">Explorar eventos</a></header>
-<?php if (!$inscripciones): ?><section class="mis-empty"><h2>Aún no te has inscripto a ningún evento</h2><p>Explorá la agenda y reservá tu próxima experiencia en Salto.</p><a class="mis-explorar" href="eventos.php">Explorar eventos</a></section><?php else: ?><section class="mis-eventos-grid" id="misEventosGrid"><?php foreach ($inscripciones as $evento): $imagen = str_starts_with($evento['imagen'], '../../') ? substr($evento['imagen'], 1) : $evento['imagen'];
+<header class="mis-minimal-header" aria-label="Navegación de Mis Eventos">
+    <a class="mis-minimal-header__logo" href="../index.php" aria-label="Ir al inicio">
+        <img src="../img/logoazul.png" alt="SIGTUR">
+    </a>
+    <a class="mis-minimal-header__back" href="../index.php">← Volver</a>
+    <button class="mis-minimal-header__profile" type="button" aria-label="Perfil no disponible">
+        <img src="<?= htmlspecialchars($misAvatarRuta, ENT_QUOTES, 'UTF-8') ?>" alt="Perfil">
+    </button>
+</header>
+<main class="mis-eventos-wrap"><header class="mis-eventos-head"><div><h1>Mis Eventos y Favoritos</h1><p>Tu agenda y los eventos que quieres guardar para más adelante.</p></div><a class="mis-explorar" href="eventos.php">Explorar eventos</a></header>
+<section class="mis-favoritos"><div class="mis-favoritos-head"><h2>Mis eventos favoritos</h2><span><?= count($favoritosEventos) ?> guardados</span></div>
+<?php if (!$favoritosEventos): ?><p class="mis-favoritos-empty">Todavía no guardaste eventos favoritos.</p><?php else: ?><div class="mis-eventos-grid" id="misFavoritosGrid"><?php foreach ($favoritosEventos as $favorito):
+    $imagenFavorito = (string) ($favorito['imagen_portada'] ?? '../img/porco.avif');
+    $fechaFavorito = !empty($favorito['fecha']) ? date('d/m/Y', strtotime($favorito['fecha'])) : '';
+    ?><article class="mis-evento-card" data-favorito-slug="<?= htmlspecialchars($favorito['evento_slug'], ENT_QUOTES, 'UTF-8') ?>"><img src="<?= htmlspecialchars($imagenFavorito, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($favorito['titulo'], ENT_QUOTES, 'UTF-8') ?>"><div class="mis-evento-info"><h2><?= htmlspecialchars($favorito['titulo'], ENT_QUOTES, 'UTF-8') ?></h2><div class="mis-evento-meta"><?php if ($fechaFavorito): ?><span>Fecha: <?= htmlspecialchars($fechaFavorito, ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?><?php if (!empty($favorito['ubicacion'])): ?><span>Lugar: <?= htmlspecialchars($favorito['ubicacion'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?><?php if (!empty($favorito['categoria'])): ?><span><?= htmlspecialchars($favorito['categoria'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?></div><div class="mis-evento-actions"><?php if (!empty($favorito['evento_id'])): ?><a class="mis-pase" href="evento.php?id=<?= (int) $favorito['evento_id'] ?>">Ver evento</a><?php endif; ?><button class="mis-cancelar" type="button" data-quitar-favorito>Quitar favorito</button></div></div></article><?php endforeach; ?></div><?php endif; ?></section>
+<?php if (!$inscripciones): ?><section class="mis-empty"><h2>Aún no te has inscripto a ningún evento</h2><p>Explorá la agenda y reservá tu próxima experiencia en Salto.</p><a class="mis-explorar" href="eventos.php">Explorar eventos</a></section><?php else: ?><section class="mis-eventos-grid" id="misEventosGrid"><?php foreach ($inscripciones as $evento):
+    $imagenEvento = $evento['imagen_portada'] ?? $evento['imagen'] ?? '../img/default.jpg';
+    $imagen = str_starts_with((string) $imagenEvento, '../../') ? substr((string) $imagenEvento, 1) : (string) $imagenEvento;
     $qr = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . rawurlencode('SIGTUR|' . $evento['slug'] . '|' . $usuarioId); ?><article class="mis-evento-card" data-inscripcion-id="<?= (int) $evento['inscripcion_id'] ?>"><img src="<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>"><div class="mis-evento-info"><h2><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h2><div class="mis-evento-meta"><span>📅 <?= htmlspecialchars(date('d/m/Y', strtotime($evento['fecha']))) ?></span><span>📍 <?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></span></div><div class="mis-evento-actions"><button class="mis-pase" type="button" data-qr="<?= htmlspecialchars($qr, ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>">Ver Pase / QR</button><button class="mis-cancelar" type="button" data-cancelar>Cancelar inscripción</button></div></div></article><?php endforeach; ?></section><?php endif; ?></main>
 <div class="mis-qr" id="misQrModal" hidden><div class="mis-qr-box"><button class="mis-qr-close" type="button" data-cerrar-qr>×</button><h2 id="misQrTitle">Pase digital</h2><img id="misQrImage" src="" alt="Código QR de acreditación"><p><?= htmlspecialchars($_SESSION['usuario_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?></p></div></div>
 <script src="../js/translator.js"></script>
 <script src="../js/script.js" defer></script>
 <script>
 const grid=document.getElementById('misEventosGrid');const modal=document.getElementById('misQrModal');document.querySelectorAll('[data-qr]').forEach(button=>button.addEventListener('click',()=>{document.getElementById('misQrTitle').textContent=button.dataset.title;document.getElementById('misQrImage').src=button.dataset.qr;modal.hidden=false}));document.querySelector('[data-cerrar-qr]')?.addEventListener('click',()=>modal.hidden=true);modal?.addEventListener('click',event=>{if(event.target===modal)modal.hidden=true});grid?.addEventListener('click',async event=>{const button=event.target.closest('[data-cancelar]');if(!button)return;const card=button.closest('[data-inscripcion-id]');if(!card||!confirm('¿Cancelar esta inscripción?'))return;button.disabled=true;const response=await fetch('mis-eventos.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({accion:'cancelar',inscripcion_id:card.dataset.inscripcionId})});const data=await response.json();if(data.ok){card.remove();if(!grid.children.length)location.reload()}else{button.disabled=false;alert('No se pudo cancelar la inscripción')}});
+</script>
+<script>
+const favoritosGrid=document.getElementById('misFavoritosGrid');
+favoritosGrid?.addEventListener('click',async event=>{
+    const button=event.target.closest('[data-quitar-favorito]');
+    if(!button)return;
+    const card=button.closest('[data-favorito-slug]');
+    button.disabled=true;
+    try{
+        const response=await fetch('api/favoritos_eventos.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({accion:'quitar',slug:card.dataset.favoritoSlug})});
+        const result=await response.json();
+        if(response.status===401){window.location.href='login.php';return}
+        if(!response.ok)throw new Error(result.error||'No se pudo quitar el favorito.');
+        card.remove();
+        if(!favoritosGrid.children.length)location.reload();
+    }catch(error){button.disabled=false;alert(error.message)}
+});
 </script></body></html>

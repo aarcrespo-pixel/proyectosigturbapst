@@ -1,3 +1,11 @@
+<?php
+session_start();
+require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/autorizacion.php';
+
+$soporteUsuario = sigtur_usuario_actual($pdo);
+$soporteCsrfToken = $soporteUsuario ? sigtur_csrf_token() : '';
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -33,15 +41,15 @@
           <a class="btn faq-link" href="faq.php">Enviar una pregunta</a>
           <div class="faq-list">
             <div class="faq-item">
-              <strong data-i18n="supportFaq1Question">¿Cómo accedo al panel?</strong>
+              <strong class="supporttitle" data-i18n="supportFaq1Question">¿Cómo accedo al panel?</strong>
               <span data-i18n="supportFaq1Answer">Inicia sesión con tus credenciales de usuario.</span>
             </div>
             <div class="faq-item">
-              <strong data-i18n="supportFaq2Question">¿Puedo cambiar la configuración?</strong>
+              <strong class="supporttitle" data-i18n="supportFaq2Question">¿Puedo cambiar la configuración?</strong>
               <span data-i18n="supportFaq2Answer">Sí, desde la sección de configuración del sitio.</span>
             </div>
             <div class="faq-item">
-              <strong data-i18n="supportFaq3Question">¿Cómo reporto un error?</strong>
+              <strong class="supporttitle" data-i18n="supportFaq3Question">¿Cómo reporto un error?</strong>
               <span data-i18n="supportFaq3Answer">Usa el formulario de reportes en esta misma página.</span>
             </div>
           </div>
@@ -50,12 +58,20 @@
         <article class="card">
           <h2 data-i18n="supportReportTitle">Reportes</h2>
           <p data-i18n="supportReportText">Describe el problema para que el equipo lo revise.</p>
-          <div class="report-box">
-            <input type="text" placeholder="Asunto del reporte" data-i18n-placeholder="supportReportSubject" />
-            <input type="email" placeholder="Tu correo" data-i18n-placeholder="supportReportEmail" />
-            <textarea placeholder="Describe el problema o la incidencia..." data-i18n-placeholder="supportReportTextarea"></textarea>
-            <button class="btn" type="button" data-i18n="supportReportButton">Enviar reporte</button>
-          </div>
+          <?php if ($soporteUsuario): ?>
+            <form class="report-box" data-soporte-mensajes action="api/mensajes.php" method="post">
+              <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($soporteCsrfToken, ENT_QUOTES, 'UTF-8') ?>">
+              <input type="text" name="contexto" value="Soporte general" maxlength="120" placeholder="Asunto del reporte" data-i18n-placeholder="supportReportSubject" />
+              <textarea name="mensaje" maxlength="500" placeholder="Describe el problema o la incidencia..." data-i18n-placeholder="supportReportTextarea" required></textarea>
+              <button class="btn" type="submit" data-i18n="supportReportButton">Enviar reporte</button>
+              <p data-soporte-estado role="status" aria-live="polite"></p>
+            </form>
+          <?php else: ?>
+            <div class="support-login-prompt">
+              <p>Iniciá sesión para enviar un reporte y recibir respuesta del equipo de soporte.</p>
+              <a class="btn" href="login.php">Iniciar sesión</a>
+            </div>
+          <?php endif; ?>
         </article>
 
         <article class="card">
@@ -63,7 +79,8 @@
           <p data-i18n="supportContactText">Opciones para comunicarte con soporte.</p>
           <div class="contact-list">
             <div class="contact-item" data-i18n="supportContactEmail">Correo: soporte@sigtur.com</div>
-            <div class="contact-item" data-i18n="supportContactWhatsapp">WhatsApp: +598 99 999 999</div>
+            <div class="contact-item"><a href="https://wa.me/59891661335" target="_blank" rel="noopener noreferrer" data-i18n="supportContactWhatsapp">WhatsApp: 091 661 335</a></div>
+            <div class="contact-item"><a href="https://instagram.com/bapstuy" target="_blank" rel="noopener noreferrer" data-i18n="supportContactInstagram">Instagram: @bapstuy</a></div>
             <div class="contact-item" data-i18n="supportContactHours">Horario: Lunes a Viernes, 9:00 a 18:00</div>
           </div>
         </article>
@@ -73,15 +90,15 @@
           <p data-i18n="supportHelpText">Guías breves para resolver tareas simples.</p>
           <div class="help-list">
             <div class="help-item">
-              <strong data-i18n="supportHelp1Title">Actualizar datos</strong>
+              <strong class="supporttitle" data-i18n="supportHelp1Title">Actualizar datos</strong>
               <span data-i18n="supportHelp1Text">Ve a configuración y guarda los cambios.</span>
             </div>
             <div class="help-item">
-              <strong data-i18n="supportHelp2Title">Revisar eventos</strong>
+              <strong class="supporttitle" data-i18n="supportHelp2Title">Revisar eventos</strong>
               <span data-i18n="supportHelp2Text">Consulta la sección de eventos y filtros disponibles.</span>
             </div>
             <div class="help-item">
-              <strong data-i18n="supportHelp3Title">Solucionar acceso</strong>
+              <strong class="supporttitle" data-i18n="supportHelp3Title">Solucionar acceso</strong>
               <span data-i18n="supportHelp3Text">Verifica tu usuario, contraseña y conexión.</span>
             </div>
           </div>
@@ -89,6 +106,7 @@
       </section>
     </section>
   </main>
+  <script src="../js/mensajes.js?v=20261001-1"></script>
   <script src="../js/translator.js"></script>
   <script src="../js/script.js"></script>
 </body>

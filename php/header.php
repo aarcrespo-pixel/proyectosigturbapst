@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/helpers/autorizacion.php';
 /* El header es un componente compartido: se ejecuta dentro de varias páginas,
    por eso primero garantiza una sesión disponible sin iniciar una duplicada. */
 if (session_status() === PHP_SESSION_NONE) {
@@ -23,6 +24,7 @@ $headerPageBase = $_SERVER['PHP_SELF'] ?? '';
 $headerUserLoggedIn = isset($_SESSION['usuario_id']);
 $headerUserName = $_SESSION['usuario_nombre'] ?? 'Usuario';
 $headerUserEmail = $_SESSION['usuario_email'] ?? '';
+$headerUserRole = sigtur_normalizar_rol($_SESSION['rol'] ?? null);
 $headerUserNickname = $_SESSION['usuario_nickname'] ?? (!empty($headerUserEmail) ? strtolower(strstr($headerUserEmail, '@', true) ?: $headerUserEmail) : 'usuario');
 $headerUserAvatar = $_SESSION['usuario_avatar'] ?? 'user-default.png';
 
@@ -105,10 +107,12 @@ $headerLinks = [
                 </div>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/personalizar-perfil.php" data-open-profile-modal>Personalizar Perfil</a>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/mis-eventos.php">Mis Eventos / Favoritos</a>
+                <?php if (($_SESSION['rol'] ?? '') === 'administrador'): ?><a class="perfil-item" href="<?= BASE_URL ?>php/panel-admin.php">Panel de administración</a><?php elseif (($_SESSION['rol'] ?? '') === 'organizador'): ?><a class="perfil-item" href="<?= BASE_URL ?>php/panel-organizador.php">Panel de organizador</a><?php endif; ?>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/configuracion.php" data-i18n="navSettings">Configuración</a>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/soporte.php" data-i18n="navSupport">Soporte</a>
                 <div class="perfil-divider"></div>
-                <a class="perfil-item perfil-item-logout" href="<?= BASE_URL ?>php/cerrar-sesion.php" data-i18n="navLogout">Cerrar Sesión</a>
+                <!-- El logout se resuelve en el controlador central de autenticación. -->
+                <a class="perfil-item perfil-item-logout" href="<?= BASE_URL ?>php/login.php?accion=cerrar-sesion" data-i18n="navLogout">Cerrar Sesión</a>
             <?php else: ?>
                 <div class="perfil-user-header">
                     <img class="perfil-user-avatar" src="<?php echo htmlspecialchars($headerAssetPrefix . 'img/user.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar invitado">
@@ -126,10 +130,63 @@ $headerLinks = [
     </div>
 </header>
 
+<?php if ($headerUserLoggedIn): ?>
+<button
+    type="button"
+    hidden
+    data-notificaciones-toggle
+    data-user-id="<?= (int) ($_SESSION['usuario_id'] ?? 0) ?>"
+    data-api="<?= BASE_URL ?>php/api/notificaciones.php"
+    data-service-worker="<?= BASE_URL ?>sw.js"
+    data-csrf="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"
+    aria-hidden="true"
+    tabindex="-1"></button>
+<?php endif; ?>
+
 <script src="<?= BASE_URL ?>js/weather.js" defer></script>
 <script src="<?= BASE_URL ?>js/translator.js" defer></script>
 <script src="<?= BASE_URL ?>js/search.js" defer></script>
+<script src="<?= BASE_URL ?>js/notificaciones.js" defer></script>
+<script src="<?= BASE_URL ?>js/copilot_ai.js?v=20260930-1" defer></script>
 <?php $mensajesWidgetRoot = BASE_URL; include __DIR__ . '/mensajes-widget.php'; ?>
+
+<?php if ($headerUserLoggedIn && $headerUserRole === 'turista'): ?>
+<div class="copilot-assistant" id="copilot-assistant" data-api="<?= BASE_URL ?>php/api/copilot_ai.php" data-csrf="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+    <button type="button" class="copilot-assistant__toggle" id="copilot-assistant-toggle" aria-label="Abrir asistente de IA" aria-expanded="false" aria-controls="copilot-assistant-panel" title="Abrir asistente Sigtur">
+        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+            <path d="M12 3a2 2 0 0 1 2 2h2.2A3.8 3.8 0 0 1 20 8.8v6.4a3.8 3.8 0 0 1-3.8 3.8h-.7l-3.5 2.6-3.5-2.6h-.7A3.8 3.8 0 0 1 4 15.2V8.8A3.8 3.8 0 0 1 7.8 5H10a2 2 0 0 1 2-2Zm-4.2 5A.8.8 0 0 0 7 8.8v6.4a.8.8 0 0 0 .8.8h1.7l2.5 1.9 2.5-1.9h1.7a.8.8 0 0 0 .8-.8V8.8a.8.8 0 0 0-.8-.8H7.8ZM9 10a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm6 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm-6 4h6v1.5H9V14Z"/>
+        </svg>
+    </button>
+
+    <div class="copilot-assistant__panel" id="copilot-assistant-panel" hidden>
+        <div class="copilot-assistant__header">
+            <div>
+                <strong>Asistente IA</strong>
+                <small>Tu guía de Salto</small>
+            </div>
+            <div class="copilot-assistant__header-actions">
+                <button type="button" id="copilot-assistant-history" title="Ver chat anterior">Historial</button>
+                <button type="button" id="copilot-assistant-clear" title="Limpiar chat actual">Limpiar</button>
+                <button type="button" id="copilot-assistant-delete" title="Eliminar chat">Eliminar</button>
+            </div>
+            <button type="button" class="copilot-assistant__close" id="copilot-assistant-close" aria-label="Cerrar asistente">×</button>
+        </div>
+
+        <div class="copilot-assistant__history" id="copilot-assistant-history-panel" hidden></div>
+
+        <div class="copilot-assistant__messages" id="copilot-assistant-messages">
+            <div class="copilot-assistant__message copilot-assistant__message--bot">
+                Hola 👋 Soy el asistente virtual de Sigtur Salto. ¿En qué puedo ayudarte?
+            </div>
+        </div>
+
+        <form class="copilot-assistant__form" id="copilot-assistant-form">
+            <textarea id="copilot-assistant-input" rows="3" maxlength="800" placeholder="Escribí tu pregunta..." required></textarea>
+            <button type="submit" id="copilot-assistant-submit">Enviar</button>
+        </form>
+    </div>
+</div>
+<?php endif; ?>
 
 <?php /* El modal solo se monta para usuarios autenticados; así no se exponen
          controles de edición de perfil a visitantes anónimos. */

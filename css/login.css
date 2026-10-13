@@ -563,3 +563,77 @@ button:disabled {
         font-size: 0.88rem;
     }
 }
+
+@media (max-width: 600px) {
+    body {
+        align-items: flex-start;
+        min-height: 100dvh;
+        padding: 5.5rem max(12px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    }
+
+    main,
+    .contenedor {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .contenedor {
+        padding: clamp(14px, 4vw, 20px);
+    }
+
+    .logo-back {
+        top: max(10px, env(safe-area-inset-top));
+        left: max(10px, env(safe-area-inset-left));
+    }
+
+    .form-row-2,
+    .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .button-group,
+    .botones {
+        flex-direction: column;
+    }
+
+    .button-group > *,
+    .botones > * {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .banner-section {
+        height: clamp(100px, 32vw, 160px);
+    }
+
+    .profile-avatar-section {
+        margin-bottom: 1.25rem;
+    }
+
+    .avatar-container {
+        width: clamp(84px, 25vw, 110px);
+        height: clamp(84px, 25vw, 110px);
+    }
+
+    .intro,
+    .register-prompt,
+    .google-legal {
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 360px) {
+    .contenedor {
+        padding: 12px;
+        border-radius: 14px;
+    }
+
+    input,
+    textarea,
+    select {
+        padding-right: 9px;
+        padding-left: 9px;
+        font-size: 0.9rem;
+    }
+}

@@ -1,5 +1,9 @@
 <?php
 require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/autorizacion.php';
+$usuarioActual = sigtur_usuario_actual($pdo);
+$puedeGestionarEventos = $usuarioActual && in_array($usuarioActual['rol'], ['organizador', 'administrador'], true);
+$csrfToken = $puedeGestionarEventos ? sigtur_csrf_token() : '';
 
 /* Esta página tiene dos salidas: HTML para la vista normal y JSON cuando
     ajax=1. Mantener ambas en el mismo controlador evita duplicar filtros. */
@@ -57,7 +61,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Estilos CSS -->
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>"> <!-- Estilos generales -->
-    <link rel="stylesheet" href="../css/eventos.css"> <!-- Estilos específicos de eventos -->
+    <link rel="stylesheet" href="../css/eventos.css?v=20261013-1"> <!-- Estilos específicos de eventos -->
 </head>
 
 <body class="page-eventos">
@@ -137,10 +141,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         <section class="seccion eventos-principales">
             <div class="titulo-seccion eventos-header">
                 <h2>Listado de Eventos</h2>
-                <div class="eventos-header-actions"><button type="button" class="btn-filtros" id="btn-filtros" aria-expanded="false">Filtros ⚙️</button><button type="button" class="btn-crear-evento" id="btn-crear-evento">Crear Evento +</button></div>
+                <div class="eventos-header-actions"><button type="button" class="btn-filtros" id="btn-filtros" aria-expanded="false">Filtros ⚙️</button><?php if ($puedeGestionarEventos): ?><button type="button" class="btn-crear-evento" id="btn-crear-evento">Crear Evento +</button><?php endif; ?></div>
             </div>
             <div class="eventos-lista" id="eventos-principales-contenedor">
-                <?php foreach ($eventosDesdeBd as $evento): ?>
+                <?php foreach (array_slice($eventosDesdeBd, 0, 4) as $evento): ?>
                     <article class="evento-card" data-item-key="evento-<?= htmlspecialchars($evento['slug'], ENT_QUOTES, 'UTF-8') ?>" data-engagement="like-only">
                         <div class="evento-card-media"><img src="<?= htmlspecialchars($evento['imagen_portada'] ?: '../img/porco.avif', ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy"></div>
                         <div class="evento-card-body"><span class="categoria"><?= htmlspecialchars($evento['categoria'] . ' · ' . ($evento['tipo_entrada'] ?? 'Gratuito'), ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><p class="lugar"><?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></p></div>
@@ -148,9 +152,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                     </article>
                 <?php endforeach; ?>
             </div>
+            <button type="button" class="boton-ver-mas-eventos" id="ver-mas-eventos" hidden>Ver más eventos</button>
         </section>
 
-        <div class="form-evento-overlay" id="form-evento-overlay" aria-hidden="true">
+        <?php if ($puedeGestionarEventos): ?><div class="form-evento-overlay" id="form-evento-overlay" aria-hidden="true">
             <div class="form-evento-modal" role="dialog" aria-modal="true" aria-labelledby="form-evento-title">
                 <button class="form-evento-close" id="form-evento-close" type="button" aria-label="Cerrar formulario">×</button>
                 <div class="form-evento-header">
@@ -158,6 +163,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                     <p>Completa los datos para agregar un nuevo evento a la plataforma.</p>
                 </div>
                 <form id="form-nuevo-evento" class="form-evento" method="post" action="crear-evento.php" novalidate>
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                     <div class="form-error" id="form-error" role="alert"></div>
 
                     <div class="form-section">
@@ -292,7 +298,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                     </div>
                 </form>
             </div>
-        </div>
+        </div><?php endif; ?>
 
         <!-- El drawer se mantiene fuera del flujo del grid para animarse sin desplazar tarjetas. -->
         <aside class="filtros-drawer" id="filtros-drawer" aria-hidden="true" aria-labelledby="filtros-title">
@@ -359,13 +365,25 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
         <div class="lightbox-content">
             <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar imagen">×</button>
-            <button class="lightbox-arrow left" id="lightbox-prev" aria-label="Imagen anterior">❮</button>
             <div class="lightbox-media">
+                <!-- CAMBIO APLICADO: las flechas viven dentro del área visual de
+                     la foto para que nunca puedan invadir el panel de comentarios. -->
+                <button class="lightbox-arrow left" id="lightbox-prev" aria-label="Imagen anterior">❮</button>
                 <img id="lightbox-image" src="" alt="Vista ampliada de galería">
+                <button class="lightbox-arrow right" id="lightbox-next" aria-label="Siguiente imagen">❯</button>
             </div>
-            <button class="lightbox-arrow right" id="lightbox-next" aria-label="Siguiente imagen">❯</button>
             <aside class="lightbox-comments" aria-label="Comentarios de la imagen">
-                <div class="lightbox-caption" id="lightbox-caption"></div>
+                <!-- Estos nodos reciben item.titulo e item.descripcion desde
+                     eventos.js cada vez que cambia la foto del lightbox. -->
+                <div class="lightbox-info">
+                    <span class="lightbox-kicker">Galería de Salto</span>
+                    <h2 id="lightbox-title">Imagen de galería</h2>
+                    <p id="lightbox-description">Imágenes de lugares y actividades de la ciudad.</p>
+                    <div class="lightbox-meta">
+                        <span id="lightbox-date">Publicado recientemente</span>
+                        <span class="lightbox-caption" id="lightbox-caption"></span>
+                    </div>
+                </div>
                 <article class="gallery-engagement-card" id="lightbox-engagement-card"></article>
             </aside>
         </div>
@@ -375,40 +393,36 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         <div class="footer-grid">
             <div class="footer-col">
                 <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4>EVENTOS</h4>
-                    <span class="footer-toggle-icon">▾</span>
-                </button>
-                <div class="footer-links">
-                    <a href="eventos.php" class="footer-link">Eventos destacados</a>
-                    <a href="eventos.php" class="footer-link">Próximos eventos</a>
-                    <a href="eventos.php" class="footer-link">Eventos anteriores</a>
-                    <a href="eventos.php" class="footer-link">Todos los eventos</a>
-                </div>
-            </div>
-
-            <div class="footer-col">
-                <button class="footer-toggle" type="button" aria-expanded="false">
                     <h4>LUGARES</h4>
                     <span class="footer-toggle-icon">▾</span>
                 </button>
                 <div class="footer-links">
-                    <a href="lugares.php" class="footer-link">Plaza Artigas</a>
-                    <a href="lugares.php" class="footer-link">Plaza Treinta y Tres</a>
-                    <a href="lugares.php" class="footer-link">Costanera Norte</a>
-                    <a href="lugares.php" class="footer-link">Costanera Sur</a>
-                    <a href="lugares.php" class="footer-link">Parque Benito Solari</a>
+                    <a href="lugar.php?slug=plaza-artigas" class="footer-link">Plaza Artigas</a>
+                    <a href="lugar.php?slug=plaza-treinta-y-tres-orientales" class="footer-link">Plaza Treinta y Tres Orientales</a>
+                    <a href="lugar.php?slug=costanera-norte" class="footer-link">Costanera Norte</a>
+                    <a href="lugar.php?slug=costanera-sur" class="footer-link">Costanera Sur</a>
+                    <a href="lugar.php?slug=parque-benito-solari" class="footer-link">Parque Benito Solari</a>
                 </div>
             </div>
 
-            <div class="footer-col">
+            <div class="footer-col footer-col--expandable">
                 <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4>TURISMO</h4>
-                    <span class="footer-toggle-icon">▾</span>
+                    <h4 data-i18n="footerGastronomy">GASTRONOMÍA</h4>
+                    <span class="footer-toggle-icon" aria-hidden="true">▾</span>
                 </button>
                 <div class="footer-links">
-                    <a href="turismo.php" class="footer-link">Actividades</a>
-                    <a href="turismo.php" class="footer-link">Lugares turísticos</a>
-                    <a href="turismo.php" class="footer-link">Experienciaxz|    s</a>
+                    <a href="gastronomia.php#restaurante-la-vieja-bodega" class="footer-link">La Vieja Bodega</a>
+                    <a href="gastronomia.php#restaurante-trattoria" class="footer-link">Trattoria</a>
+                    <a href="gastronomia.php#restaurante-toscana" class="footer-link">Toscana</a>
+                    <a href="gastronomia.php#restaurante-punto-y-aparte" class="footer-link">Punto y Aparte</a>
+                    <a href="gastronomia.php#restaurante-rodelu" class="footer-link">Rodelu</a>
+                    <a href="gastronomia.php#restaurante-el-tony" class="footer-link">El Tony</a>
+                    <a href="gastronomia.php#restaurante-la-canilla" class="footer-link">La Canilla</a>
+                    <a href="gastronomia.php#restaurante-el-dominico" class="footer-link">El Dominico</a>
+                    <a href="gastronomia.php#restaurante-la-2000" class="footer-link">La 2000</a>
+                    <a href="gastronomia.php#restaurante-buffet-del-chef" class="footer-link">Buffet del Chef</a>
+                    <a href="gastronomia.php#restaurante-don-diego" class="footer-link">Don Diego</a>
+                    <a href="gastronomia.php#restaurante-gaucho" class="footer-link">GAUCHO</a>
                 </div>
             </div>
 
@@ -417,10 +431,11 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                     <h4>SIGTUR</h4>
                     <span class="footer-toggle-icon"></span>
                 </button>
-                    <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon">
+                <div class="footer-links">
+                    <a href="https://instagram.com/bapstuy" target="_blank" rel="noopener noreferrer" class="footer-link footer-link--icon">
                         <span class="social-icon">IG</span>Instagram
                     </a>
-                    <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
+                    <a href="https://facebook.com/sigtur" target="_blank" rel="noopener noreferrer" class="footer-link footer-link--icon">
                         <span class="social-icon">FB</span>Facebook
                     </a>
                 </div>
@@ -444,7 +459,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <script src="../js/interacciones-tarjetas.js" defer></script>
     <script>window.sigturEventoIds = <?= json_encode($eventoIdsPorSlug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosDesdeBd = <?= json_encode($eventosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script src="../js/eventos.js" defer></script>
+    <script src="../js/eventos.js?v=20261013-3" defer></script>
 </body>
 
 </html>

@@ -11,11 +11,17 @@ if (!$seguidorId || !$seguidoId || $seguidorId === (int) $seguidoId) {
     exit;
 }
 
-$existe = $pdo->prepare('SELECT id FROM usuarios WHERE id = :id LIMIT 1');
+$existe = $pdo->prepare('SELECT id, perfil_publico FROM usuarios WHERE id = :id LIMIT 1');
 $existe->execute([':id' => $seguidoId]);
-if (!$existe->fetchColumn()) {
+$usuarioSeguido = $existe->fetch();
+if (!$usuarioSeguido) {
     http_response_code(404);
     echo json_encode(['error' => 'Usuario no encontrado.']);
+    exit;
+}
+if (!(bool) $usuarioSeguido['perfil_publico']) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Este perfil es privado.']);
     exit;
 }
 

@@ -77,16 +77,6 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
         <p class="texto-deslizar" data-i18n="homeScroll">
             Desliza para ver más
         </p>
-        <!-- Botón de información -->
-        <button class="info-btn" type="button" aria-expanded="false" data-i18n="homeInfoButton">Información</button>
-        <!-- Panel con información sobre SIGTUR -->
-        <div class="info-panel" id="info-panel">
-            <h3 data-i18n="homeInfoTitle">¿Qué es SIGTUR?</h3>
-            <p data-i18n="homeInfoText1">SIGTUR es una guía local de Salto pensada para ayudarte a descubrir eventos, lugares y experiencias
-                únicas de la ciudad.</p>
-            <p data-i18n="homeInfoText2">La plataforma reúne recomendaciones culturales, turísticas y de ocio para que cada visita sea más simple,
-                informada y memorable.</p>
-        </div>
     </section>
 
 
@@ -167,23 +157,23 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
                 </div>
                 <div class="slide">
                     <div class="info-evento">
-                        <h3>LSF</h3>
-                        <p>Competición de futbol salteña.</p>
+                        <h3>Carrera en Bicicleta</h3>
+                        <p>Recorrido en bicicleta por la ciudad.</p>
                         <div class="accion-boton">
-                            <a href="php/eventos.php" class="boton-amarillo">Ver mas</a>
+                            <a href="php/eventos/carrera-de-bicicleta.php" class="boton-amarillo">Ver mas</a>
                         </div>
                     </div>
-                    <img src="img/lsf.jpg" alt="Evento">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7b44_MpWq3Wzray5_wVaB-4meo0Tam3gwbPNK_1AJ74I1Xo5EhmUKhTIE&amp;s=10" alt="Carrera en Bicicleta">
                 </div>
                 <div class="slide">
                     <div class="info-evento">
-                        <h3>LSB</h3>
-                        <p>Competición de básquetbol salteño.</p>
+                        <h3>Halloween en Polo</h3>
+                        <p>Una noche temática para celebrar.</p>
                         <div class="accion-boton">
-                            <a href="php/eventos.php" class="boton-amarillo">Ver mas</a>
+                            <a href="php/eventos/polo.php" class="boton-amarillo">Ver mas</a>
                         </div>
                     </div>
-                    <img src="img/lsb.jpg" alt="Evento">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrj22POvl9MEEF961dr53OM-Hpxz75raAMOqjgqS_fNJ15QnNkQmBHkx_z&amp;s=10" alt="Halloween en Polo">
                 </div>
             </div>
 
@@ -246,27 +236,27 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
             <div class="contenedor-slides">
                 <div class="slide activo">
                     <div class="info-evento">
-                        <h3>La Trouville</h3>
-                        <p>Sabores locales y una propuesta ideal para compartir una buena salida.</p>
+                        <h3>La Vieja Bodega</h3>
+                        <p>Conocé La Vieja Bodega y consultá su ubicación desde la sección de gastronomía.</p>
                         <div class="accion-boton"><a href="php/gastronomia.php" class="boton-amarillo">Ver gastronomía</a></div>
                     </div>
-                    <img src="img/Trouville.jpg" alt="La Trouville">
+                    <img src="img/r1.jfif" alt="La Vieja Bodega">
                 </div>
                 <div class="slide">
                     <div class="info-evento">
-                        <h3>Cine Sarandí</h3>
-                        <p>Una salida para combinar entretenimiento, encuentro y propuestas cercanas.</p>
+                        <h3>Trattoria</h3>
+                        <p>Encontrá Trattoria entre los restaurantes de Salto.</p>
                         <div class="accion-boton"><a href="php/gastronomia.php" class="boton-amarillo">Ver gastronomía</a></div>
                     </div>
-                    <img src="img/Cine_Sarandi.jpg" alt="Cine Sarandí">
+                    <img src="img/r2.jfif" alt="Trattoria">
                 </div>
                 <div class="slide">
                     <div class="info-evento">
-                        <h3>Salto Shopping</h3>
-                        <p>Opciones para comer, pasear y disfrutar una salida urbana.</p>
+                        <h3>Toscana</h3>
+                        <p>Descubrí Toscana y consultá su ubicación en la página de gastronomía.</p>
                         <div class="accion-boton"><a href="php/gastronomia.php" class="boton-amarillo">Ver gastronomía</a></div>
                     </div>
-                    <img src="img/Shopping_Salto.jpg" alt="Salto Shopping">
+                    <img src="img/r3.jfif" alt="Toscana">
                 </div>
             </div>
             <button class="flecha derecha" aria-label="Siguiente lugar gastronómico"></button>
@@ -278,75 +268,61 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
         </div>
     </section>
 
-    <section class="seccion-notificaciones">
-        <h2 data-i18n="homeNewsTitle">Noticias en Salto</h2>
-        <div class="contenedor-carta">
-            <img src="img/peñ.jpg" alt="Carta" class="imagen-carta">
-            <div class="texto-carta">
-                <h2>El Clásico Salteño se juega este fin de semana, Peñarol vs. Nacional</h2>
-                <p>Este sabado 18 de julio se disputará el clásico entre Peñarol y Nacional en el Estadio de Peñarol</p>
-                <div class="accion-boton">
-                    <a href="php/eventos.php" class="boton-amarillo" data-i18n="homeNewsButton">Ver noticia</a>
-                </div>
-            </div>
-        </div>
-    </section>
-    
     <footer class="footer">
         <div class="footer-grid">
-            <div class="footer-col">
-                <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerEvents">EVENTOS</h4>
-                    <span class="footer-toggle-icon">▾</span>
-                </button>
-                <div class="footer-links">
-                    <a href="php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="0">Eventos destacados</a>
-                    <a href="php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="1">Próximos eventos</a>
-                    <a href="php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="2">Eventos anteriores</a>
-                    <a href="php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="3">Todos los eventos</a>
-                </div>
-            </div>
-
             <div class="footer-col">
                 <button class="footer-toggle" type="button" aria-expanded="false">
                     <h4 data-i18n="footerPlaces">LUGARES</h4>
                     <span class="footer-toggle-icon">▾</span>
                 </button>
                 <div class="footer-links">
-                    <a href="php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="0">Plaza Artigas</a>
-                    <a href="php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="1">Plaza Treinta y Tres Orientales</a>
-                    <a href="php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="2">Costanera Norte</a>
-                    <a href="php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="3">Costanera Sur</a>
-                    <a href="php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="4">Parque Benito Solari</a>
+                    <a href="php/lugar.php?slug=plaza-artigas" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="0">Plaza Artigas</a>
+                    <a href="php/lugar.php?slug=plaza-treinta-y-tres-orientales" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="1">Plaza Treinta y Tres Orientales</a>
+                    <a href="php/lugar.php?slug=costanera-norte" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="2">Costanera Norte</a>
+                    <a href="php/lugar.php?slug=costanera-sur" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="3">Costanera Sur</a>
+                    <a href="php/lugar.php?slug=parque-benito-solari" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="4">Parque Benito Solari</a>
                 </div>
             </div>
 
-            <div class="footer-col">
+            <div class="footer-col footer-col--expandable">
                 <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerTourism">TURISMO</h4>
-                    <span class="footer-toggle-icon">▾</span>
+                    <h4 data-i18n="footerGastronomy">GASTRONOMÍA</h4>
+                    <span class="footer-toggle-icon" aria-hidden="true">▾</span>
                 </button>
                 <div class="footer-links">
-                    <a href="php/turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="0">Actividades</a>
-                    <a href="php/turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="1">Lugares turísticos</a>
-                    <a href="php/turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="2">Experiencias</a>
+                    <a href="php/gastronomia.php#restaurante-la-vieja-bodega" class="footer-link">La Vieja Bodega</a>
+                    <a href="php/gastronomia.php#restaurante-trattoria" class="footer-link">Trattoria</a>
+                    <a href="php/gastronomia.php#restaurante-toscana" class="footer-link">Toscana</a>
+                    <a href="php/gastronomia.php#restaurante-punto-y-aparte" class="footer-link">Punto y Aparte</a>
+                    <a href="php/gastronomia.php#restaurante-rodelu" class="footer-link">Rodelu</a>
+                    <a href="php/gastronomia.php#restaurante-el-tony" class="footer-link">El Tony</a>
+                    <a href="php/gastronomia.php#restaurante-la-canilla" class="footer-link">La Canilla</a>
+                    <a href="php/gastronomia.php#restaurante-el-dominico" class="footer-link">El Dominico</a>
+                    <a href="php/gastronomia.php#restaurante-la-2000" class="footer-link">La 2000</a>
+                    <a href="php/gastronomia.php#restaurante-buffet-del-chef" class="footer-link">Buffet del Chef</a>
+                    <a href="php/gastronomia.php#restaurante-don-diego" class="footer-link">Don Diego</a>
+                    <a href="php/gastronomia.php#restaurante-gaucho" class="footer-link">GAUCHO</a>
                 </div>
             </div>
 
             <div class="footer-col footer-col--social">
                 <button class="footer-toggle" type="button" aria-expanded="false">
                     <h4 data-i18n="footerSigtur">SIGTUR</h4>
-                    <span class="footer-toggle-icon"></span>
+                    <span class="footer-toggle-icon">▾</span>
                 </button>
-                    <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon">
+                <div class="footer-links">
+                    <a href="https://instagram.com/bapstuy" target="_blank" rel="noopener noreferrer" class="footer-link footer-link--icon">
                         <span class="social-icon">IG</span>Instagram
                     </a>
-                    <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
+                    <a href="https://facebook.com/sigtur" target="_blank" rel="noopener noreferrer" class="footer-link footer-link--icon">
                         <span class="social-icon">FB</span>Facebook
                     </a>
+                    <div class="footer-info-actions">
+                        <button class="footer-info-button" type="button">Información</button>
+                        <button class="footer-bapst-button" type="button">Sobre BAPST</button>
+                    </div>
                 </div>
             </div>
-        </div>
         </div>
 
 
@@ -377,7 +353,7 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
             <form class="perfil-form" method="post" action="php/personalizar-perfil.php" enctype="multipart/form-data">
                 <div class="perfil-avatar-row">
                     <div class="avatar-preview-wrap">
-                        <img id="avatarPreview" src="<?php echo htmlspecialchars($avatarRuta, ENT_QUOTES, 'UTF-8'); ?>" alt="Previsualización del avatar">
+                        <img id="avatarPreview" src="<?php echo htmlspecialchars($headerAvatarRoute, ENT_QUOTES, 'UTF-8'); ?>" alt="Previsualización del avatar">
                     </div>
                     <label class="upload-box" for="avatarInput">
                         <input id="avatarInput" type="file" name="avatar" accept="image/*">

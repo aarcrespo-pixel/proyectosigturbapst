@@ -1,3 +1,18 @@
+<?php
+session_start();
+require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/autorizacion.php';
+
+$configUsuario = sigtur_usuario_actual($pdo);
+$configBaseUrl = rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/'))), '/') . '/';
+$configCsrfToken = sigtur_csrf_token();
+$configPerfilPublico = true;
+if ($configUsuario) {
+  $consultaPrivacidad = $pdo->prepare('SELECT perfil_publico FROM usuarios WHERE id = :id LIMIT 1');
+  $consultaPrivacidad->execute([':id' => (int) $configUsuario['id']]);
+  $configPerfilPublico = (bool) $consultaPrivacidad->fetchColumn();
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,7 +25,7 @@
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="../css/soporte.css" />
+  <link rel="stylesheet" href="../css/soporte.css?v=<?= time() ?>" />
 </head>
 <body>
   <main class="support-page">
@@ -55,40 +70,80 @@
 
         <article class="card">
           <h2 data-i18n="configNotificationsTitle">Notificaciones</h2>
-          <p data-i18n="configNotificationsText">Activa o desactiva los avisos importantes del proyecto.</p>
+          <p data-i18n="configNotificationsText">Activá los avisos del navegador y enterate cuando se publique un evento nuevo en SIGTUR.</p>
 
-          <div class="config-row">
-            <div class="config-label">
-              <strong class="sub-title" data-i18n="configNotificationEventsTitle">Eventos destacados</strong>
-              <span data-i18n="configNotificationEventsText">Recibe alertas de actividades nuevas o próximas.</span>
+          <?php if ($configUsuario): ?>
+            <div class="config-notificaciones" data-config-notificaciones>
+              <div class="config-row config-notificaciones__summary">
+                <div class="config-label">
+                  <strong class="sub-title">Avisos del sitio</strong>
+                  <span>Recibí novedades de eventos, respuestas y comunicados importantes.</span>
+                </div>
+                <span class="config-chip" id="notificaciones-estado" aria-live="polite">Desactivadas</span>
+              </div>
+              <p class="config-notificaciones__help" id="notificaciones-ayuda" aria-live="polite">Las notificaciones están desactivadas.</p>
+              <div class="config-notificaciones__toolbar config-notificaciones__toolbar--right">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  data-notificaciones-toggle
+                  data-user-id="<?= (int) $configUsuario['id'] ?>"
+                  data-api="<?= htmlspecialchars($configBaseUrl . 'php/api/notificaciones.php', ENT_QUOTES, 'UTF-8') ?>"
+                  data-service-worker="<?= htmlspecialchars($configBaseUrl . 'sw.js', ENT_QUOTES, 'UTF-8') ?>"
+                  data-csrf="<?= htmlspecialchars($configCsrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                  Notificaciones
+                  <span class="config-notificaciones__badge" id="notificaciones-badge" hidden>0</span>
+                </button>
+                <button type="button" class="btn btn-secondary" data-notificaciones-mark-all>Marcar todas como leídas</button>
+                <button type="button" class="btn btn-secondary" data-notificaciones-toggle-permission>Activar notificaciones</button>
+              </div>
+
+              <div class="config-notificaciones__panel" id="notificaciones-panel" hidden>
+                <ul class="config-notificaciones__lista" id="notificaciones-lista">
+                  <li class="config-notificaciones__empty">Cargando notificaciones...</li>
+                </ul>
+              </div>
             </div>
-            <span class="config-chip">Activado</span>
-          </div>
-          <div class="config-row">
-            <div class="config-label">
-              <strong class="sub-title" data-i18n="configNotificationRemindersTitle">Recordatorios</strong>
-              <span data-i18n="configNotificationRemindersText">Envío de avisos de actualización o mantenimiento.</span>
+          <?php else: ?>
+            <div class="config-notificaciones__login">
+              <p>Iniciá sesión para activar las notificaciones y ver tus avisos personales.</p>
+              <a class="btn btn-primary" href="login.php">Iniciar sesión</a>
             </div>
-            <span class="config-chip">Opcional</span>
-          </div>
+          <?php endif; ?>
         </article>
 
         <article class="card">
           <h2 data-i18n="configSecurityTitle">Seguridad y acceso</h2>
           <p data-i18n="configSecurityText">Gestiona los accesos y el control de la plataforma.</p>
 
-          <div class="config-row">
-            <div class="config-label">
-              <strong class="sub-title" data-i18n="configAccessPublicTitle">Acceso público</strong>
-              <span data-i18n="configAccessPublicText">Permite ver el contenido sin iniciar sesión.</span>
+          <?php if ($configUsuario): ?>
+            <div class="config-row config-privacidad" data-config-privacidad
+              data-api="<?= htmlspecialchars($configBaseUrl . 'php/api/preferencias_privacidad.php', ENT_QUOTES, 'UTF-8') ?>"
+              data-csrf="<?= htmlspecialchars($configCsrfToken, ENT_QUOTES, 'UTF-8') ?>">
+              <div class="config-label">
+                <strong class="sub-title">Visibilidad de mi perfil</strong>
+                <span>Elegí si otras personas pueden ver tu perfil y tus publicaciones.</span>
+              </div>
+              <label class="config-switch">
+                <input type="checkbox" id="perfil-publico" <?= $configPerfilPublico ? 'checked' : '' ?>>
+                <span class="config-switch__track" aria-hidden="true"></span>
+                <span class="config-switch__label" data-state="<?= $configPerfilPublico ? 'publico' : 'privado' ?>"><?= $configPerfilPublico ? 'Público' : 'Privado' ?></span>
+              </label>
+              <span class="config-privacidad__estado" id="privacidad-estado" aria-live="polite"></span>
             </div>
-            <span class="config-chip">Sí</span>
-          </div>
+          <?php else: ?>
+            <div class="config-row">
+              <div class="config-label">
+                <strong class="sub-title">Visibilidad del perfil</strong>
+                <span>Iniciá sesión para controlar quién puede ver tu perfil.</span>
+              </div>
+            </div>
+          <?php endif; ?>
 
           <div class="config-row">
             <div class="config-label">
               <strong class="sub-title" data-i18n="configAdminPanelTitle">Panel de administración</strong>
-              <span data-i18n="configAdminPanelText">Acceso privado para editar contenido y configuraciones.</span>
+              <span data-i18n="configAdminPanelText">Acceso privado para editar contenido y configuraciones. Siempre protegido por permisos.</span>
             </div>
             <span class="config-chip">Protegido</span>
           </div>
@@ -101,15 +156,20 @@
       </div>
     </section>
   </main>
-  <script src="../js/translator.js"></script>
-  <script src="../js/script.js"></script>
+  <script src="../js/translator.js?v=20261001-1"></script>
+  <script src="../js/script.js?v=20261001-1"></script>
+  <script src="../js/notificaciones.js?v=<?= time() ?>"></script>
   <script>
     /* Estos selectores conectan preferencias visuales, idioma y tamaño de
        fuente con las funciones compartidas del script global. */
     const selectorTema = document.getElementById('tema');
     const selectorIdioma = document.getElementById('idioma');
     const selectorTamanoLetra = document.getElementById('tamano-letra');
-    const botonGuardar = document.querySelector('.btn-primary');
+    const botonGuardar = document.querySelector('.config-actions .btn-primary');
+    const botonRestablecer = document.querySelector('.config-actions .btn-secondary');
+    const privacidadConfig = document.querySelector('[data-config-privacidad]');
+    const selectorPerfilPublico = document.getElementById('perfil-publico');
+    const privacidadEstado = document.getElementById('privacidad-estado');
 
     const aplicarTemaDesdeConfiguracion = (oscuro) => {
       guardarTema(oscuro);
@@ -139,6 +199,47 @@
       });
     }
 
+    if (privacidadConfig && selectorPerfilPublico) {
+      selectorPerfilPublico.addEventListener('change', async () => {
+        const valorAnterior = !selectorPerfilPublico.checked;
+        const etiquetaEstado = privacidadConfig.querySelector('.config-switch__label');
+        selectorPerfilPublico.disabled = true;
+        if (privacidadEstado) privacidadEstado.textContent = 'Guardando…';
+
+        try {
+          const respuesta = await fetch(privacidadConfig.dataset.api, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            credentials: 'same-origin',
+            body: new URLSearchParams({
+              perfil_publico: selectorPerfilPublico.checked ? '1' : '0',
+              csrf_token: privacidadConfig.dataset.csrf || ''
+            })
+          });
+          const datos = await respuesta.json();
+          if (!respuesta.ok || !datos.success) {
+            throw new Error(datos.message || 'No se pudo guardar la privacidad.');
+          }
+
+          if (etiquetaEstado) {
+            etiquetaEstado.textContent = datos.perfil_publico ? 'Público' : 'Privado';
+            etiquetaEstado.dataset.state = datos.perfil_publico ? 'publico' : 'privado';
+          }
+          if (privacidadEstado) privacidadEstado.textContent = datos.message;
+        } catch (error) {
+          selectorPerfilPublico.checked = valorAnterior;
+          if (etiquetaEstado) {
+            etiquetaEstado.textContent = valorAnterior ? 'Público' : 'Privado';
+            etiquetaEstado.dataset.state = valorAnterior ? 'publico' : 'privado';
+          }
+          if (privacidadEstado) privacidadEstado.textContent = error.message || 'No se pudo guardar la privacidad.';
+          console.error('No se pudo actualizar la privacidad del perfil', error);
+        } finally {
+          selectorPerfilPublico.disabled = false;
+        }
+      });
+    }
+
     if (botonGuardar) {
       botonGuardar.addEventListener('click', () => {
         aplicarTemaDesdeConfiguracion(selectorTema && selectorTema.value === 'Oscuro');
@@ -149,6 +250,18 @@
         if (selectorTamanoLetra) {
           guardarTamanoLetra(selectorTamanoLetra.value);
         }
+        window.location.assign('../index.php');
+      });
+    }
+
+    if (botonRestablecer) {
+      botonRestablecer.addEventListener('click', () => {
+        aplicarTemaDesdeConfiguracion(false);
+        guardarIdioma('es');
+        aplicarIdioma('es');
+        guardarTamanoLetra('normal');
+        if (selectorIdioma) selectorIdioma.value = 'es';
+        if (selectorTamanoLetra) selectorTamanoLetra.value = 'normal';
       });
     }
 
