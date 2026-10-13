@@ -26,7 +26,7 @@ if (!in_array($accion, ['crear', 'editar', 'eliminar'], true)) {
 }
 
 if ($accion !== 'crear') {
-    $consultaEventoExistente = $pdo->prepare('SELECT id, slug, organizador_id FROM eventos WHERE id = :id LIMIT 1');
+    $consultaEventoExistente = $pdo->prepare('SELECT id, slug, organizador_id, imagen_portada FROM eventos WHERE id = :id LIMIT 1');
     $consultaEventoExistente->execute([':id' => $eventoId]);
     $eventoExistente = $consultaEventoExistente->fetch();
     if (!$eventoExistente) {
@@ -76,13 +76,55 @@ $ubicacion = trim($_POST['ubicacion'] ?? '');
 $categoria = trim($_POST['categoria'] ?? 'General');
 $tipoEntrada = trim($_POST['tipoEntrada'] ?? 'Gratuito');
 $precioEntrada = trim($_POST['precio'] ?? '');
-$imagen = trim($_POST['imagen_portada'] ?? 'default.jpg');
+$imagen = trim($_POST['imagen_portada'] ?? '');
+if ($imagen === '') {
+    $imagen = $accion === 'editar' ? (string) ($eventoExistente['imagen_portada'] ?? 'default.jpg') : 'default.jpg';
+}
 
 /* Los campos obligatorios se validan en servidor porque el formulario puede
     ser enviado fuera del navegador o manipulado desde las herramientas web. */
 if ($titulo === '' || $descripcion === '' || $fecha === '' || $ubicacion === '') {
     http_response_code(422);
     exit('Completa título, descripción, fecha y ubicación.');
+}
+
+if ($accion === 'editar' && isset($_FILES['imagen'])) {
+    $archivoImagen = $_FILES['imagen'];
+    if ($archivoImagen['error'] !== UPLOAD_ERR_NO_FILE) {
+        if ($archivoImagen['error'] !== UPLOAD_ERR_OK) {
+            http_response_code($archivoImagen['error'] === UPLOAD_ERR_INI_SIZE || $archivoImagen['error'] === UPLOAD_ERR_FORM_SIZE ? 413 : 422);
+            exit('No se pudo recibir la imagen. Probá con un archivo más pequeño.');
+        }
+        if ($archivoImagen['size'] > 5 * 1024 * 1024) {
+            http_response_code(413);
+            exit('La imagen no puede superar los 5 MB.');
+        }
+
+        $tiposImagen = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+        ];
+        $mimeImagen = (new finfo(FILEINFO_MIME_TYPE))->file($archivoImagen['tmp_name']);
+        if (!isset($tiposImagen[$mimeImagen]) || @getimagesize($archivoImagen['tmp_name']) === false) {
+            http_response_code(422);
+            exit('El archivo debe ser una imagen JPG, PNG o WEBP válida.');
+        }
+
+        $directorioImagenes = __DIR__ . '/../uploads/eventos';
+        if (!is_dir($directorioImagenes) && !mkdir($directorioImagenes, 0775, true) && !is_dir($directorioImagenes)) {
+            error_log('No se pudo crear el directorio para imágenes de eventos.');
+            http_response_code(500);
+            exit('No se pudo guardar la imagen del evento.');
+        }
+        $nombreImagen = 'evento_' . $eventoId . '_' . bin2hex(random_bytes(12)) . '.' . $tiposImagen[$mimeImagen];
+        if (!move_uploaded_file($archivoImagen['tmp_name'], $directorioImagenes . '/' . $nombreImagen)) {
+            error_log('No se pudo mover la imagen subida del evento ' . $eventoId . '.');
+            http_response_code(500);
+            exit('No se pudo guardar la imagen del evento.');
+        }
+        $imagen = '../uploads/eventos/' . $nombreImagen;
+    }
 }
 
 /* Convertimos el título en un slug estable y consultamos su disponibilidad

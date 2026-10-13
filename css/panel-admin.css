@@ -214,6 +214,33 @@ body.admin-panel-page {
     grid-column: 1 / -1;
 }
 
+.admin-event__image-field {
+    max-width: 520px;
+}
+
+.admin-event__image-preview {
+    display: block;
+    width: 100%;
+    max-height: 260px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: 1px solid var(--admin-line);
+    border-radius: 12px;
+    background: var(--admin-soft);
+}
+
+.admin-event__image-input {
+    min-height: auto !important;
+    padding: 9px !important;
+}
+
+.admin-field-hint {
+    color: var(--admin-muted);
+    font-size: .8rem;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
 .admin-form__actions {
     display: flex;
     flex-wrap: wrap;

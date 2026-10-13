@@ -167,10 +167,13 @@ $eventosFuturos = count(array_filter($eventos, static fn($evento) => strtotime($
                             </div>
                             <details class="admin-event__editor">
                                 <summary>Editar evento</summary>
-                                <form class="admin-form" method="post" action="crear-evento.php">
+                                <form class="admin-form" method="post" enctype="multipart/form-data" action="crear-evento.php">
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="accion" value="editar">
                                     <input type="hidden" name="evento_id" value="<?= (int) $evento['id'] ?>">
+                                    <label class="admin-form__wide">Descripción
+                                        <textarea name="descripcion" maxlength="5000" required><?= htmlspecialchars($evento['descripcion'], ENT_QUOTES, 'UTF-8') ?></textarea>
+                                    </label>
                                     <label>Título
                                         <input name="titulo" maxlength="255" required value="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>">
                                     </label>
@@ -199,6 +202,16 @@ $eventosFuturos = count(array_filter($eventos, static fn($evento) => strtotime($
                                                 <option value="<?= (int) $organizador['id'] ?>" <?= (int) $evento['organizador_id'] === (int) $organizador['id'] ? 'selected' : '' ?>><?= htmlspecialchars($organizador['nombre_completo'], ENT_QUOTES, 'UTF-8') ?></option>
                                             <?php endforeach; ?>
                                         </select>
+                                    </label>
+                                    <label class="admin-form__wide admin-event__image-field">Foto del evento
+                                        <img
+                                            class="admin-event__image-preview"
+                                            src="<?= htmlspecialchars($evento['imagen_portada'] ?: '../img/porco.avif', ENT_QUOTES, 'UTF-8') ?>"
+                                            alt="Foto actual de <?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>"
+                                            loading="lazy"
+                                        >
+                                        <input class="admin-event__image-input" type="file" name="imagen" accept="image/jpeg,image/png,image/webp">
+                                        <span class="admin-field-hint">Seleccioná una nueva foto JPG, PNG o WEBP. Si no elegís otra, se conserva la actual.</span>
                                     </label>
                                     <div class="admin-form__wide admin-form__actions">
                                         <button class="admin-button" type="submit">Guardar cambios</button>
