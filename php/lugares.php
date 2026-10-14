@@ -1,3 +1,10 @@
+<?php
+require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/contenido_publico.php';
+sigtur_inicializar_contenido_publico($pdo);
+$lugaresEmblematicos = $pdo->query("SELECT nombre, imagen, descripcion FROM lugares WHERE seccion_publica = 'emblematico' ORDER BY FIELD(slug, 'plaza-treinta-y-tres-orientales', 'plaza-artigas', 'parque-benito-solari'), nombre")->fetchAll();
+$lugaresRecreacion = $pdo->query("SELECT nombre, imagen, descripcion FROM lugares WHERE seccion_publica = 'recreacion' ORDER BY FIELD(slug, 'plaza-roosvelt', 'costanera-norte', 'muelle-negro'), nombre")->fetchAll();
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -55,27 +62,15 @@
         <section class="seccion-lugares" id="lugares-emblematicos">
             <h2 data-i18n="placesSectionEmblematicTitle">Lugares emblemáticos</h2>
             <div class="destinos-grid">
+                <?php foreach ($lugaresEmblematicos as $lugar): ?>
                 <article class="tarjeta-lugar">
-                    <img src="../img/Plaza_33.webp" alt="Costanera Sur" data-i18n-alt="placesEmblematicAlt" data-i18n-index="0">
+                    <img src="<?= htmlspecialchars($lugar['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8') ?>">
                     <div class="tarjeta-contenido">
-                        <h3 data-i18n="placesEmblematicTitles" data-i18n-index="0">Plaza Treinta y Tres Orientales</h3>
-                        <p data-i18n="placesEmblematicDescriptions" data-i18n-index="0">Paseo tranquilo junto al río con espacios verdes, miradores y zonas para descansar al aire libre.</p>
+                        <h3><?= htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
+                        <p><?= htmlspecialchars($lugar['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
                     </div>
                 </article>
-                <article class="tarjeta-lugar">
-                    <img src="../img/Plaza_artigas.webp" alt="Plaza histórica" data-i18n-alt="placesEmblematicAlt" data-i18n-index="1">
-                    <div class="tarjeta-contenido">
-                        <h3 data-i18n="placesEmblematicTitles" data-i18n-index="1">Plaza Artigas</h3>
-                        <p data-i18n="placesEmblematicDescriptions" data-i18n-index="1">Plaza emblemática del centro con arquitectura tradicional, cafeterías y actividad cultural permanente.</p>
-                    </div>
-                </article>
-                <article class="tarjeta-lugar">
-                    <img src="../img/solari.jfif" alt="Parque Benito Solari" data-i18n-alt="placesEmblematicAlt" data-i18n-index="2">
-                    <div class="tarjeta-contenido">
-                        <h3 data-i18n="placesEmblematicTitles" data-i18n-index="2">Parque Benito Solari</h3>
-                        <p data-i18n="placesEmblematicDescriptions" data-i18n-index="2">Gran área verde perfecta para caminatas familiares, actividades deportivas y eventos al aire libre.</p>
-                    </div>
-                </article>
+                <?php endforeach; ?>
             </div>
         </section>
 
@@ -116,27 +111,15 @@
         <section class="seccion-lugares">
             <h2 data-i18n="placesSectionLeisureTitle">Lugares para Distraerse</h2>
             <div class="destinos-grid">
+                <?php foreach ($lugaresRecreacion as $lugar): ?>
                 <article class="tarjeta-lugar">
-                    <img src="https://www.salto.gub.uy/sites/default/files/styles/16_9_xl_scale/public/2024-08/0505190000.JPG.webp?itok=67uThcCX" alt="Plaza Roosvelt" data-i18n-alt="placesLeisureAlt" data-i18n-index="0">
+                    <img src="<?= htmlspecialchars($lugar['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8') ?>">
                     <div class="tarjeta-contenido">
-                        <h3 data-i18n="placesLeisureTitles" data-i18n-index="0">Plaza Roosvelt</h3>
-                        <p data-i18n="placesLeisureDescriptions" data-i18n-index="0">Plaza tranquila en la costa para tomar mates con amigos u familiares.</p>
+                        <h3><?= htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
+                        <p><?= htmlspecialchars($lugar['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
                     </div>
                 </article>
-                <article class="tarjeta-lugar">
-                    <img src="../img/Costanera_Norte.jpeg" alt="Costanera Norte" data-i18n-alt="placesLeisureAlt" data-i18n-index="1">
-                    <div class="tarjeta-contenido">
-                        <h3 data-i18n="placesLeisureTitles" data-i18n-index="1">Costanera Norte</h3>
-                        <p data-i18n="placesLeisureDescriptions" data-i18n-index="1">Área costera con vistas al río, espacios verdes y zonas para actividades al aire libre.</p>
-                    </div>
-                </article>
-                <article class="tarjeta-lugar">
-                    <img src="https://dzpqda01g2dxp.cloudfront.net/images/attractions/4069/photos/4069_0.jpg" alt="Muelle Negro" data-i18n-alt="placesLeisureAlt" data-i18n-index="2">
-                    <div class="tarjeta-contenido">
-                        <h3 data-i18n="placesLeisureTitles" data-i18n-index="2">Muelle Negro</h3>
-                        <p data-i18n="placesLeisureDescriptions" data-i18n-index="2">Zona con vista al río para relajarse y pasar el rato con amigos.</p>
-                    </div>
-                </article>
+                <?php endforeach; ?>
             </div>
         </section>
 

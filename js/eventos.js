@@ -67,7 +67,14 @@ const galeria = [
     { imagen: "https://www.infoturismo19.com.uy/wp-content/uploads/2023/07/SHOPPING-4-2.jpg", titulo: "Salto Shopping", descripcion: "Un punto de encuentro urbano con propuestas para pasear, comprar y compartir." },
     { imagen: "https://alba-uy-sarandi.cdn.mediatiquepress.com/wp-content/uploads/2024/08/Life_Cinemas_2.webp", titulo: "Cine Sarandí", descripcion: "Una sala histórica para disfrutar cine, espectáculos y actividades culturales." },
     { imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg", titulo: "Actividades en Salto", descripcion: "Propuestas y encuentros para vivir la ciudad y compartir con la comunidad." },
-    { imagen: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/84/ae/39/trouville-pizzeria-y.jpg?w=1200&h=1200&s=1", titulo: "La Trouville", descripcion: "Una propuesta gastronómica para descubrir sabores locales y disfrutar una buena salida." }
+    { imagen: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/84/ae/39/trouville-pizzeria-y.jpg?w=1200&h=1200&s=1", titulo: "La Trouville", descripcion: "Una propuesta gastronómica para descubrir sabores locales y disfrutar una buena salida." },
+    ...(Array.isArray(window.fotosGaleriaDesdeBd) ? window.fotosGaleriaDesdeBd : []).map((foto) => ({
+        imagen: foto.imagen,
+        titulo: foto.titulo,
+        descripcion: foto.descripcion,
+        categoria: foto.categoria,
+        fecha: foto.fecha
+    }))
 ];
 
 // Construir lista principal con slugs únicos para cada evento
@@ -221,9 +228,9 @@ function renderGaleria() {
     const fotosFiltradas = galeria
         .map((item, index) => ({ ...item, originalIndex: index }))
         .filter((item) => {
-            const descripcion = (item.imagen || "").toLowerCase();
+            const texto = `${item.titulo || ''} ${item.descripcion || ''} ${item.categoria || ''}`.toLowerCase();
             const coincideCategoria = galeriaFiltro === 'todos' || (item.categoria && item.categoria.toLowerCase().includes(galeriaFiltro));
-            const coincideTexto = !textoBusqueda || descripcion.includes(textoBusqueda);
+            const coincideTexto = !textoBusqueda || texto.includes(textoBusqueda);
             return coincideCategoria && coincideTexto;
         });
 
@@ -233,7 +240,9 @@ function renderGaleria() {
         <img src="${item.imagen}" alt="Galería ${index + 1}" loading="lazy" onerror="this.onerror=null;this.src='../img/porco.avif';">
             </article>
     `)
-        .join("");
+        .join("") + (window.puedeSubirFotoGaleria
+            ? '<button class="galeria-subir-foto" id="btn-agregar-foto-galeria" type="button"><span class="galeria-subir-foto__icon" aria-hidden="true">+</span><span>Subir foto</span></button>'
+            : '');
 
     if (typeof window.initInteractiveCards === 'function') {
         window.initInteractiveCards(contenedor);
@@ -619,6 +628,54 @@ function configurarFormularioEventos() {
     });
 }
 
+function configurarFormularioFotoGaleria() {
+    const overlay = document.getElementById('form-foto-galeria-overlay');
+    const contenedorGaleria = document.getElementById('galeria-contenedor');
+    const botonCerrar = document.getElementById('form-foto-galeria-close');
+    const botonCancelar = document.getElementById('form-foto-galeria-cancelar');
+    const botonSubir = document.getElementById('foto-galeria-upload-button');
+    const inputFoto = document.getElementById('foto-galeria-archivo');
+    const zonaSubida = document.getElementById('foto-galeria-upload-zone');
+    const nombreFoto = document.getElementById('foto-galeria-nombre');
+    const formulario = overlay?.querySelector('form');
+    const errorFoto = document.getElementById('foto-galeria-error');
+
+    const cerrar = () => {
+        overlay?.classList.remove('open');
+        overlay?.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    };
+
+    contenedorGaleria?.addEventListener('click', (event) => {
+        if (!event.target.closest('#btn-agregar-foto-galeria')) return;
+        overlay?.classList.add('open');
+        overlay?.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    });
+    botonCerrar?.addEventListener('click', cerrar);
+    botonCancelar?.addEventListener('click', cerrar);
+    overlay?.addEventListener('click', (event) => {
+        if (event.target === overlay) cerrar();
+    });
+    botonSubir?.addEventListener('click', () => inputFoto?.click());
+    inputFoto?.addEventListener('change', () => {
+        const archivo = inputFoto.files?.[0];
+        if (nombreFoto) nombreFoto.textContent = archivo?.name || 'Sin archivo seleccionado';
+        zonaSubida?.classList.toggle('has-file', Boolean(archivo));
+        errorFoto?.classList.remove('show');
+        if (errorFoto) errorFoto.textContent = '';
+    });
+    formulario?.addEventListener('submit', (event) => {
+        if (inputFoto?.files?.length) return;
+        event.preventDefault();
+        if (errorFoto) {
+            errorFoto.textContent = 'Selecciona una foto para agregar a la galería.';
+            errorFoto.classList.add('show');
+        }
+        botonSubir?.focus();
+    });
+}
+
 /* El filtro rápido compara texto, categoría, tipo de entrada y ubicación; el
     drawer usa además el endpoint SQL para filtros de rango. */
 function filtrarEventosPrincipales() {
@@ -886,6 +943,7 @@ function init() {
     document.getElementById("lightbox-prev")?.addEventListener("click", () => cambiarImagen(-1));
     document.getElementById("lightbox-next")?.addEventListener("click", () => cambiarImagen(1));
     configurarFormularioEventos();
+    configurarFormularioFotoGaleria();
     renderCalendario();
     actualizarFechaInput();
 }

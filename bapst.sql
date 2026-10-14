@@ -23,6 +23,23 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   UNIQUE KEY `uniq_cedula` (`cedula`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `solicitudes_rango` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `usuario_id` int NOT NULL,
+  `rol_solicitado` varchar(30) NOT NULL,
+  `domicilio` varchar(255) NOT NULL,
+  `motivo` varchar(500) NOT NULL,
+  `estado` varchar(20) NOT NULL DEFAULT 'pendiente',
+  `fecha_creacion` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `revisado_por` int DEFAULT NULL,
+  `fecha_revision` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_solicitudes_rango_estado_fecha` (`estado`, `fecha_creacion`),
+  KEY `idx_solicitudes_rango_usuario_fecha` (`usuario_id`, `fecha_creacion`),
+  CONSTRAINT `fk_solicitudes_rango_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_solicitudes_rango_revisor` FOREIGN KEY (`revisado_por`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE IF NOT EXISTS `comentarios` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `item_key` varchar(255) NOT NULL,
@@ -107,6 +124,19 @@ CREATE TABLE IF NOT EXISTS `eventos` (
   UNIQUE KEY `uniq_eventos_slug` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `galeria_eventos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `imagen` varchar(255) NOT NULL,
+  `titulo` varchar(160) NOT NULL,
+  `descripcion` text NOT NULL,
+  `tipo_evento` varchar(80) NOT NULL,
+  `usuario_id` int NOT NULL,
+  `fecha_creacion` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_galeria_eventos_tipo_fecha` (`tipo_evento`, `fecha_creacion`),
+  KEY `idx_galeria_eventos_usuario` (`usuario_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE IF NOT EXISTS `lugares` (
   `id` int NOT NULL AUTO_INCREMENT,
   `slug` varchar(120) NOT NULL,
@@ -125,6 +155,41 @@ CREATE TABLE IF NOT EXISTS `lugares` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_lugares_slug` (`slug`),
   KEY `idx_lugares_nombre` (`nombre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `contenido_turistico` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `slug` varchar(120) NOT NULL,
+  `tipo` varchar(20) NOT NULL,
+  `nombre` varchar(160) NOT NULL,
+  `imagen` varchar(500) NOT NULL,
+  `descripcion` text NOT NULL,
+  `detalle` varchar(255) NOT NULL DEFAULT '',
+  `estrellas` tinyint DEFAULT NULL,
+  `orden` int NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_contenido_turistico_slug` (`slug`),
+  KEY `idx_contenido_turistico_tipo_orden` (`tipo`, `orden`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `gastronomia_catalogo` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `slug` varchar(120) NOT NULL,
+  `nombre` varchar(160) NOT NULL,
+  `imagen` varchar(500) NOT NULL,
+  `descripcion` text NOT NULL,
+  `categoria` varchar(80) NOT NULL DEFAULT 'Restaurante',
+  `url_mapa` varchar(500) NOT NULL DEFAULT '',
+  `orden` int NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_gastronomia_catalogo_slug` (`slug`),
+  KEY `idx_gastronomia_orden` (`orden`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `contenido_catalogo_meta` (
+  `clave` varchar(80) NOT NULL,
+  `creado_en` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`clave`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 COMMIT;

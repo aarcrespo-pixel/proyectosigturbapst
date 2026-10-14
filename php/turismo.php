@@ -1,3 +1,11 @@
+<?php
+require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/contenido_publico.php';
+sigtur_inicializar_contenido_publico($pdo);
+$escapadas = $pdo->query("SELECT nombre, imagen, descripcion, detalle FROM contenido_turistico WHERE tipo = 'escapada' ORDER BY orden, id")->fetchAll();
+$rutasTuristicas = $pdo->query("SELECT nombre, imagen, descripcion, detalle FROM contenido_turistico WHERE tipo = 'ruta' ORDER BY orden, id")->fetchAll();
+$termasTuristicas = $pdo->query("SELECT nombre, imagen, descripcion, detalle, estrellas FROM contenido_turistico WHERE tipo = 'termas' ORDER BY orden, id")->fetchAll();
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -56,68 +64,32 @@
         <section class="seccion-turismo" id="destinos">
             <h2 data-i18n="tourismSectionEscapadasTitle">Escapadas recomendadas</h2>
             <div class="destinos-grid">
+                <?php foreach ($escapadas as $destino): ?>
                 <article class="tarjeta-destino">
-                    <img src="../img/Costanera_Norte.jpeg" alt="Costanera de Salto" data-i18n-alt="tourismEscapadasAlt" data-i18n-index="0">
+                    <img src="<?= htmlspecialchars($destino['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($destino['nombre'], ENT_QUOTES, 'UTF-8') ?>">
                     <div class="contenido">
-                        <h3 data-i18n="tourismEscapadasTitles" data-i18n-index="0">Costanera Norte</h3>
-                        <p data-i18n="tourismEscapadasDescriptions" data-i18n-index="0">Un paseo al borde del río para disfrutar de arte urbano, música en vivo y atardeceres junto al agua.</p>
-                        <div class="meta" data-i18n="tourismEscapadasMeta" data-i18n-index="0">Ideal para familias · 3 km</div>
+                        <h3><?= htmlspecialchars($destino['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
+                        <p><?= htmlspecialchars($destino['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
+                        <div class="meta"><?= htmlspecialchars($destino['detalle'], ENT_QUOTES, 'UTF-8') ?></div>
                     </div>
                 </article>
-                <article class="tarjeta-destino">
-                    <img src="../img/BaSalto.jpg" alt="Basalto" data-i18n-alt="tourismEscapadasAlt" data-i18n-index="1">
-                    <div class="contenido">
-                        <h3 data-i18n="tourismEscapadasTitles" data-i18n-index="1">BaSalto</h3>
-                        <p data-i18n="tourismEscapadasDescriptions" data-i18n-index="1">Centro histórico con monumentos, cafés y espacios culturales que invitan a recorrer la identidad local.</p>
-                        <div class="meta" data-i18n="tourismEscapadasMeta" data-i18n-index="1">Cultura · Centro</div>
-                    </div>
-                </article>
-                <article class="tarjeta-destino">
-                    <img src="../img/solari.jfif" alt="Parque Solari" data-i18n-alt="tourismEscapadasAlt" data-i18n-index="2">
-                    <div class="contenido">
-                        <h3 data-i18n="tourismEscapadasTitles" data-i18n-index="2">Parque Benito Solari</h3>
-                        <p data-i18n="tourismEscapadasDescriptions" data-i18n-index="2">Un lugar verde donde se mezclan senderos, picnic y actividades deportivas al aire libre.</p>
-                        <div class="meta" data-i18n="tourismEscapadasMeta" data-i18n-index="2">Naturaleza · Relax</div>
-                    </div>
-                </article>
+                <?php endforeach; ?>
             </div>
         </section>
 
         <section class="seccion-turismo">
             <h2 data-i18n="tourismSectionRoutesTitle">Rutas y experiencias</h2>
             <div class="rutas-grid">
+                <?php foreach ($rutasTuristicas as $ruta): ?>
                 <article class="tarjeta-ruta">
-                    <img src="../img/Trouville.jpg" alt="Trouville" data-i18n-alt="tourismRoutesAlt" data-i18n-index="0">
+                    <img src="<?= htmlspecialchars($ruta['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($ruta['nombre'], ENT_QUOTES, 'UTF-8') ?>">
                     <div class="contenido">
-                        <h3 data-i18n="tourismRoutesTitles" data-i18n-index="0">La Trouville</h3>
-                        <p data-i18n="tourismRoutesDescriptions" data-i18n-index="0">Probá platos típicos y descubrí sabores locales en mercados, parrillas y cafeterías con encanto.</p>
-                        <div class="meta" data-i18n="tourismRoutesMeta" data-i18n-index="0">Comida</div>
+                        <h3><?= htmlspecialchars($ruta['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
+                        <p><?= htmlspecialchars($ruta['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
+                        <div class="meta"><?= htmlspecialchars($ruta['detalle'], ENT_QUOTES, 'UTF-8') ?></div>
                     </div>
                 </article>
-                <article class="tarjeta-ruta">
-                    <img src="../img/Cine_Sarandi.jpg" alt="Cine Sarandi" data-i18n-alt="tourismRoutesAlt" data-i18n-index="1">
-                    <div class="contenido">
-                        <h3 data-i18n="tourismRoutesTitles" data-i18n-index="1">Cine Sarandi</h3>
-                        <p data-i18n="tourismRoutesDescriptions" data-i18n-index="1">Itinerarios para vivir la ciudad de noche con espectáculos, bares y rincones de música en vivo.</p>
-                        <div class="meta" data-i18n="tourismRoutesMeta" data-i18n-index="1">Cine</div>
-                    </div>
-                </article>
-                <article class="tarjeta-ruta">
-                    <img src="../img/fosa.webp" alt="La Fosa" data-i18n-alt="tourismRoutesAlt" data-i18n-index="2">
-                    <div class="contenido">
-                        <h3 data-i18n="tourismRoutesTitles" data-i18n-index="2">La Fosa</h3>
-                        <p data-i18n="tourismRoutesDescriptions" data-i18n-index="2">Circuito de skate, bicicleta y barras calistenicas.</p>
-                        <div class="meta" data-i18n="tourismRoutesMeta" data-i18n-index="2">Deportes · Guía disponible</div>
-                    </div>
-                </article>
-                <article class="tarjeta-ruta">
-                    <img src="../img/Shopping_Salto.jpg" alt="Shopping Salto" data-i18n-alt="tourismRoutesAlt" data-i18n-index="3">
-                    <div class="contenido">
-                        <h3 data-i18n="tourismRoutesTitles" data-i18n-index="3">Salto Shopping</h3>
-                        <p data-i18n="tourismRoutesDescriptions" data-i18n-index="3">Shopping con variedad de tiendas y zonas para comer.</p>
-                        <div class="meta" data-i18n="tourismRoutesMeta" data-i18n-index="3">Shopping</div>
-                    </div>
-                </article>
+                <?php endforeach; ?>
             </div>
         </section>
 
@@ -128,50 +100,20 @@
         <section class="seccion-turismo">
             <h2 data-i18n="tourismWaterparksTitle">Parques Acuáticos y Termas</h2>
             <div class="rutas-grid">
+                <?php foreach ($termasTuristicas as $termas): ?>
+                <?php $calificacion = (int) ($termas['estrellas'] ?? 0); ?>
                 <article class="tarjeta-ruta">
-                    <img src="https://www.salto.gub.uy/sites/default/files/styles/16_9_lg/public/2025-07/termas-dayman.png.webp?itok=Y_zseTHZ" alt="Dayman" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="0">
+                    <img src="<?= htmlspecialchars($termas['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($termas['nombre'], ENT_QUOTES, 'UTF-8') ?>">
                     <div class="contenido">
-                        <h3 data-i18n="tourismWaterparkTitles" data-i18n-index="0">Termas del Dayman</h3>
-                        <p data-i18n="tourismWaterparkDescriptions" data-i18n-index="0">Termas naturales con aguas termales.</p>
-                        <div class="hotel-info">
-                            <div class="estrellas" aria-label="5 estrellas" data-i18n-aria-label="tourismHotelStars5">★★★★★</div>
-                        </div>
-                        <div class="meta" data-i18n="tourismWaterparkMeta" data-i18n-index="0">Termas</div>
+                        <h3><?= htmlspecialchars($termas['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
+                        <p><?= htmlspecialchars($termas['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
+                        <?php if ($calificacion > 0): ?><div class="hotel-info">
+                            <div class="estrellas" aria-label="<?= $calificacion ?> estrellas"><?= str_repeat('★', $calificacion) . str_repeat('☆', 5 - $calificacion) ?></div>
+                        </div><?php endif; ?>
+                        <div class="meta"><?= htmlspecialchars($termas['detalle'], ENT_QUOTES, 'UTF-8') ?></div>
                     </div>
                 </article>
-                <article class="tarjeta-ruta">
-                    <img src="https://s3.amazonaws.com/pdugallery2/25801/big_nosotros_01.webp" alt="Aquamania" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="1">
-                    <div class="contenido">
-                        <h3 data-i18n="tourismWaterparkTitles" data-i18n-index="1">Acuamania</h3>
-                        <p data-i18n="tourismWaterparkDescriptions" data-i18n-index="1">Parque acuático con diversas atracciones y áreas de descanso.</p>
-                        <div class="hotel-info">
-                            <div class="estrellas" aria-label="4 estrellas" data-i18n-aria-label="tourismHotelStars4">★★★★☆</div>
-                        </div>
-                        <div class="meta" data-i18n="tourismWaterparkMeta" data-i18n-index="1">Parque Acuático</div>
-                    </div>
-                </article>
-                <article class="tarjeta-ruta">
-                    <img src="https://images.trvl-media.com/lodging/2000000/1160000/1159500/1159497/e0a87b61.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill" alt="La Fosa" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="2">
-                    <div class="contenido">
-                        <h3 data-i18n="tourismWaterparkTitles" data-i18n-index="2">Termas de la Arapey</h3>
-                        <p data-i18n="tourismWaterparkDescriptions" data-i18n-index="2">Termas para relajarse en familia.</p>
-                        <div class="hotel-info">
-                            <div class="estrellas" aria-label="5 estrellas" data-i18n-aria-label="tourismHotelStars5">★★★★★</div>
-                        </div>
-                        <div class="meta" data-i18n="tourismWaterparkMeta" data-i18n-index="2">Termas</div>
-                    </div>
-                </article>
-                <article class="tarjeta-ruta">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtxRTmV6EPSUjXRqh8S7b3vhCQMugTwAgSTY-maV-T8qUuaUmApX5-SYk&s=10" alt="Aguas Claras" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="3">
-                    <div class="contenido">
-                        <h3 data-i18n="tourismWaterparkTitles" data-i18n-index="3">Agua Clara</h3>
-                        <p data-i18n="tourismWaterparkDescriptions" data-i18n-index="3">Piscinas relajantes para disfrutar en las vacaciones.</p>
-                        <div class="hotel-info">
-                            <div class="estrellas" aria-label="4 estrellas" data-i18n-aria-label="tourismHotelStars4">★★★★☆</div>
-                        </div>
-                        <div class="meta" data-i18n="tourismWaterparkMeta" data-i18n-index="3">Termas</div>
-                    </div>
-                </article>
+                <?php endforeach; ?>
             </div>
         </section>
 

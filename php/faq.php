@@ -1,3 +1,8 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -17,16 +22,17 @@
 
     <section class="faq-card" aria-labelledby="faq-form-title">
         <h2 id="faq-form-title">Envía tu pregunta</h2>
-        <form id="faq-form" class="faq-form" novalidate>
-            <label for="faq-pregunta">Pregunta</label>
-            <textarea id="faq-pregunta" name="pregunta" rows="5" minlength="5" maxlength="1000" placeholder="Escribe aquí tu pregunta..." required></textarea>
-            <?php if (empty($_SESSION['usuario_id'])): ?>
-                <label for="faq-email">Email para recibir respuesta</label>
-                <input id="faq-email" type="email" name="email" placeholder="tu@email.com" required>
-            <?php endif; ?>
-            <button id="faq-submit" class="faq-submit" type="submit"><span class="faq-submit-label">Enviar pregunta</span></button>
-            <p id="faq-feedback" class="faq-feedback" role="status" aria-live="polite"></p>
-        </form>
+        <?php if (empty($_SESSION['usuario_id'])): ?>
+            <p class="faq-login-required">Inicia sesión para enviar tu pregunta. El equipo te responderá en la página de Soporte, en la sección “Respuestas de administradores”.</p>
+            <a class="faq-submit" href="login.php">Iniciar sesión</a>
+        <?php else: ?>
+            <form id="faq-form" class="faq-form" novalidate>
+                <label for="faq-pregunta">Pregunta</label>
+                <textarea id="faq-pregunta" name="pregunta" rows="5" minlength="5" maxlength="1000" placeholder="Escribe aquí tu pregunta..." required></textarea>
+                <button id="faq-submit" class="faq-submit" type="submit"><span class="faq-submit-label">Enviar pregunta</span></button>
+                <p id="faq-feedback" class="faq-feedback" role="status" aria-live="polite"></p>
+            </form>
+        <?php endif; ?>
     </section>
 </main>
 <div id="faq-toast" class="faq-toast" role="status" aria-live="polite" hidden></div>

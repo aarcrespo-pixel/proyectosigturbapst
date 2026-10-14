@@ -33,13 +33,9 @@ if ($accion !== 'crear') {
         http_response_code(404);
         exit('El evento no existe.');
     }
-    if (!$esAdministrador && (int) $eventoExistente['organizador_id'] !== $usuarioId) {
-        http_response_code(403);
-        exit('No tienes permiso para modificar este evento.');
-    }
 }
 $nuevoOrganizadorId = $accion === 'crear' ? $usuarioId : (int) $eventoExistente['organizador_id'];
-if ($accion === 'editar' && $esAdministrador && isset($_POST['organizador_id'])) {
+if ($accion === 'editar' && isset($_POST['organizador_id'])) {
     $nuevoOrganizadorId = (int) $_POST['organizador_id'];
     if ($nuevoOrganizadorId > 0) {
         $rolOrganizador = $pdo->prepare('SELECT rol FROM usuarios WHERE id = :id LIMIT 1');

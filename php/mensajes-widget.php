@@ -5,14 +5,14 @@ if ($mensajesWidgetUserId <= 0) {
     return;
 }
 $mensajesWidgetScript = htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') . 'js/mensajes.js?v=20260915-3';
-if (($_SESSION['rol'] ?? '') !== 'administrador') {
+if (!in_array($_SESSION['rol'] ?? '', ['administrador', 'organizador'], true)) {
     ?><script src="<?= $mensajesWidgetScript ?>" defer></script><?php
     return;
 }
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 $mensajesWidgetUsuario = sigtur_usuario_actual($pdo);
-if (!$mensajesWidgetUsuario || $mensajesWidgetUsuario['rol'] !== 'administrador') {
+if (!$mensajesWidgetUsuario || !in_array($mensajesWidgetUsuario['rol'], ['administrador', 'organizador'], true)) {
     ?><script src="<?= $mensajesWidgetScript ?>" defer></script><?php
     return;
 }

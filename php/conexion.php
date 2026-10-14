@@ -80,6 +80,33 @@ try {
         INDEX `idx_faq_estado` (`estado`),
         INDEX `idx_faq_usuario` (`usuario_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $columnasPreguntasFaq = $pdo->query("SHOW COLUMNS FROM `preguntas_frecuentes`")->fetchAll(PDO::FETCH_COLUMN, 0);
+    if (!in_array('respuesta', $columnasPreguntasFaq, true)) {
+        $pdo->exec("ALTER TABLE `preguntas_frecuentes` ADD COLUMN `respuesta` TEXT NULL AFTER `pregunta`");
+    }
+    if (!in_array('respondido_por', $columnasPreguntasFaq, true)) {
+        $pdo->exec("ALTER TABLE `preguntas_frecuentes` ADD COLUMN `respondido_por` INT NULL AFTER `respuesta`");
+    }
+    if (!in_array('fecha_respuesta', $columnasPreguntasFaq, true)) {
+        $pdo->exec("ALTER TABLE `preguntas_frecuentes` ADD COLUMN `fecha_respuesta` TIMESTAMP NULL DEFAULT NULL AFTER `fecha_creacion`");
+    }
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `preguntas_frecuentes_mensajes` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `pregunta_id` INT NOT NULL,
+        `autor_id` INT NULL,
+        `autor_rol` VARCHAR(20) NOT NULL,
+        `mensaje` TEXT NOT NULL,
+        `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        `clave_migracion` VARCHAR(40) NULL,
+        UNIQUE KEY `uniq_faq_mensaje_migracion` (`pregunta_id`, `clave_migracion`),
+        KEY `idx_faq_mensajes_conversacion` (`pregunta_id`, `id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $pdo->exec("INSERT IGNORE INTO `preguntas_frecuentes_mensajes`
+        (`pregunta_id`, `autor_id`, `autor_rol`, `mensaje`, `fecha_creacion`, `clave_migracion`)
+        SELECT `id`, `respondido_por`, 'administrador', `respuesta`,
+            COALESCE(`fecha_respuesta`, `fecha_creacion`), 'respuesta_inicial'
+        FROM `preguntas_frecuentes`
+        WHERE `respuesta` IS NOT NULL AND `respuesta` <> ''");
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS `eventos` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -93,6 +120,18 @@ try {
         `es_pasado` TINYINT(1) DEFAULT 0,
         `organizador_id` INT NOT NULL,
         `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `galeria_eventos` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `imagen` VARCHAR(255) NOT NULL,
+        `titulo` VARCHAR(160) NOT NULL,
+        `descripcion` TEXT NOT NULL,
+        `tipo_evento` VARCHAR(80) NOT NULL,
+        `usuario_id` INT NOT NULL,
+        `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        KEY `idx_galeria_eventos_tipo_fecha` (`tipo_evento`, `fecha_creacion`),
+        KEY `idx_galeria_eventos_usuario` (`usuario_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS `favoritos_eventos` (

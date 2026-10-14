@@ -1,0 +1,160 @@
+.solicitud-rango {
+    max-width: 960px;
+}
+
+.solicitud-card {
+    margin-bottom: 20px;
+    padding: clamp(20px, 4vw, 34px);
+    border: 1px solid var(--admin-line);
+    border-radius: 20px;
+    background: var(--admin-paper);
+    box-shadow: 0 12px 30px rgba(23, 35, 45, .06);
+}
+
+.solicitud-card h2 {
+    margin: 0 0 8px;
+}
+
+.solicitud-card > p,
+.solicitud-admin-card header p:last-child {
+    color: var(--admin-muted);
+    line-height: 1.6;
+}
+
+.solicitud-privacidad {
+    margin-bottom: 24px;
+    padding: 16px 18px;
+    border-left: 4px solid var(--admin-accent);
+    border-radius: 8px;
+    background: var(--admin-soft);
+}
+
+.solicitud-privacidad p {
+    margin: 8px 0 0;
+    color: var(--admin-muted);
+    line-height: 1.6;
+}
+
+.solicitud-form,
+.solicitud-form label {
+    display: grid;
+    gap: 8px;
+}
+
+.solicitud-form {
+    gap: 20px;
+}
+
+.solicitud-datos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.solicitud-form input:not([type="checkbox"]),
+.solicitud-form select,
+.solicitud-form textarea {
+    width: 100%;
+    min-height: 44px;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid var(--admin-line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--admin-ink);
+    font: inherit;
+}
+
+.solicitud-form input[readonly] {
+    background: #f3f6f8;
+}
+
+.solicitud-form textarea {
+    resize: vertical;
+}
+
+.solicitud-form small {
+    color: var(--admin-muted);
+    line-height: 1.5;
+}
+
+.solicitud-consentimiento {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 10px !important;
+    color: var(--admin-muted);
+    line-height: 1.5;
+}
+
+.solicitud-consentimiento input {
+    margin-top: 4px;
+}
+
+.solicitud-alert {
+    margin: 0 0 18px;
+    padding: 13px 16px;
+    border-radius: 10px;
+}
+
+.solicitud-alert--success {
+    background: #e8f6ee;
+    color: #225b37;
+}
+
+.solicitud-alert--error {
+    background: #fff0ef;
+    color: #8d2820;
+}
+
+.solicitud-admin-card header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.solicitud-identidad {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 20px;
+    margin: 20px 0;
+}
+
+.solicitud-identidad div {
+    min-width: 0;
+}
+
+.solicitud-identidad dt {
+    color: var(--admin-muted);
+    font-size: .82rem;
+}
+
+.solicitud-identidad dd {
+    margin: 4px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.solicitud-motivo {
+    padding: 16px;
+    border-radius: 10px;
+    background: var(--admin-soft);
+}
+
+.solicitud-motivo p {
+    margin: 8px 0 0;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.solicitud-decision {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+    .solicitud-datos,
+    .solicitud-identidad {
+        grid-template-columns: 1fr;
+    }
+}

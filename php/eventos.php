@@ -3,6 +3,7 @@ require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 $usuarioActual = sigtur_usuario_actual($pdo);
 $puedeGestionarEventos = $usuarioActual && in_array($usuarioActual['rol'], ['organizador', 'administrador'], true);
+$esOrganizador = $usuarioActual && $usuarioActual['rol'] === 'organizador';
 $csrfToken = $puedeGestionarEventos ? sigtur_csrf_token() : '';
 
 /* Esta página tiene dos salidas: HTML para la vista normal y JSON cuando
@@ -45,6 +46,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     echo json_encode($consultaFiltrada->fetchAll(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
+$fotosGaleriaDesdeBd = $pdo->query('SELECT imagen, titulo, descripcion, tipo_evento AS categoria, DATE_FORMAT(fecha_creacion, "%d/%m/%Y") AS fecha FROM galeria_eventos ORDER BY id DESC')->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -61,7 +63,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Estilos CSS -->
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>"> <!-- Estilos generales -->
-    <link rel="stylesheet" href="../css/eventos.css?v=20261013-1"> <!-- Estilos específicos de eventos -->
+    <link rel="stylesheet" href="../css/eventos.css?v=20261014-2"> <!-- Estilos específicos de eventos -->
 </head>
 
 <body class="page-eventos">
@@ -337,11 +339,67 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                         <button type="button" class="filtro-pill" data-galeria-filtro="carrera">Carreras</button>
                         <button type="button" class="filtro-pill" data-galeria-filtro="deportivo">Deportivo</button>
                         <button type="button" class="filtro-pill" data-galeria-filtro="discoteca">Discotecas</button>
+                        <button type="button" class="filtro-pill" data-galeria-filtro="cultural">Culturales</button>
+                        <button type="button" class="filtro-pill" data-galeria-filtro="feria">Ferias</button>
+                        <button type="button" class="filtro-pill" data-galeria-filtro="otro">Otros</button>
                     </div>
                 </div>
             </div>
+            <?php if (($_GET['foto'] ?? '') === 'guardada'): ?>
+                <p class="galeria-upload-notice" role="status">La foto se agregó correctamente a la galería.</p>
+            <?php endif; ?>
             <div class="grilla-galeria" id="galeria-contenedor"></div>
         </section>
+
+        <?php if ($esOrganizador): ?>
+            <div class="form-evento-overlay" id="form-foto-galeria-overlay" aria-hidden="true">
+                <div class="form-evento-modal" role="dialog" aria-modal="true" aria-labelledby="form-foto-galeria-title">
+                    <button class="form-evento-close" id="form-foto-galeria-close" type="button" aria-label="Cerrar formulario">×</button>
+                    <div class="form-evento-header">
+                        <h3 id="form-foto-galeria-title">Agregar foto a la galería</h3>
+                        <p>Comparte una imagen de un evento con la comunidad.</p>
+                    </div>
+                    <form class="form-evento" method="post" action="agregar-foto-galeria.php" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                        <div class="form-error" id="foto-galeria-error" role="alert"></div>
+                        <label class="field">
+                            <span>Título de la foto</span>
+                            <input type="text" name="titulo" maxlength="160" required placeholder="Ej. Carrera nocturna en la costanera">
+                        </label>
+                        <label class="field">
+                            <span>Descripción</span>
+                            <textarea name="descripcion" maxlength="2000" rows="4" required placeholder="Cuenta qué sucede en la foto."></textarea>
+                        </label>
+                        <label class="field">
+                            <span>Tipo de evento</span>
+                            <select name="tipo_evento" required>
+                                <option value="">Selecciona un tipo</option>
+                                <option value="Competencias">Competencias</option>
+                                <option value="Carreras">Carreras</option>
+                                <option value="Deportivo">Deportivo</option>
+                                <option value="Discotecas">Discotecas</option>
+                                <option value="Cultural">Cultural</option>
+                                <option value="Feria">Feria</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </label>
+                        <label class="field upload-field">
+                            <span>Foto del evento</span>
+                            <div class="upload-zone" id="foto-galeria-upload-zone">
+                                <input type="file" id="foto-galeria-archivo" name="foto" accept="image/jpeg,image/png,image/webp" hidden>
+                                <button class="upload-button" id="foto-galeria-upload-button" type="button">Subir foto</button>
+                                <p>Selecciona una imagen JPG, PNG o WEBP de hasta 5 MB.</p>
+                                <p class="upload-name" id="foto-galeria-nombre">Sin archivo seleccionado</p>
+                            </div>
+                        </label>
+                        <div class="form-actions">
+                            <button class="btn-cancelar" id="form-foto-galeria-cancelar" type="button">Cancelar</button>
+                            <button class="btn-crear-form" type="submit">Agregar foto</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <section class="seccion mapa-seccion" aria-labelledby="mapa-eventos-titulo">
             <div class="mapa-encabezado">
@@ -459,7 +517,9 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <script src="../js/interacciones-tarjetas.js" defer></script>
     <script>window.sigturEventoIds = <?= json_encode($eventoIdsPorSlug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosDesdeBd = <?= json_encode($eventosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script src="../js/eventos.js?v=20261013-3" defer></script>
+    <script>window.fotosGaleriaDesdeBd = <?= json_encode($fotosGaleriaDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
+    <script>window.puedeSubirFotoGaleria = <?= $esOrganizador ? 'true' : 'false' ?>;</script>
+    <script src="../js/eventos.js?v=20261014-2" defer></script>
 </body>
 
 </html>

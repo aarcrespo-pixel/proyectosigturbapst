@@ -77,6 +77,22 @@ body.admin-panel-page {
     gap: 8px;
 }
 
+.admin-dashboard-page .admin-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+}
+
+.admin-dashboard-page .admin-nav {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+}
+
+.admin-dashboard-page .admin-nav__link {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
 .admin-nav__link {
     display: inline-flex;
     align-items: center;
@@ -162,6 +178,71 @@ body.admin-panel-page {
     margin: 7px 0 0;
     color: var(--admin-muted);
     line-height: 1.55;
+}
+
+.admin-content-links {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.admin-content-link {
+    display: grid;
+    gap: 7px;
+    padding: 18px 20px;
+    border: 1px solid var(--admin-line);
+    border-radius: 15px;
+    background: var(--admin-paper);
+    color: var(--admin-ink);
+    text-decoration: none;
+    transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+
+.admin-content-link:hover {
+    transform: translateY(-2px);
+    border-color: var(--admin-accent);
+    box-shadow: 0 10px 24px rgba(29, 53, 68, .08);
+}
+
+.admin-content-link strong {
+    color: var(--admin-accent-dark);
+    font-size: 1.1rem;
+}
+
+.admin-content-link span {
+    color: var(--admin-muted);
+    font-size: .9rem;
+}
+
+.admin-content-item {
+    margin: 12px 0;
+    padding: 16px 18px;
+    border: 1px solid var(--admin-line);
+    border-radius: 14px;
+    background: var(--admin-paper);
+}
+
+.admin-content-item > summary {
+    color: var(--admin-ink);
+    cursor: pointer;
+    font-weight: 750;
+}
+
+.admin-content-form {
+    margin-top: 18px;
+}
+
+.admin-notice {
+    padding: 14px 18px;
+    border: 1px solid #b7dfc4;
+    border-radius: 12px;
+    background: #eaf7ee;
+    color: #225b37;
+}
+
+.admin-button--danger {
+    margin-top: 12px;
+    background: #a53628;
 }
 
 .admin-form {
@@ -540,6 +621,15 @@ body.admin-panel-page {
     .admin-nav {
         justify-content: flex-start;
     }
+
+    .admin-dashboard-page .admin-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-dashboard-page .admin-nav {
+        width: 100%;
+        overflow-x: auto;
+    }
 }
 
 @media (max-width: 600px) {
@@ -590,6 +680,10 @@ body.admin-panel-page {
     .admin-form {
         grid-template-columns: 1fr;
         gap: 13px;
+    }
+
+    .admin-content-links {
+        grid-template-columns: 1fr;
     }
 
     .admin-form__wide {

@@ -32,7 +32,6 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
     ];
 
     $dirUpload = $uploadDirs[$type] ?? null;
-    error_log("[{$type}] Directorio configurado: {$dirUpload}");
 
     if (!$dirUpload) {
         error_log("[{$type}] ERROR: Tipo de archivo inválido");
@@ -46,12 +45,6 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
     }
 
     $file = $_FILES[$fileKey];
-    error_log("[{$type}] Archivo detectado: " . json_encode([
-        'name' => $file['name'] ?? 'N/A',
-        'size' => $file['size'] ?? 0,
-        'error' => $file['error'] ?? 'N/A',
-        'tmp_name' => $file['tmp_name'] ?? 'N/A',
-    ]));
 
     // ===== VALIDAR ERRORES DE UPLOAD =====
     // El código de upload distingue archivo ausente, parcial, grande o bloqueado.
@@ -86,60 +79,37 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
         error_log("[{$type}] ERROR: Extensión no permitida '{$extension}'. Permitidas: " . implode(', ', $permitidas));
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
     }
-    error_log("[{$type}] ✓ Extensión válida: {$extension}");
 
     // ===== CREAR DIRECTORIO SI NO EXISTE =====
     if (!is_dir($dirUpload)) {
-        error_log("[{$type}] Directorio no existe: {$dirUpload}");
-
         if (!@mkdir($dirUpload, 0755, true)) {
             error_log("[{$type}] ERROR: No se pudo crear directorio");
             return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
         }
-        error_log("[{$type}] ✓ Directorio creado: {$dirUpload}");
-    } else {
-        error_log("[{$type}] ✓ Directorio existe: {$dirUpload}");
     }
 
     // ===== VERIFICAR PERMISOS =====
     if (!is_writable($dirUpload)) {
-        error_log("[{$type}] ERROR: Directorio no escribible. Permisos: " . substr(sprintf('%o', fileperms($dirUpload)), -4));
+        error_log("[{$type}] ERROR: Directorio no escribible");
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
     }
-    error_log("[{$type}] ✓ Directorio escribible");
 
     // ===== GENERAR NOMBRE ÚNICO =====
     $nombreArchivo = $type . '_' . $userId . '_' . time() . '.' . $extension;
     $rutaDestino = $dirUpload . $nombreArchivo;
-    error_log("[{$type}] Nombre de archivo: {$nombreArchivo}");
-    error_log("[{$type}] Ruta destino: {$rutaDestino}");
 
     // ===== VALIDAR TMP_NAME =====
     if (empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
         error_log("[{$type}] ERROR: tmp_name inválido o no es archivo subido");
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
     }
-    error_log("[{$type}] ✓ tmp_name válido: " . $file['tmp_name']);
 
     // ===== MOVER ARCHIVO =====
     // move_uploaded_file verifica que el origen provenga del mecanismo de upload de PHP.
     if (!move_uploaded_file($file['tmp_name'], $rutaDestino)) {
         error_log("[{$type}] ERROR: move_uploaded_file() falló");
-        error_log("[{$type}] - Fuente: " . $file['tmp_name']);
-        error_log("[{$type}] - Destino: " . $rutaDestino);
-        error_log("[{$type}] - Destino existe antes: " . (file_exists($rutaDestino) ? 'SÍ' : 'NO'));
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
     }
-    error_log("[{$type}] ✓ Archivo movido correctamente");
-
-    // ===== VERIFICAR QUE SE GUARDÓ =====
-    if (!file_exists($rutaDestino)) {
-        error_log("[{$type}] ERROR: Archivo no encontrado después de move_uploaded_file");
-        return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
-    }
-
-    $tamaño = filesize($rutaDestino);
-    error_log("[{$type}] ✓ Archivo verificado. Tamaño: {$tamaño} bytes");
 
     // ===== ELIMINAR ARCHIVO ANTERIOR =====
     $archivoAnterior = $_SESSION[$sessionKey] ?? 'default-' . $type . '.png';
@@ -148,18 +118,12 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
         $rutaAnterior = $dirUpload . basename($archivoAnterior);
 
         if (file_exists($rutaAnterior)) {
-            error_log("[{$type}] Eliminando archivo anterior: {$archivoAnterior}");
-            if (@unlink($rutaAnterior)) {
-                error_log("[{$type}] ✓ Archivo anterior eliminado");
-            } else {
-                error_log("[{$type}] ⚠ No se pudo eliminar archivo anterior");
+            if (!@unlink($rutaAnterior)) {
+                error_log("[{$type}] ERROR: No se pudo eliminar el archivo anterior");
             }
-        } else {
-            error_log("[{$type}] Archivo anterior no encontrado: {$rutaAnterior}");
         }
     }
 
-    error_log("[{$type}] ✓✓✓ ÉXITO: {$nombreArchivo}");
     return $nombreArchivo;
 }
 
@@ -177,11 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $_SESSION['usuario_avatar'] = (string) ($imagenesActuales['avatar'] ?? 'default-avatar.png');
     $_SESSION['usuario_banner'] = (string) ($imagenesActuales['banner'] ?? 'default-banner.png');
-
-    // LOGGING: Inicio de procesamiento
-    error_log("=== INICIO PROCESAMIENTO POST - Usuario: {$userId} ===");
-    error_log("_FILES: " . json_encode(array_keys($_FILES)));
-    error_log("_POST keys: " . json_encode(array_keys($_POST)));
 
     // Validar y limpiar datos de texto
     $nombre = trim($_POST['nombre'] ?? '');
@@ -213,13 +172,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Procesar subidas de archivos
-    error_log("Procesando avatar...");
     $avatarNombre = processImageUpload('avatar', 'avatar', $userId, 'usuario_avatar');
-    error_log("Avatar resultante: {$avatarNombre}");
-
-    error_log("Procesando banner...");
     $bannerNombre = processImageUpload('banner', 'banner', $userId, 'usuario_banner');
-    error_log("Banner resultante: {$bannerNombre}");
 
     // Obtener valores actuales para la BD
     $nombreFinal = $nombre !== '' ? $nombre : $_SESSION['usuario_nombre'];
@@ -231,10 +185,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
      /* El UPDATE usa parámetros nombrados para actualizar perfil y archivos en
          una sola operación; después sincronizamos la sesión con esos valores. */
      // Actualizar base de datos
-    try {
-        error_log("Preparando UPDATE SQL...");
-
-        $stmt = $pdo->prepare(
+     try {
+         $stmt = $pdo->prepare(
             'UPDATE usuarios SET
                 nombre_completo = :nombre,
                 avatar = :avatar,
@@ -245,17 +197,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 sitio_web = :sitio_web
             WHERE id = :id'
         );
-
-        error_log("Valores a actualizar: " . json_encode([
-            ':nombre' => $nombreFinal,
-            ':avatar' => $avatarNombre,
-            ':banner' => $bannerNombre,
-            ':nickname' => $nicknameFinal,
-            ':biografia' => $biografiaFinal,
-            ':ubicacion' => $ubicacionFinal,
-            ':sitio_web' => $sitioWebFinal,
-            ':id' => $userId,
-        ]));
 
         $result = $stmt->execute([
             ':nombre' => $nombreFinal,
@@ -269,11 +210,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         if (!$result) {
-            error_log("ERROR en execute(): " . json_encode($stmt->errorInfo()));
             throw new Exception("Error al ejecutar UPDATE: " . json_encode($stmt->errorInfo()));
         }
-
-        error_log("UPDATE ejecutado correctamente. Filas afectadas: " . $stmt->rowCount());
 
         // Actualizar sesión
         $_SESSION['usuario_nombre'] = $nombreFinal;
@@ -283,9 +221,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['usuario_biografia'] = $biografiaFinal ?? '';
         $_SESSION['usuario_ubicacion'] = $ubicacionFinal ?? '';
         $_SESSION['usuario_sitio_web'] = $sitioWebFinal ?? '';
-
-        error_log("Sesión actualizada correctamente.");
-        error_log("=== FIN PROCESAMIENTO EXITOSO ===\n");
 
         // Redirigir al inicio
         header('Location: ../index.php');
@@ -302,7 +237,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // ========================
 try {
     $userId = (int) $_SESSION['usuario_id'];
-    error_log("=== CARGANDO PERFIL - Usuario ID: {$userId} ===");
 
     // Cargamos el perfil con una consulta parametrizada para evitar exponer otro usuario.
     $stmt = $pdo->prepare('SELECT nombre_completo, nickname, biografia, ubicacion, sitio_web, avatar, banner FROM usuarios WHERE id = :id');
@@ -310,16 +244,8 @@ try {
     $usuario = $stmt->fetch();
 
     if (!$usuario) {
-        error_log("ERROR: Usuario no encontrado en BD");
         die("Error: Usuario no encontrado.");
     }
-
-    error_log("✓ Usuario cargado. Datos: " . json_encode([
-        'nombre_completo' => $usuario['nombre_completo'] ?? 'NULL',
-        'avatar' => $usuario['avatar'] ?? 'NULL',
-        'banner' => $usuario['banner'] ?? 'NULL',
-        'nickname' => $usuario['nickname'] ?? 'NULL',
-    ]));
 
 } catch (PDOException $e) {
     error_log("ERROR PDO al cargar usuario: " . $e->getMessage());
@@ -343,8 +269,6 @@ $avatarUrl = $avatarFilename !== '' && is_file($avatarPath)
 $bannerUrl = $bannerFilename !== '' && is_file($bannerPath)
     ? '../uploads/banners/' . rawurlencode($bannerFilename)
     : '../img/banner-default-white.svg';
-
-error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
 ?>
 
 <!DOCTYPE html>
@@ -353,6 +277,8 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personalizar Perfil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="../css/login.css?v=20261013-2">
     <link rel="stylesheet" href="../css/perfil.css?v=20261013-2">
 </head>
@@ -368,7 +294,7 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
 
             <!-- Banner -->
             <div class="banner-section" id="bannerContainer" onclick="document.getElementById('bannerInput').click()">
-                <img id="bannerImage" src="<?php echo htmlspecialchars($bannerUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="Banner de perfil" class="banner-image">
+                <img id="bannerImage" src="<?php echo htmlspecialchars($bannerUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="Banner de perfil" class="banner-image" width="620" height="140" decoding="async" fetchpriority="high">
                 <div class="banner-overlay">
                     <div class="banner-overlay-text">
                         <div style="font-size: 24px; margin-bottom: 2px;">📷</div>
@@ -380,7 +306,7 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
             <!-- Avatar -->
             <div class="profile-avatar-section">
                 <div class="avatar-container" id="avatarContainer" onclick="document.getElementById('avatarInput').click()">
-                    <img id="avatarImage" src="<?php echo htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar de perfil" class="avatar-image">
+                    <img id="avatarImage" src="<?php echo htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar de perfil" class="avatar-image" width="100" height="100" decoding="async">
                     <div class="avatar-overlay">
                         <div class="avatar-overlay-text">
                             <div style="font-size: 20px; margin-bottom: 1px;">📷</div>
@@ -439,9 +365,8 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
         </section>
     </main>
 
-    <script src="../js/translator.js"></script>
+    <script src="../js/translator.js" defer></script>
     <script src="../js/script.js" defer></script>
-    <script src="../js/login.js" defer></script>
     <script>
         // Actualizar contadores de caracteres
         function setupCharCounter(inputId, countId, maxLength) {
@@ -464,29 +389,26 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
         setupCharCounter('ubicacion', 'ubicacionCount', 100);
         setupCharCounter('biografia', 'biografiaCount', 150);
 
-        // Previsualizar avatar
-        document.getElementById('avatarInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    document.getElementById('avatarImage').src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        const previewUrls = new Map();
+        function setupImagePreview(inputId, imageId) {
+            const input = document.getElementById(inputId);
+            const image = document.getElementById(imageId);
 
-        // Previsualizar banner
-        document.getElementById('bannerInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    document.getElementById('bannerImage').src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                if (!file) return;
+
+                const previousUrl = previewUrls.get(this.id);
+                if (previousUrl) URL.revokeObjectURL(previousUrl);
+
+                const previewUrl = URL.createObjectURL(file);
+                previewUrls.set(this.id, previewUrl);
+                image.src = previewUrl;
+            });
+        }
+
+        setupImagePreview('avatarInput', 'avatarImage');
+        setupImagePreview('bannerInput', 'bannerImage');
     </script>
 </body>
 </html>

@@ -1614,6 +1614,65 @@ body[data-tema="oscuro"] .drawer-field select { background: #24252a; border-colo
     box-shadow: 0 14px 28px rgba(17, 17, 17, 0.2);
 }
 
+.galeria-subir-foto {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 1.5rem;
+    border: 2px dashed rgba(17, 17, 17, 0.32);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.72);
+    color: #111111;
+    font: inherit;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.galeria-subir-foto:hover {
+    transform: translateY(-3px);
+    border-color: #ff7f2a;
+    background: #fff8f2;
+}
+
+.galeria-subir-foto__icon {
+    width: 4rem;
+    height: 4rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #111111;
+    color: #ffffff;
+    font-size: 3rem;
+    font-weight: 400;
+    line-height: 1;
+}
+
+body[data-tema="oscuro"] .galeria-subir-foto {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(24, 25, 29, 0.82);
+    color: #f4f4f5;
+}
+
+body[data-tema="oscuro"] .galeria-subir-foto:hover {
+    border-color: #ff9a56;
+    background: rgba(54, 42, 32, 0.96);
+}
+
+.galeria-upload-notice {
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid #b8e3c7;
+    border-radius: 14px;
+    background: #effaf2;
+    color: #185c2d;
+    font-weight: 600;
+}
+
 .form-evento-overlay {
     position: fixed;
     inset: 0;

@@ -1,3 +1,9 @@
+<?php
+require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/contenido_publico.php';
+sigtur_inicializar_contenido_publico($pdo);
+$propuestasGastronomicas = $pdo->query('SELECT slug, nombre, imagen, descripcion, categoria, url_mapa FROM gastronomia_catalogo ORDER BY orden, id')->fetchAll();
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -53,7 +59,7 @@
         </section>
 
         <section class="gastronomia-resumen" aria-label="Resumen gastronómico de Salto">
-            <div><strong>12</strong><span>restaurantes para descubrir</span></div>
+            <div><strong><?= count($propuestasGastronomicas) ?></strong><span>restaurantes para descubrir</span></div>
             <div><strong>Salto</strong><span>restaurantes locales</span></div>
             <div><strong>Maps</strong><span>ubicaciones para consultar</span></div>
             <div><strong>+</strong><span>opciones para distintos gustos</span></div>
@@ -72,32 +78,18 @@
                 </label>
             </div>
             <div class="gastronomia-grid" aria-label="Restaurantes de Salto">
-                <?php
-                $propuestasGastronomicas = [
-                    ['La Vieja Bodega', '../img/r1.jfif'],
-                    ['Trattoria', '../img/r2.jfif'],
-                    ['Toscana', '../img/r3.jfif'],
-                    ['Punto y Aparte', '../img/r4.jpg'],
-                    ['Rodelu', '../img/r5.jfif'],
-                    ['El Tony', '../img/r6.jfif'],
-                    ['La Canilla', '../img/r7.jfif'],
-                    ['El Dominico', '../img/r8.jfif'],
-                    ['La 2000', '../img/gastronomia.jpg'],
-                    ['Buffet del Chef', '../img/Trouville.jpg'],
-                    ['Don Diego', '../img/Shopping_Salto.jpg'],
-                    ['GAUCHO', '../img/feria_emprendedores.jpg'],
-                ];
-                foreach ($propuestasGastronomicas as [$nombre, $imagen]):
-                    $restauranteId = 'restaurante-' . strtolower(str_replace(' ', '-', $nombre));
-                    $busqueda = $nombre . ', Salto, Uruguay';
-                    $urlMapa = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($busqueda);
+                <?php foreach ($propuestasGastronomicas as $restaurante):
+                    $restauranteId = 'restaurante-' . $restaurante['slug'];
+                    $nombre = $restaurante['nombre'];
+                    $imagen = $restaurante['imagen'];
+                    $urlMapa = $restaurante['url_mapa'] !== '' ? $restaurante['url_mapa'] : 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($nombre . ', Salto, Uruguay');
                 ?>
                     <article class="tarjeta-gastronomia" id="<?= htmlspecialchars($restauranteId, ENT_QUOTES, 'UTF-8') ?>" data-gastronomia-categoria="restaurante">
                         <img src="<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>">
                         <div class="tarjeta-gastronomia__contenido">
-                            <span class="tarjeta-gastronomia__meta">Restaurante</span>
+                            <span class="tarjeta-gastronomia__meta"><?= htmlspecialchars($restaurante['categoria'], ENT_QUOTES, 'UTF-8') ?></span>
                             <h3><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?></h3>
-                            <p>Consultá la propuesta, los horarios y los precios directamente con el restaurante.</p>
+                            <p><?= htmlspecialchars($restaurante['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
                             <a href="<?= htmlspecialchars($urlMapa, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Ver ubicación <span aria-hidden="true">↗</span></a>
                         </div>
                     </article>

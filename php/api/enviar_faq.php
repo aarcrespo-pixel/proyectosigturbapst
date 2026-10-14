@@ -13,7 +13,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 /* Se guarda texto plano; las vistas administrativas deben escaparlo al mostrarlo. */
 $pregunta = trim((string) ($_POST['pregunta'] ?? ''));
 $usuarioId = isset($_SESSION['usuario_id']) ? (int) $_SESSION['usuario_id'] : null;
-$email = trim((string) ($_POST['email'] ?? ($_SESSION['usuario_email'] ?? '')));
+$email = trim((string) ($_SESSION['usuario_email'] ?? ''));
+
+if ($usuarioId === null || $usuarioId <= 0) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Inicia sesión para enviar una pregunta y recibir la respuesta en Preguntas frecuentes.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 if ($pregunta === '' || mb_strlen($pregunta) < 5) {
     http_response_code(422);
@@ -21,14 +27,8 @@ if ($pregunta === '' || mb_strlen($pregunta) < 5) {
     exit;
 }
 
-if ($usuarioId === null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    http_response_code(422);
-    echo json_encode(['success' => false, 'message' => 'Indica un email válido para recibir respuesta.'], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-/* La consulta preparada separa datos y SQL: usuario_id/email identifican al
-   remitente, estado permite moderación y NOW() registra el momento de envío. */
+/* Solo las cuentas autenticadas pueden enviar; así la respuesta queda ligada
+   a la cuenta remitente y se muestra de forma privada en Preguntas frecuentes. */
 $insertar = $pdo->prepare("INSERT INTO preguntas_frecuentes (usuario_id, email, pregunta, estado, fecha_creacion)
     VALUES (:usuario_id, :email, :pregunta, 'pendiente', NOW())");
 $insertar->execute([

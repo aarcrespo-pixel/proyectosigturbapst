@@ -31,8 +31,8 @@ try {
     $usuarioId = (int) $usuarioActual['id'];
 
     $accion = (string) ($_GET['accion'] ?? $_POST['accion'] ?? 'conversaciones');
-    if ($accion !== 'consulta' && $usuarioActual['rol'] !== 'administrador') {
-        responderMensajes(['success' => false, 'status' => 'error', 'message' => 'La mensajería directa es exclusiva para administradores.'], 403);
+    if ($accion !== 'consulta' && !in_array($usuarioActual['rol'], ['administrador', 'organizador'], true)) {
+        responderMensajes(['success' => false, 'status' => 'error', 'message' => 'La mensajería directa está disponible para administradores y organizadores.'], 403);
     }
     if ($accion === 'consulta' && !sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
         responderMensajes(['success' => false, 'status' => 'error', 'message' => 'La sesión expiró. Recargá la página e intentá otra vez.'], 403);
@@ -67,10 +67,15 @@ try {
     }
 
     if ($otroUsuarioId > 0 && in_array($accion, ['enviar', 'leer', 'conversacion'], true)) {
-        $destinatarioAdmin = $pdo->prepare("SELECT id FROM usuarios WHERE id = :id AND rol = 'administrador' LIMIT 1");
-        $destinatarioAdmin->execute([':id' => $otroUsuarioId]);
-        if (!$destinatarioAdmin->fetchColumn() || $otroUsuarioId === $usuarioId) {
-            responderMensajes(['success' => false, 'status' => 'error', 'message' => 'Solo puedes chatear con otra cuenta administradora.'], 403);
+        $destinatario = $pdo->prepare('SELECT rol FROM usuarios WHERE id = :id LIMIT 1');
+        $destinatario->execute([':id' => $otroUsuarioId]);
+        $rolDestinatario = $destinatario->fetchColumn();
+        $puedeContactar = $rolDestinatario !== false
+            && ($usuarioActual['rol'] === 'administrador'
+                ? in_array(strtolower((string) $rolDestinatario), ['administrador', 'admin', 'moderador', 'organizador'], true)
+                : in_array(strtolower((string) $rolDestinatario), ['administrador', 'admin', 'moderador'], true));
+        if (!$puedeContactar || $otroUsuarioId === $usuarioId) {
+            responderMensajes(['success' => false, 'status' => 'error', 'message' => 'Solo puedes chatear con una cuenta autorizada para mensajería.'], 403);
         }
     }
 
@@ -185,15 +190,18 @@ try {
     }
      /* CAMBIO APLICADO: el inbox devuelve último texto, fecha y pendientes,
          agrupando cada contacto una sola vez para la columna izquierda. */
-    $consulta = $pdo->prepare("SELECT u.id AS usuario_id, u.nombre_completo, u.nickname, COALESCE(u.foto_perfil, u.avatar) AS foto_perfil, MAX(m.fecha_creacion) AS ultima_fecha, SUBSTRING_INDEX(GROUP_CONCAT(m.mensaje ORDER BY m.fecha_creacion DESC, m.id DESC SEPARATOR '||'), '||', 1) AS ultimo_mensaje, SUM(CASE WHEN m.destinatario_id = :usuario_no_leido AND m.leido = 0 THEN 1 ELSE 0 END) AS no_leidos FROM mensajes m INNER JOIN usuarios u ON u.id = CASE WHEN m.remitente_id = :usuario_contacto THEN m.destinatario_id ELSE m.remitente_id END WHERE (m.remitente_id = :usuario_emisor OR m.destinatario_id = :usuario_receptor) AND u.rol = 'administrador' GROUP BY u.id, u.nombre_completo, u.nickname, u.foto_perfil, u.avatar ORDER BY ultima_fecha DESC");
+    $rolesVisibles = $usuarioActual['rol'] === 'administrador'
+        ? "('administrador', 'admin', 'moderador', 'organizador')"
+        : "('administrador', 'admin', 'moderador')";
+    $consulta = $pdo->prepare("SELECT u.id AS usuario_id, u.nombre_completo, u.nickname, COALESCE(u.foto_perfil, u.avatar) AS foto_perfil, MAX(m.fecha_creacion) AS ultima_fecha, SUBSTRING_INDEX(GROUP_CONCAT(m.mensaje ORDER BY m.fecha_creacion DESC, m.id DESC SEPARATOR '||'), '||', 1) AS ultimo_mensaje, SUM(CASE WHEN m.destinatario_id = :usuario_no_leido AND m.leido = 0 THEN 1 ELSE 0 END) AS no_leidos FROM mensajes m INNER JOIN usuarios u ON u.id = CASE WHEN m.remitente_id = :usuario_contacto THEN m.destinatario_id ELSE m.remitente_id END WHERE (m.remitente_id = :usuario_emisor OR m.destinatario_id = :usuario_receptor) AND u.rol IN {$rolesVisibles} GROUP BY u.id, u.nombre_completo, u.nickname, u.foto_perfil, u.avatar ORDER BY ultima_fecha DESC");
      $consulta->execute([':usuario_no_leido' => $usuarioId, ':usuario_contacto' => $usuarioId, ':usuario_emisor' => $usuarioId, ':usuario_receptor' => $usuarioId]);
     $conversaciones = $consulta->fetchAll();
-    $contactosAdmin = $pdo->prepare("SELECT id AS usuario_id, nombre_completo, nickname, COALESCE(foto_perfil, avatar) AS foto_perfil, '' AS ultimo_mensaje, 0 AS no_leidos FROM usuarios WHERE rol = 'administrador' AND id <> :usuario ORDER BY nombre_completo ASC");
-    $contactosAdmin->execute([':usuario' => $usuarioId]);
+    $contactosPermitidos = $pdo->prepare("SELECT id AS usuario_id, nombre_completo, nickname, COALESCE(foto_perfil, avatar) AS foto_perfil, '' AS ultimo_mensaje, 0 AS no_leidos FROM usuarios WHERE rol IN {$rolesVisibles} AND id <> :usuario_excluido ORDER BY nombre_completo ASC");
+    $contactosPermitidos->execute([':usuario_excluido' => $usuarioId]);
     $conversacionIds = array_fill_keys(array_map(static fn ($conversacion) => (int) $conversacion['usuario_id'], $conversaciones), true);
-    foreach ($contactosAdmin->fetchAll() as $contactoAdmin) {
-        if (!isset($conversacionIds[(int) $contactoAdmin['usuario_id']])) {
-            $conversaciones[] = $contactoAdmin;
+    foreach ($contactosPermitidos->fetchAll() as $contactoPermitido) {
+        if (!isset($conversacionIds[(int) $contactoPermitido['usuario_id']])) {
+            $conversaciones[] = $contactoPermitido;
         }
     }
     responderMensajes(['success' => true, 'data' => $conversaciones, 'conversations' => $conversaciones]);
