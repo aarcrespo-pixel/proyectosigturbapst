@@ -1,0 +1,32 @@
+.admin-lista-expandible [data-lista-item][hidden] {
+    display: none !important;
+}
+
+.admin-lista-expandible__boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    margin-top: 14px;
+    padding: 0 17px;
+    border: 1px solid #17657d;
+    border-radius: 10px;
+    background: #fff;
+    color: #12485f;
+    font: inherit;
+    font-size: .9rem;
+    font-weight: 750;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.admin-lista-expandible__boton:hover {
+    transform: translateY(-1px);
+    background: #17657d;
+    color: #fff;
+}
+
+.admin-lista-expandible__boton:focus-visible {
+    outline: 3px solid rgba(23, 101, 125, .25);
+    outline-offset: 3px;
+}

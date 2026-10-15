@@ -1,0 +1,209 @@
+<?php
+require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/contenido_publico.php';
+sigtur_inicializar_contenido_publico($pdo);
+$lugaresEmblematicos = $pdo->query("SELECT nombre, imagen, descripcion FROM lugares WHERE seccion_publica = 'emblematico' ORDER BY FIELD(slug, 'plaza-treinta-y-tres-orientales', 'plaza-artigas', 'parque-benito-solari'), nombre")->fetchAll();
+$lugaresRecreacion = $pdo->query("SELECT nombre, imagen, descripcion FROM lugares WHERE seccion_publica = 'recreacion' ORDER BY FIELD(slug, 'plaza-roosvelt', 'costanera-norte', 'muelle-negro'), nombre")->fetchAll();
+?>
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lugares | SIGTUR</title>
+    <link rel="icon" href="../img/logoblanco.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/estilos.css?v=20261015-1">
+    <link rel="stylesheet" href="../css/lugares.css">
+</head>
+
+<body>
+    <?php
+    $headerCurrentPage = 'lugares';
+    $headerActivePage = 'lugares';
+    include __DIR__ . '/header.php';
+    ?>
+
+    <nav class="bottom-nav" aria-label="Navegación inferior">
+        <a href="../index.php" class="bottom-nav-item">
+            <img src="../img/logoazul.png" class="bottom-nav-icon" alt="Inicio" data-i18n-alt="navHome">
+            <span class="bottom-nav-label" data-i18n="navHome">Inicio</span>
+        </a>
+        <a href="eventos.php" class="bottom-nav-item active">
+            <img src="../img/nav-eventos.png" class="bottom-nav-icon" alt="Eventos" data-i18n-alt="navEvents">
+            <span class="bottom-nav-label" data-i18n="navEvents">Eventos</span>
+        </a>
+        <a href="turismo.php" class="bottom-nav-item">
+            <img src="../img/turismo.png" class="bottom-nav-icon" alt="Turismo" data-i18n-alt="navTourism">
+            <span class="bottom-nav-label" data-i18n="navTourism">Turismo</span>
+        </a>
+        <a href="lugares.php" class="bottom-nav-item">
+            <img src="../img/lugares.png" class="bottom-nav-icon" alt="Lugares" data-i18n-alt="navPlaces">
+            <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
+        </a>
+        <a href="gastronomia.php" class="bottom-nav-item">
+            <img src="../img/gastronomia.jpg" class="bottom-nav-icon" alt="Gastronomía">
+            <span class="bottom-nav-label">Gastronomía</span>
+        </a>
+    </nav>
+
+    <main class="pagina-lugares">
+        <section class="hero-lugares">
+            <div class="hero-texto">
+                <span data-i18n="placesHeroLabel">Lugares históricos</span>
+                <h1 data-i18n="placesHeroTitle">LUGARES</h1>
+                <p data-i18n="placesHeroText">Descubre los lugares más emblemáticos de Salto, llenos de historia y cultura.</p>
+            </div>
+        </section>
+
+        <section class="seccion-lugares" id="lugares-emblematicos">
+            <h2 data-i18n="placesSectionEmblematicTitle">Lugares emblemáticos</h2>
+            <div class="destinos-grid">
+                <?php foreach ($lugaresEmblematicos as $lugar): ?>
+                <article class="tarjeta-lugar">
+                    <img src="<?= htmlspecialchars($lugar['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8') ?>">
+                    <div class="tarjeta-contenido">
+                        <h3><?= htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
+                        <p><?= htmlspecialchars($lugar['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
+                    </div>
+                </article>
+                <?php endforeach; ?>
+            </div>
+        </section>
+
+        <section class="seccion-lugares">
+            <h2 data-i18n="placesSectionCategoriesTitle">Categorías de lugares</h2>
+            <div class="intereses-grid">
+                <article class="tarjeta-interes">
+                    <img src="../img/gastronomia.jpg" alt="Cafés y gastronomía" data-i18n-alt="placesCategoryAlt" data-i18n-index="0">
+                    <div class="tarjeta-contenido">
+                        <h3 data-i18n="placesCategoryTitles" data-i18n-index="0">Gastronomía</h3>
+                        <p data-i18n="placesCategoryDescriptions" data-i18n-index="0">Selección de cafés, parrillas y locales con sabores locales que marcan tendencia en la ciudad.</p>
+                    </div>
+                </article>
+                <article class="tarjeta-interes">
+                    <img src="../img/cultura.jpg" alt="Arte urbano" data-i18n-alt="placesCategoryAlt" data-i18n-index="1">
+                    <div class="tarjeta-contenido">
+                        <h3 data-i18n="placesCategoryTitles" data-i18n-index="1">Cultura</h3>
+                        <p data-i18n="placesCategoryDescriptions" data-i18n-index="1">Galerías, murales y espacios históricos que muestran la identidad y patrimonio de Salto.</p>
+                    </div>
+                </article>
+                <article class="tarjeta-interes">
+                    <img src="../img/Naturaleza.webp" alt="Espacios naturales" data-i18n-alt="placesCategoryAlt" data-i18n-index="2">
+                    <div class="tarjeta-contenido">
+                        <h3 data-i18n="placesCategoryTitles" data-i18n-index="2">Naturaleza</h3>
+                        <p data-i18n="placesCategoryDescriptions" data-i18n-index="2">Áreas verdes, parques y paseos naturales para los amantes del aire libre y la calma.</p>
+                    </div>
+                </article>
+                <article class="tarjeta-interes">
+                    <img src="../img/experiencias.webp" alt="Atracciones urbanas" data-i18n-alt="placesCategoryAlt" data-i18n-index="3">
+                    <div class="tarjeta-contenido">
+                        <h3 data-i18n="placesCategoryTitles" data-i18n-index="3">Experiencias</h3>
+                        <p data-i18n="placesCategoryDescriptions" data-i18n-index="3">Actividades interactivas, mercados y puntos de encuentro que enriquecen cada visita.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="seccion-lugares">
+            <h2 data-i18n="placesSectionLeisureTitle">Lugares para Distraerse</h2>
+            <div class="destinos-grid">
+                <?php foreach ($lugaresRecreacion as $lugar): ?>
+                <article class="tarjeta-lugar">
+                    <img src="<?= htmlspecialchars($lugar['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8') ?>">
+                    <div class="tarjeta-contenido">
+                        <h3><?= htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
+                        <p><?= htmlspecialchars($lugar['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
+                    </div>
+                </article>
+                <?php endforeach; ?>
+            </div>
+        </section>
+
+
+        <section class="seccion-lugares">
+            <h2 data-i18n="placesSectionGalleryTitle">Galería Histórica</h2>
+            <div class="galeria-lugares">
+                <article class="tarjeta-galeria"><img src="../img/Plaza_33.webp" alt="Vista de evento" data-i18n-alt="placesGalleryAlt" data-i18n-index="0"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="0">Plaza Treinta y Tres</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/Plaza_artigas.webp" alt="Plaza central" data-i18n-alt="placesGalleryAlt" data-i18n-index="1"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="1">Plaza Artigas</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/solari.jfif" alt="Espacio de descanso" data-i18n-alt="placesGalleryAlt" data-i18n-index="2"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="2">Parque Benito Solari</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/Termas_Dayman.webp" alt="Punto turístico" data-i18n-alt="placesGalleryAlt" data-i18n-index="3"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="3">Termas del Dayman</h3></div></article>
+            </div>
+        </section>
+
+
+        <section class="seccion-lugares mapa-seccion" aria-labelledby="mapa-lugares-titulo">
+            <div class="mapa-encabezado">
+                <span class="mapa-kicker">Ubicaciones</span>
+                <h2 id="mapa-lugares-titulo">Encontrá estos lugares</h2>
+                <p>Explorá en el mapa dónde queda cada punto destacado de Salto.</p>
+            </div>
+            <div class="mapa-contenido">
+                <iframe src="https://www.google.com/maps?q=Salto%2C%20Uruguay&output=embed" loading="lazy" title="Mapa de lugares destacados en Salto"></iframe>
+                <div class="mapa-lugares">
+                    <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20Artigas%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza Artigas</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20Treinta%20y%20Tres%20Orientales%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza Treinta y Tres</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Parque%20Benito%20Solari%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Parque Benito Solari</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Muelle%20Negro%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Muelle Negro</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4 data-i18n="footerPlaces">LUGARES</h4>
+                    <span class="footer-toggle-icon">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="../php/lugar.php?slug=plaza-artigas" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="0">Plaza Artigas</a>
+                    <a href="../php/lugar.php?slug=plaza-treinta-y-tres-orientales" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="1">Plaza Treinta y Tres Orientales</a>
+                    <a href="../php/lugar.php?slug=costanera-norte" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="2">Costanera Norte</a>
+                    <a href="../php/lugar.php?slug=costanera-sur" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="3">Costanera Sur</a>
+                    <a href="../php/lugar.php?slug=parque-benito-solari" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="4">Parque Benito Solari</a>
+                </div>
+            </div>
+
+            <div class="footer-col footer-col--expandable">
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4 data-i18n="footerGastronomy">GASTRONOMÍA</h4>
+                    <span class="footer-toggle-icon" aria-hidden="true">▾</span>
+                </button>
+                <div class="footer-links">
+                    <a href="gastronomia.php#restaurante-la-vieja-bodega" class="footer-link">La Vieja Bodega</a>
+                    <a href="gastronomia.php#restaurante-trattoria" class="footer-link">Trattoria</a>
+                    <a href="gastronomia.php#restaurante-toscana" class="footer-link">Toscana</a>
+                    <a href="gastronomia.php#restaurante-punto-y-aparte" class="footer-link">Punto y Aparte</a>
+                    <a href="gastronomia.php#restaurante-rodelu" class="footer-link">Rodelu</a>
+                    <a href="gastronomia.php#restaurante-el-tony" class="footer-link">El Tony</a>
+                    <a href="gastronomia.php#restaurante-la-canilla" class="footer-link">La Canilla</a>
+                    <a href="gastronomia.php#restaurante-el-dominico" class="footer-link">El Dominico</a>
+                    <a href="gastronomia.php#restaurante-la-2000" class="footer-link">La 2000</a>
+                    <a href="gastronomia.php#restaurante-buffet-del-chef" class="footer-link">Buffet del Chef</a>
+                    <a href="gastronomia.php#restaurante-don-diego" class="footer-link">Don Diego</a>
+                    <a href="gastronomia.php#restaurante-gaucho" class="footer-link">GAUCHO</a>
+                </div>
+            </div>
+
+            <div class="footer-col footer-col--social">
+                <button class="footer-toggle" type="button" aria-expanded="false">
+                    <h4 data-i18n="footerSigtur">SIGTUR</h4>
+                    <span class="footer-toggle-icon"></span>
+                </button>
+                <div class="footer-links">
+                    <a href="https://instagram.com/bapstuy" target="_blank" rel="noopener noreferrer" class="footer-link footer-link--icon"><span class="social-icon">IG</span>Instagram</a>
+                    <a href="https://facebook.com/sigtur" target="_blank" rel="noopener noreferrer" class="footer-link footer-link--icon"><span class="social-icon">FB</span>Facebook</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom" data-i18n="footerLegal">SIGTUR © 2026 by Bapst is licensed under CC BY-NC-ND 4.0</div>
+    </footer>
+    <script src="../js/script.js" defer></script>
+    <script src="../js/lugar-links.js" defer></script>
+
+</html>
