@@ -25,7 +25,7 @@ if ($configUsuario) {
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="../css/soporte.css?v=20261015-1" />
+  <link rel="stylesheet" href="../css/soporte.css?v=<?= time() ?>" />
 </head>
 <body>
   <main class="support-page">
@@ -158,7 +158,7 @@ if ($configUsuario) {
   </main>
   <script src="../js/translator.js?v=20261001-1"></script>
   <script src="../js/script.js?v=20261001-1"></script>
-  <script src="../js/notificaciones.js?v=20261015-1"></script>
+  <script src="../js/notificaciones.js?v=<?= time() ?>"></script>
   <script>
     /* Estos selectores conectan preferencias visuales, idioma y tamaño de
        fuente con las funciones compartidas del script global. */

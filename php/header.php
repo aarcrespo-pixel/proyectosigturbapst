@@ -53,7 +53,7 @@ $headerLinks = [
     ['label' => 'Gastronomía', 'url' => BASE_URL . 'php/gastronomia.php', 'page' => 'gastronomia'],
 ];
 ?>
-<header class="menu-principal" data-csrf="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+<header class="menu-principal">
     <button class="hamburguesa" aria-label="Abrir menú" data-i18n-aria-label="navMenuOpen">
         ☰
     </button>
@@ -168,8 +168,8 @@ $headerLinks = [
     <div class="copilot-assistant__panel" id="copilot-assistant-panel" hidden>
         <div class="copilot-assistant__header">
             <div>
-                <strong>Asistente Gemini</strong>
-                <small>Respuestas de Google Gemini sobre SIGTUR</small>
+                <strong>Asistente IA</strong>
+                <small>Tu guía de Salto</small>
             </div>
             <div class="copilot-assistant__header-actions">
                 <button type="button" id="copilot-assistant-history" title="Ver chat anterior">Historial</button>

@@ -1019,20 +1019,6 @@ body[data-tema="oscuro"] .perfil-btn:hover {
     transition: background 0.25s ease, transform 0.2s ease, color 0.25s ease;
 }
 
-.perfil-logout-form {
-    width: 100%;
-    margin: 0;
-}
-
-.perfil-logout-form button.perfil-item {
-    width: 100%;
-    border: 0;
-    background: transparent;
-    text-align: left;
-    font: inherit;
-    cursor: pointer;
-}
-
 .perfil-item:hover {
     background: rgba(255, 255, 255, 0.09);
     color: #ffffff;
