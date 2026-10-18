@@ -2,10 +2,7 @@
 session_start();
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
-<<<<<<< HEAD
 require_once __DIR__ . '/helpers/notificaciones.php';
-=======
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     // El endpoint solo crea eventos por POST; cualquier acceso directo vuelve al listado.
@@ -29,7 +26,7 @@ if (!in_array($accion, ['crear', 'editar', 'eliminar'], true)) {
 }
 
 if ($accion !== 'crear') {
-    $consultaEventoExistente = $pdo->prepare('SELECT id, slug, organizador_id FROM eventos WHERE id = :id LIMIT 1');
+    $consultaEventoExistente = $pdo->prepare('SELECT id, slug, organizador_id, imagen_portada FROM eventos WHERE id = :id LIMIT 1');
     $consultaEventoExistente->execute([':id' => $eventoId]);
     $eventoExistente = $consultaEventoExistente->fetch();
     if (!$eventoExistente) {
@@ -79,13 +76,49 @@ $ubicacion = trim($_POST['ubicacion'] ?? '');
 $categoria = trim($_POST['categoria'] ?? 'General');
 $tipoEntrada = trim($_POST['tipoEntrada'] ?? 'Gratuito');
 $precioEntrada = trim($_POST['precio'] ?? '');
-$imagen = trim($_POST['imagen_portada'] ?? 'default.jpg');
+$imagenActual = $accion === 'editar' ? (string) ($eventoExistente['imagen_portada'] ?? 'default.jpg') : 'default.jpg';
+$imagen = trim(is_string($_POST['imagen_portada'] ?? null) ? $_POST['imagen_portada'] : $imagenActual);
 
 /* Los campos obligatorios se validan en servidor porque el formulario puede
     ser enviado fuera del navegador o manipulado desde las herramientas web. */
 if ($titulo === '' || $descripcion === '' || $fecha === '' || $ubicacion === '') {
     http_response_code(422);
     exit('Completa título, descripción, fecha y ubicación.');
+}
+
+$archivoImagen = $_FILES['imagen'] ?? null;
+$rutaImagenSubida = null;
+if (is_array($archivoImagen) && ($archivoImagen['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+    if (($archivoImagen['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        http_response_code(in_array($archivoImagen['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true) ? 413 : 422);
+        exit('No se pudo recibir la imagen del evento.');
+    }
+    if ((int) ($archivoImagen['size'] ?? 0) <= 0 || (int) $archivoImagen['size'] > 10 * 1024 * 1024 || !is_uploaded_file($archivoImagen['tmp_name'])) {
+        http_response_code(413);
+        exit('La imagen debe pesar menos de 10 MB.');
+    }
+
+    $extensionesPermitidas = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $mimeImagen = (new finfo(FILEINFO_MIME_TYPE))->file($archivoImagen['tmp_name']);
+    $datosImagen = @getimagesize($archivoImagen['tmp_name']);
+    if (!isset($extensionesPermitidas[$mimeImagen]) || $datosImagen === false || ($datosImagen['mime'] ?? '') !== $mimeImagen) {
+        http_response_code(422);
+        exit('Usá una imagen JPG, PNG o WEBP válida.');
+    }
+
+    $directorioImagenes = dirname(__DIR__) . '/uploads/eventos';
+    if (!is_dir($directorioImagenes) && !mkdir($directorioImagenes, 0775, true) && !is_dir($directorioImagenes)) {
+        http_response_code(500);
+        exit('No se pudo preparar la carpeta de imágenes.');
+    }
+    $nombreImagen = 'evento_' . bin2hex(random_bytes(16)) . '.' . $extensionesPermitidas[$mimeImagen];
+    $rutaImagenSubida = $directorioImagenes . DIRECTORY_SEPARATOR . $nombreImagen;
+    if (!move_uploaded_file($archivoImagen['tmp_name'], $rutaImagenSubida)) {
+        $rutaImagenSubida = null;
+        http_response_code(500);
+        exit('No se pudo guardar la imagen del evento.');
+    }
+    $imagen = '../uploads/eventos/' . $nombreImagen;
 }
 
 /* Convertimos el título en un slug estable y consultamos su disponibilidad
@@ -139,15 +172,28 @@ if ($accion === 'editar') {
     $actualizar = $pdo->prepare('UPDATE eventos SET titulo = :titulo, descripcion = :descripcion, fecha = :fecha, ubicacion = :ubicacion, lugar_id = :lugar_id, categoria = :categoria, tipo_entrada = :tipo_entrada, precio = :precio, imagen_portada = :imagen, es_pasado = :es_pasado, organizador_id = :organizador WHERE id = :id');
     $parametrosEvento[':id'] = $eventoId;
     unset($parametrosEvento[':slug']);
-    $actualizar->execute($parametrosEvento);
+    try {
+        $actualizar->execute($parametrosEvento);
+    } catch (Throwable $error) {
+        if ($rutaImagenSubida && is_file($rutaImagenSubida)) {
+            unlink($rutaImagenSubida);
+        }
+        throw $error;
+    }
     header('Location: evento.php?id=' . $eventoId);
     exit;
 }
 
 $insertar = $pdo->prepare('INSERT INTO eventos (titulo, slug, descripcion, fecha, ubicacion, lugar_id, categoria, tipo_entrada, precio, imagen_portada, es_pasado, organizador_id) VALUES (:titulo, :slug, :descripcion, :fecha, :ubicacion, :lugar_id, :categoria, :tipo_entrada, :precio, :imagen, :es_pasado, :organizador)');
-$insertar->execute($parametrosEvento);
+try {
+    $insertar->execute($parametrosEvento);
+} catch (Throwable $error) {
+    if ($rutaImagenSubida && is_file($rutaImagenSubida)) {
+        unlink($rutaImagenSubida);
+    }
+    throw $error;
+}
 
-<<<<<<< HEAD
 sigtur_notificar_turistas(
     $pdo,
     'Nuevo evento en SIGTUR',
@@ -155,8 +201,6 @@ sigtur_notificar_turistas(
     'evento'
 );
 
-=======
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 /* Redirigimos usando el ID generado por MySQL, no el slug recibido, para abrir
     exactamente la fila recién creada aunque el slug haya sido numerado. */
 header('Location: evento.php?id=' . (int) $pdo->lastInsertId());

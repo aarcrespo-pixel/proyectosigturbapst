@@ -8,6 +8,9 @@
                desde index.php, /php/ y subcarpetas de eventos. */
     const COMMENTS_API_URL = `${projectPhpPath}comentarios.php`;
     const DELETE_COMMENT_API_URL = `${projectPhpPath}comentarios.php`;
+    const csrfToken = document.querySelector('.menu-principal')?.dataset.csrf
+        || document.querySelector('.perfil-publico')?.dataset.csrf
+        || '';
     const cardSelectors = '.tarjeta, .evento-card, .evento-card-pasado, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria, .tarjeta-destino, .tarjeta-ruta, .gallery-engagement-card';
 
     function slugifyText(value) {
@@ -301,7 +304,7 @@
                 fetch(DELETE_COMMENT_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-                body: new URLSearchParams({ accion: 'eliminar', id: String(comment.id), item_key: key })
+                body: new URLSearchParams({ accion: 'eliminar', id: String(comment.id), item_key: key, csrf_token: csrfToken })
             })
                 .then(async (response) => {
                     const data = await response.json();
@@ -340,7 +343,7 @@
             fetch(COMMENTS_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-                body: new URLSearchParams({ item_key: key, texto: text, parent_id: String(comment.id) })
+                body: new URLSearchParams({ item_key: key, texto: text, parent_id: String(comment.id), csrf_token: csrfToken })
             }).then(async response => {
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'No se pudo publicar la respuesta');
@@ -351,9 +354,13 @@
         form?.addEventListener('submit', async (event) => {
             event.preventDefault();
             event.stopPropagation();
+            if (!csrfToken) {
+                window.location.href = `${projectPhpPath}login.php`;
+                return;
+            }
             const text = textarea?.value?.trim();
             if (!text) return;
-            const datos = new URLSearchParams({ item_key: key, texto: text });
+            const datos = new URLSearchParams({ item_key: key, texto: text, csrf_token: csrfToken });
 
             try {
                 const response = await fetch(COMMENTS_API_URL, {

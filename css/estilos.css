@@ -903,6 +903,7 @@ body[data-tema="oscuro"] .barra-busqueda input::placeholder {
 .perfil-btn {
     width: clamp(3.5rem, 4vw, 5.3rem);
     height: clamp(3.5rem, 4vw, 5.3rem);
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -941,10 +942,10 @@ body[data-tema="oscuro"] .perfil-btn:hover {
 }
 
 .perfil-btn img {
-    width: 70%;
-    height: 70%;
-    object-fit: contain;
-    border-radius: 50px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
 }
 
 .perfil-menu {
@@ -1041,7 +1042,6 @@ body[data-tema="oscuro"] .perfil-btn:hover {
     color: #ffc1c1;
 }
 
-<<<<<<< HEAD
 .notificaciones-widget {
     position: relative;
     display: flex;
@@ -1193,8 +1193,6 @@ body[data-tema="oscuro"] .perfil-btn:hover {
     margin-top: 0.75rem;
 }
 
-=======
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 .perfil.activo .perfil-menu {
     display: flex;
 }
@@ -2195,7 +2193,6 @@ body[data-tema="oscuro"] .mapa-lugares a {
     color: inherit;
 }
 
-<<<<<<< HEAD
 .copilot-assistant {
     position: fixed;
     right: 1.25rem;
@@ -2226,6 +2223,13 @@ body[data-tema="oscuro"] .mapa-lugares a {
 .copilot-assistant__toggle span {
     display: block;
     line-height: 1;
+    pointer-events: none;
+}
+
+.copilot-assistant__toggle svg {
+    width: 1.9rem;
+    height: 1.9rem;
+    fill: currentColor;
     pointer-events: none;
 }
 
@@ -2376,8 +2380,6 @@ body[data-tema="oscuro"] .mapa-lugares a {
     cursor: wait;
 }
 
-=======
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 @media(max-width:1120px) {
     .footer-grid {
         grid-template-columns: repeat(2, minmax(160px, 1fr));
@@ -2993,3 +2995,268 @@ body[data-tema="oscuro"] .mapa-lugares a {
 .menu-principal .barra-busqueda { z-index: 1000 !important; }
 .menu-principal .barra-busqueda .search-results-dropdown { z-index: 1001 !important; }
 .menu-principal .weather-widget { z-index: 10 !important; }
+
+/* Shared responsive guardrails keep page-specific layouts inside narrow viewports. */
+html,
+body {
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+main,
+section,
+article,
+aside,
+header,
+footer,
+form,
+.contenedor,
+.contenedor-pagina {
+    min-width: 0;
+}
+
+img,
+video,
+svg,
+canvas,
+iframe {
+    max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+li,
+label,
+button,
+a,
+span,
+strong {
+    overflow-wrap: anywhere;
+}
+
+input,
+textarea,
+select {
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media (max-width: 900px) {
+    .menu-principal .weather-widget {
+        position: fixed;
+        top: 16px;
+        right: calc(16px + clamp(2.8rem, 4vw, 3.6rem) + 0.8rem);
+        left: auto;
+        width: max-content;
+        max-width: calc(100vw - 100px);
+        padding: 0.6rem 0.75rem;
+        gap: 0.35rem 0.5rem;
+        white-space: normal;
+        overflow: hidden;
+        transform: none;
+    }
+
+    .menu-principal .weather-humidity,
+    .menu-principal .weather-ith {
+        display: none;
+    }
+
+    .bottom-nav {
+        left: max(8px, env(safe-area-inset-left));
+        right: max(8px, env(safe-area-inset-right));
+        gap: 0.15rem;
+    }
+
+    .bottom-nav-item {
+        white-space: normal;
+        text-align: center;
+        line-height: 1.15;
+        overflow-wrap: anywhere;
+    }
+
+    .footer-bottom {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-principal .weather-widget {
+        right: 4.2rem;
+        max-width: calc(100vw - 7rem);
+        font-size: 0.72rem;
+    }
+
+    .bottom-nav-item {
+        padding-right: 0.1rem;
+        padding-left: 0.1rem;
+        font-size: clamp(0.54rem, 2.5vw, 0.68rem);
+    }
+
+    .bottom-nav-item .bottom-nav-icon {
+        width: clamp(19px, 6vw, 24px);
+        height: clamp(19px, 6vw, 24px);
+    }
+
+    .copilot-assistant {
+        right: max(12px, env(safe-area-inset-right));
+        bottom: calc(82px + env(safe-area-inset-bottom));
+    }
+
+    .copilot-assistant__panel {
+        width: min(360px, calc(100vw - 24px));
+        max-height: calc(100dvh - 120px);
+    }
+}
+
+/* A focused footer keeps the remaining link groups balanced after removing
+   the event and tourism link groups. */
+.footer {
+    background:
+        radial-gradient(ellipse at 18% 0%, rgba(211, 98, 72, .12), transparent 38%),
+        linear-gradient(145deg, #171717, #101214 68%, #171411);
+    border-top: 1px solid rgba(245, 232, 216, .12);
+}
+
+.footer-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    max-width: 1120px;
+}
+
+.footer-col {
+    align-self: start;
+    min-width: 0;
+    padding-top: 1rem;
+    border-top: 2px solid rgba(211, 98, 72, .55);
+}
+
+.footer-toggle {
+    min-height: 2rem;
+}
+
+.footer-toggle h4 {
+    letter-spacing: .14em;
+}
+
+.footer-links {
+    max-height: 240px;
+    margin-top: 4px;
+    opacity: 1;
+    overflow: visible;
+}
+
+.footer-link {
+    width: fit-content;
+    max-width: 100%;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.footer-link--icon {
+    width: fit-content;
+}
+
+.footer-bottom {
+    width: min(100%, 1120px);
+    margin: 2.5rem auto 0;
+    padding-top: 1.5rem;
+    border-top-color: rgba(245, 232, 216, .14);
+    font-size: .88rem;
+    letter-spacing: .04em;
+    line-height: 1.8;
+}
+
+@media (min-width: 781px) {
+    .footer-toggle {
+        cursor: default;
+    }
+
+    .footer-toggle-icon {
+        display: none;
+    }
+
+    .footer-col--expandable .footer-toggle {
+        cursor: pointer;
+    }
+
+    .footer-col--expandable .footer-toggle-icon {
+        display: inline-block;
+    }
+}
+
+@media (max-width: 780px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .footer-col {
+        padding-top: .85rem;
+    }
+
+    .footer-toggle {
+        cursor: pointer;
+    }
+
+    .footer-toggle-icon {
+        display: inline-block;
+    }
+
+    .footer-links {
+        max-height: 0;
+        margin-top: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height .3s ease, opacity .3s ease, margin-top .3s ease;
+    }
+
+    .footer-col.open .footer-links {
+        max-height: 520px;
+        margin-top: 4px;
+        opacity: 1;
+    }
+
+    .footer-bottom {
+        margin-top: 1.75rem;
+    }
+}
+
+.footer-col--expandable .footer-links {
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height .3s ease, opacity .3s ease, margin-top .3s ease;
+}
+
+.footer-col--expandable.open .footer-links {
+    max-height: 520px;
+    margin-top: 4px;
+    opacity: 1;
+}
+
+@media (max-width: 780px) {
+    .copilot-assistant {
+        right: max(12px, env(safe-area-inset-right));
+        bottom: calc(82px + env(safe-area-inset-bottom));
+    }
+
+    body .mensajes-widget {
+        right: max(12px, env(safe-area-inset-right));
+        bottom: calc(148px + env(safe-area-inset-bottom));
+    }
+
+    body .mensajes-widget .mensajes-widget__panel {
+        width: min(680px, calc(100vw - 40px));
+        height: min(420px, calc(100vh - 210px - env(safe-area-inset-bottom)));
+        height: min(420px, calc(100dvh - 210px - env(safe-area-inset-bottom)));
+    }
+}

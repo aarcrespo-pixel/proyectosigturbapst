@@ -190,13 +190,20 @@ if ($accion === 'historial' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     exit;
 }
 
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'message' => 'Método no permitido.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+$csrfToken = is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null;
+if (!sigtur_validar_csrf($csrfToken)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'La sesión expiró. Recargá la página e intentá otra vez.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 if ($accion === 'borrar_historial') {
-    $csrfToken = $_POST['csrf_token'] ?? null;
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !sigtur_validar_csrf(is_string($csrfToken) ? $csrfToken : null)) {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'La sesión expiró. Recargá la página e intentá otra vez.'], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
     $borrarHistorial = $pdo->prepare('DELETE FROM copilot_ai_historial WHERE usuario_id = :usuario_id');
     $borrarHistorial->execute([':usuario_id' => (int) $usuarioActual['id']]);
     echo json_encode(['success' => true, 'message' => 'Chat eliminado correctamente.'], JSON_UNESCAPED_UNICODE);
@@ -216,11 +223,6 @@ $contextoSigtur = sigtur_ai_contexto_sigtur($pdo);
 $previousResponseId = trim((string) ($_POST['previous_response_id'] ?? ''));
 $respuestaApi = sigtur_ai_respuesta_api($mensaje, $contextoSigtur, $previousResponseId !== '' ? $previousResponseId : null);
 if ($respuestaApi === null || trim((string) ($respuestaApi['text'] ?? '')) === '') {
-    if ($sigturAiError !== null) {
-        http_response_code(503);
-        echo json_encode(['success' => false, 'message' => $sigturAiError], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
     $respuesta = sigtur_ai_respuesta_local($mensaje);
     $responseId = null;
 } else {

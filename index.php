@@ -268,38 +268,8 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
         </div>
     </section>
 
-<<<<<<< HEAD
-=======
-    <section class="seccion-notificaciones">
-        <h2 data-i18n="homeNewsTitle">Noticias en Salto</h2>
-        <div class="contenedor-carta">
-            <img src="img/peñ.jpg" alt="Carta" class="imagen-carta">
-            <div class="texto-carta">
-                <h2>El Clásico Salteño se juega este fin de semana, Peñarol vs. Nacional</h2>
-                <p>Este sabado 18 de julio se disputará el clásico entre Peñarol y Nacional en el Estadio de Peñarol</p>
-                <div class="accion-boton">
-                    <a href="php/eventos.php" class="boton-amarillo" data-i18n="homeNewsButton">Ver noticia</a>
-                </div>
-            </div>
-        </div>
-    </section>
-    
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
     <footer class="footer">
         <div class="footer-grid">
-            <div class="footer-col">
-                <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerEvents">EVENTOS</h4>
-                    <span class="footer-toggle-icon">▾</span>
-                </button>
-                <div class="footer-links">
-                    <a href="php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="0">Eventos destacados</a>
-                    <a href="php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="1">Próximos eventos</a>
-                    <a href="php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="2">Eventos anteriores</a>
-                    <a href="php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="3">Todos los eventos</a>
-                </div>
-            </div>
-
             <div class="footer-col">
                 <button class="footer-toggle" type="button" aria-expanded="false">
                     <h4 data-i18n="footerPlaces">LUGARES</h4>
@@ -316,13 +286,13 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
 
             <div class="footer-col">
                 <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerTourism">TURISMO</h4>
+                    <h4 data-i18n="footerGastronomy">GASTRONOMÍA</h4>
                     <span class="footer-toggle-icon">▾</span>
                 </button>
                 <div class="footer-links">
-                    <a href="php/turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="0">Actividades</a>
-                    <a href="php/turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="1">Lugares turísticos</a>
-                    <a href="php/turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="2">Experiencias</a>
+                    <a href="php/gastronomia.php#propuestas-gastronomicas" class="footer-link" data-i18n="footerGastronomyLinks" data-i18n-index="0">Restaurantes</a>
+                    <a href="php/gastronomia.php#propuestas-gastronomicas" class="footer-link" data-i18n="footerGastronomyLinks" data-i18n-index="1">Cafés y propuestas locales</a>
+                    <a href="php/gastronomia.php#propuestas-gastronomicas" class="footer-link" data-i18n="footerGastronomyLinks" data-i18n-index="2">Explorar gastronomía</a>
                 </div>
             </div>
 
@@ -331,10 +301,10 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
                     <h4 data-i18n="footerSigtur">SIGTUR</h4>
                     <span class="footer-toggle-icon">▾</span>
                 </button>
-                <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon">
+                <a href="https://instagram.com/bapstuy" target="_blank" rel="noopener noreferrer" class="footer-link footer-link--icon">
                     <span class="social-icon">IG</span>Instagram
                 </a>
-                <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon">
+                <a href="https://facebook.com/sigtur" target="_blank" rel="noopener noreferrer" class="footer-link footer-link--icon">
                     <span class="social-icon">FB</span>Facebook
                 </a>
                 <div class="footer-info-actions">
@@ -359,53 +329,7 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
         </div>
     </footer>
 
-    <script src="js/script.js?v=dark-features"></script>    <div class="perfil-modal-backdrop" id="perfilModal" aria-hidden="true">
-        <div class="perfil-modal" role="dialog" aria-modal="true" aria-labelledby="perfilModalTitle">
-            <div class="perfil-modal-header">
-                <div>
-                    <p class="modal-kicker">Cuenta</p>
-                    <h2 id="perfilModalTitle">Personalizar Perfil</h2>
-                </div>
-                <button type="button" class="perfil-modal-close" data-close-profile-modal aria-label="Cerrar">×</button>
-            </div>
-
-            <form class="perfil-form" method="post" action="php/personalizar-perfil.php" enctype="multipart/form-data">
-                <div class="perfil-avatar-row">
-                    <div class="avatar-preview-wrap">
-                        <img id="avatarPreview" src="<?php echo htmlspecialchars($avatarRuta, ENT_QUOTES, 'UTF-8'); ?>" alt="Previsualización del avatar">
-                    </div>
-                    <label class="upload-box" for="avatarInput">
-                        <input id="avatarInput" type="file" name="avatar" accept="image/*">
-                        <span>Cambiar foto</span>
-                    </label>
-                </div>
-
-                <div class="perfil-form-grid">
-                    <label>
-                        <span>Nombre de usuario</span>
-                        <input type="text" name="nickname" maxlength="50" value="<?php echo htmlspecialchars($_SESSION['usuario_nickname'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="@tuusuario">
-                    </label>
-                    <label>
-                        <span>Ubicación</span>
-                        <input type="text" name="ubicacion" maxlength="100" value="<?php echo htmlspecialchars($_SESSION['usuario_ubicacion'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="Salto, Uruguay">
-                    </label>
-                    <label class="full-width">
-                        <span>Biografía</span>
-                        <textarea name="biografia" maxlength="150" rows="4" placeholder="Cuéntanos algo sobre vos..."><?php echo htmlspecialchars($_SESSION['usuario_biografia'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-                    </label>
-                    <label class="full-width">
-                        <span>Enlace web / red social</span>
-                        <input type="url" name="sitio_web" value="<?php echo htmlspecialchars($_SESSION['usuario_sitio_web'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="https://tuweb.com">
-                    </label>
-                </div>
-
-                <div class="perfil-modal-actions">
-                    <button type="button" class="perfil-btn-secondary" data-close-profile-modal>Cancelar</button>
-                    <button type="submit" class="perfil-btn-primary">Guardar cambios</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <script src="js/script.js?v=dark-features"></script>
 </body>
 
 </html>

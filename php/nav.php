@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/helpers/autorizacion.php';
 $scriptPath = ltrim($_SERVER['PHP_SELF'] ?? '', '/');
 $scriptDir = dirname($scriptPath);
 $segments = array_values(array_filter(explode('/', $scriptDir), fn ($segment) => $segment !== ''));
@@ -13,9 +14,10 @@ $phpBase = $segments[0] === 'php'
     : '';
 
 $navBase = $navBase ?? $phpBase;
+sigtur_iniciar_sesion_segura();
 $activePage = $activePage ?? '';
 ?>
-<header class="menu-principal">
+<header class="menu-principal" data-csrf="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
     <button class="hamburguesa" aria-label="Abrir menú" data-i18n-aria-label="navMenuOpen">
         ☰
     </button>
@@ -35,13 +37,13 @@ $activePage = $activePage ?? '';
     </div>
 
     <?php
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
 $usuarioActual = $_SESSION['usuario_nombre'] ?? 'Usuario';
 $usuarioEmailActual = $_SESSION['usuario_email'] ?? '';
 $usuarioNicknameActual = $_SESSION['usuario_nickname'] ?? (!empty($usuarioEmailActual) ? strtolower(strstr($usuarioEmailActual, '@', true) ?: $usuarioEmailActual) : 'usuario');
 $usuarioAvatarActual = $_SESSION['usuario_avatar'] ?? 'default-avatar.png';
+$avatarCropXActual = max(0, min(100, (float) ($_SESSION['usuario_avatar_crop_x'] ?? 50)));
+$avatarCropZoomActual = max(1, min(2.5, (float) ($_SESSION['usuario_avatar_crop_zoom'] ?? 1)));
+$avatarCropStyleActual = 'object-position: ' . number_format($avatarCropXActual, 2, '.', '') . '% 50%; transform: scale(' . number_format($avatarCropZoomActual, 2, '.', '') . ');';
 $avatarFilename = basename($usuarioAvatarActual);
 $avatarActualRuta = (!empty($usuarioAvatarActual) && $usuarioAvatarActual !== 'default-avatar.png' && $usuarioAvatarActual !== 'user-default.png' && file_exists(__DIR__ . '/../uploads/avatars/' . $avatarFilename))
     ? $rootBase . 'uploads/avatars/' . $avatarFilename
@@ -50,7 +52,7 @@ $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
 ?>
     <div class="perfil">
         <button class="perfil-btn" aria-label="Abrir perfil" data-i18n-aria-label="navProfile">
-            <img src="<?= htmlspecialchars($avatarActualRuta, ENT_QUOTES, 'UTF-8'); ?>" alt="Perfil" data-i18n-alt="navProfile">
+            <img src="<?= htmlspecialchars($avatarActualRuta, ENT_QUOTES, 'UTF-8'); ?>" alt="Perfil" style="<?= htmlspecialchars($avatarCropStyleActual, ENT_QUOTES, 'UTF-8') ?>" data-i18n-alt="navProfile">
         </button>
 
         <div class="perfil-menu">
@@ -63,14 +65,11 @@ $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
                         <span class="perfil-email"><?= htmlspecialchars($usuarioEmailActual, ENT_QUOTES, 'UTF-8'); ?></span>
                     </div>
                 </div>
-                <a class="perfil-item" href="#" data-open-profile-modal>Personalizar Perfil</a>
+                <a class="perfil-item" href="<?= $navBase ?>perfil.php?id=<?= (int) ($_SESSION['usuario_id'] ?? 0) ?>">Ver mi perfil</a>
                 <a class="perfil-item" href="<?= $navBase ?>mis-eventos.php">Mis Eventos / Favoritos</a>
                 <?php if (($_SESSION['rol'] ?? '') === 'administrador'): ?><a class="perfil-item" href="<?= $navBase ?>panel-admin.php">Panel de administración</a><?php elseif (($_SESSION['rol'] ?? '') === 'organizador'): ?><a class="perfil-item" href="<?= $navBase ?>panel-organizador.php">Panel de organizador</a><?php endif; ?>
                 <a class="perfil-item" href="<?= $navBase ?>configuracion.php" data-i18n="navSettings">Configuración</a>
                 <a class="perfil-item" href="<?= $navBase ?>soporte.php" data-i18n="navSupport">Soporte</a>
-                <div class="perfil-divider"></div>
-                <!-- El cierre comparte controlador con login.php para reducir endpoints duplicados. -->
-                <a class="perfil-item perfil-item-logout" href="<?= $navBase ?>login.php?accion=cerrar-sesion" data-i18n="navLogout">Cerrar Sesión</a>
             <?php else: ?>
                 <div class="perfil-user-header">
                     <img class="perfil-user-avatar" src="<?= htmlspecialchars($rootBase . 'img/user.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar invitado">

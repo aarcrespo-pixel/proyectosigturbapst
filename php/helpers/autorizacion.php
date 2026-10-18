@@ -1,4 +1,27 @@
 <?php
+function sigtur_iniciar_sesion_segura(): void
+{
+    if (session_status() !== PHP_SESSION_NONE) {
+        return;
+    }
+
+    $conexionSegura = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    if (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443) {
+        $conexionSegura = true;
+    }
+
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => $conexionSegura,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+    session_start();
+}
+
 function sigtur_normalizar_rol(?string $rol): string
 {
     $rol = strtolower(trim((string) $rol));

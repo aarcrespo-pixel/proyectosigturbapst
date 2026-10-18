@@ -13,7 +13,6 @@ window.chatIntervalId = window.chatIntervalId || null;
             event.preventDefault();
             const texto = soporteForm.querySelector('[name="mensaje"]')?.value.trim() || '';
             const contexto = soporteForm.querySelector('[name="contexto"]')?.value.trim() || 'Soporte general';
-<<<<<<< HEAD
             const csrfToken = soporteForm.querySelector('[name="csrf_token"]')?.value || '';
             const estado = soporteForm.querySelector('[data-soporte-estado]');
             const boton = soporteForm.querySelector('button[type="submit"]');
@@ -23,33 +22,20 @@ window.chatIntervalId = window.chatIntervalId || null;
             }
             if (boton) boton.disabled = true;
             if (estado) estado.textContent = 'Enviando reporte...';
-=======
-            const estado = soporteForm.querySelector('[data-soporte-estado]');
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
             try {
                 const respuesta = await fetch(soporteForm.action, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', Accept: 'application/json' },
-<<<<<<< HEAD
                     body: new URLSearchParams({ accion: 'consulta', mensaje: texto, contexto, csrf_token: csrfToken })
                 });
                 const datos = await respuesta.json().catch(() => ({}));
                 if (!respuesta.ok || datos.success !== true) throw new Error(datos.message || datos.error || 'No se pudo enviar la consulta.');
-=======
-                    body: new URLSearchParams({ accion: 'consulta', mensaje: texto, contexto })
-                });
-                const datos = await respuesta.json();
-                if (!respuesta.ok || datos.success !== true) throw new Error(datos.error || 'No se pudo enviar la consulta.');
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
                 soporteForm.reset();
                 if (estado) estado.textContent = datos.message || 'Consulta enviada.';
             } catch (error) {
                 if (estado) estado.textContent = error.message;
-<<<<<<< HEAD
             } finally {
                 if (boton) boton.disabled = false;
-=======
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
             }
         });
     }
@@ -291,7 +277,14 @@ window.chatIntervalId = window.chatIntervalId || null;
             if (sendStatus) sendStatus.textContent = 'Enviando...';
             try {
                 const response = await fetch(api, { method: 'POST', body: datos, headers: { Accept: 'application/json' } });
-                const data = await response.json();
+                const responseText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch {
+                    const contentType = response.headers.get('content-type') || 'sin Content-Type';
+                    throw new Error(`El servidor devolvió una respuesta no JSON (${response.status}, ${contentType}) desde ${response.url || api}: ${responseText.slice(0, 160)}`);
+                }
                 // CAMBIO APLICADO: solo status=success confirma persistencia;
                 // sin esa confirmación no se limpia ni se recarga el historial.
                 // FIX RESPUESTA: alcanza con que una de las dos llaves confirme

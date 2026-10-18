@@ -28,8 +28,8 @@ try {
     if (!$usuarioActual) {
         responderHistorial(['status' => 'error', 'success' => false, 'message' => 'Sesión de usuario no iniciada.'], 401);
     }
-    if ($usuarioActual['rol'] !== 'administrador') {
-        responderHistorial(['status' => 'error', 'success' => false, 'message' => 'La mensajería directa es exclusiva para administradores.'], 403);
+    if (!in_array($usuarioActual['rol'], ['administrador', 'organizador'], true)) {
+        responderHistorial(['status' => 'error', 'success' => false, 'message' => 'La mensajería directa es exclusiva para administradores y organizadores.'], 403);
     }
     $emisorId = (int) $usuarioActual['id'];
     // FIX REFRESCO / SINCRONIZACIÓN: ambos nombres llegan al mismo receptor;
@@ -42,10 +42,14 @@ try {
     if (!$receptorId || $receptorId === $emisorId) {
         responderHistorial(['status' => 'error', 'success' => false, 'message' => 'El ID del receptor no es válido.'], 422);
     }
-    $receptorAdmin = $pdo->prepare("SELECT id FROM usuarios WHERE id = :id AND rol = 'administrador' LIMIT 1");
-    $receptorAdmin->execute([':id' => $receptorId]);
-    if (!$receptorAdmin->fetchColumn()) {
-        responderHistorial(['status' => 'error', 'success' => false, 'message' => 'Solo puedes abrir conversaciones con administradores.'], 403);
+    $receptorStmt = $pdo->prepare('SELECT rol FROM usuarios WHERE id = :id LIMIT 1');
+    $receptorStmt->execute([':id' => $receptorId]);
+    $rolReceptor = $receptorStmt->fetchColumn();
+    $rolesPermitidos = $usuarioActual['rol'] === 'administrador'
+        ? ['administrador', 'organizador']
+        : ['administrador'];
+    if (!$rolReceptor || !in_array(sigtur_normalizar_rol((string) $rolReceptor), $rolesPermitidos, true)) {
+        responderHistorial(['status' => 'error', 'success' => false, 'message' => 'No tienes permiso para abrir esta conversación.'], 403);
     }
 
      /* La condición bidireccional recupera ambos sentidos con una sentencia

@@ -208,58 +208,6 @@
         </section>
     </main>
 
-    <footer class="footer">
-        <div class="footer-grid">
-            <div class="footer-col">
-                <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerEvents">EVENTOS</h4>
-                    <span class="footer-toggle-icon">▾</span>
-                </button>
-                <div class="footer-links">
-                    <a href="../php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="0">Eventos destacados</a>
-                    <a href="../php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="1">Próximos eventos</a>
-                    <a href="../php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="2">Eventos anteriores</a>
-                    <a href="../php/eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="3">Todos los eventos</a>
-                </div>
-            </div>
-
-            <div class="footer-col">
-                <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerPlaces">LUGARES</h4>
-                    <span class="footer-toggle-icon">▾</span>
-                </button>
-                <div class="footer-links">
-                    <a href="../php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="0">Plaza Artigas</a>
-                    <a href="../php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="1">Plaza Treinta y Tres Orientales</a>
-                    <a href="../php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="2">Costanera Norte</a>
-                    <a href="../php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="3">Costanera Sur</a>
-                    <a href="../php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="4">Parque Benito Solari</a>
-                </div>
-            </div>
-
-            <div class="footer-col">
-                <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerTourism">TURISMO</h4>
-                    <span class="footer-toggle-icon">▾</span>
-                </button>
-                <div class="footer-links">
-                    <a href="../php/turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="0">Actividades</a>
-                    <a href="../php/turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="1">Lugares turísticos</a>
-                    <a href="../php/turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="2">Experiencias</a>
-                </div>
-            </div>
-
-            <div class="footer-col footer-col--social">
-                <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerSigtur">SIGTUR</h4>
-                    <span class="footer-toggle-icon"></span>
-                </button>
-                <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon"><span class="social-icon">IG</span>Instagram</a>
-                <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon"><span class="social-icon">FB</span>Facebook</a>
-            </div>
-        </div>
-        <div class="footer-bottom" data-i18n="footerLegal">SIGTUR © 2026 by Bapst is licensed under CC BY-NC-ND 4.0</div>
-    </footer>
     <script src="../js/script.js" defer></script>
     <script src="../js/lugar-links.js" defer></script>
 </body> 

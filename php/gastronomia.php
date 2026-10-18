@@ -238,54 +238,6 @@
         </section>
     </main>
 
-    <footer class="footer">
-        <div class="footer-grid">
-            <div class="footer-col">
-                <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerEvents">EVENTOS</h4>
-                    <span class="footer-toggle-icon">▾</span>
-                </button>
-                <div class="footer-links">
-                    <a href="eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="0">Eventos destacados</a>
-                    <a href="eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="1">Próximos eventos</a>
-                    <a href="eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="2">Eventos anteriores</a>
-                    <a href="eventos.php" class="footer-link" data-i18n="footerEventLinks" data-i18n-index="3">Todos los eventos</a>
-                </div>
-            </div>
-            <div class="footer-col">
-                <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerPlaces">LUGARES</h4>
-                    <span class="footer-toggle-icon">▾</span>
-                </button>
-                <div class="footer-links">
-                    <a href="lugares.php" class="footer-link">Plaza Artigas</a>
-                    <a href="lugares.php" class="footer-link">Costanera Norte</a>
-                    <a href="lugares.php" class="footer-link">Parque Benito Solari</a>
-                </div>
-            </div>
-            <div class="footer-col">
-                <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerTourism">TURISMO</h4>
-                    <span class="footer-toggle-icon">▾</span>
-                </button>
-                <div class="footer-links">
-                    <a href="turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="0">Actividades</a>
-                    <a href="turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="1">Lugares turísticos</a>
-                    <a href="turismo.php" class="footer-link" data-i18n="footerTourismLinks" data-i18n-index="2">Experiencias</a>
-                </div>
-            </div>
-            <div class="footer-col footer-col--social">
-                <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerSigtur">SIGTUR</h4>
-                    <span class="footer-toggle-icon"></span>
-                </button>
-                <a href="https://instagram.com/bapstuy" target="_blank" class="footer-link footer-link--icon"><span class="social-icon">IG</span>Instagram</a>
-                <a href="https://facebook.com/sigtur" target="_blank" class="footer-link footer-link--icon"><span class="social-icon">FB</span>Facebook</a>
-            </div>
-        </div>
-        <div class="footer-bottom" data-i18n="footerLegal">SIGTUR © 2026 by Bapst is licensed under CC BY-NC-ND 4.0</div>
-    </footer>
-
     <script src="../js/script.js" defer></script>
     <script src="../js/gastronomia.js" defer></script>
 </body>

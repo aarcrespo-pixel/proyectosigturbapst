@@ -1,21 +1,20 @@
 <?php
-$mensajesWidgetRoot = $mensajesWidgetRoot ?? '';
-$mensajesWidgetUserId = (int) ($_SESSION['usuario_id'] ?? 0);
-if ($mensajesWidgetUserId <= 0) {
+if (($headerCurrentPage ?? '') !== 'index') {
     return;
 }
-$mensajesWidgetScript = htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') . 'js/mensajes.js?v=20260915-3';
-if (($_SESSION['rol'] ?? '') !== 'administrador') {
-    ?><script src="<?= $mensajesWidgetScript ?>" defer></script><?php
+
+$mensajesWidgetRoot = $mensajesWidgetRoot ?? '';
+if (empty($_SESSION['usuario_id'])) {
     return;
 }
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 $mensajesWidgetUsuario = sigtur_usuario_actual($pdo);
-if (!$mensajesWidgetUsuario || $mensajesWidgetUsuario['rol'] !== 'administrador') {
-    ?><script src="<?= $mensajesWidgetScript ?>" defer></script><?php
+if (!$mensajesWidgetUsuario || !in_array($mensajesWidgetUsuario['rol'], ['administrador', 'organizador'], true)) {
     return;
 }
+$mensajesWidgetUserId = (int) $mensajesWidgetUsuario['id'];
+$mensajesWidgetScript = htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') . 'js/mensajes.js?v=20260915-3';
 ?>
 <link rel="stylesheet" href="<?= htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') ?>css/mensajes.css">
 <div class="mensajes-widget" id="mensajesWidget" data-user-id="<?= $mensajesWidgetUserId ?>" data-api="<?= htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') ?>php/api/mensajes.php" data-avatar-fallback="<?= htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') ?>img/user.png" hidden>

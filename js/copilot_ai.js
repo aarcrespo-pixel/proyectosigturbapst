@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
             messages.scrollTop = messages.scrollHeight;
 
             try {
-                const requestBody = { message: question };
+                const requestBody = { message: question, csrf_token: csrfToken };
                 if (previousResponseId) {
                     requestBody.previous_response_id = previousResponseId;
                 }

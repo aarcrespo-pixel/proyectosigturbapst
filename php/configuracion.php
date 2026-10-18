@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 session_start();
 require_once __DIR__ . '/conexion.php';
@@ -8,8 +7,6 @@ $configUsuario = sigtur_usuario_actual($pdo);
 $configBaseUrl = rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/'))), '/') . '/';
 $configCsrfToken = sigtur_csrf_token();
 ?>
-=======
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -22,11 +19,7 @@ $configCsrfToken = sigtur_csrf_token();
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet"
   />
-<<<<<<< HEAD
   <link rel="stylesheet" href="../css/soporte.css?v=<?= time() ?>" />
-=======
-  <link rel="stylesheet" href="../css/soporte.css" />
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
 </head>
 <body>
   <main class="support-page">
@@ -71,7 +64,6 @@ $configCsrfToken = sigtur_csrf_token();
 
         <article class="card">
           <h2 data-i18n="configNotificationsTitle">Notificaciones</h2>
-<<<<<<< HEAD
           <p data-i18n="configNotificationsText">Activá los avisos del navegador y enterate cuando se publique un evento nuevo en SIGTUR.</p>
 
           <?php if ($configUsuario): ?>
@@ -81,8 +73,9 @@ $configCsrfToken = sigtur_csrf_token();
                   <strong class="sub-title">Avisos del sitio</strong>
                   <span>Recibí novedades de eventos, respuestas y comunicados importantes.</span>
                 </div>
-                <span class="config-chip" id="notificaciones-estado">Desactivadas</span>
+                <span class="config-chip" id="notificaciones-estado" aria-live="polite">Desactivadas</span>
               </div>
+              <p class="config-notificaciones__help" id="notificaciones-ayuda" aria-live="polite">Las notificaciones están desactivadas.</p>
               <div class="config-notificaciones__toolbar config-notificaciones__toolbar--right">
                 <button
                   type="button"
@@ -111,24 +104,6 @@ $configCsrfToken = sigtur_csrf_token();
               <a class="btn btn-primary" href="login.php">Iniciar sesión</a>
             </div>
           <?php endif; ?>
-=======
-          <p data-i18n="configNotificationsText">Activa o desactiva los avisos importantes del proyecto.</p>
-
-          <div class="config-row">
-            <div class="config-label">
-              <strong class="sub-title" data-i18n="configNotificationEventsTitle">Eventos destacados</strong>
-              <span data-i18n="configNotificationEventsText">Recibe alertas de actividades nuevas o próximas.</span>
-            </div>
-            <span class="config-chip">Activado</span>
-          </div>
-          <div class="config-row">
-            <div class="config-label">
-              <strong class="sub-title" data-i18n="configNotificationRemindersTitle">Recordatorios</strong>
-              <span data-i18n="configNotificationRemindersText">Envío de avisos de actualización o mantenimiento.</span>
-            </div>
-            <span class="config-chip">Opcional</span>
-          </div>
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
         </article>
 
         <article class="card">
@@ -137,16 +112,8 @@ $configCsrfToken = sigtur_csrf_token();
 
           <div class="config-row">
             <div class="config-label">
-              <strong class="sub-title" data-i18n="configAccessPublicTitle">Acceso público</strong>
-              <span data-i18n="configAccessPublicText">Permite ver el contenido sin iniciar sesión.</span>
-            </div>
-            <span class="config-chip">Sí</span>
-          </div>
-
-          <div class="config-row">
-            <div class="config-label">
               <strong class="sub-title" data-i18n="configAdminPanelTitle">Panel de administración</strong>
-              <span data-i18n="configAdminPanelText">Acceso privado para editar contenido y configuraciones.</span>
+              <span data-i18n="configAdminPanelText">Acceso privado para editar contenido y configuraciones. Siempre protegido por permisos.</span>
             </div>
             <span class="config-chip">Protegido</span>
           </div>
@@ -155,33 +122,25 @@ $configCsrfToken = sigtur_csrf_token();
 
       <div class="config-actions">
         <button class="btn btn-primary" type="button" data-i18n="configSave">Guardar cambios</button>
-        <button class="btn btn-secondary" type="button" data-i18n="configReset">Restablecer</button>
+        <button class="btn btn-secondary" type="button" data-config-reset data-i18n="configReset">Restablecer</button>
+        <a class="btn btn-secondary" href="../index.php">Salir sin guardar</a>
       </div>
     </section>
   </main>
-<<<<<<< HEAD
   <script src="../js/translator.js?v=20261001-1"></script>
   <script src="../js/script.js?v=20261001-1"></script>
   <script src="../js/notificaciones.js?v=<?= time() ?>"></script>
-=======
-  <script src="../js/translator.js"></script>
-  <script src="../js/script.js"></script>
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
   <script>
     /* Estos selectores conectan preferencias visuales, idioma y tamaño de
        fuente con las funciones compartidas del script global. */
     const selectorTema = document.getElementById('tema');
     const selectorIdioma = document.getElementById('idioma');
     const selectorTamanoLetra = document.getElementById('tamano-letra');
-<<<<<<< HEAD
     const botonGuardar = document.querySelector('.config-actions .btn-primary');
-    const botonRestablecer = document.querySelector('.config-actions .btn-secondary');
-=======
-    const botonGuardar = document.querySelector('.btn-primary');
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
+    const botonRestablecer = document.querySelector('[data-config-reset]');
 
-    const aplicarTemaDesdeConfiguracion = (oscuro) => {
-      guardarTema(oscuro);
+    const aplicarTemaDesdeConfiguracion = (oscuro, persistir = false) => {
+      if (persistir) guardarTema(oscuro);
       aplicarTema(oscuro, null);
       if (selectorTema) {
         selectorTema.value = oscuro ? 'Oscuro' : 'Claro';
@@ -196,49 +155,53 @@ $configCsrfToken = sigtur_csrf_token();
 
     if (selectorIdioma) {
       selectorIdioma.addEventListener('change', () => {
-        guardarIdioma(selectorIdioma.value);
-        aplicarIdioma(selectorIdioma.value);
+        aplicarIdioma(selectorIdioma.value, false);
       });
     }
 
     if (selectorTamanoLetra) {
       selectorTamanoLetra.value = leerTamanoLetra();
       selectorTamanoLetra.addEventListener('change', () => {
-        guardarTamanoLetra(selectorTamanoLetra.value);
+        aplicarTamanoLetra(selectorTamanoLetra.value);
       });
     }
 
     if (botonGuardar) {
-      botonGuardar.addEventListener('click', () => {
-        aplicarTemaDesdeConfiguracion(selectorTema && selectorTema.value === 'Oscuro');
-        if (selectorIdioma) {
-          guardarIdioma(selectorIdioma.value);
-          aplicarIdioma(selectorIdioma.value);
+      botonGuardar.addEventListener('click', async () => {
+        botonGuardar.disabled = true;
+        try {
+          aplicarTemaDesdeConfiguracion(selectorTema && selectorTema.value === 'Oscuro', true);
+          if (selectorIdioma) {
+            guardarIdioma(selectorIdioma.value);
+            aplicarIdioma(selectorIdioma.value, false);
+          }
+          if (selectorTamanoLetra) {
+            guardarTamanoLetra(selectorTamanoLetra.value);
+          }
+          window.location.assign('../index.php');
+        } catch (error) {
+          console.error('No se pudieron guardar las preferencias de configuración', error);
+          botonGuardar.disabled = false;
         }
-        if (selectorTamanoLetra) {
-          guardarTamanoLetra(selectorTamanoLetra.value);
-        }
-<<<<<<< HEAD
-        window.location.assign('../index.php');
       });
     }
 
     if (botonRestablecer) {
       botonRestablecer.addEventListener('click', () => {
-        aplicarTemaDesdeConfiguracion(false);
-        guardarIdioma('es');
-        aplicarIdioma('es');
-        guardarTamanoLetra('normal');
+        if (selectorTema) selectorTema.value = 'Claro';
         if (selectorIdioma) selectorIdioma.value = 'es';
         if (selectorTamanoLetra) selectorTamanoLetra.value = 'normal';
-=======
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
+        aplicarTemaDesdeConfiguracion(false);
+        aplicarIdioma('es', false);
+        aplicarTamanoLetra('normal');
       });
     }
 
-    aplicarTemaDesdeConfiguracion(leerTema());
-    aplicarIdioma(leerIdioma());
-    aplicarTamanoLetra(leerTamanoLetra());
+    if (selectorTema) selectorTema.value = leerTema() ? 'Oscuro' : 'Claro';
+    if (selectorIdioma) {
+      const idiomaGuardado = leerIdioma();
+      selectorIdioma.value = ['es', 'en', 'pt'].includes(idiomaGuardado) ? idiomaGuardado : 'es';
+    }
   </script>
 </body>
 </html>

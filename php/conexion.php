@@ -19,6 +19,20 @@ try {
        resultados asociativos para todos los controladores de la plataforma. */
     $pdo = new PDO($dsn, $dbUser, $dbPassword, $options);
 
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `sigtur_schema_version` (
+        `version` VARCHAR(40) NOT NULL PRIMARY KEY
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $versionEsperada = '2026-10-18-private-follow-requests-1';
+    $versionEsquema = $pdo->query("SELECT `version` FROM `sigtur_schema_version` LIMIT 1")->fetchColumn();
+    $bloqueoEsquema = false;
+    if ($versionEsquema !== $versionEsperada) {
+        $bloqueoEsquema = (string) $pdo->query("SELECT GET_LOCK('sigtur_schema_migrations', 10)")->fetchColumn() === '1';
+        if (!$bloqueoEsquema) {
+            throw new PDOException('No se pudo obtener el bloqueo para actualizar el esquema.');
+        }
+        $versionEsquema = $pdo->query("SELECT `version` FROM `sigtur_schema_version` LIMIT 1")->fetchColumn();
+    }
+    if ($versionEsquema !== $versionEsperada) {
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS `usuarios` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -32,6 +46,7 @@ try {
             `banner` varchar(255) NOT NULL DEFAULT 'default-banner.png',
             `nickname` varchar(50) DEFAULT NULL,
             `biografia` text DEFAULT NULL,
+            `perfil_publico` TINYINT(1) NOT NULL DEFAULT 1,
             `ubicacion` varchar(100) DEFAULT NULL,
             `sitio_web` varchar(255) DEFAULT NULL,
             `fecha_registro` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -40,6 +55,11 @@ try {
             UNIQUE KEY `uniq_cedula` (`cedula`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     ");
+
+    $columnasUsuarios = $pdo->query("SHOW COLUMNS FROM `usuarios`")->fetchAll(PDO::FETCH_COLUMN, 0);
+    if (!in_array('perfil_publico', $columnasUsuarios, true)) {
+        $pdo->exec("ALTER TABLE `usuarios` ADD COLUMN `perfil_publico` TINYINT(1) NOT NULL DEFAULT 1 AFTER `biografia`");
+    }
 
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS `comentarios` (
@@ -74,6 +94,33 @@ try {
         INDEX `idx_faq_estado` (`estado`),
         INDEX `idx_faq_usuario` (`usuario_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $columnasPreguntasFaq = $pdo->query("SHOW COLUMNS FROM `preguntas_frecuentes`")->fetchAll(PDO::FETCH_COLUMN, 0);
+    if (!in_array('respuesta', $columnasPreguntasFaq, true)) {
+        $pdo->exec("ALTER TABLE `preguntas_frecuentes` ADD COLUMN `respuesta` TEXT NULL AFTER `pregunta`");
+    }
+    if (!in_array('respondido_por', $columnasPreguntasFaq, true)) {
+        $pdo->exec("ALTER TABLE `preguntas_frecuentes` ADD COLUMN `respondido_por` INT NULL AFTER `respuesta`");
+    }
+    if (!in_array('fecha_respuesta', $columnasPreguntasFaq, true)) {
+        $pdo->exec("ALTER TABLE `preguntas_frecuentes` ADD COLUMN `fecha_respuesta` TIMESTAMP NULL DEFAULT NULL AFTER `fecha_creacion`");
+    }
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `preguntas_frecuentes_mensajes` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `pregunta_id` INT NOT NULL,
+        `autor_id` INT NULL,
+        `autor_rol` VARCHAR(20) NOT NULL,
+        `mensaje` TEXT NOT NULL,
+        `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        `clave_migracion` VARCHAR(40) NULL,
+        UNIQUE KEY `uniq_faq_mensaje_migracion` (`pregunta_id`, `clave_migracion`),
+        KEY `idx_faq_mensajes_conversacion` (`pregunta_id`, `id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $pdo->exec("INSERT IGNORE INTO `preguntas_frecuentes_mensajes`
+        (`pregunta_id`, `autor_id`, `autor_rol`, `mensaje`, `fecha_creacion`, `clave_migracion`)
+        SELECT `id`, `respondido_por`, 'administrador', `respuesta`,
+            COALESCE(`fecha_respuesta`, `fecha_creacion`), 'respuesta_inicial'
+        FROM `preguntas_frecuentes`
+        WHERE `respuesta` IS NOT NULL AND `respuesta` <> ''");
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS `eventos` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -87,6 +134,18 @@ try {
         `es_pasado` TINYINT(1) DEFAULT 0,
         `organizador_id` INT NOT NULL,
         `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `galeria_eventos` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `imagen` VARCHAR(255) NOT NULL,
+        `titulo` VARCHAR(160) NOT NULL,
+        `descripcion` TEXT NOT NULL,
+        `tipo_evento` VARCHAR(80) NOT NULL,
+        `usuario_id` INT NOT NULL,
+        `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        KEY `idx_galeria_eventos_tipo_fecha` (`tipo_evento`, `fecha_creacion`),
+        KEY `idx_galeria_eventos_usuario` (`usuario_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS `favoritos_eventos` (
@@ -153,6 +212,9 @@ try {
     $columnas = $pdo->query("SHOW COLUMNS FROM `usuarios`")->fetchAll(PDO::FETCH_COLUMN, 0);
     $camposNuevos = [
         'avatar' => "ALTER TABLE `usuarios` ADD COLUMN `avatar` varchar(255) NOT NULL DEFAULT 'default-avatar.png'",
+        'avatar_crop_x' => "ALTER TABLE `usuarios` ADD COLUMN `avatar_crop_x` DECIMAL(5,2) NOT NULL DEFAULT 50.00",
+        'avatar_crop_y' => "ALTER TABLE `usuarios` ADD COLUMN `avatar_crop_y` DECIMAL(5,2) NOT NULL DEFAULT 50.00",
+        'avatar_crop_zoom' => "ALTER TABLE `usuarios` ADD COLUMN `avatar_crop_zoom` DECIMAL(3,2) NOT NULL DEFAULT 1.00",
         'foto_perfil' => "ALTER TABLE `usuarios` ADD COLUMN `foto_perfil` varchar(255) DEFAULT NULL",
         'nickname' => "ALTER TABLE `usuarios` ADD COLUMN `nickname` varchar(50) DEFAULT NULL",
         'biografia' => "ALTER TABLE `usuarios` ADD COLUMN `biografia` text DEFAULT NULL",
@@ -199,6 +261,17 @@ try {
         $pdo->exec("ALTER TABLE `seguidores` ADD COLUMN `fecha` TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER `seguido_id`");
     }
 
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `solicitudes_seguimiento` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `seguidor_id` INT NOT NULL,
+        `seguido_id` INT NOT NULL,
+        `fecha_solicitud` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY `uniq_solicitud_seguimiento` (`seguidor_id`, `seguido_id`),
+        KEY `idx_solicitudes_destinatario` (`seguido_id`, `fecha_solicitud`),
+        CONSTRAINT `fk_solicitud_seguidor` FOREIGN KEY (`seguidor_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+        CONSTRAINT `fk_solicitud_seguido` FOREIGN KEY (`seguido_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
     $pdo->exec("CREATE TABLE IF NOT EXISTS `likes_publicaciones` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,
         `usuario_id` INT NOT NULL,
@@ -216,10 +289,12 @@ try {
         `destinatario_id` INT NOT NULL,
         `mensaje` VARCHAR(500) NOT NULL,
         `foto_url` VARCHAR(255) DEFAULT NULL,
+        `video_url` VARCHAR(255) DEFAULT NULL,
         `audio_url` VARCHAR(255) DEFAULT NULL,
         `fecha_creacion` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         `leido` TINYINT(1) NOT NULL DEFAULT 0,
         KEY `idx_mensajes_destinatario` (`destinatario_id`),
+        KEY `idx_mensajes_conversacion` (`remitente_id`, `destinatario_id`, `id`),
         CONSTRAINT `fk_mensajes_remitente` FOREIGN KEY (`remitente_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
         CONSTRAINT `fk_mensajes_destinatario` FOREIGN KEY (`destinatario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
@@ -227,10 +302,13 @@ try {
     if (!in_array('leido', $columnasMensajes, true)) {
         $pdo->exec("ALTER TABLE `mensajes` ADD COLUMN `leido` TINYINT(1) NOT NULL DEFAULT 0");
     }
-    foreach (['foto_url' => "ALTER TABLE `mensajes` ADD COLUMN `foto_url` VARCHAR(255) DEFAULT NULL", 'audio_url' => "ALTER TABLE `mensajes` ADD COLUMN `audio_url` VARCHAR(255) DEFAULT NULL"] as $campoMensaje => $sqlMensaje) {
+    foreach ([
+        'foto_url' => "ALTER TABLE `mensajes` ADD COLUMN `foto_url` VARCHAR(255) DEFAULT NULL",
+        'video_url' => "ALTER TABLE `mensajes` ADD COLUMN `video_url` VARCHAR(255) DEFAULT NULL",
+        'audio_url' => "ALTER TABLE `mensajes` ADD COLUMN `audio_url` VARCHAR(255) DEFAULT NULL",
+    ] as $campoMensaje => $sqlMensaje) {
         if (!in_array($campoMensaje, $columnasMensajes, true)) $pdo->exec($sqlMensaje);
     }
-<<<<<<< HEAD
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS `notificaciones` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -291,8 +369,6 @@ try {
         CONSTRAINT `fk_recordatorios_evento` FOREIGN KEY (`evento_id`) REFERENCES `eventos` (`id`) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-=======
->>>>>>> 00361ec4d7278fe96ed7b2843a726b6c83d0105b
     /* CAMBIO APLICADO: normalizamos instalaciones antiguas. El proyecto usa
        mensaje/fecha_creacion, pero algunas bases pueden traer texto/fecha;
        agregamos las columnas actuales y copiamos los datos existentes. */
@@ -308,6 +384,10 @@ try {
         // CAMBIO APLICADO: permite guardar si la consulta proviene de soporte
         // general o de un evento específico sin cambiar los mensajes previos.
         $pdo->exec("ALTER TABLE `mensajes` ADD COLUMN `contexto` VARCHAR(255) NULL AFTER `mensaje`");
+    }
+    $indicesMensajes = $pdo->query("SHOW INDEX FROM `mensajes`")->fetchAll(PDO::FETCH_COLUMN, 2);
+    if (!in_array('idx_mensajes_conversacion', $indicesMensajes, true)) {
+        $pdo->exec("ALTER TABLE `mensajes` ADD INDEX `idx_mensajes_conversacion` (`remitente_id`, `destinatario_id`, `id`)");
     }
 
     /* La tabla de lugares normaliza los puntos turísticos y permite que una
@@ -343,6 +423,7 @@ try {
         ['parque-benito-solari', 'Parque Benito Solari', 'Naturaleza', 'Parque Benito Solari, Salto, Uruguay', '../img/solari.jfif', 'Gran parque urbano con áreas verdes para descansar, caminar y realizar actividades familiares.', 'El parque representa uno de los espacios verdes más importantes de Salto y conserva un fuerte valor social como lugar de reunión, deporte y contacto con la naturaleza.', 'Picnic y descanso|Caminatas|Juegos y actividades familiares|Fotografía de flora y paisaje', 'Acceso libre; preferentemente de día', 'Respetar los espacios verdes, retirar residuos y llevar repelente en temporada cálida.', -31.3900000, -57.9700000],
         ['plaza-artigas', 'Plaza Artigas', 'Cultura', 'Plaza Artigas, Salto, Uruguay', '../img/Plaza_artigas.webp', 'Plaza central de Salto, rodeada de actividad urbana, cultura y arquitectura tradicional.', 'La Plaza Artigas es un punto cívico y simbólico de la ciudad, vinculada a la vida pública, los actos y la identidad histórica de Salto.', 'Observar monumentos|Caminar por el centro|Visitar ferias y actividades|Conocer edificios cercanos', 'Espacio público de acceso libre', 'Ideal para combinar con un recorrido por el centro y la gastronomía local.', -31.3840000, -57.9610000],
         ['plaza-treinta-y-tres-orientales', 'Plaza Treinta y Tres Orientales', 'Cultura', 'Plaza Treinta y Tres Orientales, Salto, Uruguay', '../img/plazab.jpeg', 'Paseo urbano con espacios verdes, miradores y zonas de descanso.', 'La plaza integra la memoria cívica y la vida cotidiana de Salto, ofreciendo un espacio de encuentro que conecta patrimonio, paisaje urbano y recreación.', 'Paseo y descanso|Observar arquitectura|Fotografía urbana|Conectar con otros puntos del centro', 'Acceso libre durante todo el día', 'Visitar durante la mañana o el atardecer y respetar las áreas de descanso.', -31.3860000, -57.9620000],
+        ['costanera-sur', 'Costanera Sur', 'Naturaleza', 'Costanera Sur, Salto, Uruguay', '../img/Naturaleza.webp', 'Paseo junto al río Uruguay para disfrutar del paisaje y recorrer la zona costera de Salto.', 'La Costanera Sur integra el recorrido ribereño de Salto y ofrece un espacio público para pasear y contemplar el entorno.', 'Pasear junto al río|Disfrutar el paisaje|Recorrer la zona costera', 'Espacio público de acceso libre', 'Consultar las condiciones del lugar y recorrerlo con precaución.', null, null],
         ['la-trouville', 'La Trouville', 'Gastronomía', 'La Trouville, Salto, Uruguay', '../img/Trouville.jpg', 'Propuesta gastronómica local para descubrir sabores y encuentros en la ciudad.', 'La Trouville representa la tradición de los espacios gastronómicos como lugares de reunión, conversación y construcción de experiencias locales.', 'Probar platos regionales|Compartir una comida|Conocer productos locales|Disfrutar la vida nocturna', 'Consultar horarios del establecimiento', 'Se recomienda verificar disponibilidad y horarios antes de asistir.', -31.3860000, -57.9600000],
         ['cine-sarandi', 'Cine Sarandí', 'Cultura', 'Cine Sarandí, Salto, Uruguay', '../img/Cine_Sarandi.jpg', 'Sala y punto cultural para disfrutar cine, espectáculos y propuestas de la ciudad.', 'El Cine Sarandí forma parte de la memoria cultural de Salto y de la tradición de las salas como espacios de encuentro, arte y participación comunitaria.', 'Consultar cartelera|Asistir a funciones|Participar de actividades culturales|Recorrer la zona céntrica', 'Según cartelera y función programada', 'Consultar la programación oficial y llegar con anticipación a las funciones.', -31.3850000, -57.9600000],
         ['la-fosa', 'La Fosa', 'Deporte', 'La Fosa, Salto, Uruguay', '../img/fosa.webp', 'Circuito urbano para bicicleta, skate y actividades deportivas al aire libre.', 'La Fosa se consolidó como un punto de encuentro para jóvenes y familias, integrando deporte, recreación y apropiación comunitaria del espacio público.', 'Bicicleta y skate|Calistenia|Fotografía urbana|Actividades al aire libre', 'Acceso libre durante el día', 'Usar protección, hidratarse y respetar a quienes comparten el circuito.', -31.3970000, -57.9670000],
@@ -363,6 +444,13 @@ try {
     /* Vinculamos registros antiguos por texto para que la relación nueva sea
        útil desde la primera carga, incluso antes de editar cada evento a mano. */
     $pdo->exec("UPDATE eventos e INNER JOIN lugares l ON e.ubicacion LIKE CONCAT('%', l.nombre, '%') SET e.lugar_id = l.id WHERE e.lugar_id IS NULL");
+    $pdo->exec("DELETE FROM `sigtur_schema_version`");
+    $versionStmt = $pdo->prepare("INSERT INTO `sigtur_schema_version` (`version`) VALUES (:version)");
+    $versionStmt->execute([':version' => $versionEsperada]);
+    }
+    if ($bloqueoEsquema) {
+        $pdo->query("SELECT RELEASE_LOCK('sigtur_schema_migrations')");
+    }
 } catch (PDOException $e) {
     http_response_code(503);
     /* CAMBIO APLICADO: los endpoints JSON no pueden devolver texto HTML/plain

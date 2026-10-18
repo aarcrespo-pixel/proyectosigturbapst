@@ -56,10 +56,10 @@ const clavesTraducibles = new Set([
     'navHome','navEvents','navTourism','navPlaces','navLogin','navSettings','navSupport','navLogout','navMenuOpen','navProfile','navSearch',
     'searchPlaceholder',
     'homeScroll','homeInfoButton','homeInfoTitle','homeInfoText1','homeInfoText2','homeFeaturesTitle','homeFeatureEvents','homeFeatureTourism','homeFeaturePlaces',
-    'homeEventsTitle','homeEventButton','homeNewsTitle','homeNewsButton',
+    'homeEventsTitle','homeEventButton',
     'configBack','configEyebrow','configTitle','configDescription','configGeneralTitle','configGeneralText','configLabelSiteName','configLabelEmail','configLabelCity','configVisualTitle','configVisualText','configLabelTheme','configLabelLanguage','configLabelDescription','configNotificationsTitle','configNotificationsText','configNotificationEventsTitle','configNotificationEventsText','configNotificationRemindersTitle','configNotificationRemindersText','configSecurityTitle','configSecurityText','configAccessPublicTitle','configAccessPublicText','configAdminPanelTitle','configAdminPanelText','configSave','configReset','themeDark','themeLight','languageOptionEs','languageOptionEn','languageOptionPt','languageOptionFr','languageOptionIt','languageOptionDe','languageOptionJa','languageOptionZh','languageOptionAr','languageOptionRu',
     'eventsHeroLabel','eventsHeroTitle','eventsHeroText','eventsFeaturedLabel','tourismHeroLabel','tourismHeroTitle','tourismHeroText','placesHeroLabel','placesHeroTitle','placesHeroText',
-    'supportBack','supportEyebrow','supportTitle','supportLead','supportFaqTitle','supportFaqText','supportFaq1Question','supportFaq1Answer','supportFaq2Question','supportFaq2Answer','supportFaq3Question','supportFaq3Answer','supportReportTitle','supportReportText','supportReportName','supportReportEmail','supportReportMessage','supportReportButton','supportContactTitle','supportContactText',
+    'supportBack','supportEyebrow','supportTitle','supportLead','supportFaqTitle','supportFaqText','supportFaq1Question','supportFaq1Answer','supportFaq2Question','supportFaq2Answer','supportFaq3Question','supportFaq3Answer','supportReportTitle','supportReportText',    'supportReportName','supportReportEmail','supportReportMessage','supportReportButton','supportContactTitle','supportContactText','supportContactEmail','supportContactWhatsapp','supportContactInstagram','supportContactHours',
     'loginBack','loginBackAlt','loginTitle','loginIntro','loginUsername','loginUsernamePlaceholder','loginPassword','loginPasswordPlaceholder','loginForgot','loginSubmit','loginRegister','loginRemember','loginError','loginSuccess',
     'registerTitle','registerIntro','registerName','registerNamePlaceholder','registerEmail','registerEmailPlaceholder','registerPassword','registerPasswordPlaceholder','registerSubmit','registerLogin','registerTerms',
     'pageLoginTitle','pageRegisterTitle','pageSupportTitle'
@@ -93,14 +93,14 @@ const traducciones = {
         homeFeaturePlacesText2: 'Descubre lugares únicos donde vivir momentos especiales y recordar la visita.',
         homeEventsTitle: 'Eventos Destacados',
         homeEventButton: 'Ver más',
-        homeNewsTitle: 'Noticias en Salto',
-        homeNewsButton: 'Ver noticia',
         footerEvents: 'EVENTOS',
         footerPlaces: 'LUGARES',
         footerTourism: 'TURISMO',
+        footerGastronomy: 'GASTRONOMÍA',
         footerSigtur: 'SIGTUR',
         footerEventLinks: ['Eventos destacados', 'Próximos eventos', 'Eventos anteriores', 'Todos los eventos'],
         footerPlaceLinks: ['Plaza Artigas', 'Plaza Treinta y Tres Orientales', 'Costanera Norte', 'Costanera Sur', 'Parque Benito Solari'],
+        footerGastronomyLinks: ['Restaurantes', 'Cafés y propuestas locales', 'Explorar gastronomía'],
         footerTourismLinks: ['Actividades', 'Lugares turísticos', 'Experiencias'],
         footerLegal: 'SIGTUR © 2026 by Bapst is licensed under CC BY-NC-ND 4.0',
         configBack: '← Volver',
@@ -181,14 +181,14 @@ const traducciones = {
         homeFeaturePlacesText2: 'Find unique places where you can create special memories.',
         homeEventsTitle: 'Featured Events',
         homeEventButton: 'See more',
-        homeNewsTitle: 'News in Salto',
-        homeNewsButton: 'Read more',
         footerEvents: 'EVENTS',
         footerPlaces: 'PLACES',
         footerTourism: 'TOURISM',
+        footerGastronomy: 'GASTRONOMY',
         footerSigtur: 'SIGTUR',
         footerEventLinks: ['Featured events', 'Upcoming events', 'Past events', 'All events'],
         footerPlaceLinks: ['Plaza Artigas', 'Plaza Treinta y Tres Orientales', 'North waterfront', 'South waterfront', 'Parque Benito Solari'],
+        footerGastronomyLinks: ['Restaurants', 'Cafés and local spots', 'Explore gastronomy'],
         footerTourismLinks: ['Activities', 'Tourist spots', 'Experiences'],
         footerLegal: 'SIGTUR © 2026 by Bapst is licensed under CC BY-NC-ND 4.0',
         configBack: '← Back',
@@ -269,14 +269,14 @@ const traducciones = {
         homeFeaturePlacesText2: 'Descubra lugares únicos onde viver momentos especiais e lembrar da visita.',
         homeEventsTitle: 'Eventos em destaque',
         homeEventButton: 'Ver mais',
-        homeNewsTitle: 'Notícias em Salto',
-        homeNewsButton: 'Ver notícia',
         footerEvents: 'EVENTOS',
         footerPlaces: 'LOCAIS',
         footerTourism: 'TURISMO',
+        footerGastronomy: 'GASTRONOMIA',
         footerSigtur: 'SIGTUR',
         footerEventLinks: ['Eventos em destaque', 'Próximos eventos', 'Eventos anteriores', 'Todos os eventos'],
         footerPlaceLinks: ['Praça Artigas', 'Praça Treinta y Tres Orientales', 'Costanera Norte', 'Costanera Sul', 'Parque Benito Solari'],
+        footerGastronomyLinks: ['Restaurantes', 'Cafés e propostas locais', 'Explorar gastronomia'],
         footerTourismLinks: ['Atividades', 'Locais turísticos', 'Experiências'],
         footerLegal: 'SIGTUR © 2026 por Bapst está licenciado sob CC BY-NC-ND 4.0',
         configBack: '← Voltar',
@@ -398,7 +398,8 @@ const traduccionesExtra = {
         supportReportTextarea: 'Describe el problema o la incidencia...',
         supportReportButton: 'Enviar reporte',
         supportContactEmail: 'Correo: soporte@sigtur.com',
-        supportContactWhatsapp: 'WhatsApp: +598 99 999 999',
+        supportContactWhatsapp: 'WhatsApp: 091 661 335',
+        supportContactInstagram: 'Instagram: @bapstuy',
         supportContactHours: 'Horario: Lunes a Viernes, 9:00 a 18:00',
         supportHelp1Title: 'Actualizar datos',
         supportHelp1Text: 'Ve a configuración y guarda los cambios.',
@@ -569,7 +570,8 @@ const traduccionesExtra = {
         supportReportTextarea: 'Describe the problem or incident...',
         supportReportButton: 'Send report',
         supportContactEmail: 'Email: support@sigtur.com',
-        supportContactWhatsapp: 'WhatsApp: +598 99 999 999',
+        supportContactWhatsapp: 'WhatsApp: 091 661 335',
+        supportContactInstagram: 'Instagram: @bapstuy',
         supportContactHours: 'Hours: Monday to Friday, 9:00 to 18:00',
         supportHelp1Title: 'Update data',
         supportHelp1Text: 'Go to settings and save your changes.',
@@ -738,7 +740,8 @@ const traduccionesExtra = {
         supportReportTextarea: 'Descreva o problema ou a ocorrência...',
         supportReportButton: 'Enviar relatório',
         supportContactEmail: 'E-mail: suporte@sigtur.com',
-        supportContactWhatsapp: 'WhatsApp: +598 99 999 999',
+        supportContactWhatsapp: 'WhatsApp: 091 661 335',
+        supportContactInstagram: 'Instagram: @bapstuy',
         supportContactHours: 'Horário: segunda a sexta, 9:00 às 18:00',
         supportHelp1Title: 'Atualizar dados',
         supportHelp1Text: 'Vá em configurações e salve as alterações.',
@@ -869,9 +872,9 @@ const guardarIdioma = (idioma) => {
     localStorage.setItem(storageClaveIdioma, idiomaActivo);
 };
 
-const aplicarIdioma = (idioma = leerIdioma()) => {
+const aplicarIdioma = (idioma = leerIdioma(), persistir = true) => {
     const idiomaActivo = idiomasDisponibles.includes(idioma) ? idioma : 'es';
-    guardarIdioma(idiomaActivo);
+    if (persistir) guardarIdioma(idiomaActivo);
     document.documentElement.lang = idiomaActivo;
     document.documentElement.setAttribute('data-lang', idiomaActivo);
     document.body.dataset.lang = idiomaActivo;
@@ -1260,9 +1263,28 @@ const activarToggleFeature = () => {
 
 const activarToggleFooter = () => {
     const togglesFooter = document.querySelectorAll('.footer-toggle');
+    const breakpointFooterDesktop = window.matchMedia('(min-width: 781px)');
+
+    const sincronizarTogglesFooter = (esEscritorio) => {
+        togglesFooter.forEach((toggle) => {
+            const footerCol = toggle.closest('.footer-col');
+            if (!footerCol) return;
+            if (footerCol.classList.contains('footer-col--expandable')) return;
+            footerCol.classList.toggle('open', esEscritorio);
+            toggle.classList.toggle('open', esEscritorio);
+            toggle.setAttribute('aria-expanded', String(esEscritorio));
+        });
+    };
+
+    sincronizarTogglesFooter(breakpointFooterDesktop.matches);
+    breakpointFooterDesktop.addEventListener('change', (evento) => {
+        sincronizarTogglesFooter(evento.matches);
+    });
+
     togglesFooter.forEach((toggle) => {
         toggle.addEventListener('click', () => {
             const footerCol = toggle.closest('.footer-col');
+            if (breakpointFooterDesktop.matches && (!footerCol || !footerCol.classList.contains('footer-col--expandable'))) return;
             const expandido = toggle.getAttribute('aria-expanded') === 'true';
             const abrir = !expandido;
             if (!footerCol) return;

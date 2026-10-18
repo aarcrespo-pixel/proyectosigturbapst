@@ -32,7 +32,6 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
     ];
 
     $dirUpload = $uploadDirs[$type] ?? null;
-    error_log("[{$type}] Directorio configurado: {$dirUpload}");
 
     if (!$dirUpload) {
         error_log("[{$type}] ERROR: Tipo de archivo inválido");
@@ -46,12 +45,6 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
     }
 
     $file = $_FILES[$fileKey];
-    error_log("[{$type}] Archivo detectado: " . json_encode([
-        'name' => $file['name'] ?? 'N/A',
-        'size' => $file['size'] ?? 0,
-        'error' => $file['error'] ?? 'N/A',
-        'tmp_name' => $file['tmp_name'] ?? 'N/A',
-    ]));
 
     // ===== VALIDAR ERRORES DE UPLOAD =====
     // El código de upload distingue archivo ausente, parcial, grande o bloqueado.
@@ -86,60 +79,37 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
         error_log("[{$type}] ERROR: Extensión no permitida '{$extension}'. Permitidas: " . implode(', ', $permitidas));
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
     }
-    error_log("[{$type}] ✓ Extensión válida: {$extension}");
 
     // ===== CREAR DIRECTORIO SI NO EXISTE =====
     if (!is_dir($dirUpload)) {
-        error_log("[{$type}] Directorio no existe: {$dirUpload}");
-
         if (!@mkdir($dirUpload, 0755, true)) {
             error_log("[{$type}] ERROR: No se pudo crear directorio");
             return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
         }
-        error_log("[{$type}] ✓ Directorio creado: {$dirUpload}");
-    } else {
-        error_log("[{$type}] ✓ Directorio existe: {$dirUpload}");
     }
 
     // ===== VERIFICAR PERMISOS =====
     if (!is_writable($dirUpload)) {
-        error_log("[{$type}] ERROR: Directorio no escribible. Permisos: " . substr(sprintf('%o', fileperms($dirUpload)), -4));
+        error_log("[{$type}] ERROR: Directorio no escribible");
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
     }
-    error_log("[{$type}] ✓ Directorio escribible");
 
     // ===== GENERAR NOMBRE ÚNICO =====
     $nombreArchivo = $type . '_' . $userId . '_' . time() . '.' . $extension;
     $rutaDestino = $dirUpload . $nombreArchivo;
-    error_log("[{$type}] Nombre de archivo: {$nombreArchivo}");
-    error_log("[{$type}] Ruta destino: {$rutaDestino}");
 
     // ===== VALIDAR TMP_NAME =====
     if (empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
         error_log("[{$type}] ERROR: tmp_name inválido o no es archivo subido");
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
     }
-    error_log("[{$type}] ✓ tmp_name válido: " . $file['tmp_name']);
 
     // ===== MOVER ARCHIVO =====
     // move_uploaded_file verifica que el origen provenga del mecanismo de upload de PHP.
     if (!move_uploaded_file($file['tmp_name'], $rutaDestino)) {
         error_log("[{$type}] ERROR: move_uploaded_file() falló");
-        error_log("[{$type}] - Fuente: " . $file['tmp_name']);
-        error_log("[{$type}] - Destino: " . $rutaDestino);
-        error_log("[{$type}] - Destino existe antes: " . (file_exists($rutaDestino) ? 'SÍ' : 'NO'));
         return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
     }
-    error_log("[{$type}] ✓ Archivo movido correctamente");
-
-    // ===== VERIFICAR QUE SE GUARDÓ =====
-    if (!file_exists($rutaDestino)) {
-        error_log("[{$type}] ERROR: Archivo no encontrado después de move_uploaded_file");
-        return $_SESSION[$sessionKey] ?? ('default-' . $type . '.png');
-    }
-
-    $tamaño = filesize($rutaDestino);
-    error_log("[{$type}] ✓ Archivo verificado. Tamaño: {$tamaño} bytes");
 
     // ===== ELIMINAR ARCHIVO ANTERIOR =====
     $archivoAnterior = $_SESSION[$sessionKey] ?? 'default-' . $type . '.png';
@@ -148,18 +118,12 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
         $rutaAnterior = $dirUpload . basename($archivoAnterior);
 
         if (file_exists($rutaAnterior)) {
-            error_log("[{$type}] Eliminando archivo anterior: {$archivoAnterior}");
-            if (@unlink($rutaAnterior)) {
-                error_log("[{$type}] ✓ Archivo anterior eliminado");
-            } else {
-                error_log("[{$type}] ⚠ No se pudo eliminar archivo anterior");
+            if (!@unlink($rutaAnterior)) {
+                error_log("[{$type}] ERROR: No se pudo eliminar el archivo anterior");
             }
-        } else {
-            error_log("[{$type}] Archivo anterior no encontrado: {$rutaAnterior}");
         }
     }
 
-    error_log("[{$type}] ✓✓✓ ÉXITO: {$nombreArchivo}");
     return $nombreArchivo;
 }
 
@@ -168,20 +132,23 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
 // ========================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = (int) $_SESSION['usuario_id'];
+    $consultaAvatarActual = $pdo->prepare('SELECT avatar, avatar_crop_x, avatar_crop_zoom FROM usuarios WHERE id = :id LIMIT 1');
+    $consultaAvatarActual->execute([':id' => $userId]);
+    $avatarActual = $consultaAvatarActual->fetch(PDO::FETCH_ASSOC);
+    if (!$avatarActual) {
+        http_response_code(404);
+        exit('Usuario no encontrado.');
+    }
+    $_SESSION['usuario_avatar'] = (string) $avatarActual['avatar'];
+    $avatarNombre = processImageUpload('avatar', 'avatar', $userId, 'usuario_avatar');
+    $avatarCropX = max(0, min(100, (float) ($_POST['avatar_crop_x'] ?? $avatarActual['avatar_crop_x'])));
+    $avatarCropY = 50.0;
+    $avatarCropZoom = max(1, min(2.5, (float) ($_POST['avatar_crop_zoom'] ?? $avatarActual['avatar_crop_zoom'])));
 
-    // LOGGING: Inicio de procesamiento
-    error_log("=== INICIO PROCESAMIENTO POST - Usuario: {$userId} ===");
-    error_log("_FILES: " . json_encode(array_keys($_FILES)));
-    error_log("_POST keys: " . json_encode(array_keys($_POST)));
-
-    // Validar y limpiar datos de texto
     $nombre = trim($_POST['nombre'] ?? '');
     $nickname = trim($_POST['nickname'] ?? '');
     $biografia = trim($_POST['biografia'] ?? '');
-    $ubicacion = trim($_POST['ubicacion'] ?? '');
-    $sitioWeb = trim($_POST['sitio_web'] ?? '');
 
-    // Aplicar límites de caracteres
     if ($nombre !== '' && strlen($nombre) > 100) {
         $nombre = substr($nombre, 0, 100);
     }
@@ -190,96 +157,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nickname = substr($nickname, 0, 50);
     }
 
-    if ($ubicacion !== '' && strlen($ubicacion) > 100) {
-        $ubicacion = substr($ubicacion, 0, 100);
-    }
-
     if ($biografia !== '' && strlen($biografia) > 150) {
         $biografia = substr($biografia, 0, 150);
     }
 
-    // Validar URL
-    if ($sitioWeb !== '' && !filter_var($sitioWeb, FILTER_VALIDATE_URL)) {
-        $sitioWeb = '';
-    }
-
-    // Procesar subidas de archivos
-    error_log("Procesando avatar...");
-    $avatarNombre = processImageUpload('avatar', 'avatar', $userId, 'usuario_avatar');
-    error_log("Avatar resultante: {$avatarNombre}");
-
-    error_log("Procesando banner...");
-    $bannerNombre = processImageUpload('banner', 'banner', $userId, 'usuario_banner');
-    error_log("Banner resultante: {$bannerNombre}");
-
-    // Obtener valores actuales para la BD
     $nombreFinal = $nombre !== '' ? $nombre : $_SESSION['usuario_nombre'];
     $nicknameFinal = $nickname !== '' ? $nickname : null;
     $biografiaFinal = $biografia !== '' ? $biografia : null;
-    $ubicacionFinal = $ubicacion !== '' ? $ubicacion : null;
-    $sitioWebFinal = $sitioWeb !== '' ? $sitioWeb : null;
 
-     /* El UPDATE usa parámetros nombrados para actualizar perfil y archivos en
-         una sola operación; después sincronizamos la sesión con esos valores. */
-     // Actualizar base de datos
-    try {
-        error_log("Preparando UPDATE SQL...");
-
-        $stmt = $pdo->prepare(
+     try {
+         $stmt = $pdo->prepare(
             'UPDATE usuarios SET
                 nombre_completo = :nombre,
-                avatar = :avatar,
-                banner = :banner,
                 nickname = :nickname,
                 biografia = :biografia,
-                ubicacion = :ubicacion,
-                sitio_web = :sitio_web
+                avatar = :avatar,
+                avatar_crop_x = :avatar_crop_x,
+                avatar_crop_y = :avatar_crop_y,
+                avatar_crop_zoom = :avatar_crop_zoom
             WHERE id = :id'
         );
 
-        error_log("Valores a actualizar: " . json_encode([
-            ':nombre' => $nombreFinal,
-            ':avatar' => $avatarNombre,
-            ':banner' => $bannerNombre,
-            ':nickname' => $nicknameFinal,
-            ':biografia' => $biografiaFinal,
-            ':ubicacion' => $ubicacionFinal,
-            ':sitio_web' => $sitioWebFinal,
-            ':id' => $userId,
-        ]));
-
         $result = $stmt->execute([
             ':nombre' => $nombreFinal,
-            ':avatar' => $avatarNombre,
-            ':banner' => $bannerNombre,
             ':nickname' => $nicknameFinal,
             ':biografia' => $biografiaFinal,
-            ':ubicacion' => $ubicacionFinal,
-            ':sitio_web' => $sitioWebFinal,
+            ':avatar' => $avatarNombre,
+            ':avatar_crop_x' => $avatarCropX,
+            ':avatar_crop_y' => $avatarCropY,
+            ':avatar_crop_zoom' => $avatarCropZoom,
             ':id' => $userId,
         ]);
 
         if (!$result) {
-            error_log("ERROR en execute(): " . json_encode($stmt->errorInfo()));
             throw new Exception("Error al ejecutar UPDATE: " . json_encode($stmt->errorInfo()));
         }
 
-        error_log("UPDATE ejecutado correctamente. Filas afectadas: " . $stmt->rowCount());
-
         // Actualizar sesión
         $_SESSION['usuario_nombre'] = $nombreFinal;
-        $_SESSION['usuario_avatar'] = $avatarNombre;
-        $_SESSION['usuario_banner'] = $bannerNombre;
         $_SESSION['usuario_nickname'] = $nicknameFinal ?? strtolower(str_replace(' ', '', $nombreFinal ?? 'usuario'));
         $_SESSION['usuario_biografia'] = $biografiaFinal ?? '';
-        $_SESSION['usuario_ubicacion'] = $ubicacionFinal ?? '';
-        $_SESSION['usuario_sitio_web'] = $sitioWebFinal ?? '';
+        $_SESSION['usuario_avatar'] = $avatarNombre;
+        $_SESSION['usuario_avatar_crop_x'] = $avatarCropX;
+        $_SESSION['usuario_avatar_crop_y'] = $avatarCropY;
+        $_SESSION['usuario_avatar_crop_zoom'] = $avatarCropZoom;
 
-        error_log("Sesión actualizada correctamente.");
-        error_log("=== FIN PROCESAMIENTO EXITOSO ===\n");
-
-        // Redirigir al inicio
-        header('Location: ../index.php');
+        header('Location: perfil.php?id=' . $userId);
         exit;
 
     } catch (Exception $e) {
@@ -293,24 +216,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // ========================
 try {
     $userId = (int) $_SESSION['usuario_id'];
-    error_log("=== CARGANDO PERFIL - Usuario ID: {$userId} ===");
 
     // Cargamos el perfil con una consulta parametrizada para evitar exponer otro usuario.
-    $stmt = $pdo->prepare('SELECT nombre_completo, nickname, biografia, ubicacion, sitio_web, avatar, banner FROM usuarios WHERE id = :id');
+    $stmt = $pdo->prepare('SELECT nombre_completo, nickname, biografia, avatar, avatar_crop_x, avatar_crop_zoom FROM usuarios WHERE id = :id');
     $stmt->execute([':id' => $userId]);
     $usuario = $stmt->fetch();
 
     if (!$usuario) {
-        error_log("ERROR: Usuario no encontrado en BD");
         die("Error: Usuario no encontrado.");
     }
-
-    error_log("✓ Usuario cargado. Datos: " . json_encode([
-        'nombre_completo' => $usuario['nombre_completo'] ?? 'NULL',
-        'avatar' => $usuario['avatar'] ?? 'NULL',
-        'banner' => $usuario['banner'] ?? 'NULL',
-        'nickname' => $usuario['nickname'] ?? 'NULL',
-    ]));
 
 } catch (PDOException $e) {
     error_log("ERROR PDO al cargar usuario: " . $e->getMessage());
@@ -321,16 +235,16 @@ try {
 $nombre = htmlspecialchars($usuario['nombre_completo'] ?? '', ENT_QUOTES, 'UTF-8');
 $nickname = htmlspecialchars($usuario['nickname'] ?? '', ENT_QUOTES, 'UTF-8');
 $biografia = htmlspecialchars($usuario['biografia'] ?? '', ENT_QUOTES, 'UTF-8');
-$ubicacion = htmlspecialchars($usuario['ubicacion'] ?? '', ENT_QUOTES, 'UTF-8');
-$sitioWeb = htmlspecialchars($usuario['sitio_web'] ?? '', ENT_QUOTES, 'UTF-8');
-$avatar = htmlspecialchars($usuario['avatar'] ?? 'default-avatar.png', ENT_QUOTES, 'UTF-8');
-$banner = htmlspecialchars($usuario['banner'] ?? 'default-banner.png', ENT_QUOTES, 'UTF-8');
-
-// URLs de los archivos
-$avatarUrl = '../uploads/avatars/' . $avatar;
-$bannerUrl = '../uploads/banners/' . $banner;
-
-error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
+$avatarCropX = max(0, min(100, (float) ($usuario['avatar_crop_x'] ?? 50)));
+$avatarCropY = 50.0;
+$avatarCropZoom = max(1, min(2.5, (float) ($usuario['avatar_crop_zoom'] ?? 1)));
+$avatarFilename = basename((string) ($usuario['avatar'] ?? ''));
+$avatarUrl = $avatarFilename !== ''
+    && $avatarFilename !== 'default-avatar.png'
+    && $avatarFilename !== 'user-default.png'
+    && is_file(__DIR__ . '/../uploads/avatars/' . $avatarFilename)
+        ? '../uploads/avatars/' . rawurlencode($avatarFilename)
+        : '../img/user.png';
 ?>
 
 <!DOCTYPE html>
@@ -339,45 +253,37 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personalizar Perfil</title>
-    <link rel="stylesheet" href="../css/login.css">
-    <link rel="stylesheet" href="../css/perfil.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="../css/login.css?v=20261013-2">
+    <link rel="stylesheet" href="../css/perfil.css?v=20261013-2">
 </head>
 <body>
-    <a class="logo-back" href="../index.php" aria-label="Volver al inicio">
-        <img src="../img/logoblanco.png" alt="Volver al inicio">
-    </a>
-
     <main>
         <section class="contenedor">
             <h1>Editar Perfil</h1>
-            <p class="intro">Personaliza tu información y fotos</p>
-
-            <!-- Banner -->
-            <div class="banner-section" id="bannerContainer" onclick="document.getElementById('bannerInput').click()">
-                <img id="bannerImage" src="<?php echo $bannerUrl; ?>" alt="Banner de perfil" class="banner-image" onerror="this.src='../uploads/banners/default-banner.png'">
-                <div class="banner-overlay">
-                    <div class="banner-overlay-text">
-                        <div style="font-size: 24px; margin-bottom: 2px;">📷</div>
-                        <div>Cambiar portada</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Avatar -->
-            <div class="profile-avatar-section">
-                <div class="avatar-container" id="avatarContainer" onclick="document.getElementById('avatarInput').click()">
-                    <img id="avatarImage" src="<?php echo $avatarUrl; ?>" alt="Avatar de perfil" class="avatar-image" onerror="this.src='../uploads/avatars/default-avatar.png'">
-                    <div class="avatar-overlay">
-                        <div class="avatar-overlay-text">
-                            <div style="font-size: 20px; margin-bottom: 1px;">📷</div>
-                            <div>Cambiar foto</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <p class="intro">Actualiza tu foto, nombre, nombre de usuario y biografía.</p>
 
             <!-- Form -->
             <form method="POST" enctype="multipart/form-data" id="editForm" novalidate>
+                <div class="profile-avatar-section">
+                    <label class="avatar-container" for="avatarInput">
+                        <img id="avatarImage" src="<?= htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Foto de perfil actual" class="avatar-image" width="100" height="100" style="object-position: <?= number_format($avatarCropX, 2, '.', '') ?>% <?= number_format($avatarCropY, 2, '.', '') ?>%; transform: scale(<?= number_format($avatarCropZoom, 2, '.', '') ?>)">
+                        <span class="avatar-overlay"><span class="avatar-overlay-text">Cambiar foto</span></span>
+                    </label>
+                    <input type="file" id="avatarInput" name="avatar" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+                    <div class="avatar-adjust-controls" aria-label="Ajustar encuadre de la foto">
+                        <div class="avatar-adjust-control">
+                            <div><label for="avatarCropX">Encuadre horizontal</label><output id="avatarCropXValue"><?= (int) round($avatarCropX) ?>%</output></div>
+                            <input type="range" id="avatarCropX" name="avatar_crop_x" min="0" max="100" step="1" value="<?= htmlspecialchars((string) $avatarCropX, ENT_QUOTES, 'UTF-8') ?>">
+                        </div>
+                        <div class="avatar-adjust-control">
+                            <div><label for="avatarCropZoom">Zoom</label><output id="avatarCropZoomValue"><?= number_format($avatarCropZoom, 2, '.', '') ?>×</output></div>
+                            <input type="range" id="avatarCropZoom" name="avatar_crop_zoom" min="1" max="2.5" step="0.05" value="<?= htmlspecialchars((string) $avatarCropZoom, ENT_QUOTES, 'UTF-8') ?>">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Nombre Real -->
                 <div class="field-group">
                     <label for="nombre">Nombre Completo</label>
@@ -385,18 +291,10 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
                     <span class="char-counter"><span id="nombreCount">0</span>/100</span>
                 </div>
 
-                <!-- Nickname y Ubicación (2 columnas) -->
-                <div class="form-row-2">
-                    <div class="field-group">
-                        <label for="nickname">Nickname</label>
-                        <input type="text" id="nickname" name="nickname" maxlength="50" value="<?php echo $nickname; ?>" placeholder="@usuario">
-                        <span class="char-counter"><span id="nicknameCount">0</span>/50</span>
-                    </div>
-                    <div class="field-group">
-                        <label for="ubicacion">Ubicación</label>
-                        <input type="text" id="ubicacion" name="ubicacion" maxlength="100" value="<?php echo $ubicacion; ?>" placeholder="Ciudad o país">
-                        <span class="char-counter"><span id="ubicacionCount">0</span>/100</span>
-                    </div>
+                <div class="field-group">
+                    <label for="nickname">Nombre de usuario</label>
+                    <input type="text" id="nickname" name="nickname" maxlength="50" value="<?php echo $nickname; ?>" placeholder="@usuario">
+                    <span class="char-counter"><span id="nicknameCount">0</span>/50</span>
                 </div>
 
                 <!-- Biografía -->
@@ -406,28 +304,17 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
                     <span class="char-counter"><span id="biografiaCount">0</span>/150</span>
                 </div>
 
-                <!-- Sitio Web -->
-                <div class="field-group">
-                    <label for="sitio_web">Sitio Web</label>
-                    <input type="url" id="sitio_web" name="sitio_web" value="<?php echo $sitioWeb; ?>" placeholder="https://ejemplo.com">
-                </div>
-
                 <!-- Botones -->
                 <div class="button-group">
-                    <a href="../index.php" class="action-btn secondary back-link">Cancelar</a>
+                    <a href="perfil.php?id=<?= (int) $_SESSION['usuario_id'] ?>" class="action-btn secondary back-link">Volver al perfil</a>
                     <button type="submit" class="action-btn primary">Guardar cambios</button>
                 </div>
-
-                <!-- Input files DENTRO del formulario (CRÍTICO) -->
-                <input type="file" id="avatarInput" name="avatar" accept="image/*" style="display:none;">
-                <input type="file" id="bannerInput" name="banner" accept="image/*" style="display:none;">
             </form>
         </section>
     </main>
 
-    <script src="../js/translator.js"></script>
+    <script src="../js/translator.js" defer></script>
     <script src="../js/script.js" defer></script>
-    <script src="../js/login.js" defer></script>
     <script>
         // Actualizar contadores de caracteres
         function setupCharCounter(inputId, countId, maxLength) {
@@ -447,31 +334,27 @@ error_log("URLs: Avatar={$avatarUrl}, Banner={$bannerUrl}");
 
         setupCharCounter('nombre', 'nombreCount', 100);
         setupCharCounter('nickname', 'nicknameCount', 50);
-        setupCharCounter('ubicacion', 'ubicacionCount', 100);
         setupCharCounter('biografia', 'biografiaCount', 150);
 
-        // Previsualizar avatar
-        document.getElementById('avatarInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    document.getElementById('avatarImage').src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Previsualizar banner
-        document.getElementById('bannerInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    document.getElementById('bannerImage').src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
+        const avatarInput = document.getElementById('avatarInput');
+        const avatarImage = document.getElementById('avatarImage');
+        const avatarCropX = document.getElementById('avatarCropX');
+        const avatarCropZoom = document.getElementById('avatarCropZoom');
+        let avatarPreviewUrl = '';
+        const updateAvatarCropPreview = () => {
+            avatarImage.style.objectPosition = `${avatarCropX.value}% 50%`;
+            avatarImage.style.transform = `scale(${avatarCropZoom.value})`;
+            document.getElementById('avatarCropXValue').textContent = `${avatarCropX.value}%`;
+            document.getElementById('avatarCropZoomValue').textContent = `${Number(avatarCropZoom.value).toFixed(2)}×`;
+        };
+        [avatarCropX, avatarCropZoom].forEach((control) => control.addEventListener('input', updateAvatarCropPreview));
+        avatarInput?.addEventListener('change', () => {
+            const file = avatarInput.files?.[0];
+            if (!file) return;
+            if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+            avatarPreviewUrl = URL.createObjectURL(file);
+            avatarImage.src = avatarPreviewUrl;
+            updateAvatarCropPreview();
         });
     </script>
 </body>

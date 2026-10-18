@@ -1,32 +1,7 @@
 <?php
-session_start();
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
-
-/* CAMBIO APLICADO: el cierre de sesión vive junto al inicio de sesión para
-   evitar un controlador PHP separado. Se procesa antes de redirigir a los
-   usuarios activos hacia la pantalla de login. */
-if (($_GET['accion'] ?? '') === 'cerrar-sesion') {
-    $_SESSION = [];
-
-    if (ini_get('session.use_cookies')) {
-        $params = session_get_cookie_params();
-        setcookie(
-            session_name(),
-            '',
-            time() - 42000,
-            $params['path'],
-            $params['domain'],
-            $params['secure'],
-            $params['httponly']
-        );
-    }
-
-    session_unset();
-    session_destroy();
-    header('Location: ../index.php');
-    exit;
-}
+sigtur_iniciar_sesion_segura();
 
 // Evitamos que una sesión activa vuelva a mostrar el formulario de login.
 if (isset($_SESSION['usuario_id'])) {
@@ -36,20 +11,29 @@ if (isset($_SESSION['usuario_id'])) {
 
 $message = '';
 $messageType = '';
+$loginInputValue = $_SERVER['REQUEST_METHOD'] === 'POST' && is_string($_POST['login'] ?? null)
+    ? trim($_POST['login'])
+    : '';
+$emailIncorrecto = false;
+$passwordIncorrecta = false;
 
 /* El POST se procesa antes del HTML para poder redirigir tras autenticar o
     conservar un mensaje de error en la misma pantalla. */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
+        $message = 'La sesión expiró. Recargá la página e intentá nuevamente.';
+        $messageType = 'error';
+    } else {
     /* El mismo valor se acepta como email o cédula y se consulta con un
        Prepared Statement para impedir inyección SQL. */
-    $loginInput = trim($_POST['login'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $loginInput = $loginInputValue;
+    $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
 
-    if ($loginInput === '' || $password === '') {
+    if ($loginInput === '' || $password === '' || strlen($loginInput) > 100 || strlen($password) > 4096) {
         $message = 'Ingresá tu email o cédula y tu contraseña.';
         $messageType = 'error';
     } else {
-        $stmt = $pdo->prepare('SELECT * FROM usuarios WHERE email = :email OR cedula = :cedula LIMIT 1');
+        $stmt = $pdo->prepare('SELECT id, nombre_completo, email, cedula, password, rol, avatar, banner, nickname, biografia, ubicacion, sitio_web, avatar_crop_x, avatar_crop_zoom FROM usuarios WHERE email = :email OR cedula = :cedula LIMIT 1');
         $stmt->execute([
             ':email' => $loginInput,
             ':cedula' => $loginInput,
@@ -60,22 +44,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 /* Guardamos los datos mínimos de identidad y perfil para que el
                     resto de controladores pueda autorizar y personalizar la UI. */
             session_regenerate_id(true);
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             $_SESSION['usuario_id'] = (int) $usuario['id'];
             $_SESSION['rol'] = sigtur_normalizar_rol($usuario['rol'] ?? null);
             $_SESSION['usuario_nombre'] = $usuario['nombre_completo'];
             $_SESSION['usuario_email'] = $usuario['email'];
             $_SESSION['usuario_avatar'] = !empty($usuario['avatar']) ? $usuario['avatar'] : 'default-avatar.png';
+            $_SESSION['usuario_avatar_crop_x'] = max(0, min(100, (float) ($usuario['avatar_crop_x'] ?? 50)));
+            $_SESSION['usuario_avatar_crop_zoom'] = max(1, min(2.5, (float) ($usuario['avatar_crop_zoom'] ?? 1)));
             $_SESSION['usuario_banner'] = !empty($usuario['banner']) ? $usuario['banner'] : 'default-banner.png';
             $_SESSION['usuario_nickname'] = !empty($usuario['nickname']) ? $usuario['nickname'] : strtolower(str_replace(' ', '', $usuario['nombre_completo']));
             $_SESSION['usuario_biografia'] = $usuario['biografia'] ?? '';
             $_SESSION['usuario_ubicacion'] = $usuario['ubicacion'] ?? '';
             $_SESSION['usuario_sitio_web'] = $usuario['sitio_web'] ?? '';
+            if (password_needs_rehash($usuario['password'], PASSWORD_DEFAULT)) {
+                $actualizarPassword = $pdo->prepare('UPDATE usuarios SET password = :password WHERE id = :id');
+                $actualizarPassword->execute([
+                    ':password' => password_hash($password, PASSWORD_DEFAULT),
+                    ':id' => (int) $usuario['id'],
+                ]);
+            }
             header('Location: ../index.php');
             exit;
         }
 
-        $message = 'Credenciales inválidas. Verificá tus datos e intentá nuevamente.';
-        $messageType = 'error';
+        if (!$usuario && (filter_var($loginInput, FILTER_VALIDATE_EMAIL) || str_contains($loginInput, '@'))) {
+            $emailIncorrecto = true;
+        } elseif ($usuario) {
+            $passwordIncorrecta = true;
+        } else {
+            $message = 'Credenciales inválidas. Verificá tus datos e intentá nuevamente.';
+            $messageType = 'error';
+        }
+    }
     }
 }
 
@@ -110,16 +111,23 @@ if (isset($_GET['registro']) && $_GET['registro'] === 'exito') {
             <?php endif; ?>
 
             <form id="loginForm" class="login-form" method="post" action="login.php" novalidate>
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
                 <label for="login" data-i18n="loginUsername">Email o Cédula</label>
-                <input type="text" id="login" name="login" autocomplete="off" placeholder="usuario@email.com o 12345678" data-i18n-placeholder="loginUsernamePlaceholder" />
+                <input type="text" id="login" name="login" autocomplete="username" maxlength="100" required placeholder="usuario@email.com o 12345678" value="<?= htmlspecialchars($loginInputValue, ENT_QUOTES, 'UTF-8') ?>" <?= $emailIncorrecto ? 'aria-invalid="true"' : '' ?> data-i18n-placeholder="loginUsernamePlaceholder" />
+                <?php if ($emailIncorrecto): ?>
+                    <p class="login-field-error" role="alert">El correo electrónico es incorrecto.</p>
+                <?php endif; ?>
 
                 <label for="password" data-i18n="loginPassword">Contraseña</label>
                 <div class="password-field">
-                    <input type="password" id="password" name="password" placeholder="••••••••" data-i18n-placeholder="loginPasswordPlaceholder" />
+                    <input type="password" id="password" name="password" autocomplete="current-password" maxlength="4096" required placeholder="••••••••" <?= $passwordIncorrecta ? 'aria-invalid="true"' : '' ?> data-i18n-placeholder="loginPasswordPlaceholder" />
                     <button type="button" class="toggle-password" data-target="password" aria-label="Mostrar contraseña">
                         <span class="toggle-icon">👁</span>
                     </button>
                 </div>
+                <?php if ($passwordIncorrecta): ?>
+                    <p class="login-field-error" role="alert">Contraseña incorrecta.</p>
+                <?php endif; ?>
 
                 <button type="button" class="forgot-password" onclick="event.preventDefault()" data-i18n="loginForgot">Olvidé mi contraseña</button>
 
@@ -130,12 +138,7 @@ if (isset($_GET['registro']) && $_GET['registro'] === 'exito') {
                     <a href="registrarse.php" class="register-link" data-i18n="loginRegister">Registrate acá</a>
                 </p>
 
-                <a class="google-button" href="https://accounts.google.com/signin/v2/identifier?service=mail" target="_blank" rel="noopener noreferrer">
-                    <img class="google-icon" src="../img/google-logo.png" alt="Google logo" data-i18n-alt="loginGoogleAlt">
-                    <span data-i18n="loginGoogle">Iniciar con Google</span>
-                </a>
-
-                <p class="google-legal" data-i18n="loginLegal">Al iniciar sesión aceptas los términos y condiciones de la empresa, las reglas de uso y la política de privacidad.</p>
+                <p class="legal-notice" data-i18n="loginLegal">Al iniciar sesión aceptas los términos y condiciones de la empresa, las reglas de uso y la política de privacidad.</p>
             </form>
         </section>
     </main>

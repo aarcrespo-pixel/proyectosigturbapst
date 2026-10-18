@@ -1,0 +1,114 @@
+.admin-mensajes-main {
+    padding-top: clamp(28px, 5vw, 58px);
+}
+
+.admin-mensajes-reportes {
+    margin-top: 20px;
+}
+
+.admin-mensajes-reporte {
+    margin: 12px 0 0;
+    padding: 18px 20px;
+    border: 1px solid var(--admin-line);
+    border-radius: 15px;
+    background: var(--admin-paper);
+    box-shadow: 0 7px 20px rgba(29, 53, 68, .04);
+}
+
+.admin-mensajes-reporte__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.admin-mensajes-reporte__header > div {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.admin-mensajes-reporte__header strong {
+    color: var(--admin-ink);
+    font-size: 1rem;
+}
+
+.admin-mensajes-reporte__header > div > span {
+    color: var(--admin-muted);
+    font-size: .84rem;
+    overflow-wrap: anywhere;
+}
+
+.admin-mensajes-reporte p {
+    margin: 15px 0 12px;
+    color: #354956;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+
+.admin-mensajes-reporte small {
+    color: var(--admin-muted);
+    font-size: .78rem;
+}
+
+.admin-mensajes-estado {
+    display: inline-flex;
+    align-items: center;
+    min-height: 27px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: #eef2f4;
+    color: #586875;
+    font-size: .74rem;
+    font-weight: 750;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.admin-mensajes-estado--pendiente {
+    background: #fff3d8;
+    color: #885815;
+}
+
+.admin-mensajes-respuesta {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--admin-accent);
+    border-radius: 0 12px 12px 0;
+    background: var(--admin-soft);
+}
+
+.admin-mensajes-respuesta strong {
+    color: var(--admin-accent-dark);
+}
+
+.admin-mensajes-respuesta p {
+    margin: 8px 0;
+}
+
+.admin-mensajes-responder {
+    margin-top: 16px;
+}
+
+.admin-mensajes-responder .admin-form__actions {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+    .admin-mensajes-main {
+        padding-top: 16px;
+    }
+
+    .admin-mensajes-reporte {
+        padding: 15px;
+    }
+
+    .admin-mensajes-reporte__header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .admin-mensajes-responder .admin-form__actions {
+        grid-column: auto;
+    }
+}

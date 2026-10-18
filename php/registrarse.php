@@ -1,6 +1,7 @@
 <?php
-session_start();
 require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/autorizacion.php';
+sigtur_iniciar_sesion_segura();
 
 if (isset($_SESSION['usuario_id'])) {
     header('Location: ../index.php');
@@ -15,16 +16,26 @@ $messageType = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     /* Normalizamos y validamos todos los campos antes de tocar la base de
        datos para rechazar entradas incompletas o con formato inválido. */
-    $nombreCompleto = trim($_POST['nombre_completo'] ?? '');
-    $cedula = trim($_POST['cedula'] ?? '');
-    $email = trim(strtolower($_POST['email'] ?? ''));
-    $telefono = trim($_POST['telefono'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirmarPassword = $_POST['confirmar_password'] ?? '';
-    $aceptaTerminos = isset($_POST['aceptar_terminos']) ? $_POST['aceptar_terminos'] : '';
+    if (!sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
+        $message = 'La sesión expiró. Recargá la página e intentá nuevamente.';
+        $messageType = 'error';
+    }
 
-    if ($nombreCompleto === '' || $cedula === '' || $email === '' || $password === '' || $confirmarPassword === '' || $aceptaTerminos !== 'on') {
+    $nombreCompleto = is_string($_POST['nombre_completo'] ?? null) ? trim($_POST['nombre_completo']) : '';
+    $cedula = is_string($_POST['cedula'] ?? null) ? trim($_POST['cedula']) : '';
+    $email = is_string($_POST['email'] ?? null) ? trim(strtolower($_POST['email'])) : '';
+    $telefono = is_string($_POST['telefono'] ?? null) ? trim($_POST['telefono']) : '';
+    $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
+    $confirmarPassword = is_string($_POST['confirmar_password'] ?? null) ? $_POST['confirmar_password'] : '';
+    $aceptaTerminos = is_string($_POST['aceptar_terminos'] ?? null) ? $_POST['aceptar_terminos'] : '';
+
+    if ($message !== '') {
+        // El formulario ya tiene un error de seguridad que se informa al usuario.
+    } elseif ($nombreCompleto === '' || $cedula === '' || $email === '' || $password === '' || $confirmarPassword === '' || $aceptaTerminos !== 'on') {
         $message = 'Completa todos los campos obligatorios y acepta los términos y condiciones.';
+        $messageType = 'error';
+    } elseif (mb_strlen($nombreCompleto) > 100 || strlen($email) > 100 || strlen($telefono) > 20) {
+        $message = 'Revisá la longitud del nombre, correo electrónico o teléfono.';
         $messageType = 'error';
     } elseif (!preg_match('/^\d{1,8}$/', $cedula)) {
         $message = 'La cédula debe contener solo números y hasta 8 dígitos.';
@@ -34,6 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $messageType = 'error';
     } elseif ($password !== $confirmarPassword) {
         $message = 'Las contraseñas no coinciden.';
+        $messageType = 'error';
+    } elseif (strlen($password) < 8 || strlen($password) > 72) {
+        $message = 'La contraseña debe tener entre 8 y 72 caracteres.';
         $messageType = 'error';
     } elseif ($telefono !== '' && !preg_match('/^[0-9+\-\s()]{6,15}$/', $telefono)) {
         $message = 'El número telefónico no es válido.';
@@ -51,17 +65,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Nunca guardamos la contraseña plana: password_hash genera un hash verificable.
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare('INSERT INTO usuarios (nombre_completo, cedula, email, telefono, password, rol) VALUES (:nombre_completo, :cedula, :email, :telefono, :password, :rol)');
-            $stmt->execute([
-                ':nombre_completo' => $nombreCompleto,
-                ':cedula' => $cedula,
-                ':email' => $email,
-                ':telefono' => $telefono,
-                ':password' => $hash,
-                ':rol' => 'turista',
-            ]);
 
-            header('Location: login.php?registro=exito');
-            exit;
+            try {
+                $stmt->execute([
+                    ':nombre_completo' => $nombreCompleto,
+                    ':cedula' => $cedula,
+                    ':email' => $email,
+                    ':telefono' => $telefono,
+                    ':password' => $hash,
+                    ':rol' => 'turista',
+                ]);
+            } catch (PDOException $exception) {
+                if ($exception->getCode() !== '23000') {
+                    error_log('SIGTUR registration failed while inserting a user.');
+                    $message = 'No se pudo crear la cuenta. Intentá nuevamente más tarde.';
+                    $messageType = 'error';
+                } else {
+                    $message = 'Ya existe una cuenta con ese email o cédula.';
+                    $messageType = 'error';
+                }
+            }
+
+            if ($message === '') {
+                header('Location: login.php?registro=exito');
+                exit;
+            }
         }
     }
 }
@@ -95,10 +123,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <form id="registroForm" method="post" action="registrarse.php" novalidate>
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
                 <div class="form-grid">
                     <div class="field-group">
                         <label for="Nombre">Nombre completo</label>
-                        <input type="text" id="Nombre" name="nombre_completo" placeholder="Nombre completo" value="<?php echo htmlspecialchars($_POST['nombre_completo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required />
+                        <input type="text" id="Nombre" name="nombre_completo" maxlength="100" autocomplete="name" placeholder="Nombre completo" value="<?php echo htmlspecialchars($_POST['nombre_completo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required />
                     </div>
 
                     <div class="field-group">
@@ -108,18 +137,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="field-group">
                         <label for="CorreoElectronico">Correo electrónico</label>
-                        <input type="email" id="CorreoElectronico" name="email" placeholder="Correo electrónico" value="<?php echo htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required />
+                        <input type="email" id="CorreoElectronico" name="email" maxlength="100" autocomplete="email" placeholder="Correo electrónico" value="<?php echo htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required />
                     </div>
 
                     <div class="field-group">
                         <label for="Telefono">Número telefónico</label>
-                        <input type="tel" id="Telefono" name="telefono" maxlength="15" placeholder="Número telefónico" value="<?php echo htmlspecialchars($_POST['telefono'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
+                        <input type="tel" id="Telefono" name="telefono" maxlength="20" autocomplete="tel" placeholder="Número telefónico" value="<?php echo htmlspecialchars($_POST['telefono'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                     </div>
 
                     <div class="field-group">
                         <label for="Contraseña">Contraseña</label>
                         <div class="password-field">
-                            <input type="password" id="Contraseña" name="password" placeholder="Contraseña" required />
+                            <input type="password" id="Contraseña" name="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Contraseña" required />
                             <button type="button" class="toggle-password" data-target="Contraseña" aria-label="Mostrar contraseña">
                                 <span class="toggle-icon">👁</span>
                             </button>
@@ -129,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="field-group">
                         <label for="ConfirmarContraseña">Confirmar contraseña</label>
                         <div class="password-field">
-                            <input type="password" id="ConfirmarContraseña" name="confirmar_password" placeholder="Confirmar contraseña" required />
+                            <input type="password" id="ConfirmarContraseña" name="confirmar_password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Confirmar contraseña" required />
                             <button type="button" class="toggle-password" data-target="ConfirmarContraseña" aria-label="Mostrar contraseña">
                                 <span class="toggle-icon">👁</span>
                             </button>
@@ -148,13 +177,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <p class="register-prompt">
                     ¿Ya tenés una cuenta?
-                    <a href="login.php" class="register-link" data-i18n="loginRegister">Inicia sesión acá</a>
+                    <a href="login.php" class="register-link" data-i18n="registerLogin">Inicia sesión acá</a>
                 </p>
-
-                <a class="google-button" href="https://accounts.google.com/signin/v2/identifier?service=mail" target="_blank" rel="noopener noreferrer">
-                    <img class="google-icon" src="../img/google-logo.png" alt="Google logo">
-                    Iniciar con Google
-                </a>
             </form>
         </section>
     </main>
