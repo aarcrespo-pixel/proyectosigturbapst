@@ -19,6 +19,7 @@ try {
     session_start();
     require_once __DIR__ . '/../conexion.php';
     require_once __DIR__ . '/../helpers/autorizacion.php';
+    require_once __DIR__ . '/../helpers/imagenes.php';
 
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
         responderEliminacionGaleria(['success' => false, 'message' => 'Método no permitido.'], 405);
@@ -54,15 +55,10 @@ try {
 
     $archivoEliminado = false;
     $advertencia = null;
-    $rutaRelativa = str_replace('\\', '/', (string) $foto['imagen']);
-    $prefijoGaleria = '../uploads/galeria-eventos/';
-    $nombreArchivo = str_starts_with($rutaRelativa, $prefijoGaleria)
-        ? substr($rutaRelativa, strlen($prefijoGaleria))
-        : '';
+    $nombreArchivo = sigtur_nombre_imagen_desde_ruta((string) $foto['imagen'], 'uploads/galeria-eventos');
+    $nombreArchivo = basename(str_replace('\\', '/', $nombreArchivo));
     if (
-        $nombreArchivo !== ''
-        && basename($nombreArchivo) === $nombreArchivo
-        && preg_match('/^foto_[a-f0-9]{32}\.(jpg|png|webp)$/D', $nombreArchivo) === 1
+        preg_match('/^(?:foto_[a-f0-9]{32}|usuario-\d+-[a-z0-9-]+-[a-f0-9]{32})\.(jpg|png|webp)$/D', $nombreArchivo) === 1
     ) {
         $directorioReal = realpath(__DIR__ . '/../../uploads/galeria-eventos');
         $archivoReal = $directorioReal !== false ? realpath($directorioReal . DIRECTORY_SEPARATOR . $nombreArchivo) : false;

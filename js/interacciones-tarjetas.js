@@ -10,6 +10,7 @@
     const DELETE_COMMENT_API_URL = `${projectPhpPath}comentarios.php`;
     const csrfToken = document.querySelector('.menu-principal')?.dataset.csrf
         || document.querySelector('.perfil-publico')?.dataset.csrf
+        || document.body?.dataset.csrf
         || '';
     const cardSelectors = '.tarjeta, .evento-card, .evento-card-pasado, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria, .tarjeta-destino, .tarjeta-ruta, .gallery-engagement-card';
 

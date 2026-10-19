@@ -3,6 +3,7 @@
 session_start();
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/censura.php';
+require_once __DIR__ . '/helpers/autorizacion.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -21,6 +22,12 @@ if ((!$esEliminacion && $itemKey === '') || strlen($itemKey) > 255) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuarioId = (int) ($_SESSION['usuario_id'] ?? 0);
+
+    if (!sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
+        http_response_code(403);
+        echo json_encode(['error' => 'La sesión expiró. Recargá la página e intentá nuevamente']);
+        exit;
+    }
 
     /* La eliminación comparte este controlador con la publicación: se valida
        sesión y autorización antes de ejecutar el DELETE parametrizado. */

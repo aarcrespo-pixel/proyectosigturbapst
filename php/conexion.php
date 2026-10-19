@@ -22,7 +22,7 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS `sigtur_schema_version` (
         `version` VARCHAR(40) NOT NULL PRIMARY KEY
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-    $versionEsperada = '2026-10-18-private-follow-requests-1';
+    $versionEsperada = '2026-10-18-upload-image-filenames-1';
     $versionEsquema = $pdo->query("SELECT `version` FROM `sigtur_schema_version` LIMIT 1")->fetchColumn();
     $bloqueoEsquema = false;
     if ($versionEsquema !== $versionEsperada) {
@@ -444,6 +444,25 @@ try {
     /* Vinculamos registros antiguos por texto para que la relación nueva sea
        útil desde la primera carga, incluso antes de editar cada evento a mano. */
     $pdo->exec("UPDATE eventos e INNER JOIN lugares l ON e.ubicacion LIKE CONCAT('%', l.nombre, '%') SET e.lugar_id = l.id WHERE e.lugar_id IS NULL");
+    $pdo->exec("UPDATE eventos SET imagen_portada = SUBSTRING_INDEX(REPLACE(imagen_portada, CHAR(92), '/'), '/', -1) WHERE imagen_portada LIKE '../uploads/eventos/%'");
+    $pdo->exec("UPDATE eventos SET imagen_portada = SUBSTRING_INDEX(REPLACE(imagen_portada, CHAR(92), '/'), '/', -1) WHERE imagen_portada LIKE 'uploads/eventos/%' OR imagen_portada LIKE '/uploads/eventos/%'");
+    $pdo->exec("UPDATE galeria_eventos SET imagen = SUBSTRING_INDEX(REPLACE(imagen, CHAR(92), '/'), '/', -1) WHERE imagen LIKE '../uploads/galeria-eventos/%'");
+    $pdo->exec("UPDATE galeria_eventos SET imagen = SUBSTRING_INDEX(REPLACE(imagen, CHAR(92), '/'), '/', -1) WHERE imagen LIKE 'uploads/galeria-eventos/%' OR imagen LIKE '/uploads/galeria-eventos/%'");
+    $pdo->exec("UPDATE lugares SET imagen = SUBSTRING_INDEX(REPLACE(imagen, CHAR(92), '/'), '/', -1) WHERE imagen LIKE '../uploads/contenido-publico/%'");
+    $pdo->exec("UPDATE lugares SET imagen = SUBSTRING_INDEX(REPLACE(imagen, CHAR(92), '/'), '/', -1) WHERE imagen LIKE 'uploads/contenido-publico/%' OR imagen LIKE '/uploads/contenido-publico/%'");
+    $pdo->exec("UPDATE contenido_turistico SET imagen = SUBSTRING_INDEX(REPLACE(imagen, CHAR(92), '/'), '/', -1) WHERE imagen LIKE '../uploads/contenido-publico/%'");
+    $pdo->exec("UPDATE contenido_turistico SET imagen = SUBSTRING_INDEX(REPLACE(imagen, CHAR(92), '/'), '/', -1) WHERE imagen LIKE 'uploads/contenido-publico/%' OR imagen LIKE '/uploads/contenido-publico/%'");
+    $pdo->exec("UPDATE gastronomia_catalogo SET imagen = SUBSTRING_INDEX(REPLACE(imagen, CHAR(92), '/'), '/', -1) WHERE imagen LIKE '../uploads/contenido-publico/%'");
+    $pdo->exec("UPDATE gastronomia_catalogo SET imagen = SUBSTRING_INDEX(REPLACE(imagen, CHAR(92), '/'), '/', -1) WHERE imagen LIKE 'uploads/contenido-publico/%' OR imagen LIKE '/uploads/contenido-publico/%'");
+    $pdo->exec("UPDATE publicaciones SET imagen = SUBSTRING_INDEX(REPLACE(imagen, CHAR(92), '/'), '/', -1) WHERE imagen LIKE 'uploads/publicaciones/%'");
+    $pdo->exec("UPDATE publicaciones SET imagen = SUBSTRING_INDEX(REPLACE(imagen, CHAR(92), '/'), '/', -1) WHERE imagen LIKE '../uploads/publicaciones/%' OR imagen LIKE '/uploads/publicaciones/%'");
+    $pdo->exec("UPDATE mensajes SET foto_url = SUBSTRING_INDEX(REPLACE(foto_url, CHAR(92), '/'), '/', -1) WHERE foto_url LIKE 'uploads/chat/%'");
+    $pdo->exec("UPDATE mensajes SET foto_url = SUBSTRING_INDEX(REPLACE(foto_url, CHAR(92), '/'), '/', -1) WHERE foto_url LIKE '../uploads/chat/%' OR foto_url LIKE '/uploads/chat/%'");
+    $pdo->exec("UPDATE favoritos_eventos SET imagen_portada = SUBSTRING_INDEX(REPLACE(imagen_portada, CHAR(92), '/'), '/', -1) WHERE imagen_portada LIKE '../uploads/eventos/%'");
+    $pdo->exec("UPDATE favoritos_eventos SET imagen_portada = SUBSTRING_INDEX(REPLACE(imagen_portada, CHAR(92), '/'), '/', -1) WHERE imagen_portada LIKE 'uploads/eventos/%' OR imagen_portada LIKE '/uploads/eventos/%'");
+    $pdo->exec("UPDATE usuarios SET avatar = SUBSTRING_INDEX(REPLACE(avatar, CHAR(92), '/'), '/', -1) WHERE avatar LIKE '../uploads/avatars/%' OR avatar LIKE 'uploads/avatars/%' OR avatar LIKE '/uploads/avatars/%'");
+    $pdo->exec("UPDATE usuarios SET foto_perfil = SUBSTRING_INDEX(REPLACE(foto_perfil, CHAR(92), '/'), '/', -1) WHERE foto_perfil LIKE '../uploads/avatars/%' OR foto_perfil LIKE 'uploads/avatars/%' OR foto_perfil LIKE '/uploads/avatars/%'");
+    $pdo->exec("UPDATE usuarios SET banner = SUBSTRING_INDEX(REPLACE(banner, CHAR(92), '/'), '/', -1) WHERE banner LIKE '../uploads/banners/%' OR banner LIKE 'uploads/banners/%' OR banner LIKE '/uploads/banners/%'");
     $pdo->exec("DELETE FROM `sigtur_schema_version`");
     $versionStmt = $pdo->prepare("INSERT INTO `sigtur_schema_version` (`version`) VALUES (:version)");
     $versionStmt->execute([':version' => $versionEsperada]);

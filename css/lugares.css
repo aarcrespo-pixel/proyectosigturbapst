@@ -150,9 +150,60 @@ body {
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.lugares-galeria-add {
+    display: flex;
+    min-height: 260px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    border: 2px dashed var(--card-border);
+    border-radius: 28px;
+    background: var(--card-bg);
+}
+
+.lugares-galeria-add__input {
+    display: none;
+}
+
+.lugares-galeria-add__button {
+    display: grid;
+    width: 64px;
+    height: 64px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c36a50, #f2b08f);
+    color: #fff;
+    font: inherit;
+    font-size: 2.5rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 12px 28px rgba(195, 106, 80, .25);
+}
+
+.lugares-galeria-add__button:hover {
+    transform: translateY(-2px);
+}
+
+.lugares-galeria-add__hint,
+.lugares-galeria-feedback {
+    color: var(--text-muted, #5a6487);
+    font-size: .9rem;
+    text-align: center;
+}
+
+.lugares-galeria-feedback {
+    margin: 0 0 1rem;
+    padding: .8rem 1rem;
+    border-radius: 12px;
+    background: rgba(195, 106, 80, .09);
+}
+
 body[data-tema="oscuro"] .tarjeta-lugar,
 body[data-tema="oscuro"] .tarjeta-interes,
-body[data-tema="oscuro"] .tarjeta-galeria {
+body[data-tema="oscuro"] .tarjeta-galeria,
+body[data-tema="oscuro"] .lugares-galeria-add {
     background: linear-gradient(180deg, rgba(43, 30, 17, 0.96), rgba(26, 18, 11, 0.96));
     border-color: rgba(255, 223, 177, 0.16);
     box-shadow: 0 20px 48px rgba(0, 0, 0, 0.26);
@@ -160,7 +211,8 @@ body[data-tema="oscuro"] .tarjeta-galeria {
 
 .tarjeta-lugar,
 .tarjeta-interes,
-.tarjeta-galeria {
+.tarjeta-galeria,
+.lugares-galeria-add {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 28px;
@@ -263,7 +315,8 @@ body[data-tema="oscuro"] .tarjeta-contenido p {
 
     .tarjeta-lugar,
     .tarjeta-interes,
-    .tarjeta-galeria {
+    .tarjeta-galeria,
+    .lugares-galeria-add {
         min-height: auto;
     }
 

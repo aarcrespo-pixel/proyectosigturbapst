@@ -66,7 +66,9 @@ window.chatIntervalId = window.chatIntervalId || null;
     }
     function getMediaUrl(path) {
         if (!path) return '';
-        return /^(https?:|\/)/i.test(path) ? path : `${avatarFallback.replace(/img\/user\.png$/, '')}${path}`;
+        if (/^(https?:|\/)/i.test(path)) return path;
+        const mediaPath = path.includes('/') ? path : `uploads/chat/${encodeURIComponent(path)}`;
+        return `${avatarFallback.replace(/img\/user\.png$/, '')}${mediaPath}`;
     }
     // CAMBIO APLICADO: priorizamos la hora SQL y solo usamos el parseo local
     // como respaldo para mensajes optimistas o respuestas antiguas.

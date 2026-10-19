@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../conexion.php';
+require_once __DIR__ . '/../helpers/imagenes.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -42,6 +43,11 @@ $projectRoot = str_replace('\\', '/', dirname(__DIR__, 2));
 $publicBase = $documentRoot !== '' ? rtrim(str_ireplace($documentRoot, '', $projectRoot), '/') . '/' : '/';
 foreach ($resultados as &$resultado) {
     $resultado['tipoLabel'] = $resultado['tipo'] === 'evento' ? 'EVENTO' : ($resultado['tipo'] === 'lugar' ? 'LUGAR' : 'GASTRONOMÍA');
+    if ($resultado['tipo'] === 'evento') {
+        $resultado['imagen'] = sigtur_url_imagen_subida((string) $resultado['imagen'], 'eventos', '../img/porco.avif');
+    } elseif ($resultado['tipo'] === 'lugar') {
+        $resultado['imagen'] = sigtur_url_imagen_subida((string) $resultado['imagen'], 'contenido-publico');
+    }
     if (!preg_match('/^https?:\\/\\//i', $resultado['imagen'] ?? '')) {
         $resultado['imagen'] = $publicBase . ltrim(str_replace(['../', './'], '', $resultado['imagen'] ?? ''), '/');
     }

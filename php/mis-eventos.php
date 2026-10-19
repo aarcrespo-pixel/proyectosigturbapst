@@ -10,6 +10,7 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 
 require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/imagenes.php';
 $usuarioId = (int) $_SESSION['usuario_id'];
 
 $catalogo = [
@@ -195,12 +196,15 @@ body[data-tema="oscuro"] .mis-empty p,
 <main class="mis-eventos-wrap"><header class="mis-eventos-head"><div><h1>Mis Eventos y Favoritos</h1><p>Tu agenda y los eventos que quieres guardar para más adelante.</p></div></header>
 <section class="mis-favoritos"><div class="mis-favoritos-head"><h2>Mis eventos favoritos</h2><span><?= count($favoritosEventos) ?> guardados</span></div>
 <?php if (!$favoritosEventos): ?><p class="mis-favoritos-empty">Todavía no guardaste eventos favoritos.</p><?php else: ?><div class="mis-eventos-grid" id="misFavoritosGrid"><?php foreach ($favoritosEventos as $favorito):
-    $imagenFavorito = (string) ($favorito['imagen_portada'] ?? '../img/porco.avif');
+    $imagenFavorito = sigtur_url_imagen_subida((string) ($favorito['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif');
     $fechaFavorito = !empty($favorito['fecha']) ? date('d/m/Y', strtotime($favorito['fecha'])) : '';
     ?><article class="mis-evento-card" data-favorito-slug="<?= htmlspecialchars($favorito['evento_slug'], ENT_QUOTES, 'UTF-8') ?>"><img src="<?= htmlspecialchars($imagenFavorito, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($favorito['titulo'], ENT_QUOTES, 'UTF-8') ?>"><div class="mis-evento-info"><h2><?= htmlspecialchars($favorito['titulo'], ENT_QUOTES, 'UTF-8') ?></h2><div class="mis-evento-meta"><?php if ($fechaFavorito): ?><span>Fecha: <?= htmlspecialchars($fechaFavorito, ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?><?php if (!empty($favorito['ubicacion'])): ?><span>Lugar: <?= htmlspecialchars($favorito['ubicacion'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?><?php if (!empty($favorito['categoria'])): ?><span><?= htmlspecialchars($favorito['categoria'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?></div><div class="mis-evento-actions"><?php if (!empty($favorito['evento_id'])): ?><a class="mis-pase" href="evento.php?id=<?= (int) $favorito['evento_id'] ?>">Ver evento</a><?php endif; ?><button class="mis-cancelar" type="button" data-quitar-favorito>Quitar favorito</button></div></div></article><?php endforeach; ?></div><?php endif; ?></section>
 <?php if (!$inscripciones): ?><section class="mis-empty"><a class="mis-explorar" href="eventos.php">Explorar eventos</a></section><?php else: ?><div class="mis-eventos-followup"><a class="mis-explorar" href="eventos.php">Explorar eventos</a></div><section class="mis-eventos-grid" id="misEventosGrid"><?php foreach ($inscripciones as $evento):
-    $imagenEvento = $evento['imagen_portada'] ?? $evento['imagen'] ?? '../img/default.jpg';
-    $imagen = str_starts_with((string) $imagenEvento, '../../') ? substr((string) $imagenEvento, 1) : (string) $imagenEvento;
+    $imagenEvento = $evento['imagen_portada'] ?? $evento['imagen'] ?? '';
+    if (str_starts_with((string) $imagenEvento, '../../')) {
+        $imagenEvento = substr((string) $imagenEvento, 1);
+    }
+    $imagen = sigtur_url_imagen_subida((string) $imagenEvento, 'eventos', '../img/default.jpg');
     $qr = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . rawurlencode('SIGTUR|' . $evento['slug'] . '|' . $usuarioId); ?><article class="mis-evento-card" data-inscripcion-id="<?= (int) $evento['inscripcion_id'] ?>"><img src="<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>"><div class="mis-evento-info"><h2><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h2><div class="mis-evento-meta"><span>📅 <?= htmlspecialchars(date('d/m/Y', strtotime($evento['fecha']))) ?></span><span>📍 <?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></span></div><div class="mis-evento-actions"><button class="mis-pase" type="button" data-qr="<?= htmlspecialchars($qr, ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>">Ver Pase / QR</button><button class="mis-cancelar" type="button" data-cancelar>Cancelar inscripción</button></div></div></article><?php endforeach; ?></section><?php endif; ?></main>
 <div class="mis-qr" id="misQrModal" hidden><div class="mis-qr-box"><button class="mis-qr-close" type="button" data-cerrar-qr>×</button><h2 id="misQrTitle">Pase digital</h2><img id="misQrImage" src="" alt="Código QR de acreditación"><p><?= htmlspecialchars($_SESSION['usuario_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?></p></div></div>
 <script src="../js/translator.js"></script>

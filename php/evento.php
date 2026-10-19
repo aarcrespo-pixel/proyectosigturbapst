@@ -3,6 +3,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/imagenes.php';
+require_once __DIR__ . '/helpers/autorizacion.php';
 
 $eventos = [
     'bambola' => ['La Bambola', 'Discoteca', '+18', 'Costanera Sur 1535', 'Todos los fines de semana.', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRh8BnVQ1qdPDXqoHVHylKrGhwk3guImN0d1ZRYbBNmSXoKPhqmCE-pMsE&s', '2026-09-19', false, -31.3921, -57.9606],
@@ -47,7 +49,7 @@ if ($esEventoDinamico) {
     $edad = 'Todo público';
     $lugar = $eventoDb['ubicacion'];
     $descripcion = $eventoDb['descripcion'];
-    $imagen = $eventoDb['imagen_portada'] ?: '../img/porco.avif';
+    $imagen = sigtur_url_imagen_subida((string) ($eventoDb['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif');
     $fecha = $eventoDb['fecha'];
     $aireLibre = false;
     $latitud = -31.383;
@@ -81,6 +83,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['accion']))
     /* Las acciones AJAX responden JSON y se procesan antes del HTML para que
        inscripción y preguntas no mezclen cabeceras con la vista. */
     header('Content-Type: application/json; charset=utf-8');
+    if (!sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
+        http_response_code(403);
+        echo json_encode(['error' => 'La sesión expiró. Recargá la página e intentá nuevamente']);
+        exit;
+    }
     if (!$usuarioId) {
         http_response_code(401);
         echo json_encode(['error' => 'Iniciá sesión para continuar']);
@@ -132,7 +139,7 @@ $mapUrl = 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($
 $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . rawurlencode('SIGTUR|' . $slug . '|' . $usuarioId);
 $fechaLegible = date('d/m/Y', strtotime($fecha));
 $fotosEvento = [$imagen];
-$itemKeyComentarios = $esEventoDinamico ? 'evento-' . $eventoId : 'evento-' . $slug;
+$itemKeyComentarios = 'evento-' . ($eventoId > 0 ? $eventoId : $slug);
 $faq = [['¿Hay estacionamiento?', 'Sí, revisá las indicaciones del lugar antes de asistir.'], ['¿Cuál es la política de cancelación?', 'Podés cancelar tu inscripción desde esta misma página.'], ['¿El lugar es accesible?', 'Consultá al organizador mediante el formulario de preguntas.']];
 ?>
 <!DOCTYPE html>
@@ -149,24 +156,18 @@ $faq = [['¿Hay estacionamiento?', 'Sí, revisá las indicaciones del lugar ante
 .event-hero{background-image:none}
 .event-hero{background:transparent!important}
 .event-hero::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;background-image:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.65) 60%,rgba(0,0,0,.75) 100%),url('<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>');background-size:cover;background-position:center}
-.event-detail .menu-principal{background:transparent!important}
-.event-back{left:auto;right:clamp(1.25rem,6vw,6rem)}
-.event-detail .menu-principal{position:absolute;z-index:2}
+.event-back{left:clamp(1.25rem,6vw,6rem);right:auto;top:1.5rem;z-index:3}
 .event-hero__content{position:relative;z-index:2}
 .event-hero h1,.event-hero p,.event-badge,.event-social{position:relative;z-index:2;text-shadow:0 2px 10px rgba(0,0,0,.8)}
 .event-actions{position:relative;z-index:2}
-.event-exit{display:none!important}
 .event-favorite{background:#fff;color:#17110a!important}.event-favorite.is-favorite{background:#ffe4dc;color:#8f3024!important}.event-social{display:none!important}
 </style>
 </head>
-<body class="event-detail <?= $esPasado ? 'event-finished' : '' ?>">
-<?php $navBase = $esEventoDinamico ? '' : '../';
-$activePage = 'eventos';
-require __DIR__.'/nav.php'; ?>
+<body class="event-detail <?= $esPasado ? 'event-finished' : '' ?>" data-csrf="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
 <main>
-<section class="event-hero"><a class="event-back" href="../eventos.php">← Volver a eventos</a><a class="event-exit" href="../eventos.php">Salir del evento</a><div class="event-hero__content"><div class="event-meta"><span class="event-badge"><?= htmlspecialchars($fechaLegible) ?></span><span class="event-badge"><?= htmlspecialchars($categoria) ?></span><span class="event-badge"><?= htmlspecialchars($edad) ?></span><a class="event-badge" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📍 <?= htmlspecialchars($lugar) ?></a></div><h1><?= htmlspecialchars($nombre) ?></h1><p><?= htmlspecialchars($descripcion) ?></p><div class="event-social"><div class="event-avatars"><?php foreach ($avatares as $avatar):$avatarFile = basename($avatar['avatar'] ?? '');
+<section class="event-hero"><a class="event-back" href="<?= $esEventoDinamico ? 'eventos.php' : '../eventos.php' ?>">← Volver a eventos</a><div class="event-hero__content"><div class="event-meta"><span class="event-badge"><?= htmlspecialchars($fechaLegible) ?></span><span class="event-badge"><?= htmlspecialchars($categoria) ?></span><span class="event-badge"><?= htmlspecialchars($edad) ?></span><a class="event-badge" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📍 <?= htmlspecialchars($lugar) ?></a></div><h1><?= htmlspecialchars($nombre) ?></h1><p><?= htmlspecialchars($descripcion) ?></p><div class="event-social"><div class="event-avatars"><?php foreach ($avatares as $avatar):$avatarFile = basename($avatar['avatar'] ?? '');
     $avatarSrc = ($avatarFile && $avatarFile !== 'default-avatar.png' && file_exists(__DIR__.'/../uploads/avatars/'.$avatarFile)) ? '../uploads/avatars/'.$avatarFile : '../img/user.png'; ?><img class="event-avatar" src="<?= htmlspecialchars($avatarSrc, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($avatar['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>"><?php endforeach; ?></div><span><?= $asistentes ?> <?= $asistentes === 1 ? 'persona asistirá' : 'personas asistirán' ?></span></div><div class="event-actions"><button id="favoriteEventButton" class="event-primary event-favorite<?= $esFavorito ? ' is-favorite' : '' ?>" type="button" aria-pressed="<?= $esFavorito ? 'true' : 'false' ?>" data-endpoint="<?= htmlspecialchars($apiBase . 'favoritos_eventos.php', ENT_QUOTES, 'UTF-8') ?>" data-slug="<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>" data-evento-id="<?= (int) $eventoId ?>" data-titulo="<?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>" data-descripcion="<?= htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8') ?>" data-fecha="<?= htmlspecialchars($fecha, ENT_QUOTES, 'UTF-8') ?>" data-ubicacion="<?= htmlspecialchars($lugar, ENT_QUOTES, 'UTF-8') ?>" data-categoria="<?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>" data-imagen="<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>"><?= $esFavorito ? '★ Guardado en favoritos' : '☆ Guardar en favoritos' ?></button><?php if ($inscripto): ?><button id="ticketButton" class="event-secondary" type="button">Ver mi Pase / QR</button><?php endif; ?><a class="event-secondary" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Cómo llegar</a></div></div></section>
-<section class="event-main"><div class="event-grid"><div><article class="event-panel"><h2>Sobre el evento</h2><p><?= htmlspecialchars($descripcion) ?> Fecha: <?= htmlspecialchars($fechaLegible) ?>. Encontrá todos los detalles y preparate para vivir la experiencia.</p><div class="event-facts"><div class="event-fact"><strong>Fecha</strong><?= htmlspecialchars($fechaLegible) ?></div><div class="event-fact"><strong>Ubicación</strong><?= htmlspecialchars($lugar) ?></div></div><div id="forecast" class="event-panel event-forecast"><span id="forecastIcon">☀️</span><strong id="forecastText">Clima estimado</strong></div></article><article class="event-panel event-faq"><h2>Preguntas frecuentes</h2><?php foreach ($faq as [$pregunta,$respuesta]): ?><details><summary><?= htmlspecialchars($pregunta) ?></summary><p><?= htmlspecialchars($respuesta) ?></p></details><?php endforeach; ?><form class="event-question" id="form-comentario-evento" data-endpoint="<?= htmlspecialchars($apiBase . 'agregar_comentario_evento.php', ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="evento_id" value="<?= (int) $eventoId ?>"><input name="comentario" maxlength="500" placeholder="¿Tenés otra pregunta?" <?= !$usuarioId ? 'disabled' : '' ?>><button type="submit" <?= !$usuarioId ? 'disabled' : '' ?>>Enviar</button></form><?php if (!$usuarioId): ?><small>Iniciá sesión para preguntar al organizador.</small><?php endif; ?><p class="event-question-feedback" id="event-question-feedback" role="status" aria-live="polite"></p></article><?php if ($preguntasRespondidas): ?><article class="event-panel event-faq"><h2>Preguntas respondidas</h2><?php foreach ($preguntasRespondidas as $q): ?><details><summary><?= htmlspecialchars($q['pregunta']) ?></summary><p><?= htmlspecialchars($q['respuesta']) ?></p></details><?php endforeach; ?></article><?php endif; ?></div><aside><article class="event-panel"><h2>Planificá tu visita</h2><p>Guardá el evento, consultá el mapa y revisá el pronóstico antes de salir.</p><a class="event-secondary" style="display:inline-block;background:var(--event-ink);color:white" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Abrir en Google Maps</a></article></aside></div><section style="margin-top:3rem"><h2>Eventos similares que te pueden interesar</h2><div class="event-rec"><?php $recs = array_values(array_filter($eventos, fn ($item) => $item[1] === $categoria || $item[3] === $lugar));
+<section class="event-main"><div class="event-grid"><div><article class="event-panel"><h2>Sobre el evento</h2><p><?= htmlspecialchars($descripcion) ?> Fecha: <?= htmlspecialchars($fechaLegible) ?>. Encontrá todos los detalles y preparate para vivir la experiencia.</p><div class="event-facts"><div class="event-fact"><strong>Fecha</strong><?= htmlspecialchars($fechaLegible) ?></div><div class="event-fact"><strong>Ubicación</strong><?= htmlspecialchars($lugar) ?></div></div><div id="forecast" class="event-panel event-forecast"><span id="forecastIcon">☀️</span><strong id="forecastText">Clima estimado</strong></div></article><article class="event-panel event-faq"><h2>Preguntas frecuentes</h2><?php foreach ($faq as [$pregunta,$respuesta]): ?><details><summary><?= htmlspecialchars($pregunta) ?></summary><p><?= htmlspecialchars($respuesta) ?></p></details><?php endforeach; ?><form class="event-question" id="form-comentario-evento" data-endpoint="<?= htmlspecialchars($apiBase . 'agregar_comentario_evento.php', ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="evento_id" value="<?= (int) $eventoId ?>"><input name="comentario" maxlength="500" placeholder="¿Tenés otra pregunta?" <?= !$usuarioId ? 'disabled' : '' ?>><button type="submit" <?= !$usuarioId ? 'disabled' : '' ?>>Enviar</button></form><?php if (!$usuarioId): ?><small>Iniciá sesión para preguntar al organizador.</small><?php endif; ?><p class="event-question-feedback" id="event-question-feedback" role="status" aria-live="polite"></p></article><article class="event-panel event-comments"><h2>Comentarios del evento</h2><div class="gallery-engagement-card" data-item-key="<?= htmlspecialchars($itemKeyComentarios, ENT_QUOTES, 'UTF-8') ?>"></div></article><?php if ($preguntasRespondidas): ?><article class="event-panel event-faq"><h2>Preguntas respondidas</h2><?php foreach ($preguntasRespondidas as $q): ?><details><summary><?= htmlspecialchars($q['pregunta']) ?></summary><p><?= htmlspecialchars($q['respuesta']) ?></p></details><?php endforeach; ?></article><?php endif; ?></div><aside><article class="event-panel"><h2>Planificá tu visita</h2><p>Guardá el evento, consultá el mapa y revisá el pronóstico antes de salir.</p><a class="event-secondary" style="display:inline-block;background:var(--event-ink);color:white" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Abrir en Google Maps</a></article></aside></div><section style="margin-top:3rem"><h2>Eventos similares que te pueden interesar</h2><div class="event-rec"><?php $recs = array_values(array_filter($eventos, fn ($item) => $item[1] === $categoria || $item[3] === $lugar));
 foreach (array_slice($recs, 0, 3) as $rec):$recSlug = array_search($rec, $eventos, true); $recIdQuery = $pdo->prepare('SELECT id FROM eventos WHERE slug = :slug LIMIT 1'); $recIdQuery->execute([':slug' => $recSlug]); $recId = (int) $recIdQuery->fetchColumn(); ?><a href="<?= htmlspecialchars(($esEventoDinamico ? '' : '../') . 'evento.php?id=' . $recId, ENT_QUOTES, 'UTF-8') ?>"><img src="<?= htmlspecialchars($rec[5], ENT_QUOTES, 'UTF-8') ?>" alt=""><span><?= htmlspecialchars($rec[0], ENT_QUOTES, 'UTF-8') ?></span></a><?php endforeach; ?></div></section></section>
 <?php if ($esPasado): ?>
 <section class="event-main finished-archive" aria-labelledby="finished-gallery-title">
@@ -176,14 +177,12 @@ foreach (array_slice($recs, 0, 3) as $rec):$recSlug = array_search($rec, $evento
         <article class="finished-metric"><strong><?= count($fotosEvento) ?></strong><span>Fotos subidas</span></article>
     </div>
     <section class="finished-gallery"><h2 id="finished-gallery-title">Galería de fotos</h2><div class="finished-gallery-grid"><?php foreach ($fotosEvento as $foto): ?><a href="<?= htmlspecialchars($foto, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener"><img src="<?= htmlspecialchars($foto, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>"></a><?php endforeach; ?></div></section>
-    <article class="event-panel" style="margin-top:2rem"><h2>Comentarios del evento</h2><div class="gallery-engagement-card" data-item-key="<?= htmlspecialchars($itemKeyComentarios, ENT_QUOTES, 'UTF-8') ?>"></div></article>
 </section>
 <?php endif; ?>
 </main>
 <?php if ($inscripto): ?><div class="event-qr-backdrop" id="ticketModal" hidden><article class="event-ticket"><header><strong>Pase digital</strong><button class="event-ticket-close" type="button" id="ticketClose">×</button></header><img src="<?= htmlspecialchars($qrUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Código QR de acreditación"><h2><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?></h2><dl><div><dt>Fecha</dt><dd><?= htmlspecialchars($fechaLegible) ?></dd></div><div><dt>Lugar</dt><dd><?= htmlspecialchars($lugar) ?></dd></div><div><dt>Asistente</dt><dd><?= htmlspecialchars($_SESSION['usuario_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?></dd></div></dl></article></div><?php endif; ?>
 <script src="<?= $assetBase ?>js/interacciones-tarjetas.js"></script>
 <script src="<?= $assetBase ?>js/evento.js" defer></script>
-<?php if ($esEventoDinamico): ?><script>document.querySelectorAll('.event-back,.event-exit').forEach((link) => { link.href = 'eventos.php'; });</script><?php endif; ?>
 <script>
 const favoriteEventButton = document.getElementById('favoriteEventButton');
 favoriteEventButton?.addEventListener('click', async () => {

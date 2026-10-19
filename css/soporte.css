@@ -695,6 +695,55 @@ body[data-tema="oscuro"] .config-label strong {
 .btn-secondary { color: #28536b; background: rgba(40, 83, 107, .08); border-color: rgba(40, 83, 107, .18); box-shadow: none; }
 .btn-secondary:hover { color: #1f4358; background: rgba(40, 83, 107, .14); box-shadow: none; }
 
+.config-exit-modal[hidden] {
+  display: none;
+}
+
+.config-exit-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.config-exit-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.58);
+}
+
+.config-exit-modal__dialog {
+  position: relative;
+  width: min(480px, 100%);
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.config-exit-modal__dialog h2 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+.config-exit-modal__dialog p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.config-exit-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
 .contact-list {
   display: grid;
   gap: 10px;

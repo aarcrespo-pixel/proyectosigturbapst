@@ -223,9 +223,19 @@ body.admin-panel-page {
 }
 
 .admin-content-item > summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
     color: var(--admin-ink);
     cursor: pointer;
     font-weight: 750;
+}
+
+.admin-content-item > summary .admin-button {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    pointer-events: none;
 }
 
 .admin-content-form {

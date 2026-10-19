@@ -5,6 +5,7 @@ ini_set('display_errors', '0');
 require_once __DIR__ . '/../helpers/autorizacion.php';
 sigtur_iniciar_sesion_segura();
 require_once __DIR__ . '/../conexion.php';
+require_once __DIR__ . '/../helpers/imagenes.php';
 header('Content-Type: application/json; charset=utf-8');
 
 function responderPerfilPublicaciones(array $payload, int $status = 200): void
@@ -59,7 +60,7 @@ try {
         if (!is_dir($directorio) && !mkdir($directorio, 0775, true) && !is_dir($directorio)) {
             responderPerfilPublicaciones(['success' => false, 'message' => 'No se pudo preparar la carpeta de publicaciones.'], 500);
         }
-        $nombreArchivo = 'publicacion_' . bin2hex(random_bytes(16)) . '.' . $tiposPermitidos[$mime];
+        $nombreArchivo = sigtur_nombre_imagen_subida($usuarioId, (string) ($archivo['name'] ?? 'publicacion'), $tiposPermitidos[$mime]);
         $rutaArchivo = $directorio . DIRECTORY_SEPARATOR . $nombreArchivo;
         if (!move_uploaded_file($archivo['tmp_name'], $rutaArchivo)) {
             responderPerfilPublicaciones(['success' => false, 'message' => 'No se pudo guardar la imagen.'], 500);
@@ -67,7 +68,7 @@ try {
 
         try {
             $insertar = $pdo->prepare('INSERT INTO publicaciones (usuario_id, imagen, descripcion) VALUES (:usuario_id, :imagen, NULL)');
-            $insertar->execute([':usuario_id' => $usuarioId, ':imagen' => 'uploads/publicaciones/' . $nombreArchivo]);
+            $insertar->execute([':usuario_id' => $usuarioId, ':imagen' => $nombreArchivo]);
         } catch (Throwable $exception) {
             if (is_file($rutaArchivo)) {
                 unlink($rutaArchivo);
@@ -143,7 +144,7 @@ try {
         $pdo->commit();
 
         $nombreImagen = basename((string) $imagen);
-        $rutaImagen = str_starts_with((string) $imagen, 'uploads/publicaciones/')
+        $rutaImagen = is_file(__DIR__ . '/../../uploads/publicaciones/' . $nombreImagen)
             ? __DIR__ . '/../../uploads/publicaciones/' . $nombreImagen
             : __DIR__ . '/../../uploads/banners/' . $nombreImagen;
         if ($nombreImagen !== '' && is_file($rutaImagen) && !unlink($rutaImagen)) {

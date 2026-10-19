@@ -1,6 +1,16 @@
+<?php
+require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/autorizacion.php';
+require_once __DIR__ . '/helpers/imagenes.php';
+
+$usuarioActual = sigtur_usuario_actual($pdo);
+$puedeAgregarFotosLugares = $usuarioActual && $usuarioActual['rol'] === 'organizador';
+$fotosLugaresStmt = $pdo->prepare("SELECT imagen, titulo FROM galeria_eventos WHERE tipo_evento = 'Lugares' ORDER BY fecha_creacion DESC, id DESC");
+$fotosLugaresStmt->execute();
+$fotosLugares = $fotosLugaresStmt->fetchAll();
+?>
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -141,13 +151,34 @@
         </section>
 
 
-        <section class="seccion-lugares">
+        <section class="seccion-lugares" id="galeria-historica">
             <h2 data-i18n="placesSectionGalleryTitle">Galería Histórica</h2>
+            <?php if (isset($_GET['fotos_agregadas'])): ?>
+                <p class="lugares-galeria-feedback" role="status">
+                    Se agregaron <?= max(1, (int) $_GET['fotos_agregadas']) ?> foto<?= (int) $_GET['fotos_agregadas'] === 1 ? '' : 's' ?> a la galería.
+                    <?php if (isset($_GET['algunas_fotos_fallaron'])): ?>Algunas fotos no se pudieron subir.<?php endif; ?>
+                </p>
+            <?php endif; ?>
             <div class="galeria-lugares">
                 <article class="tarjeta-galeria"><img src="../img/Plaza_33.webp" alt="Vista de evento" data-i18n-alt="placesGalleryAlt" data-i18n-index="0"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="0">Plaza Treinta y Tres</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/Plaza_artigas.webp" alt="Plaza central" data-i18n-alt="placesGalleryAlt" data-i18n-index="1"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="1">Plaza Artigas</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/solari.jfif" alt="Espacio de descanso" data-i18n-alt="placesGalleryAlt" data-i18n-index="2"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="2">Parque Benito Solari</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/Termas_Dayman.webp" alt="Punto turístico" data-i18n-alt="placesGalleryAlt" data-i18n-index="3"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="3">Termas del Dayman</h3></div></article>
+                <?php foreach ($fotosLugares as $fotoLugar): ?>
+                    <?php $fotoLugarUrl = sigtur_url_imagen_subida((string) $fotoLugar['imagen'], 'galeria-eventos', '../img/porco.avif'); ?>
+                    <article class="tarjeta-galeria">
+                        <img src="<?= htmlspecialchars($fotoLugarUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($fotoLugar['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
+                        <div class="tarjeta-contenido"><h3><?= htmlspecialchars($fotoLugar['titulo'], ENT_QUOTES, 'UTF-8') ?></h3></div>
+                    </article>
+                <?php endforeach; ?>
+                <?php if ($puedeAgregarFotosLugares): ?>
+                    <form class="lugares-galeria-add" method="post" action="api/agregar_foto_galeria_publica.php" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="tipo_galeria" value="Lugares">
+                        <input class="lugares-galeria-add__input" id="fotos-lugares" type="file" name="fotos[]" accept="image/jpeg,image/png,image/webp" multiple required>
+                        <button class="lugares-galeria-add__button" type="button" aria-label="Agregar fotos a la galería histórica" title="Agregar fotos">+</button>
+                    </form>
+                <?php endif; ?>
             </div>
         </section>
 
@@ -172,5 +203,15 @@
 
     <script src="../js/script.js" defer></script>
     <script src="../js/lugar-links.js" defer></script>
+    <?php if ($puedeAgregarFotosLugares): ?>
+        <script>
+            const botonAgregarFotosLugares = document.querySelector('.lugares-galeria-add__button');
+            const selectorFotosLugares = document.getElementById('fotos-lugares');
+            botonAgregarFotosLugares?.addEventListener('click', () => selectorFotosLugares?.click());
+            selectorFotosLugares?.addEventListener('change', () => {
+                if (selectorFotosLugares.files.length > 0) selectorFotosLugares.form.submit();
+            });
+        </script>
+    <?php endif; ?>
 
 </html>

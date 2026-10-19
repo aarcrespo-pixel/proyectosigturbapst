@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
+require_once __DIR__ . '/helpers/imagenes.php';
 $usuarioActual = sigtur_usuario_actual($pdo);
 $puedeGestionarEventos = $usuarioActual && in_array($usuarioActual['rol'], ['organizador', 'administrador'], true);
 $csrfToken = $puedeGestionarEventos ? sigtur_csrf_token() : '';
@@ -10,6 +11,15 @@ $csrfToken = $puedeGestionarEventos ? sigtur_csrf_token() : '';
 /* La consulta base excluye eventos finalizados y ordena por fecha para que el
    listado principal sea una agenda real, no una copia del catálogo JS. */
 $eventosDesdeBd = $pdo->query('SELECT * FROM eventos WHERE es_pasado = 0 AND fecha >= CURDATE() ORDER BY fecha ASC, id DESC')->fetchAll();
+$eventosAnterioresDesdeBd = $pdo->query('SELECT * FROM eventos WHERE es_pasado = 1 OR fecha < CURDATE() ORDER BY fecha DESC, id DESC')->fetchAll();
+foreach ($eventosDesdeBd as &$evento) {
+    $evento['imagen_portada'] = sigtur_url_imagen_subida((string) ($evento['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif');
+}
+unset($evento);
+foreach ($eventosAnterioresDesdeBd as &$eventoAnterior) {
+    $eventoAnterior['imagen_portada'] = sigtur_url_imagen_subida((string) ($eventoAnterior['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif');
+}
+unset($eventoAnterior);
 $eventoIdsPorSlug = [];
 foreach ($pdo->query('SELECT id, slug FROM eventos')->fetchAll() as $eventoCatalogo) {
     $eventoIdsPorSlug[(string) $eventoCatalogo['slug']] = (int) $eventoCatalogo['id'];
@@ -42,7 +52,12 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     if (is_numeric($maxPrecio)) { $condiciones[] = 'COALESCE(precio, 0) <= :max_precio'; $parametros[':max_precio'] = (float) $maxPrecio; }
     $consultaFiltrada = $pdo->prepare('SELECT * FROM eventos WHERE ' . implode(' AND ', $condiciones) . ' ORDER BY fecha ASC, id DESC');
     $consultaFiltrada->execute($parametros);
-    echo json_encode($consultaFiltrada->fetchAll(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $eventosFiltrados = $consultaFiltrada->fetchAll();
+    foreach ($eventosFiltrados as &$eventoFiltrado) {
+        $eventoFiltrado['imagen_portada'] = sigtur_url_imagen_subida((string) ($eventoFiltrado['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif');
+    }
+    unset($eventoFiltrado);
+    echo json_encode($eventosFiltrados, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
 ?>
@@ -145,13 +160,14 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
             </div>
             <div class="eventos-lista" id="eventos-principales-contenedor">
                 <?php foreach ($eventosDesdeBd as $evento): ?>
-                    <article class="evento-card" data-item-key="evento-<?= htmlspecialchars($evento['slug'], ENT_QUOTES, 'UTF-8') ?>" data-engagement="like-only">
-                        <div class="evento-card-media"><img src="<?= htmlspecialchars($evento['imagen_portada'] ?: '../img/porco.avif', ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy"></div>
+                    <article class="evento-card" data-item-key="evento-<?= (int) $evento['id'] ?>" data-engagement="like-only">
+                        <div class="evento-card-media"><img src="<?= htmlspecialchars($evento['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy"></div>
                         <div class="evento-card-body"><span class="categoria"><?= htmlspecialchars($evento['categoria'] . ' · ' . ($evento['tipo_entrada'] ?? 'Gratuito'), ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><p class="lugar"><?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></p></div>
                         <div class="evento-card-action"><div class="fecha-protagonista"><span class="fecha-mes"><?= htmlspecialchars(strtoupper(date('M', strtotime($evento['fecha']))), ENT_QUOTES, 'UTF-8') ?></span><span class="fecha-dia"><?= htmlspecialchars(date('d', strtotime($evento['fecha'])), ENT_QUOTES, 'UTF-8') ?></span></div><a href="evento.php?id=<?= (int) $evento['id'] ?>" class="boton-amarillo">Ver más</a></div>
                     </article>
                 <?php endforeach; ?>
             </div>
+            <button class="eventos-list-toggle" id="eventos-principales-toggle" type="button" data-event-list="principales" aria-expanded="false" aria-controls="eventos-principales-contenedor" hidden>Ver más</button>
         </section>
 
         <?php if ($puedeGestionarEventos): ?><div class="form-evento-overlay" id="form-evento-overlay" aria-hidden="true">
@@ -318,6 +334,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                 <h2>Eventos Anteriores</h2>
             </div>
             <div class="eventos-anteriores-grid" id="anteriores-contenedor"></div>
+            <button class="eventos-list-toggle" id="eventos-anteriores-toggle" type="button" data-event-list="anteriores" aria-expanded="false" aria-controls="anteriores-contenedor" hidden>Ver más</button>
         </section>
 
         <section class="seccion galeria-eventos">
@@ -392,6 +409,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <script src="../js/interacciones-tarjetas.js" defer></script>
     <script>window.sigturEventoIds = <?= json_encode($eventoIdsPorSlug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosDesdeBd = <?= json_encode($eventosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
+    <script>window.eventosAnterioresDesdeBd = <?= json_encode($eventosAnterioresDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script src="../js/eventos.js" defer></script>
 </body>
 

@@ -1,10 +1,12 @@
 <?php
 require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/imagenes.php';
 
 /* El slug llega por GET, pero solo aceptamos caracteres de URL conocidos para
    impedir que el parámetro se use como fragmento SQL o ruta de archivo. */
 $identificador = trim((string) ($_GET['id'] ?? $_GET['slug'] ?? ''));
 $slug = strtolower(preg_replace('/[^a-z0-9-]/', '', $identificador));
+$origenDetalle = in_array($_GET['origen'] ?? '', ['turismo', 'lugares'], true) ? $_GET['origen'] : '';
 if ($identificador === '') {
     http_response_code(400);
     exit('Lugar no especificado.');
@@ -26,7 +28,7 @@ $consultaEventos = $pdo->prepare('SELECT id, titulo, fecha, ubicacion, categoria
 $consultaEventos->execute([':lugar_id' => (int) $lugar['id']]);
 $eventosRelacionados = $consultaEventos->fetchAll();
 $atractivos = array_values(array_filter(array_map('trim', explode('|', $lugar['atractivos']))));
-$imagenLugar = htmlspecialchars($lugar['imagen'], ENT_QUOTES, 'UTF-8');
+$imagenLugar = htmlspecialchars(sigtur_url_imagen_subida((string) $lugar['imagen'], 'contenido-publico'), ENT_QUOTES, 'UTF-8');
 $nombreLugar = htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
@@ -39,12 +41,13 @@ $nombreLugar = htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8');
     <link rel="stylesheet" href="../css/lugar.css">
 </head>
 <body class="lugar-page">
-<?php $navBase = ''; $activePage = 'lugares'; include __DIR__ . '/nav.php'; ?>
+<?php if ($origenDetalle === ''): $navBase = ''; $activePage = 'lugares'; include __DIR__ . '/nav.php'; endif; ?>
 
 <main>
     <section class="lugar-hero" style="--lugar-image: url('<?= $imagenLugar ?>')">
         <div class="lugar-hero__overlay"></div>
         <div class="lugar-hero__content">
+            <?php if ($origenDetalle !== ''): ?><a class="lugar-back" href="<?= $origenDetalle ?>.php">← Volver a <?= $origenDetalle === 'turismo' ? 'turismo' : 'lugares' ?></a><?php endif; ?>
             <span class="lugar-badge" data-i18n="placeCategoryLabel"> <?= htmlspecialchars($lugar['categoria'], ENT_QUOTES, 'UTF-8') ?> </span>
             <h1 class="lugar-hero-titulo"><?= $nombreLugar ?></h1>
             <p class="lugar-location">⌖ <?= htmlspecialchars($lugar['direccion'], ENT_QUOTES, 'UTF-8') ?></p>
@@ -87,7 +90,7 @@ $nombreLugar = htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8');
                 <?php foreach ($eventosRelacionados as $evento): ?>
                     <a href="evento.php?id=<?= (int) $evento['id'] ?>" class="card-evento-sugerido-link">
                         <div class="card-evento-sugerido">
-                            <div class="card-img-container"><img src="<?= htmlspecialchars($evento['imagen_portada'] ?: '../img/porco.avif', ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>"></div>
+                            <div class="card-img-container"><img src="<?= htmlspecialchars(sigtur_url_imagen_subida((string) ($evento['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif'), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>"></div>
                             <div class="lugar-event-card__body"><span class="event-category"><?= htmlspecialchars($evento['categoria'], ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><span class="event-date">📅 <?= htmlspecialchars(date('d/m/Y', strtotime($evento['fecha'])), ENT_QUOTES, 'UTF-8') ?></span><span class="event-more" data-i18n="placeViewMore">Ver Más</span></div>
                         </div>
                     </a>

@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/../helpers/imagenes.php'; ?>
 <section class="admin-section" id="eventos" aria-labelledby="events-title">
     <div class="admin-section__heading">
         <div>
@@ -5,7 +6,10 @@
             <h2 id="events-title">Eventos</h2>
             <p>Los próximos eventos aparecen primero. Abrí “Editar evento” para modificar sus datos.</p>
         </div>
-        <span class="admin-count"><?= count($todosEventos) ?> eventos</span>
+        <div class="admin-form__actions">
+            <span class="admin-count"><?= count($todosEventos) ?> eventos</span>
+            <a class="admin-button" href="eventos.php">Crear evento</a>
+        </div>
     </div>
     <?php if (!$todosEventos): ?>
         <p class="admin-empty">Todavía no hay eventos cargados.</p>
@@ -81,7 +85,7 @@
                             <label class="admin-form__wide admin-event__image-field">Foto del evento
                                 <img
                                     class="admin-event__image-preview"
-                                    src="<?= htmlspecialchars($evento['imagen_portada'] ?: '../img/porco.avif', ENT_QUOTES, 'UTF-8') ?>"
+                                    src="<?= htmlspecialchars(sigtur_url_imagen_subida((string) ($evento['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif'), ENT_QUOTES, 'UTF-8') ?>"
                                     alt="Foto actual de <?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>"
                                     loading="lazy"
                                 >

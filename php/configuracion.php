@@ -26,7 +26,7 @@ $configCsrfToken = sigtur_csrf_token();
     <section class="support-container">
       <header class="hero">
         <div class="hero-top">
-          <a class="back-pill" href="../index.php" aria-label="Volver al inicio" data-i18n-aria-label="configBack" data-i18n="configBack">← Volver</a>
+          <a class="back-pill" href="../index.php" aria-label="Volver al inicio" data-config-exit data-i18n-aria-label="configBack" data-i18n="configBack">← Volver</a>
           <span class="eyebrow" data-i18n="configEyebrow">⚙️ Configuración</span>
         </div> 
         <h1 data-i18n="configTitle">Personaliza tu experiencia en la página</h1>
@@ -123,10 +123,21 @@ $configCsrfToken = sigtur_csrf_token();
       <div class="config-actions">
         <button class="btn btn-primary" type="button" data-i18n="configSave">Guardar cambios</button>
         <button class="btn btn-secondary" type="button" data-config-reset data-i18n="configReset">Restablecer</button>
-        <a class="btn btn-secondary" href="../index.php">Salir sin guardar</a>
+        <a class="btn btn-secondary" href="../index.php" data-config-exit>Salir sin guardar</a>
       </div>
     </section>
   </main>
+  <div class="config-exit-modal" data-config-exit-modal hidden>
+    <div class="config-exit-modal__backdrop" data-config-exit-cancel></div>
+    <section class="config-exit-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="config-exit-title" aria-describedby="config-exit-description">
+      <h2 id="config-exit-title">¿Estás seguro de que quieres salir sin guardar los cambios?</h2>
+      <p id="config-exit-description">Los cambios que hiciste se perderán.</p>
+      <div class="config-exit-modal__actions">
+        <button class="btn btn-secondary" type="button" data-config-exit-cancel>Quedarme</button>
+        <button class="btn" type="button" data-config-exit-confirm>Salir de todos modos</button>
+      </div>
+    </section>
+  </div>
   <script src="../js/translator.js?v=20261001-1"></script>
   <script src="../js/script.js?v=20261001-1"></script>
   <script src="../js/notificaciones.js?v=<?= time() ?>"></script>
@@ -138,6 +149,12 @@ $configCsrfToken = sigtur_csrf_token();
     const selectorTamanoLetra = document.getElementById('tamano-letra');
     const botonGuardar = document.querySelector('.config-actions .btn-primary');
     const botonRestablecer = document.querySelector('[data-config-reset]');
+    const enlacesSalida = document.querySelectorAll('[data-config-exit]');
+    const modalSalida = document.querySelector('[data-config-exit-modal]');
+    const botonConfirmarSalida = document.querySelector('[data-config-exit-confirm]');
+    const botonCancelarSalida = document.querySelector('[data-config-exit-cancel]');
+    let destinoSalida = '../index.php';
+    let elementoEnfocadoAntesDelModal = null;
 
     const aplicarTemaDesdeConfiguracion = (oscuro, persistir = false) => {
       if (persistir) guardarTema(oscuro);
@@ -202,6 +219,52 @@ $configCsrfToken = sigtur_csrf_token();
       const idiomaGuardado = leerIdioma();
       selectorIdioma.value = ['es', 'en', 'pt'].includes(idiomaGuardado) ? idiomaGuardado : 'es';
     }
+
+    const preferenciasIniciales = {
+      tema: selectorTema ? selectorTema.value : '',
+      idioma: selectorIdioma ? selectorIdioma.value : '',
+      tamanoLetra: selectorTamanoLetra ? selectorTamanoLetra.value : ''
+    };
+
+    const hayCambiosSinGuardar = () =>
+      (selectorTema && selectorTema.value !== preferenciasIniciales.tema) ||
+      (selectorIdioma && selectorIdioma.value !== preferenciasIniciales.idioma) ||
+      (selectorTamanoLetra && selectorTamanoLetra.value !== preferenciasIniciales.tamanoLetra);
+
+    const cerrarModalSalida = () => {
+      if (!modalSalida) return;
+      modalSalida.hidden = true;
+      if (elementoEnfocadoAntesDelModal instanceof HTMLElement) {
+        elementoEnfocadoAntesDelModal.focus();
+      }
+    };
+
+    enlacesSalida.forEach((enlace) => {
+      enlace.addEventListener('click', (evento) => {
+        if (!hayCambiosSinGuardar() || !modalSalida) return;
+        evento.preventDefault();
+        destinoSalida = enlace.href;
+        elementoEnfocadoAntesDelModal = enlace;
+        modalSalida.hidden = false;
+        botonCancelarSalida?.focus();
+      });
+    });
+
+    botonConfirmarSalida?.addEventListener('click', () => {
+      window.location.assign(destinoSalida);
+    });
+
+    modalSalida?.addEventListener('click', (evento) => {
+      if (evento.target.closest('[data-config-exit-cancel]')) {
+        cerrarModalSalida();
+      }
+    });
+
+    document.addEventListener('keydown', (evento) => {
+      if (evento.key === 'Escape' && modalSalida && !modalSalida.hidden) {
+        cerrarModalSalida();
+      }
+    });
   </script>
 </body>
 </html>

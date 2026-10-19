@@ -26,6 +26,7 @@ try {
     require_once __DIR__ . '/../conexion.php';
     require_once __DIR__ . '/../helpers/autorizacion.php';
     require_once __DIR__ . '/../helpers/censura.php';
+    require_once __DIR__ . '/../helpers/imagenes.php';
     $usuarioActual = sigtur_usuario_actual($pdo);
     if (!$usuarioActual) responderMensajes(['success' => false, 'status' => 'error', 'message' => 'Sesión no iniciada'], 401);
     $usuarioId = (int) $usuarioActual['id'];
@@ -92,9 +93,9 @@ try {
             $mime = (new finfo(FILEINFO_MIME_TYPE))->file($_FILES[$campo]['tmp_name']);
             $permitidos = $campo === 'foto' ? ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'] : ['audio/webm' => 'webm', 'audio/ogg' => 'ogg', 'audio/mpeg' => 'mp3', 'audio/wav' => 'wav'];
             if (!isset($permitidos[$mime])) responderMensajes(['success' => false, 'error' => 'Tipo de archivo no permitido'], 422);
-            $nombreArchivo = $campo . '_' . bin2hex(random_bytes(12)) . '.' . $permitidos[$mime];
+            $nombreArchivo = sigtur_nombre_imagen_subida($usuarioId, (string) ($_FILES[$campo]['name'] ?? $campo), $permitidos[$mime]);
             if (!move_uploaded_file($_FILES[$campo]['tmp_name'], $directorioChat . '/' . $nombreArchivo)) responderMensajes(['success' => false, 'error' => 'No se pudo guardar el archivo'], 500);
-            ${$variable} = 'uploads/chat/' . $nombreArchivo;
+            ${$variable} = $campo === 'foto' ? $nombreArchivo : 'uploads/chat/' . $nombreArchivo;
         }
         if ($otroUsuarioId <= 0 || $otroUsuarioId === $usuarioId || ($texto === '' && !$fotoUrl && !$audioUrl) || mb_strlen($texto) > 500) {
             responderMensajes(['status' => 'error', 'success' => false, 'message' => 'Revisá el destinatario y el mensaje.'], 422);

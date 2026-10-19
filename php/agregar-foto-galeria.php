@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/imagenes.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 
 $esAjax = (($_POST['ajax'] ?? $_GET['ajax'] ?? '') === '1');
@@ -123,7 +124,7 @@ foreach ($archivos as $indice => $archivo) {
         continue;
     }
 
-    $nombreArchivo = 'foto_' . bin2hex(random_bytes(16)) . '.' . $extensionesPorMime[$mime];
+    $nombreArchivo = sigtur_nombre_imagen_subida((int) $usuario['id'], $nombreOriginal, $extensionesPorMime[$mime]);
     $rutaFoto = $directorioFotos . DIRECTORY_SEPARATOR . $nombreArchivo;
     if (!move_uploaded_file($rutaTemporal, $rutaFoto)) {
         error_log('No se pudo mover una foto subida a la galería de eventos.');
@@ -135,7 +136,7 @@ foreach ($archivos as $indice => $archivo) {
         $guardarFoto = $pdo->prepare('INSERT INTO galeria_eventos (imagen, titulo, descripcion, tipo_evento, usuario_id)
             VALUES (:imagen, :titulo, :descripcion, :tipo_evento, :usuario_id)');
         $guardarFoto->execute([
-            ':imagen' => '../uploads/galeria-eventos/' . $nombreArchivo,
+            ':imagen' => $nombreArchivo,
             ':titulo' => $titulo,
             ':descripcion' => $descripcion,
             ':tipo_evento' => $tipoEvento,
@@ -152,7 +153,7 @@ foreach ($archivos as $indice => $archivo) {
 
     $fotoGuardada = [
         'id' => (int) $pdo->lastInsertId(),
-        'imagen' => '../uploads/galeria-eventos/' . $nombreArchivo,
+        'imagen' => '../uploads/galeria-eventos/' . rawurlencode($nombreArchivo),
         'titulo' => $titulo,
         'descripcion' => $descripcion,
         'categoria' => $tipoEvento,

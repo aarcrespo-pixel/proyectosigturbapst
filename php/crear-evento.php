@@ -3,6 +3,7 @@ session_start();
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 require_once __DIR__ . '/helpers/notificaciones.php';
+require_once __DIR__ . '/helpers/imagenes.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     // El endpoint solo crea eventos por POST; cualquier acceso directo vuelve al listado.
@@ -33,9 +34,9 @@ if ($accion !== 'crear') {
         http_response_code(404);
         exit('El evento no existe.');
     }
-    if (!$esAdministrador && (int) $eventoExistente['organizador_id'] !== $usuarioId) {
+    if (!$esAdministrador && $accion === 'eliminar' && (int) $eventoExistente['organizador_id'] !== $usuarioId) {
         http_response_code(403);
-        exit('No tienes permiso para modificar este evento.');
+        exit('Solo puedes eliminar tus propios eventos.');
     }
 }
 $nuevoOrganizadorId = $accion === 'crear' ? $usuarioId : (int) $eventoExistente['organizador_id'];
@@ -111,14 +112,14 @@ if (is_array($archivoImagen) && ($archivoImagen['error'] ?? UPLOAD_ERR_NO_FILE) 
         http_response_code(500);
         exit('No se pudo preparar la carpeta de imágenes.');
     }
-    $nombreImagen = 'evento_' . bin2hex(random_bytes(16)) . '.' . $extensionesPermitidas[$mimeImagen];
+    $nombreImagen = sigtur_nombre_imagen_subida($usuarioId, (string) ($archivoImagen['name'] ?? 'evento'), $extensionesPermitidas[$mimeImagen]);
     $rutaImagenSubida = $directorioImagenes . DIRECTORY_SEPARATOR . $nombreImagen;
     if (!move_uploaded_file($archivoImagen['tmp_name'], $rutaImagenSubida)) {
         $rutaImagenSubida = null;
         http_response_code(500);
         exit('No se pudo guardar la imagen del evento.');
     }
-    $imagen = '../uploads/eventos/' . $nombreImagen;
+    $imagen = $nombreImagen;
 }
 
 /* Convertimos el título en un slug estable y consultamos su disponibilidad

@@ -7,6 +7,7 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 
 require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/imagenes.php';
 
 // ========================
 // FUNCIONES DE UTILIDAD
@@ -95,7 +96,7 @@ function processImageUpload($fileKey, $type, $userId, $sessionKey)
     }
 
     // ===== GENERAR NOMBRE ÚNICO =====
-    $nombreArchivo = $type . '_' . $userId . '_' . time() . '.' . $extension;
+    $nombreArchivo = sigtur_nombre_imagen_subida((int) $userId, (string) $nombreOriginal, $extension);
     $rutaDestino = $dirUpload . $nombreArchivo;
 
     // ===== VALIDAR TMP_NAME =====

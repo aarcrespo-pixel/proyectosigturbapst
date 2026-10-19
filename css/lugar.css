@@ -12,6 +12,8 @@ body[data-tema="oscuro"].lugar-page { --bg-main: #101114; --bg-card: #1e1e22; --
 .lugar-hero { position: relative; height: 400px; background: var(--lugar-image) center/cover; display: flex; align-items: flex-end; }
 .lugar-hero__overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8, 12, 20, .12), rgba(8, 12, 20, .88)); }
 .lugar-hero__content { position: relative; z-index: 1; width: min(1000px, calc(100% - 48px)); margin: 0 auto; padding: 40px 24px; color: #fff; }
+.lugar-back { display: inline-flex; align-items: center; margin-bottom: 20px; padding: 10px 16px; border: 1px solid rgba(255,255,255,.42); border-radius: 999px; background: rgba(15,20,24,.42); color: #fff; font-weight: 700; text-decoration: none; backdrop-filter: blur(10px); transition: background .2s ease, transform .2s ease; }
+.lugar-back:hover { background: rgba(255,255,255,.2); transform: translateY(-1px); }
 /* El tracking negativo compacta los títulos sin reducir su tamaño visual,
    una decisión tipográfica útil para encabezados largos de lugares. */
 .lugar-seccion-titulo,

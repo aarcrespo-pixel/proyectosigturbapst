@@ -28,7 +28,11 @@ if (!$pregunta) {
     http_response_code(404);
     exit('La consulta no existe.');
 }
-if ($usuario['rol'] === 'organizador' && (int) $pregunta['organizador_id'] !== (int) $usuario['id']) {
+if (
+    $usuario['rol'] === 'organizador'
+    && (int) $pregunta['organizador_id'] > 0
+    && (int) $pregunta['organizador_id'] !== (int) $usuario['id']
+) {
     http_response_code(403);
     exit('No tienes permiso para responder consultas de otro organizador.');
 }

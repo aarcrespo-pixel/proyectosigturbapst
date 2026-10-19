@@ -1,3 +1,14 @@
+<?php
+require_once __DIR__ . '/conexion.php';
+require_once __DIR__ . '/helpers/autorizacion.php';
+require_once __DIR__ . '/helpers/imagenes.php';
+
+$usuarioActual = sigtur_usuario_actual($pdo);
+$puedeAgregarFotosTurismo = $usuarioActual && $usuarioActual['rol'] === 'organizador';
+$fotosTurismoStmt = $pdo->prepare("SELECT imagen, titulo FROM galeria_eventos WHERE tipo_evento = 'Turismo' ORDER BY fecha_creacion DESC, id DESC");
+$fotosTurismoStmt->execute();
+$fotosTurismo = $fotosTurismoStmt->fetchAll();
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -122,10 +133,6 @@
         </section>
 
         <section class="seccion-turismo">
-            <a href="#" class="boton-turismo" data-i18n="tourismDiscoverMore">Descubrir más</a>
-        </section>
-
-        <section class="seccion-turismo">
             <h2 data-i18n="tourismWaterparksTitle">Parques Acuáticos y Termas</h2>
             <div class="rutas-grid">
                 <article class="tarjeta-ruta">
@@ -175,18 +182,34 @@
             </div>
         </section>
 
-        <section class="seccion-turismo">
-            <a href="#" class="boton-turismo" data-i18n="tourismDiscoverMore">Descubrir más</a>
-        </section>
-
-        <section class="seccion-turismo">
+        <section class="seccion-turismo" id="galeria-turistica">
             <h2 data-i18n="tourismGalleryTitle">Galería turística</h2>
+            <?php if (isset($_GET['fotos_agregadas'])): ?>
+                <p class="turismo-galeria-feedback" role="status">
+                    Se agregaron <?= max(1, (int) $_GET['fotos_agregadas']) ?> foto<?= (int) $_GET['fotos_agregadas'] === 1 ? '' : 's' ?> a la galería.
+                    <?php if (isset($_GET['algunas_fotos_fallaron'])): ?>Algunas fotos no se pudieron subir.<?php endif; ?>
+                </p>
+            <?php endif; ?>
             <div class="galeria-grid">
                 <article class="tarjeta-galeria"><img src="../img/solari.jfif" alt="Parque Solari" data-i18n-alt="tourismGalleryAlt" data-i18n-index="0"><div class="contenido"><h3 data-i18n="tourismGalleryTitles" data-i18n-index="0">Parque Benito Solari</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/fosa.webp" alt="La Fosa" data-i18n-alt="tourismGalleryAlt" data-i18n-index="1"><div class="contenido"><h3 data-i18n="tourismGalleryTitles" data-i18n-index="1">La Fosa</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/Shopping_Salto.jpg" alt="Shopping Salto" data-i18n-alt="tourismGalleryAlt" data-i18n-index="2"><div class="contenido"><h3 data-i18n="tourismGalleryTitles" data-i18n-index="2">Shopping Salto</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/Cine_Sarandi.jpg" alt="Cine Sarandi" data-i18n-alt="tourismGalleryAlt" data-i18n-index="3"><div class="contenido"><h3 data-i18n="tourismGalleryTitles" data-i18n-index="3">Cine Sarandi</h3></div></article>
-                <a href="#" class="boton-turismo" data-i18n="tourismGallerySeeAll">Ver todas las galerías</a>
+                <?php foreach ($fotosTurismo as $fotoTurismo): ?>
+                    <?php $fotoTurismoUrl = sigtur_url_imagen_subida((string) $fotoTurismo['imagen'], 'galeria-eventos', '../img/porco.avif'); ?>
+                    <article class="tarjeta-galeria">
+                        <img src="<?= htmlspecialchars($fotoTurismoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($fotoTurismo['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
+                        <div class="contenido"><h3><?= htmlspecialchars($fotoTurismo['titulo'], ENT_QUOTES, 'UTF-8') ?></h3></div>
+                    </article>
+                <?php endforeach; ?>
+                <?php if ($puedeAgregarFotosTurismo): ?>
+                    <form class="turismo-galeria-add" method="post" action="api/agregar_foto_galeria_publica.php" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="tipo_galeria" value="Turismo">
+                        <input class="turismo-galeria-add__input" id="fotos-turismo" type="file" name="fotos[]" accept="image/jpeg,image/png,image/webp" multiple required>
+                        <button class="turismo-galeria-add__button" type="button" aria-label="Agregar fotos a la galería turística" title="Agregar fotos">+</button>
+                    </form>
+                <?php endif; ?>
             </div>
         </section>
 
@@ -210,6 +233,16 @@
 
     <script src="../js/script.js" defer></script>
     <script src="../js/lugar-links.js" defer></script>
-</body> 
+    <?php if ($puedeAgregarFotosTurismo): ?>
+        <script>
+            const botonAgregarFotosTurismo = document.querySelector('.turismo-galeria-add__button');
+            const selectorFotosTurismo = document.getElementById('fotos-turismo');
+            botonAgregarFotosTurismo?.addEventListener('click', () => selectorFotosTurismo?.click());
+            selectorFotosTurismo?.addEventListener('change', () => {
+                if (selectorFotosTurismo.files.length > 0) selectorFotosTurismo.form.submit();
+            });
+        </script>
+    <?php endif; ?>
+</body>
 
 </html>

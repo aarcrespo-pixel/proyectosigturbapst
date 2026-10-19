@@ -59,6 +59,16 @@ const eventosPersistidos = Array.isArray(window.eventosDesdeBd) ? window.eventos
     imagen: evento.imagen_portada || '../img/porco.avif'
 })) : [];
 
+const eventosAnterioresPersistidos = Array.isArray(window.eventosAnterioresDesdeBd) ? window.eventosAnterioresDesdeBd.map((evento) => ({
+    id: Number(evento.id),
+    nombre: evento.titulo,
+    slug: evento.slug,
+    categoria: evento.categoria,
+    lugar: evento.ubicacion,
+    fecha: evento.fecha,
+    imagen: evento.imagen_portada || '../img/porco.avif'
+})) : [];
+
 const galeria = [
     // Cada foto lleva metadatos propios para que el lightbox pueda renderizar
     // el título y la descripción en lugar de mostrar un panel vacío.
@@ -80,7 +90,7 @@ let eventosPrincipales = (() => {
     ...datos.discotecas,
     ...datos.competencias
     ];
-    const slugsPersistidos = new Set(eventosPersistidos.map((evento) => evento.slug));
+    const slugsPersistidos = new Set([...eventosPersistidos, ...eventosAnterioresPersistidos].map((evento) => evento.slug));
     const list = [...eventosPersistidos, ...eventosEstaticos.filter((evento) => !slugsPersistidos.has(slugify(evento.nombre)))];
   const slugCounts = {};
   const fechasProtagonistas = [
@@ -124,6 +134,11 @@ let eventosPrincipales = (() => {
 let eventoFiltro = 'todos';
 let galeriaFiltro = 'todos';
 let galeriaBusqueda = '';
+const maxEventosVisibles = 4;
+const listasEventosExpandidas = {
+    principales: false,
+    anteriores: false
+};
 
 const pos = {}; // Crea un objeto vacío.
 // // Inicializa la posición actual para cada categoría (índice inicial = 0)
@@ -268,7 +283,8 @@ function obtenerRutaEvento(evento) {
 
 function tarjetaPrincipal(evento) {
     const slug = evento.slug || slugify(evento.nombre);
-    const itemKey = `evento-${slug}`;
+    const idCatalogado = evento.id || window.sigturEventoIds?.[slug];
+    const itemKey = `evento-${idCatalogado || slug}`;
     return `
     <article class="evento-card" data-item-key="${itemKey}" data-engagement="like-only">
       <div class="evento-card-media">
@@ -642,20 +658,47 @@ function renderEventosPrincipales() {
     const eventos = filtrarEventosPrincipales();
     if (!eventos.length) {
         contenedor.innerHTML = '<p class="sin-resultados">No se encontraron eventos con esa búsqueda.</p>';
+        actualizarVisibilidadListaEventos(contenedor, document.getElementById('eventos-principales-toggle'), false);
         return;
     }
 
     contenedor.innerHTML = eventos.map((evento) => tarjetaPrincipal(evento)).join('');
+    actualizarVisibilidadListaEventos(
+        contenedor,
+        document.getElementById('eventos-principales-toggle'),
+        listasEventosExpandidas.principales,
+        'principales'
+    );
     if (typeof window.initInteractiveCards === 'function') {
         window.initInteractiveCards(contenedor);
     }
 }
 
+function actualizarVisibilidadListaEventos(contenedor, boton, expandida, lista = null) {
+    if (!contenedor || !boton) return;
+    const tarjetas = [...contenedor.querySelectorAll('.evento-card, .evento-card-pasado')];
+    const mostrarBoton = tarjetas.length > maxEventosVisibles;
+    boton.hidden = !mostrarBoton;
+    if (!mostrarBoton) return;
+
+    tarjetas.forEach((tarjeta, indice) => {
+        tarjeta.hidden = !expandida && indice >= maxEventosVisibles;
+    });
+    boton.textContent = expandida ? 'Ver menos' : 'Ver más';
+    boton.setAttribute('aria-expanded', String(expandida));
+    if (lista) {
+        boton.dataset.eventList = lista;
+    }
+}
+
 function tarjetaAnterior(evento) {
-    const ruta = `evento-pasado.php?id=${encodeURIComponent(evento.slug || slugify(evento.nombre))}`;
-    const itemKey = evento.slug ? `evento-${evento.slug}` : `evento-${slugify(evento.nombre)}`;
+    const ruta = evento.id
+        ? `evento.php?id=${encodeURIComponent(evento.id)}`
+        : `evento-pasado.php?id=${encodeURIComponent(evento.slug || slugify(evento.nombre))}`;
+    const itemKey = `evento-${evento.id || evento.slug || slugify(evento.nombre)}`;
     return `
-        <a href="${ruta}" class="evento-card-pasado" data-item-key="${itemKey}" data-engagement="like-only">
+        <article class="evento-card-pasado" data-item-key="${itemKey}" data-engagement="like-only">
+            <a href="${ruta}" class="evento-card-pasado__link">
             <div class="card-img-container">
         <img src="${evento.imagen}" alt="${evento.nombre}" loading="lazy" onerror="this.onerror=null;this.src='../img/porco.avif';">
       </div>
@@ -668,7 +711,8 @@ function tarjetaAnterior(evento) {
                 <span class="evento-status">FINALIZADO</span>
                 <span class="boton-amarillo">Ver más</span>
             </div>
-    </a>
+            </a>
+        </article>
   `;
 }
 
@@ -676,7 +720,18 @@ function renderEventosAnteriores() {
     const contenedor = document.getElementById('anteriores-contenedor');
     if (!contenedor) return;
 
-    contenedor.innerHTML = datos.anteriores.map((evento) => tarjetaAnterior(evento)).join('');
+    const slugsAnterioresPersistidos = new Set(eventosAnterioresPersistidos.map((evento) => evento.slug));
+    const anteriores = [
+        ...eventosAnterioresPersistidos,
+        ...datos.anteriores.filter((evento) => !slugsAnterioresPersistidos.has(slugify(evento.nombre)))
+    ];
+    contenedor.innerHTML = anteriores.map((evento) => tarjetaAnterior(evento)).join('');
+    actualizarVisibilidadListaEventos(
+        contenedor,
+        document.getElementById('eventos-anteriores-toggle'),
+        listasEventosExpandidas.anteriores,
+        'anteriores'
+    );
     if (typeof window.initInteractiveCards === 'function') {
         window.initInteractiveCards(contenedor);
     }
@@ -769,7 +824,7 @@ function configurarDrawerFiltros() {
     limpiar?.addEventListener('click', () => {
         drawer.querySelectorAll('input, select').forEach((campo) => { campo.value = ''; });
         eventosPrincipales = (() => {
-            const slugsPersistidos = new Set(eventosPersistidos.map((evento) => evento.slug));
+            const slugsPersistidos = new Set([...eventosPersistidos, ...eventosAnterioresPersistidos].map((evento) => evento.slug));
             return [...eventosPersistidos, ...[...datos.destacados, ...datos.deportivos, ...datos.discotecas, ...datos.competencias].filter((evento) => !slugsPersistidos.has(slugify(evento.nombre)))];
         })();
         renderEventosPrincipales();
@@ -853,6 +908,19 @@ function init() {
     });
 
     configurarFiltrosEventos();
+    document.querySelectorAll('[data-event-list]').forEach((boton) => {
+        boton.addEventListener('click', () => {
+            const lista = boton.dataset.eventList;
+            listasEventosExpandidas[lista] = !listasEventosExpandidas[lista];
+            const esAnteriores = lista === 'anteriores';
+            actualizarVisibilidadListaEventos(
+                document.getElementById(esAnteriores ? 'anteriores-contenedor' : 'eventos-principales-contenedor'),
+                boton,
+                listasEventosExpandidas[lista],
+                lista
+            );
+        });
+    });
     configurarDrawerFiltros();
     configurarFiltrosGaleria();
     renderEventosPrincipales();

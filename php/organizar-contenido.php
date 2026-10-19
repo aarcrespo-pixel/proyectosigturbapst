@@ -5,6 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 require_once __DIR__ . '/helpers/contenido_publico.php';
+require_once __DIR__ . '/helpers/imagenes.php';
 
 $usuario = sigtur_requerir_rol($pdo, ['organizador', 'administrador'], 'login.php', 'eventos.php');
 sigtur_inicializar_contenido_publico($pdo);
@@ -26,6 +27,76 @@ function sigtur_contenido_imagen_valida(string $imagen): bool
     return filter_var($imagen, FILTER_VALIDATE_URL) !== false
         ? str_starts_with(strtolower($imagen), 'https://')
         : (bool) preg_match('/^(?:\.\.\/)?[A-Za-z0-9_./-]+$/', $imagen);
+}
+
+function sigtur_contenido_imagen_subida_presente(): bool
+{
+    return isset($_FILES['imagen_archivo'])
+        && is_array($_FILES['imagen_archivo'])
+        && ($_FILES['imagen_archivo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+}
+
+function sigtur_contenido_resolver_imagen(string $imagen): array
+{
+    if (!sigtur_contenido_imagen_subida_presente()) {
+        if (!sigtur_contenido_imagen_valida($imagen)) {
+            sigtur_contenido_error('Ingresa una ruta de imagen válida o sube una imagen JPG, PNG o WEBP.');
+        }
+        return [sigtur_nombre_imagen_desde_ruta($imagen, 'uploads/contenido-publico'), null];
+    }
+
+    $archivo = $_FILES['imagen_archivo'];
+    if (($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        $estado = in_array($archivo['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true) ? 413 : 422;
+        sigtur_contenido_error('No se pudo recibir la imagen. Comprueba el archivo e inténtalo de nuevo.', $estado);
+    }
+    if (
+        (int) ($archivo['size'] ?? 0) <= 0
+        || (int) $archivo['size'] > 10 * 1024 * 1024
+        || !is_uploaded_file((string) ($archivo['tmp_name'] ?? ''))
+    ) {
+        sigtur_contenido_error('La imagen debe pesar más de 0 y no superar los 10 MB.', 413);
+    }
+
+    $extensionesPermitidas = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $mimeImagen = (new finfo(FILEINFO_MIME_TYPE))->file($archivo['tmp_name']);
+    $datosImagen = @getimagesize($archivo['tmp_name']);
+    if (
+        !isset($extensionesPermitidas[$mimeImagen])
+        || $datosImagen === false
+        || !in_array($datosImagen[2] ?? null, [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP], true)
+        || ($datosImagen[0] ?? 0) < 1
+        || ($datosImagen[1] ?? 0) < 1
+        || ($datosImagen[0] ?? 0) > 10000
+        || ($datosImagen[1] ?? 0) > 10000
+        || ($datosImagen[0] ?? 0) * ($datosImagen[1] ?? 0) > 40000000
+    ) {
+        sigtur_contenido_error('El archivo debe ser una imagen JPG, PNG o WEBP válida.');
+    }
+
+    $directorio = __DIR__ . '/../uploads/contenido-publico';
+    if (!is_dir($directorio) && !mkdir($directorio, 0775, true) && !is_dir($directorio)) {
+        sigtur_contenido_error('No se pudo preparar la carpeta para las imágenes.', 500);
+    }
+    $nombre = sigtur_nombre_imagen_subida((int) $usuario['id'], (string) ($archivo['name'] ?? 'contenido'), $extensionesPermitidas[$mimeImagen]);
+    $rutaArchivo = $directorio . DIRECTORY_SEPARATOR . $nombre;
+    if (!move_uploaded_file($archivo['tmp_name'], $rutaArchivo)) {
+        sigtur_contenido_error('No se pudo guardar la imagen.', 500);
+    }
+
+    return [$nombre, $rutaArchivo];
+}
+
+function sigtur_contenido_ejecutar_guardado(PDOStatement $guardar, array $parametros, ?string $rutaImagenNueva): void
+{
+    try {
+        $guardar->execute($parametros);
+    } catch (Throwable $error) {
+        if ($rutaImagenNueva !== null && is_file($rutaImagenNueva) && !unlink($rutaImagenNueva)) {
+            error_log('No se pudo limpiar una imagen de contenido cuyo registro no se guardó.');
+        }
+        throw $error;
+    }
 }
 
 function sigtur_contenido_slug_disponible(PDO $pdo, string $tabla, string $slug, int $id): bool
@@ -75,7 +146,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $datos[':slug'])
                 || !in_array($datos[':seccion_publica'], ['emblematico', 'recreacion', 'oculto'], true)
                 || $datos[':nombre'] === '' || $datos[':categoria'] === '' || $datos[':direccion'] === ''
-                || !sigtur_contenido_imagen_valida($datos[':imagen']) || $datos[':descripcion'] === ''
+                || (!sigtur_contenido_imagen_valida($datos[':imagen']) && !sigtur_contenido_imagen_subida_presente()) || $datos[':descripcion'] === ''
                 || $datos[':historia'] === '' || $datos[':atractivos'] === '' || $datos[':horarios'] === ''
                 || $datos[':recomendaciones'] === '') {
                 sigtur_contenido_error('Completa los campos obligatorios e ingresa un slug e imagen válidos.');
@@ -83,13 +154,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             if (!sigtur_contenido_slug_disponible($pdo, 'lugares', $datos[':slug'], $id)) {
                 sigtur_contenido_error('Ya existe un lugar con ese slug.');
             }
+            [$datos[':imagen'], $rutaImagenNueva] = sigtur_contenido_resolver_imagen($datos[':imagen']);
             if ($accion === 'crear') {
                 $guardar = $pdo->prepare('INSERT INTO lugares (slug, nombre, categoria, seccion_publica, direccion, imagen, descripcion, historia, atractivos, horarios, recomendaciones, latitud, longitud) VALUES (:slug, :nombre, :categoria, :seccion_publica, :direccion, :imagen, :descripcion, :historia, :atractivos, :horarios, :recomendaciones, :latitud, :longitud)');
             } else {
                 $guardar = $pdo->prepare('UPDATE lugares SET slug = :slug, nombre = :nombre, categoria = :categoria, seccion_publica = :seccion_publica, direccion = :direccion, imagen = :imagen, descripcion = :descripcion, historia = :historia, atractivos = :atractivos, horarios = :horarios, recomendaciones = :recomendaciones, latitud = :latitud, longitud = :longitud WHERE id = :id');
                 $datos[':id'] = $id;
             }
-            $guardar->execute($datos);
+            sigtur_contenido_ejecutar_guardado($guardar, $datos, $rutaImagenNueva);
         } else {
             sigtur_contenido_error('La acción solicitada no es válida.');
         }
@@ -105,7 +177,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             $descripcion = trim((string) ($_POST['descripcion'] ?? ''));
             $orden = max(0, (int) ($_POST['orden'] ?? 0));
             if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug) || $nombre === ''
-                || !sigtur_contenido_imagen_valida($imagen) || $descripcion === '') {
+                || (!sigtur_contenido_imagen_valida($imagen) && !sigtur_contenido_imagen_subida_presente()) || $descripcion === '') {
                 sigtur_contenido_error('Completa los campos obligatorios e ingresa un slug e imagen válidos.');
             }
             if (!sigtur_contenido_slug_disponible($pdo, $tabla, $slug, $id)) {
@@ -122,6 +194,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     sigtur_contenido_error('La valoración debe ser un número entre 1 y 5.');
                 }
                 $estrellas = $tipo === 'termas' && $estrellasRecibidas !== '' ? (int) $estrellasRecibidas : null;
+                [$imagen, $rutaImagenNueva] = sigtur_contenido_resolver_imagen($imagen);
                 if ($accion === 'crear') {
                     $guardar = $pdo->prepare('INSERT INTO contenido_turistico (slug, tipo, nombre, imagen, descripcion, detalle, estrellas, orden) VALUES (:slug, :tipo, :nombre, :imagen, :descripcion, :detalle, :estrellas, :orden)');
                 } else {
@@ -132,13 +205,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 if ($accion === 'editar') {
                     $parametros[':id'] = $idContenido;
                 }
-                $guardar->execute($parametros);
+                sigtur_contenido_ejecutar_guardado($guardar, $parametros, $rutaImagenNueva);
             } else {
                 $categoria = trim((string) ($_POST['categoria'] ?? 'Restaurante'));
                 $urlMapa = trim((string) ($_POST['url_mapa'] ?? ''));
                 if ($categoria === '' || ($urlMapa !== '' && (filter_var($urlMapa, FILTER_VALIDATE_URL) === false || !str_starts_with(strtolower($urlMapa), 'https://')))) {
                     sigtur_contenido_error('La categoría es obligatoria y el enlace del mapa debe ser HTTPS.');
                 }
+                [$imagen, $rutaImagenNueva] = sigtur_contenido_resolver_imagen($imagen);
                 if ($accion === 'crear') {
                     $guardar = $pdo->prepare('INSERT INTO gastronomia_catalogo (slug, nombre, imagen, descripcion, categoria, url_mapa, orden) VALUES (:slug, :nombre, :imagen, :descripcion, :categoria, :url_mapa, :orden)');
                 } else {
@@ -149,7 +223,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 if ($accion === 'editar') {
                     $parametros[':id'] = $idContenido;
                 }
-                $guardar->execute($parametros);
+                sigtur_contenido_ejecutar_guardado($guardar, $parametros, $rutaImagenNueva);
             }
         } else {
             sigtur_contenido_error('La acción solicitada no es válida.');
@@ -165,6 +239,14 @@ $contenidos = $seccion === 'turismo'
     ? $pdo->query('SELECT * FROM contenido_turistico ORDER BY FIELD(tipo, "escapada", "ruta", "termas"), orden, nombre')->fetchAll()
     : ($seccion === 'gastronomia' ? $pdo->query('SELECT * FROM gastronomia_catalogo ORDER BY orden, nombre')->fetchAll() : []);
 $escape = 'sigtur_texto_contenido';
+foreach ($lugares as &$lugar) {
+    $lugar['imagen'] = sigtur_url_imagen_subida((string) $lugar['imagen'], 'contenido-publico');
+}
+unset($lugar);
+foreach ($contenidos as &$contenido) {
+    $contenido['imagen'] = sigtur_url_imagen_subida((string) $contenido['imagen'], 'contenido-publico');
+}
+unset($contenido);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -198,14 +280,14 @@ $escape = 'sigtur_texto_contenido';
             <details class="admin-content-item" open><summary>Agregar lugar</summary>
                 <?php $lugar = ['id' => 0, 'slug' => '', 'nombre' => '', 'categoria' => '', 'seccion_publica' => 'emblematico', 'direccion' => '', 'imagen' => '', 'descripcion' => '', 'historia' => '', 'atractivos' => '', 'horarios' => '', 'recomendaciones' => '', 'latitud' => '', 'longitud' => '']; include __DIR__ . '/partials/formulario-lugar.php'; ?>
             </details>
-            <?php foreach ($lugares as $lugar): ?><details class="admin-content-item"><summary><?= $escape($lugar['nombre']) ?></summary><?php include __DIR__ . '/partials/formulario-lugar.php'; ?>
+            <?php foreach ($lugares as $lugar): ?><details class="admin-content-item"><summary><span><?= $escape($lugar['nombre']) ?></span><span class="admin-button">Editar</span></summary><?php include __DIR__ . '/partials/formulario-lugar.php'; ?>
                 <form method="post" onsubmit="return confirm('¿Eliminar este lugar?');"><input type="hidden" name="csrf_token" value="<?= $escape($csrfToken) ?>"><input type="hidden" name="seccion" value="lugares"><input type="hidden" name="accion" value="eliminar"><input type="hidden" name="id" value="<?= (int) $lugar['id'] ?>"><button class="admin-button admin-button--danger" type="submit">Eliminar lugar</button></form>
             </details><?php endforeach; ?>
         <?php else: ?>
             <details class="admin-content-item" open><summary>Agregar <?= $seccion === 'turismo' ? 'propuesta turística' : 'restaurante' ?></summary>
                 <?php $contenido = ['id' => 0, 'slug' => '', 'tipo' => 'escapada', 'nombre' => '', 'imagen' => '', 'descripcion' => '', 'detalle' => '', 'estrellas' => null, 'categoria' => 'Restaurante', 'url_mapa' => '', 'orden' => 0]; include __DIR__ . '/partials/formulario-catalogo.php'; ?>
             </details>
-            <?php foreach ($contenidos as $contenido): ?><details class="admin-content-item"><summary><?= $escape($contenido['nombre']) ?><?= $seccion === 'turismo' ? ' · ' . $escape($contenido['tipo']) : '' ?></summary><?php include __DIR__ . '/partials/formulario-catalogo.php'; ?>
+            <?php foreach ($contenidos as $contenido): ?><details class="admin-content-item"><summary><span><?= $escape($contenido['nombre']) ?><?= $seccion === 'turismo' ? ' · ' . $escape($contenido['tipo']) : '' ?></span><span class="admin-button">Editar</span></summary><?php include __DIR__ . '/partials/formulario-catalogo.php'; ?>
                 <form method="post" onsubmit="return confirm('¿Eliminar este contenido?');"><input type="hidden" name="csrf_token" value="<?= $escape($csrfToken) ?>"><input type="hidden" name="seccion" value="<?= $escape($seccion) ?>"><input type="hidden" name="accion" value="eliminar"><input type="hidden" name="id" value="<?= (int) $contenido['id'] ?>"><button class="admin-button admin-button--danger" type="submit">Eliminar</button></form>
             </details><?php endforeach; ?>
         <?php endif; ?>

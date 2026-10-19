@@ -122,9 +122,60 @@ body {
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.turismo-galeria-add {
+    display: flex;
+    min-height: 260px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    border: 2px dashed var(--card-border);
+    border-radius: 28px;
+    background: var(--card-bg);
+}
+
+.turismo-galeria-add__input {
+    display: none;
+}
+
+.turismo-galeria-add__button {
+    display: grid;
+    width: 64px;
+    height: 64px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4b63ff, #82a4ff);
+    color: #fff;
+    font: inherit;
+    font-size: 2.5rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 12px 28px rgba(75, 99, 255, .25);
+}
+
+.turismo-galeria-add__button:hover {
+    transform: translateY(-2px);
+}
+
+.turismo-galeria-add__hint,
+.turismo-galeria-feedback {
+    color: var(--text-muted, #5a6487);
+    font-size: .9rem;
+    text-align: center;
+}
+
+.turismo-galeria-feedback {
+    margin: 0 0 1rem;
+    padding: .8rem 1rem;
+    border-radius: 12px;
+    background: rgba(75, 99, 255, .09);
+}
+
 body[data-tema="oscuro"] .tarjeta-destino,
 body[data-tema="oscuro"] .tarjeta-ruta,
 body[data-tema="oscuro"] .tarjeta-galeria,
+body[data-tema="oscuro"] .turismo-galeria-add,
 body[data-tema="oscuro"] .info-panel article {
     background: linear-gradient(180deg, rgba(43, 30, 17, 0.96), rgba(26, 18, 11, 0.96));
     border-color: rgba(255, 223, 177, 0.16);
@@ -133,7 +184,8 @@ body[data-tema="oscuro"] .info-panel article {
 
 .tarjeta-destino,
 .tarjeta-ruta,
-.tarjeta-galeria {
+.tarjeta-galeria,
+.turismo-galeria-add {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 28px;
@@ -279,7 +331,8 @@ body[data-tema="oscuro"] .meta {
 
     .tarjeta-destino,
     .tarjeta-ruta,
-    .tarjeta-galeria {
+    .tarjeta-galeria,
+    .turismo-galeria-add {
         min-height: auto;
     }
 

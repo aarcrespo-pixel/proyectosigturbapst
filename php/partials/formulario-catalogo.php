@@ -1,11 +1,20 @@
-<form class="admin-form admin-content-form" method="post">
+<form class="admin-form admin-content-form" method="post" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="<?= $escape($csrfToken) ?>">
     <input type="hidden" name="seccion" value="<?= $escape($seccion) ?>">
     <input type="hidden" name="accion" value="<?= (int) $contenido['id'] > 0 ? 'editar' : 'crear' ?>">
     <input type="hidden" name="id" value="<?= (int) $contenido['id'] ?>">
     <label>Slug<input name="slug" maxlength="120" pattern="[a-z0-9]+(-[a-z0-9]+)*" required value="<?= $escape((string) $contenido['slug']) ?>"></label>
     <label>Nombre<input name="nombre" maxlength="160" required value="<?= $escape((string) $contenido['nombre']) ?>"></label>
-    <label>Imagen (ruta del sitio o URL HTTPS)<input name="imagen" maxlength="500" required value="<?= $escape((string) $contenido['imagen']) ?>"></label>
+    <label class="admin-form__wide">Imagen actual (ruta del sitio o URL HTTPS)
+        <?php if ($contenido['imagen'] !== ''): ?>
+            <img class="admin-event__image-preview" src="<?= $escape((string) $contenido['imagen']) ?>" alt="Imagen actual de <?= $escape((string) $contenido['nombre']) ?>" loading="lazy">
+        <?php endif; ?>
+        <input name="imagen" maxlength="500" value="<?= $escape((string) $contenido['imagen']) ?>">
+    </label>
+    <label class="admin-form__wide">Subir imagen nueva (JPG, PNG o WEBP)
+        <input class="admin-event__image-input" type="file" name="imagen_archivo" accept="image/jpeg,image/png,image/webp">
+        <span class="admin-field-hint">Si no seleccionas una imagen, se conserva la ruta o URL actual.</span>
+    </label>
     <label>Orden<input name="orden" type="number" min="0" value="<?= (int) $contenido['orden'] ?>"></label>
     <?php if ($seccion === 'turismo'): ?>
         <label>Sección<select name="tipo"><option value="escapada" <?= $contenido['tipo'] === 'escapada' ? 'selected' : '' ?>>Escapadas recomendadas</option><option value="ruta" <?= $contenido['tipo'] === 'ruta' ? 'selected' : '' ?>>Rutas y experiencias</option><option value="termas" <?= $contenido['tipo'] === 'termas' ? 'selected' : '' ?>>Parques acuáticos y termas</option></select></label>

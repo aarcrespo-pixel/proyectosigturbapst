@@ -2,10 +2,18 @@
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../conexion.php';
+require_once __DIR__ . '/../helpers/autorizacion.php';
+require_once __DIR__ . '/../helpers/notificaciones.php';
 
 $usuarioId = (int) ($_SESSION['usuario_id'] ?? 0);
 $eventoId = filter_input(INPUT_POST, 'evento_id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 $texto = trim((string) ($_POST['comentario'] ?? $_POST['pregunta'] ?? ''));
+
+if (!sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'La sesión expiró. Recargá la página e intentá nuevamente'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 if (!$usuarioId) {
     http_response_code(401);
@@ -21,10 +29,10 @@ if (!$eventoId || $texto === '' || mb_strlen($texto) > 500) {
 
 /* El endpoint recibe el ID estable del evento, pero preguntas_eventos conserva
    el slug para mantener compatibilidad con las preguntas ya existentes. */
-$consultaEvento = $pdo->prepare('SELECT slug FROM eventos WHERE id = :evento_id LIMIT 1');
+$consultaEvento = $pdo->prepare('SELECT slug, titulo, organizador_id FROM eventos WHERE id = :evento_id LIMIT 1');
 $consultaEvento->execute([':evento_id' => $eventoId]);
-$slugEvento = $consultaEvento->fetchColumn();
-if (!$slugEvento) {
+$evento = $consultaEvento->fetch();
+if (!$evento) {
     http_response_code(404);
     echo json_encode(['success' => false, 'message' => 'Evento no encontrado'], JSON_UNESCAPED_UNICODE);
     exit;
@@ -44,10 +52,37 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS preguntas_eventos (
 
 $insertar = $pdo->prepare('INSERT INTO preguntas_eventos (evento_slug, usuario_id, pregunta) VALUES (:evento_slug, :usuario_id, :pregunta)');
 $ok = $insertar->execute([
-    ':evento_slug' => $slugEvento,
+    ':evento_slug' => $evento['slug'],
     ':usuario_id' => $usuarioId,
     ':pregunta' => $texto,
 ]);
+
+if ($ok) {
+    $organizadorId = (int) $evento['organizador_id'];
+    $destinatarios = [];
+    if ($organizadorId > 0) {
+        $destinatarios[] = $organizadorId;
+    } else {
+        $organizadores = $pdo->prepare("SELECT id FROM usuarios WHERE LOWER(rol) = 'organizador' AND id <> :usuario_id");
+        $organizadores->execute([':usuario_id' => $usuarioId]);
+        $destinatarios = array_map('intval', $organizadores->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    $consultaTurista = $pdo->prepare('SELECT COALESCE(NULLIF(nickname, \'\'), nombre_completo) FROM usuarios WHERE id = :usuario_id LIMIT 1');
+    $consultaTurista->execute([':usuario_id' => $usuarioId]);
+    $nombreTurista = (string) ($consultaTurista->fetchColumn() ?: 'Un turista');
+    foreach (array_unique($destinatarios) as $destinatarioId) {
+        if ($destinatarioId > 0 && $destinatarioId !== $usuarioId) {
+            sigtur_crear_notificacion(
+                $pdo,
+                $destinatarioId,
+                'Nueva pregunta de un turista',
+                $nombreTurista . ' preguntó sobre "' . (string) $evento['titulo'] . '": ' . $texto,
+                'consulta_evento'
+            );
+        }
+    }
+}
 
 echo json_encode([
     'success' => $ok,

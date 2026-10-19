@@ -1,7 +1,6 @@
 (() => {
     const profile = document.querySelector('.perfil-publico');
     const followButton = document.getElementById('followButton');
-    const messageButton = document.getElementById('messageButton');
     if (!profile) return;
 
     const profileOptions = profile.querySelector('[data-profile-options]');
@@ -11,6 +10,12 @@
     const optionsStatus = profileOptions?.querySelector('[data-profile-options-status]');
     const followRequestsToggle = profileOptions?.querySelector('[data-follow-requests-toggle]');
     const followRequestsPanel = profileOptions?.querySelector('[data-follow-requests-panel]');
+    const profileSearch = profile.querySelector('[data-profile-search]');
+    const profileSearchInput = profileSearch?.querySelector('[data-profile-search-input]');
+    const profileSearchResults = profileSearch?.querySelector('[data-profile-search-results]');
+    const profileSearchStatus = profileSearch?.querySelector('[data-profile-search-status]');
+    let profileSearchTimer;
+    let profileSearchRequest;
 
     optionsToggle?.addEventListener('click', () => {
         const abrir = optionsToggle.getAttribute('aria-expanded') !== 'true';
@@ -36,6 +41,86 @@
             optionsMenu.hidden = true;
             optionsToggle?.setAttribute('aria-expanded', 'false');
             optionsToggle?.focus();
+        }
+        if (event.key === 'Escape' && profileSearchResults && !profileSearchResults.hidden) {
+            profileSearchResults.hidden = true;
+            profileSearchInput?.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    profileSearchInput?.addEventListener('input', () => {
+        window.clearTimeout(profileSearchTimer);
+        profileSearchRequest?.abort();
+        const consulta = profileSearchInput.value.trim();
+        profileSearchResults.replaceChildren();
+        profileSearchResults.hidden = true;
+        profileSearchInput.setAttribute('aria-expanded', 'false');
+        if (consulta.length < 2) {
+            if (profileSearchStatus) profileSearchStatus.textContent = consulta ? 'Escribe al menos 2 caracteres.' : '';
+            return;
+        }
+        if (profileSearchStatus) profileSearchStatus.textContent = 'Buscando perfiles…';
+        profileSearchTimer = window.setTimeout(async () => {
+            profileSearchRequest = new AbortController();
+            try {
+                const response = await fetch(`${phpBase}api/buscar_perfiles.php?q=${encodeURIComponent(consulta)}`, {
+                    headers: { Accept: 'application/json' },
+                    signal: profileSearchRequest.signal
+                });
+                const data = await response.json();
+                if (!response.ok || data.success !== true) throw new Error(data.message || 'No se pudieron buscar perfiles.');
+                const usuarios = Array.isArray(data.usuarios) ? data.usuarios : [];
+                if (!usuarios.length) {
+                    profileSearchResults.hidden = false;
+                    profileSearchInput.setAttribute('aria-expanded', 'true');
+                    profileSearchResults.textContent = 'No se encontraron perfiles.';
+                    if (profileSearchStatus) profileSearchStatus.textContent = 'No se encontraron perfiles.';
+                    return;
+                }
+                usuarios.forEach((usuario) => {
+                    const link = document.createElement('a');
+                    link.className = 'profile-search__result';
+                    link.setAttribute('role', 'option');
+                    link.href = `${phpBase}perfil.php?id=${encodeURIComponent(usuario.id)}`;
+                    const avatar = document.createElement('img');
+                    avatar.src = usuario.avatar_url || '../img/user.png';
+                    avatar.alt = '';
+                    const identity = document.createElement('span');
+                    identity.className = 'profile-search__identity';
+                    const name = document.createElement('strong');
+                    name.textContent = usuario.nickname ? `@${usuario.nickname}` : (usuario.nombre || 'Usuario');
+                    identity.append(name);
+                    if (usuario.nickname && usuario.nombre) {
+                        const detail = document.createElement('small');
+                        detail.textContent = usuario.nombre;
+                        identity.append(detail);
+                    }
+                    link.append(avatar, identity);
+                    profileSearchResults.append(link);
+                });
+                profileSearchResults.hidden = false;
+                profileSearchInput.setAttribute('aria-expanded', 'true');
+                if (profileSearchStatus) profileSearchStatus.textContent = `${usuarios.length} perfiles encontrados.`;
+            } catch (error) {
+                if (error.name === 'AbortError') return;
+                profileSearchResults.hidden = false;
+                profileSearchResults.textContent = error.message || 'No se pudieron buscar perfiles.';
+                profileSearchInput.setAttribute('aria-expanded', 'true');
+                if (profileSearchStatus) profileSearchStatus.textContent = profileSearchResults.textContent;
+            }
+        }, 250);
+    });
+    profileSearchInput?.addEventListener('focus', () => {
+        if (profileSearchInput.value.trim().length >= 2 && profileSearchResults.childElementCount > 0) {
+            profileSearchResults.hidden = false;
+            profileSearchInput.setAttribute('aria-expanded', 'true');
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (profileSearch && !profileSearch.contains(event.target)) {
+            profileSearchResults.hidden = true;
+            profileSearchInput?.setAttribute('aria-expanded', 'false');
         }
     });
 
@@ -303,10 +388,16 @@
         followButton.textContent = data.label;
         followButton.classList.toggle('is-following', data.following);
         followButton.disabled = data.pending;
+        if (Object.prototype.hasOwnProperty.call(data, 'followers')) {
+            const seguidoresCounter = document.getElementById('cnt-seguidores');
+            if (seguidoresCounter) {
+                seguidoresCounter.textContent = Number(data.followers).toLocaleString('es-UY');
+            }
+        }
         if (data.following) {
             if (followStatus) followStatus.textContent = estabaPendiente ? 'Solicitud aceptada.' : '';
             if (profile.dataset.profilePublic === '0') window.location.reload();
-            cargarEstadisticas();
+            if (!Object.prototype.hasOwnProperty.call(data, 'followers')) cargarEstadisticas();
         } else if (!data.pending && estabaPendiente && followStatus) {
             followStatus.textContent = 'La solicitud ya no está pendiente.';
         }
@@ -405,9 +496,4 @@
         pendingFollowPoll = window.setInterval(consultarEstadoSolicitud, 4000);
     }
 
-    // El widget global concentra las conversaciones y recibe el usuario desde el perfil.
-    messageButton?.addEventListener('click', () => {
-        if (messageButton.dataset.requiresLogin) { window.location.href = `${phpBase}login.php`; return; }
-        window.dispatchEvent(new CustomEvent('sigtur:abrir-mensajes', { detail: { userId, name: profile.querySelector('h1')?.textContent?.trim() || 'Usuario' } }));
-    });
 })();

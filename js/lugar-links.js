@@ -19,11 +19,14 @@
     };
 
     document.addEventListener('DOMContentLoaded', () => {
+        const origenTurismo = window.location.pathname.endsWith('/turismo.php');
+        const origenLugares = window.location.pathname.endsWith('/lugares.php');
         document.querySelectorAll('.tarjeta-destino, .tarjeta-ruta, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria').forEach((card) => {
             const title = card.querySelector('h3')?.textContent.trim();
             const slug = placeSlugs[title];
             if (!slug) return;
-            const href = `lugar.php?id=${encodeURIComponent(slug)}`;
+            const origen = origenTurismo ? 'turismo' : origenLugares ? 'lugares' : '';
+            const href = `lugar.php?id=${encodeURIComponent(slug)}${origen ? `&origen=${origen}` : ''}`;
             card.setAttribute('role', 'link');
             card.setAttribute('tabindex', '0');
             card.dataset.lugarHref = href;

@@ -19,6 +19,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
 }
 
 require_once __DIR__ . '/../conexion.php';
+require_once __DIR__ . '/../helpers/imagenes.php';
 
 $slug = trim((string) ($_POST['slug'] ?? ''));
 $accion = (string) ($_POST['accion'] ?? '');
@@ -45,6 +46,7 @@ $imagen = trim((string) ($_POST['imagen'] ?? ''));
 if (str_starts_with($imagen, '../../')) {
     $imagen = substr($imagen, 1);
 }
+$imagen = sigtur_nombre_imagen_desde_ruta($imagen, 'uploads/eventos');
 
 $fecha = trim((string) ($_POST['fecha'] ?? ''));
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha) || !checkdate((int) substr($fecha, 5, 2), (int) substr($fecha, 8, 2), (int) substr($fecha, 0, 4))) {

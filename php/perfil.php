@@ -155,6 +155,13 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
             <span>Volver</span>
         </a>
     </div>
+    <div class="profile-header-tools">
+        <div class="profile-search" data-profile-search>
+            <label class="visually-hidden" for="profile-search-input">Buscar perfiles</label>
+            <input id="profile-search-input" type="search" placeholder="Buscar perfiles" autocomplete="off" aria-controls="profile-search-results" aria-expanded="false" data-profile-search-input>
+            <div class="profile-search__results" id="profile-search-results" role="listbox" aria-label="Resultados de perfiles" hidden data-profile-search-results></div>
+            <p class="visually-hidden" role="status" aria-live="polite" data-profile-search-status></p>
+        </div>
     <?php if ($perfilPuedeGestionar): ?>
         <div class="profile-options" data-profile-options data-api="api/preferencias_privacidad.php" data-csrf="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
             <button class="profile-options__toggle" type="button" aria-label="Abrir opciones del perfil" aria-expanded="false" aria-controls="profile-options-menu" data-profile-options-toggle>
@@ -199,6 +206,7 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
             </div>
         </div>
     <?php endif; ?>
+    </div>
     <section class="perfil-publico__hero">
         <div class="perfil-publico__identity">
             <div class="perfil-publico__avatar-frame">
@@ -224,7 +232,6 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
             <?php if (!$esPropio): ?>
                 <div class="perfil-publico__actions">
                     <button type="button" class="perfil-action perfil-action--primary<?= $seguido ? ' is-following' : '' ?>" id="followButton" <?= empty($_SESSION['usuario_id']) ? 'data-requires-login="1"' : '' ?> <?= $solicitudPendiente ? 'disabled' : '' ?>><?= $seguido ? 'Siguiendo' : ($solicitudPendiente ? 'Pendiente' : 'Seguir') ?></button>
-                    <button type="button" class="perfil-action perfil-action--secondary" id="messageButton" <?= empty($_SESSION['usuario_id']) ? 'data-requires-login="1"' : '' ?>>Mensaje</button>
                     <span class="perfil-follow-status" data-follow-status role="status" aria-live="polite"></span>
                 </div>
             <?php endif; ?>
@@ -248,7 +255,7 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
             </div>
         </div>
         <?php if (!$publicaciones): ?>
-            <div class="perfil-empty"><span aria-hidden="true">◌</span><p>Este usuario aún no ha compartido fotos</p></div>
+            <div class="perfil-empty"><p>Este usuario aún no ha compartido fotos</p></div>
         <?php else: ?>
             <div class="perfil-gallery">
                 <?php foreach ($publicaciones as $publicacion):
@@ -321,7 +328,7 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
 </div>
 
 <script src="../js/interacciones-tarjetas.js" defer></script>
-<script src="../js/perfil.js?v=20261015-2" defer></script>
+<script src="../js/perfil.js?v=20261018-1" defer></script>
 <?php $mensajesWidgetRoot = '../'; include __DIR__ . '/mensajes-widget.php'; ?>
 </body>
 </html>
