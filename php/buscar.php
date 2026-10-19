@@ -19,6 +19,10 @@ $q = trim((string) ($_GET['q'] ?? ''));
         .search-page-card span { color: var(--text-secondary, #5f6b7a); font-size: .85rem; }
         .search-page-empty { color: var(--text-secondary, #5f6b7a); padding: 24px 0; }
         body[data-tema="oscuro"] .search-page h1 { color: #f9fafb; }
+        body[data-tema="oscuro"] .search-page-card { border-color: rgba(255,255,255,.12); background: #20242a; }
+        body[data-tema="oscuro"] .search-page-card h2 { color: #f3f4f6; }
+        body[data-tema="oscuro"] .search-page-card span,
+        body[data-tema="oscuro"] .search-page-empty { color: #b4bec7; }
     </style>
 </head>
 <body>

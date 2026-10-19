@@ -41,7 +41,7 @@ try {
     // CAMBIO APLICADO: aceptamos los nombres usados por el widget y por los
     // formularios de soporte/eventos, normalizándolos a un único destinatario.
     $otroUsuarioId = (int) ($_GET['usuario_id'] ?? $_POST['usuario_id'] ?? $_GET['destinatario_id'] ?? $_POST['destinatario_id'] ?? $_POST['destinatario'] ?? $_GET['receptor_id'] ?? $_POST['receptor_id'] ?? 0);
-    if (!isset($_GET['accion'], $_POST['accion']) && $otroUsuarioId > 0) {
+    if (!isset($_GET['accion']) && !isset($_POST['accion']) && $otroUsuarioId > 0) {
         $accion = 'conversacion';
     }
     if ($accion === 'consulta') {
@@ -82,22 +82,42 @@ try {
     if ($accion === 'enviar') {
         $texto = censurarTexto(trim((string) ($_POST['mensaje'] ?? $_POST['texto'] ?? '')));
         $contextoMensaje = trim((string) ($_POST['contexto'] ?? 'Consulta general'));
-        $fotoUrl = null;
-        $audioUrl = null;
+        $textoLongitud = function_exists('mb_strlen') ? mb_strlen($texto, 'UTF-8') : strlen($texto);
+        if ($otroUsuarioId <= 0 || $otroUsuarioId === $usuarioId || $textoLongitud > 500) {
+            responderMensajes(['status' => 'error', 'success' => false, 'message' => 'Revisá el destinatario y el mensaje.'], 422);
+        }
+        $media = ['foto' => null, 'video' => null, 'audio' => null];
         $directorioChat = __DIR__ . '/../../uploads/chat';
-        if (!is_dir($directorioChat)) mkdir($directorioChat, 0775, true);
+        if (!is_dir($directorioChat) && !mkdir($directorioChat, 0775, true) && !is_dir($directorioChat)) {
+            responderMensajes(['success' => false, 'status' => 'error', 'message' => 'No se pudo preparar el almacenamiento de archivos.'], 500);
+        }
         /* multipart/form-data deja los archivos en $_FILES; validamos MIME y
            extensión en servidor antes de moverlos al directorio público. */
-        foreach (['foto' => 'fotoUrl', 'audio' => 'audioUrl'] as $campo => $variable) {
-            if (empty($_FILES[$campo]) || $_FILES[$campo]['error'] !== UPLOAD_ERR_OK) continue;
+        $tiposPermitidos = [
+            'foto' => ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'],
+            'video' => ['video/mp4' => 'mp4', 'video/webm' => 'webm', 'video/quicktime' => 'mov'],
+            'audio' => ['audio/webm' => 'webm', 'audio/ogg' => 'ogg', 'audio/mpeg' => 'mp3', 'audio/wav' => 'wav', 'audio/mp4' => 'm4a', 'audio/aac' => 'aac'],
+        ];
+        $limitesBytes = ['foto' => 8 * 1024 * 1024, 'video' => 40 * 1024 * 1024, 'audio' => 15 * 1024 * 1024];
+        foreach ($tiposPermitidos as $campo => $mimes) {
+            if (!isset($_FILES[$campo]) || $_FILES[$campo]['error'] === UPLOAD_ERR_NO_FILE) continue;
+            if ($_FILES[$campo]['error'] !== UPLOAD_ERR_OK) {
+                responderMensajes(['success' => false, 'status' => 'error', 'message' => 'No se pudo recibir el archivo adjunto. Revisá el tamaño máximo permitido por el servidor.'], 422);
+            }
+            if ((int) $_FILES[$campo]['size'] > $limitesBytes[$campo]) {
+                responderMensajes(['success' => false, 'status' => 'error', 'message' => 'El archivo adjunto supera el tamaño permitido.'], 422);
+            }
             $mime = (new finfo(FILEINFO_MIME_TYPE))->file($_FILES[$campo]['tmp_name']);
-            $permitidos = $campo === 'foto' ? ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'] : ['audio/webm' => 'webm', 'audio/ogg' => 'ogg', 'audio/mpeg' => 'mp3', 'audio/wav' => 'wav'];
-            if (!isset($permitidos[$mime])) responderMensajes(['success' => false, 'error' => 'Tipo de archivo no permitido'], 422);
-            $nombreArchivo = sigtur_nombre_imagen_subida($usuarioId, (string) ($_FILES[$campo]['name'] ?? $campo), $permitidos[$mime]);
-            if (!move_uploaded_file($_FILES[$campo]['tmp_name'], $directorioChat . '/' . $nombreArchivo)) responderMensajes(['success' => false, 'error' => 'No se pudo guardar el archivo'], 500);
-            ${$variable} = $campo === 'foto' ? $nombreArchivo : 'uploads/chat/' . $nombreArchivo;
+            if (!isset($mimes[$mime])) {
+                responderMensajes(['success' => false, 'status' => 'error', 'message' => 'El tipo de archivo adjunto no está permitido.'], 422);
+            }
+            $nombreArchivo = sigtur_nombre_imagen_subida($usuarioId, (string) ($_FILES[$campo]['name'] ?? $campo), $mimes[$mime]);
+            if (!move_uploaded_file($_FILES[$campo]['tmp_name'], $directorioChat . '/' . $nombreArchivo)) {
+                responderMensajes(['success' => false, 'status' => 'error', 'message' => 'No se pudo guardar el archivo adjunto.'], 500);
+            }
+            $media[$campo] = 'uploads/chat/' . $nombreArchivo;
         }
-        if ($otroUsuarioId <= 0 || $otroUsuarioId === $usuarioId || ($texto === '' && !$fotoUrl && !$audioUrl) || mb_strlen($texto) > 500) {
+        if ($texto === '' && !array_filter($media)) {
             responderMensajes(['status' => 'error', 'success' => false, 'message' => 'Revisá el destinatario y el mensaje.'], 422);
         }
         /* PDO separa valores del SQL y la validación limita la entrada antes de
@@ -136,8 +156,16 @@ try {
             $valores = [':remitente', ':destinatario', ':texto'];
             $parametros = [':remitente' => $usuarioId, ':destinatario' => $otroUsuarioId, ':texto' => $texto];
             if ($colContexto) { $campos[] = $colContexto; $valores[] = ':contexto'; $parametros[':contexto'] = $contextoMensaje; }
-            if ($fotoUrl && in_array('foto_url', $columnasTabla, true)) { $campos[] = 'foto_url'; $valores[] = ':foto'; $parametros[':foto'] = $fotoUrl; }
-            if ($audioUrl && in_array('audio_url', $columnasTabla, true)) { $campos[] = 'audio_url'; $valores[] = ':audio'; $parametros[':audio'] = $audioUrl; }
+            foreach (['foto' => 'foto_url', 'video' => 'video_url', 'audio' => 'audio_url'] as $tipo => $columna) {
+                if ($media[$tipo] !== null) {
+                    if (!in_array($columna, $columnasTabla, true)) {
+                        responderMensajes(['success' => false, 'status' => 'error', 'message' => 'La base de datos todavía no está preparada para este tipo de archivo. Actualizá el esquema e intentá nuevamente.'], 500);
+                    }
+                    $campos[] = $columna;
+                    $valores[] = ':' . $tipo;
+                    $parametros[':' . $tipo] = $media[$tipo];
+                }
+            }
             $consultaSql = 'INSERT INTO `' . $tablaMensajes . '` (`' . implode('`, `', $campos) . '`) VALUES (' . implode(', ', $valores) . ')';
             // DIAGNÓSTICO: registramos nombres/tabla, nunca contraseñas ni
             // archivos; los valores siguen viajando mediante parámetros PDO.
@@ -170,6 +198,11 @@ try {
             'success' => true,
             'status' => 'success',
             'id' => $mensajeId,
+            'remitente_id' => $usuarioId,
+            'mensaje' => $texto,
+            'foto_url' => $media['foto'],
+            'video_url' => $media['video'],
+            'audio_url' => $media['audio'],
             // CAMBIO APLICADO: devolvemos la hora guardada por MySQL para que
             // la burbuja optimista y el historial usen el mismo timestamp.
             'fecha' => $horaGuardada,
@@ -183,7 +216,7 @@ try {
     if ($accion === 'conversacion' && $otroUsuarioId > 0) {
         /* CAMBIO APLICADO: cada placeholder tiene nombre propio. PDO con
            prepares nativos no permite reutilizar el mismo parámetro nombrado. */
-        $consulta = $pdo->prepare("SELECT m.id, m.remitente_id, m.destinatario_id, m.mensaje, m.contexto, m.foto_url, m.audio_url, m.fecha_creacion, DATE_FORMAT(m.fecha_creacion, '%H:%i') AS hora, m.leido, u.nombre_completo, u.nickname, COALESCE(u.foto_perfil, u.avatar) AS foto_perfil FROM mensajes m INNER JOIN usuarios u ON u.id = m.remitente_id WHERE (m.remitente_id = :usuario_emisor AND m.destinatario_id = :otro_receptor) OR (m.remitente_id = :otro_emisor AND m.destinatario_id = :usuario_receptor) ORDER BY m.fecha_creacion ASC, m.id ASC LIMIT 100");
+        $consulta = $pdo->prepare("SELECT m.id, m.remitente_id, m.destinatario_id, m.mensaje, m.contexto, m.foto_url, m.video_url, m.audio_url, m.fecha_creacion, DATE_FORMAT(m.fecha_creacion, '%H:%i') AS hora, m.leido, u.nombre_completo, u.nickname, COALESCE(u.foto_perfil, u.avatar) AS foto_perfil FROM mensajes m INNER JOIN usuarios u ON u.id = m.remitente_id WHERE (m.remitente_id = :usuario_emisor AND m.destinatario_id = :otro_receptor) OR (m.remitente_id = :otro_emisor AND m.destinatario_id = :usuario_receptor) ORDER BY m.fecha_creacion ASC, m.id ASC LIMIT 100");
         $consulta->execute([':usuario_emisor' => $usuarioId, ':otro_receptor' => $otroUsuarioId, ':otro_emisor' => $otroUsuarioId, ':usuario_receptor' => $usuarioId]);
         $mensajes = $consulta->fetchAll();
         responderMensajes(['success' => true, 'data' => $mensajes, 'messages' => $mensajes]);

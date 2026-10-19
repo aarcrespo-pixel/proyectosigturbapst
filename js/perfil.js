@@ -16,6 +16,19 @@
     const profileSearchStatus = profileSearch?.querySelector('[data-profile-search-status]');
     let profileSearchTimer;
     let profileSearchRequest;
+    const agregarInsigniaVerificada = (elemento, verificado) => {
+        if (!verificado) return;
+        const badge = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        badge.setAttribute('class', 'verified-badge');
+        badge.setAttribute('viewBox', '0 0 24 24');
+        badge.setAttribute('role', 'img');
+        badge.setAttribute('aria-label', 'Cuenta verificada');
+        badge.setAttribute('focusable', 'false');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M12 1.7 14.5 3l2.8-.2 1.1 2.6 2.4 1.5-.6 2.8 1.1 2.5-1.8 2.2-.3 2.8-2.7.8-1.8 2.2-2.7-.9-2.7.9-1.8-2.2-2.7-.8-.3-2.8-1.8-2.2 1.1-2.5-.6-2.8 2.4-1.5 1.1-2.6 2.8.2L12 1.7Zm-1.2 13.9 6-6-1.4-1.4-4.6 4.6-2.2-2.2-1.4 1.4 3.6 3.6Z');
+        badge.append(path);
+        elemento.append(badge);
+    };
 
     optionsToggle?.addEventListener('click', () => {
         const abrir = optionsToggle.getAttribute('aria-expanded') !== 'true';
@@ -89,6 +102,7 @@
                     identity.className = 'profile-search__identity';
                     const name = document.createElement('strong');
                     name.textContent = usuario.nickname ? `@${usuario.nickname}` : (usuario.nombre || 'Usuario');
+                    agregarInsigniaVerificada(name, usuario.verificado);
                     identity.append(name);
                     if (usuario.nickname && usuario.nombre) {
                         const detail = document.createElement('small');
@@ -301,6 +315,7 @@
                     identity.className = 'perfil-connections-list__identity';
                     const name = document.createElement('strong');
                     name.textContent = usuario.nickname || usuario.nombre || 'Usuario';
+                    agregarInsigniaVerificada(name, usuario.verificado);
                     const detail = document.createElement('small');
                     detail.textContent = usuario.nickname ? (usuario.nombre || '') : '';
                     identity.append(name, detail);
@@ -364,19 +379,31 @@
         if (event.key === 'ArrowRight') renderProfilePhoto(activePhotoIndex + 1);
     });
 
+    let cargandoEstadisticas = false;
     async function cargarEstadisticas() {
+        if (cargandoEstadisticas || document.visibilityState === 'hidden') return;
+        cargandoEstadisticas = true;
         try {
-            const response = await fetch(`${phpBase}api/obtener_perfil_stats.php?id=${encodeURIComponent(userId)}`);
+            const response = await fetch(`${phpBase}api/obtener_perfil_stats.php?id=${encodeURIComponent(userId)}`, {
+                cache: 'no-store',
+                headers: { Accept: 'application/json' }
+            });
             const data = await response.json();
             if (!response.ok || data.success !== true) throw new Error(data.message || 'No se pudieron cargar las estadísticas.');
             document.getElementById('cnt-seguidores').textContent = Number(data.seguidores || 0).toLocaleString('es-UY');
             document.getElementById('cnt-seguidos').textContent = Number(data.seguidos || 0).toLocaleString('es-UY');
             document.getElementById('cnt-likes').textContent = Number(data.likes || 0).toLocaleString('es-UY');
         } catch (error) {
-            // Los contadores permanecen en cero si el endpoint no está disponible.
+            // Conservamos los últimos valores si el endpoint no está disponible.
+        } finally {
+            cargandoEstadisticas = false;
         }
     }
     cargarEstadisticas();
+    window.setInterval(cargarEstadisticas, 5000);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') cargarEstadisticas();
+    });
 
     const followStatus = profile.querySelector('[data-follow-status]');
     let pendingFollowPoll = null;

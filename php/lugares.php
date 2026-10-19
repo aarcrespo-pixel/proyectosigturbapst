@@ -48,7 +48,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
             <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
         </a>
         <a href="gastronomia.php" class="bottom-nav-item">
-            <img src="../img/gastronomia.jpg" class="bottom-nav-icon" alt="Gastronomía">
+            <img src="../img/gastronomia.png" class="bottom-nav-icon" alt="Gastronomía">
             <span class="bottom-nav-label">Gastronomía</span>
         </a>
     </nav>
@@ -59,6 +59,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                 <span data-i18n="placesHeroLabel">Lugares históricos</span>
                 <h1 data-i18n="placesHeroTitle">LUGARES</h1>
                 <p data-i18n="placesHeroText">Descubre los lugares más emblemáticos de Salto, llenos de historia y cultura.</p>
+                <a class="hero-gallery-link" href="#galeria-historica" data-i18n="placesGalleryButton">Ver todas las galerías</a>
             </div>
         </section>
 
@@ -152,18 +153,26 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
 
 
         <section class="seccion-lugares" id="galeria-historica">
-            <h2 data-i18n="placesSectionGalleryTitle">Galería Histórica</h2>
+            <div class="gallery-section-heading">
+                <div>
+                    <span class="gallery-section-kicker">Memoria e identidad</span>
+                    <h2 data-i18n="placesSectionGalleryTitle">Galería Histórica</h2>
+                    <p data-i18n="placesGalleryIntro">Un recorrido visual por los espacios y las tradiciones que cuentan la historia de Salto.</p>
+                </div>
+                <span class="gallery-section-count" aria-label="<?= count($fotosLugares) + 5 ?> fotos destacadas"><?= count($fotosLugares) + 5 ?> lugares</span>
+            </div>
             <?php if (isset($_GET['fotos_agregadas'])): ?>
                 <p class="lugares-galeria-feedback" role="status">
                     Se agregaron <?= max(1, (int) $_GET['fotos_agregadas']) ?> foto<?= (int) $_GET['fotos_agregadas'] === 1 ? '' : 's' ?> a la galería.
                     <?php if (isset($_GET['algunas_fotos_fallaron'])): ?>Algunas fotos no se pudieron subir.<?php endif; ?>
                 </p>
             <?php endif; ?>
-            <div class="galeria-lugares">
-                <article class="tarjeta-galeria"><img src="../img/Plaza_33.webp" alt="Vista de evento" data-i18n-alt="placesGalleryAlt" data-i18n-index="0"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="0">Plaza Treinta y Tres</h3></div></article>
-                <article class="tarjeta-galeria"><img src="../img/Plaza_artigas.webp" alt="Plaza central" data-i18n-alt="placesGalleryAlt" data-i18n-index="1"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="1">Plaza Artigas</h3></div></article>
-                <article class="tarjeta-galeria"><img src="../img/solari.jfif" alt="Espacio de descanso" data-i18n-alt="placesGalleryAlt" data-i18n-index="2"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="2">Parque Benito Solari</h3></div></article>
-                <article class="tarjeta-galeria"><img src="../img/Termas_Dayman.webp" alt="Punto turístico" data-i18n-alt="placesGalleryAlt" data-i18n-index="3"><div class="tarjeta-contenido"><h3 data-i18n="placesGalleryTitles" data-i18n-index="3">Termas del Dayman</h3></div></article>
+            <div class="galeria-lugares gallery-photo-grid">
+                <article class="tarjeta-galeria"><img src="../img/Plaza_33.webp" alt="Plaza Treinta y Tres y su entorno histórico" loading="lazy" decoding="async" data-i18n-alt="placesGalleryAlt" data-i18n-index="0"><div class="tarjeta-contenido"><span class="gallery-photo-tag">Patrimonio</span><h3 data-i18n="placesGalleryTitles" data-i18n-index="0">Plaza Treinta y Tres</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/Plaza_artigas.webp" alt="Monumentos de la Plaza Artigas" loading="lazy" decoding="async" data-i18n-alt="placesGalleryAlt" data-i18n-index="1"><div class="tarjeta-contenido"><span class="gallery-photo-tag">Historia</span><h3 data-i18n="placesGalleryTitles" data-i18n-index="1">Plaza Artigas</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/Cine_Sarandi.jpg" alt="Calle céntrica junto al Cine Sarandí" loading="lazy" decoding="async" data-i18n-alt="placesGalleryAlt" data-i18n-index="2"><div class="tarjeta-contenido"><span class="gallery-photo-tag">Centro</span><h3 data-i18n="placesGalleryTitles" data-i18n-index="2">Centro histórico</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/cultura.jpg" alt="Expresión de la cultura popular salteña" loading="lazy" decoding="async" data-i18n-alt="placesGalleryAlt" data-i18n-index="3"><div class="tarjeta-contenido"><span class="gallery-photo-tag">Tradiciones</span><h3 data-i18n="placesGalleryTitles" data-i18n-index="3">Cultura salteña</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/Costanera_Norte.jpeg" alt="Paseo costero de Salto" loading="lazy" decoding="async" data-i18n-alt="placesGalleryAlt" data-i18n-index="4"><div class="tarjeta-contenido"><span class="gallery-photo-tag">Paisaje urbano</span><h3 data-i18n="placesGalleryTitles" data-i18n-index="4">Costanera de Salto</h3></div></article>
                 <?php foreach ($fotosLugares as $fotoLugar): ?>
                     <?php $fotoLugarUrl = sigtur_url_imagen_subida((string) $fotoLugar['imagen'], 'galeria-eventos', '../img/porco.avif'); ?>
                     <article class="tarjeta-galeria">

@@ -729,3 +729,84 @@ body.admin-panel-page {
         grid-column: auto;
     }
 }
+
+body[data-tema="oscuro"].admin-panel-page {
+    --admin-ink: #edf2f5;
+    --admin-muted: #b0bdc5;
+    --admin-line: #3b454d;
+    --admin-paper: #20262c;
+    --admin-canvas: #151a1f;
+    --admin-accent: #83c4d3;
+    --admin-accent-dark: #9bd3df;
+    --admin-soft: #29353b;
+    color-scheme: dark;
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-section,
+body[data-tema="oscuro"].admin-panel-page .admin-question,
+body[data-tema="oscuro"].admin-panel-page .admin-event {
+    border-color: var(--admin-line);
+    background: var(--admin-paper);
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-form label,
+body[data-tema="oscuro"].admin-panel-page .admin-question > p,
+body[data-tema="oscuro"].admin-panel-page .admin-mensajes-reporte p {
+    color: var(--admin-muted);
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-form input,
+body[data-tema="oscuro"].admin-panel-page .admin-form textarea,
+body[data-tema="oscuro"].admin-panel-page .admin-form select {
+    border-color: var(--admin-line);
+    background: #171c21;
+    color: var(--admin-ink);
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-form input:focus,
+body[data-tema="oscuro"].admin-panel-page .admin-form textarea:focus,
+body[data-tema="oscuro"].admin-panel-page .admin-form select:focus {
+    background: #1a2025;
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-event__editor {
+    background: #1a2025;
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-status,
+body[data-tema="oscuro"].admin-panel-page .admin-mensajes-estado {
+    background: #303941;
+    color: #d4dce1;
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-status--upcoming {
+    background: #1f3b2e;
+    color: #a6e2bb;
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-status--past {
+    background: #303941;
+    color: #c3ccd2;
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-mensajes-respuesta {
+    background: var(--admin-soft);
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-notice {
+    border-color: #365c45;
+    background: #1d382a;
+    color: #a6e2bb;
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-status:not(.admin-status--upcoming):not(.admin-status--past),
+body[data-tema="oscuro"].admin-panel-page .admin-mensajes-estado--pendiente {
+    background: #463820;
+    color: #f6d890;
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-button--danger {
+    border-color: #6d3934;
+    background: #382522;
+    color: #ffc1b8;
+}

@@ -335,6 +335,45 @@ h1 {
     color: var(--text-muted);
 }
 
+body[data-tema="oscuro"] {
+    color-scheme: dark;
+    --sky-1: #191d22;
+    --sky-2: #171b20;
+    --sky-3: #121519;
+    --text-dark: #edf2f5;
+    --text-muted: #b5c0c7;
+    --card: #232a30;
+    --shadow: rgba(0, 0, 0, .32);
+}
+
+body[data-tema="oscuro"] .barra-superior,
+body[data-tema="oscuro"] .fila-categoria,
+body[data-tema="oscuro"] .estado-vacio {
+    border: 1px solid rgba(255, 255, 255, .1);
+    background: rgba(35, 42, 48, .9);
+}
+
+body[data-tema="oscuro"] .caja-busqueda,
+body[data-tema="oscuro"] .contenedor-select,
+body[data-tema="oscuro"] .menu-desplegable {
+    background: #20262c;
+    color: var(--text-dark);
+}
+
+body[data-tema="oscuro"] .opcion-menu {
+    background: #2b333a;
+    color: var(--text-dark);
+}
+
+body[data-tema="oscuro"] .opcion-menu:hover,
+body[data-tema="oscuro"] .opcion-menu:focus-visible {
+    background: #39434c;
+}
+
+body[data-tema="oscuro"] .etiqueta {
+    background: #2b333a;
+}
+
 @media (max-width: 980px) {
     .pista-carrusel .tarjeta-evento {
         flex-basis: calc((100% - 18px) / 2);

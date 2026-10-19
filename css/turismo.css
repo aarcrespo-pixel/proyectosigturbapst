@@ -299,6 +299,134 @@ body[data-tema="oscuro"] .meta {
     color: #4a516d;
 }
 
+.gallery-section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.gallery-section-heading h2 {
+    margin: .2rem 0 .35rem;
+}
+
+.gallery-section-heading p {
+    margin: 0;
+    color: #596273;
+    line-height: 1.6;
+}
+
+.gallery-section-kicker {
+    color: #5267cb;
+    font-size: .76rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.gallery-section-count {
+    flex: 0 0 auto;
+    padding: .55rem .85rem;
+    border: 1px solid rgba(75, 99, 255, .18);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .68);
+    color: #465273;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.gallery-photo-grid {
+    grid-auto-rows: 1fr;
+    gap: 1.15rem;
+}
+
+.gallery-photo-grid .tarjeta-galeria {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+    flex-direction: column;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 12px 32px rgba(36, 51, 89, .1);
+}
+
+.gallery-photo-grid .tarjeta-galeria img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: #e8edf4;
+    transition: transform .45s ease;
+}
+
+.gallery-photo-grid .tarjeta-galeria:hover img {
+    transform: scale(1.035);
+}
+
+.gallery-photo-grid .tarjeta-galeria .contenido {
+    flex: 1;
+    padding: 1rem 1.1rem 1.15rem;
+}
+
+.gallery-photo-grid .tarjeta-galeria h3 {
+    margin: .35rem 0 0;
+    color: #202838;
+    font-size: 1.05rem;
+    line-height: 1.35;
+}
+
+.gallery-photo-tag {
+    display: inline-block;
+    color: #566bbf;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+.hero-gallery-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1.5rem;
+    padding: .85rem 1.25rem;
+    border: 1px solid rgba(255, 255, 255, .72);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .14);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+    transition: background .2s ease, transform .2s ease;
+}
+
+.hero-gallery-link:hover,
+.hero-gallery-link:focus-visible {
+    background: rgba(255, 255, 255, .25);
+    transform: translateY(-2px);
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+body[data-tema="oscuro"] .gallery-section-heading p,
+body[data-tema="oscuro"] .gallery-section-kicker,
+body[data-tema="oscuro"] .gallery-section-count,
+body[data-tema="oscuro"] .gallery-photo-grid .tarjeta-galeria h3,
+body[data-tema="oscuro"] .gallery-photo-tag {
+    color: #edf2ff;
+}
+
+body[data-tema="oscuro"] .gallery-section-count {
+    border-color: rgba(195, 207, 255, .24);
+    background: rgba(255, 255, 255, .08);
+}
+
+body[data-tema="oscuro"] .gallery-photo-grid .tarjeta-galeria {
+    background: #211f2b;
+    border-color: rgba(220, 226, 255, .13);
+}
+
 @media (max-width: 900px) {
 
     .destinos-grid,
@@ -310,6 +438,10 @@ body[data-tema="oscuro"] .meta {
 
     .tarjeta-ruta {
         grid-template-columns: 1fr;
+    }
+
+    .gallery-photo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -346,6 +478,18 @@ body[data-tema="oscuro"] .meta {
 
     .contenido h3 {
         font-size: 1.35rem;
+    }
+
+    .gallery-section-heading {
+        align-items: flex-start;
+    }
+
+    .gallery-section-count {
+        margin-top: .25rem;
+    }
+
+    .gallery-photo-grid .tarjeta-galeria img {
+        aspect-ratio: 16 / 11;
     }
 
     .hero-turismo {

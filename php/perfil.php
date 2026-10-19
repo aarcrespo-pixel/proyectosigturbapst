@@ -9,7 +9,7 @@ if (!$usuarioId) {
     exit('Perfil no especificado.');
 }
 
-$consultaUsuario = $pdo->prepare('SELECT id, nombre_completo, nickname, biografia, avatar, avatar_crop_x, avatar_crop_zoom, banner, fecha_registro, perfil_publico FROM usuarios WHERE id = :id LIMIT 1');
+$consultaUsuario = $pdo->prepare('SELECT id, nombre_completo, nickname, verificado, biografia, avatar, avatar_crop_x, avatar_crop_zoom, banner, fecha_registro, perfil_publico FROM usuarios WHERE id = :id LIMIT 1');
 $consultaUsuario->execute([':id' => $usuarioId]);
 $usuario = $consultaUsuario->fetch();
 if (!$usuario) {
@@ -42,10 +42,8 @@ if ($perfilPuedeGestionar) {
 }
 
 if (!(bool) $usuario['perfil_publico'] && !$esPropio && !$seguido) {
-    if (empty($_SESSION['usuario_id'])) {
-        http_response_code(403);
-    }
-    $nombrePrivado = htmlspecialchars((string) $usuario['nombre_completo'], ENT_QUOTES, 'UTF-8');
+    $handlePrivado = htmlspecialchars((string) ($usuario['nickname'] ?: strtolower(str_replace(' ', '', (string) $usuario['nombre_completo']))), ENT_QUOTES, 'UTF-8');
+    $avatarPrivado = perfilAssetUrl((string) ($usuario['avatar'] ?? ''), 'avatars', '../img/user.png');
     ?>
     <!DOCTYPE html>
     <html lang="es">
@@ -54,22 +52,31 @@ if (!(bool) $usuario['perfil_publico'] && !$esPropio && !$seguido) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Perfil privado | SIGTUR</title>
         <link rel="stylesheet" href="../css/estilos.css">
-        <link rel="stylesheet" href="../css/perfil.css?v=20261015-2">
+        <link rel="stylesheet" href="../css/perfil.css?v=20261019-2">
     </head>
     <body class="perfil-publico-page">
         <main class="perfil-publico" data-user-id="<?= $usuarioId ?>" data-own-profile="0" data-profile-public="0" data-following="0" data-pending-follow="<?= $solicitudPendiente ? '1' : '0' ?>" data-csrf="<?= !empty($_SESSION['usuario_id']) ? htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') : '' ?>">
-            <section class="perfil-empty" aria-live="polite">
-                <h1>Este perfil es privado</h1>
-                <p><?= $nombrePrivado ?> eligió limitar la visibilidad de su perfil.</p>
+            <section class="perfil-private-card" aria-label="Vista limitada del perfil privado">
+                <img class="perfil-private-card__avatar" src="<?= htmlspecialchars($avatarPrivado, ENT_QUOTES, 'UTF-8') ?>" alt="Foto de perfil" style="object-position: <?= number_format($avatarCropX, 2, '.', '') ?>% <?= number_format($avatarCropY, 2, '.', '') ?>%; transform: scale(<?= number_format($avatarCropZoom, 2, '.', '') ?>)">
+                <p class="perfil-publico__handle">@<?= $handlePrivado ?><?php if ((bool) $usuario['verificado']): ?> <svg class="verified-badge" viewBox="0 0 24 24" role="img" aria-label="Cuenta verificada" focusable="false"><path d="M12 1.7 14.5 3l2.8-.2 1.1 2.6 2.4 1.5-.6 2.8 1.1 2.5-1.8 2.2-.3 2.8-2.7.8-1.8 2.2-2.7-.9-2.7.9-1.8-2.2-2.7-.8-.3-2.8-1.8-2.2 1.1-2.5-.6-2.8 2.4-1.5 1.1-2.6 2.8.2L12 1.7Zm-1.2 13.9 6-6-1.4-1.4-4.6 4.6-2.2-2.2-1.4 1.4 3.6 3.6Z"/></svg><?php endif; ?></p>
+                <p class="perfil-private-card__notice">Este perfil es privado</p>
+                <div class="perfil-stats-container perfil-private-card__stats" aria-label="Estadísticas del perfil">
+                    <div class="stat-item"><span class="stat-numero" id="cnt-seguidores">0</span><span class="stat-etiqueta">Seguidores</span></div>
+                    <div class="stat-divider" aria-hidden="true"></div>
+                    <div class="stat-item"><span class="stat-numero" id="cnt-seguidos">0</span><span class="stat-etiqueta">Seguidos</span></div>
+                    <div class="stat-divider" aria-hidden="true"></div>
+                    <div class="stat-item"><span class="stat-numero" id="cnt-likes">0</span><span class="stat-etiqueta">Me gusta</span></div>
+                </div>
                 <?php if (!empty($_SESSION['usuario_id'])): ?>
                     <button type="button" id="followButton" class="perfil-action perfil-action--primary" data-requires-login="0" <?= $solicitudPendiente ? 'disabled' : '' ?>><?= $solicitudPendiente ? 'Pendiente' : 'Seguir' ?></button>
                     <p class="perfil-follow-status" data-follow-status role="status" aria-live="polite"></p>
                 <?php else: ?>
                     <a class="perfil-action perfil-action--primary" href="login.php">Iniciar sesión para seguir</a>
                 <?php endif; ?>
-                <a href="../index.php">Volver al inicio</a>
+                <a class="perfil-private-card__back" href="../index.php">Volver al inicio</a>
             </section>
         </main>
+        <script src="../js/tema.js" defer></script>
         <script src="../js/perfil.js?v=20261018-follow-requests-1" defer></script>
         <?php $mensajesWidgetRoot = '../'; include __DIR__ . '/mensajes-widget.php'; ?>
     </body>
@@ -145,12 +152,12 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?> | SIGTUR</title>
     <link rel="stylesheet" href="../css/estilos.css">
-    <link rel="stylesheet" href="../css/perfil.css">
+    <link rel="stylesheet" href="../css/perfil.css?v=20261019-2">
 </head>
 <body class="perfil-publico-page">
 <main class="perfil-publico" data-user-id="<?= $usuarioId ?>" data-following="<?= $seguido ? '1' : '0' ?>" data-pending-follow="<?= $solicitudPendiente ? '1' : '0' ?>" data-own-profile="<?= $esPropio ? '1' : '0' ?>" data-profile-public="<?= (bool) $usuario['perfil_publico'] ? '1' : '0' ?>" data-csrf="<?= !empty($_SESSION['usuario_id']) ? htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') : '' ?>">
-    <div class="profile-header-actions" style="position: absolute; top: 20px; left: 20px; z-index: 100;">
-        <a href="../index.php" class="btn-volver-glass" style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 20px; cursor: pointer; text-decoration: none;">
+    <div class="profile-header-actions">
+        <a href="../index.php" class="btn-volver-glass">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             <span>Volver</span>
         </a>
@@ -164,11 +171,12 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
         </div>
     <?php if ($perfilPuedeGestionar): ?>
         <div class="profile-options" data-profile-options data-api="api/preferencias_privacidad.php" data-csrf="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
-            <button class="profile-options__toggle" type="button" aria-label="Abrir opciones del perfil" aria-expanded="false" aria-controls="profile-options-menu" data-profile-options-toggle>
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+            <button class="profile-options__toggle" type="button" aria-label="Configuración del perfil" title="Configuración" aria-expanded="false" aria-controls="profile-options-menu" data-profile-options-toggle>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2-1.5-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.5a7.8 7.8 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a7.4 7.4 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.4 1 2-3.4-2.1-1.5ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg>
             </button>
             <div class="profile-options__menu" id="profile-options-menu" hidden>
-                <a href="personalizar-perfil.php">Personalizar perfil</a>
+                <a href="configuracion.php"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.8 7.8 0 0 0 0-2l2-1.5-2-3.4-2.4 1a7.4 7.4 0 0 0-1.7-1L15 3.5h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.5a7.8 7.8 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a7.4 7.4 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.4 1 2-3.4-2.1-1.5ZM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg>Configuración</a>
+                <a href="personalizar-perfil.php"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm8.2-3.5a8.5 8.5 0 0 0-.1-1.3l1.5-1.2-1.5-2.6-1.8.7a7.8 7.8 0 0 0-2.2-1.3L15.8 4h-3.1l-.3 2.1a7.8 7.8 0 0 0-2.2 1.3l-1.8-.7-1.5 2.6 1.5 1.2a8.5 8.5 0 0 0 0 2l-1.5 1.2 1.5 2.6 1.8-.7a7.8 7.8 0 0 0 2.2 1.3l.3 2.1h3.1l.3-2.1a7.8 7.8 0 0 0 2.2-1.3l1.8.7 1.5-2.6-1.5-1.2c.1-.4.1-.8.1-1.2Z"/></svg>Personalizar perfil</a>
                 <button type="button" data-profile-privacy-toggle><?= (bool) $usuario['perfil_publico'] ? 'Hacer perfil privado' : 'Hacer perfil público' ?></button>
                 <?php if (!(bool) $usuario['perfil_publico']): ?>
                     <button type="button" data-follow-requests-toggle aria-expanded="false" aria-controls="profile-follow-requests">
@@ -213,7 +221,8 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
                 <img class="perfil-publico__avatar" src="<?= htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Avatar de <?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>" style="object-position: <?= number_format($avatarCropX, 2, '.', '') ?>% <?= number_format($avatarCropY, 2, '.', '') ?>%; transform: scale(<?= number_format($avatarCropZoom, 2, '.', '') ?>)">
             </div>
             <div class="perfil-publico__details">
-                <p class="perfil-publico__handle">@<?= htmlspecialchars($handle, ENT_QUOTES, 'UTF-8') ?></p>
+                <p class="perfil-publico__eyebrow">Perfil de usuario</p>
+                <p class="perfil-publico__handle">@<?= htmlspecialchars($handle, ENT_QUOTES, 'UTF-8') ?><?php if ((bool) $usuario['verificado']): ?> <svg class="verified-badge" viewBox="0 0 24 24" role="img" aria-label="Cuenta verificada" focusable="false"><path d="M12 1.7 14.5 3l2.8-.2 1.1 2.6 2.4 1.5-.6 2.8 1.1 2.5-1.8 2.2-.3 2.8-2.7.8-1.8 2.2-2.7-.9-2.7.9-1.8-2.2-2.7-.8-.3-2.8-1.8-2.2 1.1-2.5-.6-2.8 2.4-1.5 1.1-2.6 2.8.2L12 1.7Zm-1.2 13.9 6-6-1.4-1.4-4.6 4.6-2.2-2.2-1.4 1.4 3.6 3.6Z"/></svg><?php endif; ?></p>
                 <h1><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?></h1>
                 <p class="perfil-publico__bio"><?= nl2br(htmlspecialchars($usuario['biografia'] ?: 'Este usuario todavía no ha agregado una biografía.', ENT_QUOTES, 'UTF-8')) ?></p>
                 <p class="perfil-publico__joined">En SIGTUR desde <?= htmlspecialchars(date('F Y', strtotime($usuario['fecha_registro'])), ENT_QUOTES, 'UTF-8') ?></p>
@@ -328,6 +337,7 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
 </div>
 
 <script src="../js/interacciones-tarjetas.js" defer></script>
+<script src="../js/tema.js" defer></script>
 <script src="../js/perfil.js?v=20261018-1" defer></script>
 <?php $mensajesWidgetRoot = '../'; include __DIR__ . '/mensajes-widget.php'; ?>
 </body>

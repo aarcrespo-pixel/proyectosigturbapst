@@ -178,5 +178,6 @@ $solicitudes = $pdo->query("SELECT s.id, s.usuario_id, s.rol_solicitado, s.domic
             <?php endforeach; ?>
         <?php endif; ?>
     </main>
+    <script src="../js/tema.js" defer></script>
 </body>
 </html>

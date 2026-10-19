@@ -72,6 +72,24 @@ body[data-tema="oscuro"] .detalle-comentarios h2 {
   color: #f6ead8;
 }
 
+body[data-tema="oscuro"] .event-panel,
+body[data-tema="oscuro"] .event-fact {
+  border-color: rgba(255, 255, 255, .12);
+  background: #20242a;
+  color: #f1f3f5;
+}
+
+body[data-tema="oscuro"] .event-panel h2,
+body[data-tema="oscuro"] .event-panel p,
+body[data-tema="oscuro"] .event-panel span {
+  color: #e4e8eb;
+}
+
+body[data-tema="oscuro"] .detalle-comentarios .card-engagement {
+  border-color: rgba(255, 255, 255, .12);
+  background: #20242a;
+}
+
 
 /* Responsive */
 @media (max-width:900px){

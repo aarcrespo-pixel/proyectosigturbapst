@@ -181,6 +181,7 @@ foreach (array_slice($recs, 0, 3) as $rec):$recSlug = array_search($rec, $evento
 <?php endif; ?>
 </main>
 <?php if ($inscripto): ?><div class="event-qr-backdrop" id="ticketModal" hidden><article class="event-ticket"><header><strong>Pase digital</strong><button class="event-ticket-close" type="button" id="ticketClose">×</button></header><img src="<?= htmlspecialchars($qrUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Código QR de acreditación"><h2><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?></h2><dl><div><dt>Fecha</dt><dd><?= htmlspecialchars($fechaLegible) ?></dd></div><div><dt>Lugar</dt><dd><?= htmlspecialchars($lugar) ?></dd></div><div><dt>Asistente</dt><dd><?= htmlspecialchars($_SESSION['usuario_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?></dd></div></dl></article></div><?php endif; ?>
+<script src="<?= $assetBase ?>js/tema.js" defer></script>
 <script src="<?= $assetBase ?>js/interacciones-tarjetas.js"></script>
 <script src="<?= $assetBase ?>js/evento.js" defer></script>
 <script>

@@ -51,6 +51,9 @@ window.chatIntervalId = window.chatIntervalId || null;
     let activeName = '';
     let activeAvatar = '../img/user.png';
     let activeContext = 'Consulta de soporte';
+    let lastMessageId = 0;
+    let hasMoreHistory = false;
+    let historyRequestPending = false;
 
     function normalizarReceptorId(value) {
         const rawValue = value?.dataset?.usuarioId ?? value?.dataset?.id ?? value;
@@ -61,7 +64,10 @@ window.chatIntervalId = window.chatIntervalId || null;
     function openWidget(userId = 0, name = '') {
         widget.classList.add('is-open');
         toggle.setAttribute('aria-expanded', 'true');
-        if (userId) abrirChat(userId, name);
+        if (userId) {
+            abrirChat(userId, name);
+            return;
+        }
         loadConversations();
     }
     function getMediaUrl(path) {
@@ -80,10 +86,10 @@ window.chatIntervalId = window.chatIntervalId || null;
         return Number.isNaN(parsed.getTime()) ? String(fecha).slice(0, 5) : parsed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
     }
     function renderBubble(item) {
-        const media = `${item.foto_url ? `<img class="mensajes-widget__photo" src="${escapeHtml(getMediaUrl(item.foto_url))}" alt="Imagen adjunta" onerror="this.remove()">` : ''}${item.audio_url ? `<audio class="mensajes-widget__audio" controls src="${escapeHtml(getMediaUrl(item.audio_url))}"></audio>` : ''}`;
+        const media = `${item.foto_url ? `<img class="mensajes-widget__photo" src="${escapeHtml(getMediaUrl(item.foto_url))}" alt="Imagen adjunta" loading="lazy" onerror="this.remove()">` : ''}${item.video_url ? `<video class="mensajes-widget__video" controls preload="metadata" src="${escapeHtml(getMediaUrl(item.video_url))}"></video>` : ''}${item.audio_url ? `<audio class="mensajes-widget__audio" controls preload="none" src="${escapeHtml(getMediaUrl(item.audio_url))}"></audio>` : ''}`;
         const emisorId = item.remitente_id ?? item.emisor_id ?? item.emisor;
         const textoMensaje = item.mensaje ?? item.texto ?? '';
-        return `<div class="mensajes-widget__message ${Number(emisorId) === Number(window.sigturUserId) ? 'mine' : ''}">${textoMensaje ? `<span>${escapeHtml(textoMensaje)}</span>` : ''}${media}<time class="mensajes-widget__time" datetime="${escapeHtml(item.fecha || item.created_at || '')}">${escapeHtml(obtenerHora(item))} hs</time></div>`;
+        return `<div class="mensajes-widget__message ${Number(emisorId) === Number(window.sigturUserId) ? 'mine' : ''}" data-message-id="${escapeHtml(item.id || '')}">${textoMensaje ? `<span>${escapeHtml(textoMensaje)}</span>` : ''}${media}<time class="mensajes-widget__time" datetime="${escapeHtml(item.fecha || item.created_at || '')}">${escapeHtml(obtenerHora(item))} hs</time></div>`;
     }
 
     function obtenerContexto(texto) {
@@ -118,71 +124,68 @@ window.chatIntervalId = window.chatIntervalId || null;
     }
     /* Leer primero como texto permite distinguir JSON válido de HTML generado
        por Apache/PHP en un 404, 500 o fatal error y mostrar la ruta exacta. */
-    async function cargarHistorialMensajes(receptorId, reconstruir = false) {
+    async function cargarHistorialMensajes(receptorId, reconstruir = false, soloNuevos = false, antesDeId = 0) {
         const idValido = normalizarReceptorId(receptorId);
-        if (!idValido || window.chatActivoId !== idValido) {
-            console.error('ID de receptor no válido:', receptorId);
+        if (!idValido || window.chatActivoId !== idValido || historyRequestPending) {
+            if (!idValido || window.chatActivoId !== idValido) console.error('ID de receptor no válido:', receptorId);
             return false;
         }
         const areaMensajes = chat.querySelector('.mensajes-widget__messages') || document.getElementById('area-mensajes') || document.querySelector('.chat-mensajes-container');
         if (!areaMensajes) return false;
-
-        const rutas = [
-            `${historyApi}?receptor_id=${encodeURIComponent(idValido)}`,
-            `${api}?accion=conversacion&receptor_id=${encodeURIComponent(idValido)}`,
-        ].filter((ruta, indice, lista) => lista.indexOf(ruta) === indice);
-        let ultimoError = 'No se pudo obtener una respuesta del servidor.';
-
-        for (const rutaApi of rutas) {
+        historyRequestPending = true;
+        const scrollHeightAnterior = areaMensajes.scrollHeight;
+        if (reconstruir) lastMessageId = 0;
+        const parametros = new URLSearchParams({ receptor_id: String(idValido) });
+        if (soloNuevos && lastMessageId) parametros.set('after_id', String(lastMessageId));
+        if (antesDeId) parametros.set('before_id', String(antesDeId));
+        const rutaApi = `${historyApi}?${parametros.toString()}`;
+        try {
+            const respuesta = await fetch(rutaApi, { headers: { Accept: 'application/json' } });
+            const textoBruto = await respuesta.text();
+            if (window.chatActivoId !== idValido) return false;
+            let datos;
             try {
-                const respuesta = await fetch(rutaApi, { headers: { Accept: 'application/json' } });
-                const textoBruto = await respuesta.text();
-                // Una respuesta vieja no puede pintar encima del contacto elegido después.
-                if (window.chatActivoId !== idValido) return false;
-                const pareceHtml = textoBruto.trim().startsWith('<') || /<!doctype|<html[\s>]/i.test(textoBruto);
-                if (pareceHtml) {
-                    console.error('Respuesta HTML no esperada desde el servidor:', rutaApi, textoBruto);
-                    ultimoError = `El servidor devolvió HTML (${respuesta.status || 'error HTTP'}) en vez de JSON.`;
-                    continue;
-                }
-                let datos;
-                try {
-                    datos = JSON.parse(textoBruto);
-                } catch (error) {
-                    ultimoError = `JSON inválido: ${error.message}`;
-                    continue;
-                }
-                if (!respuesta.ok || datos.success !== true) {
-                    ultimoError = datos.message || datos.error || `HTTP ${respuesta.status}`;
-                    continue;
-                }
-                if (window.chatActivoId !== idValido) return false;
-                    /* El backend puede evolucionar de "mensajes" a "data".
-                       Este desacoplamiento defensivo permite que el cliente
-                       siga renderizando aunque cambie el nombre del payload. */
-                    const mensajes = Array.isArray(datos.data)
-                        ? datos.data
-                        : (Array.isArray(datos.mensajes) ? datos.mensajes : (datos.messages || []));
-                    // FIX REFRESCO / SINCRONIZACIÓN: una respuesta vacía no
-                    // puede borrar un historial que ya se ve en pantalla.
-                    if (!mensajes.length && areaMensajes.querySelector('.mensajes-widget__message')) {
-                        console.warn('[mensajeria] El servidor devolvió cero mensajes; se conserva el historial visible.', idValido);
-                        return true;
-                    }
-                    const scrollEstabaAbajo = areaMensajes.scrollHeight - areaMensajes.scrollTop - areaMensajes.clientHeight < 80;
-                    areaMensajes.innerHTML = mensajes.length
-                    ? mensajes.map(renderBubble).join('')
-                    : '<p class="mensajes-widget__empty">Iniciá la conversación.</p>';
-                    if (reconstruir || scrollEstabaAbajo) areaMensajes.scrollTop = areaMensajes.scrollHeight;
-                return true;
+                datos = JSON.parse(textoBruto);
             } catch (error) {
-                ultimoError = `Error de red o parseo: ${error.message}`;
+                throw new Error(`El servidor devolvió una respuesta no JSON (${respuesta.status}): ${textoBruto.slice(0, 160)}`);
             }
+            if (!respuesta.ok || datos.success !== true) {
+                throw new Error(datos.message || datos.error || `HTTP ${respuesta.status}`);
+            }
+            const mensajes = Array.isArray(datos.data) ? datos.data : (datos.mensajes || []);
+            const cercaDelFinal = areaMensajes.scrollHeight - areaMensajes.scrollTop - areaMensajes.clientHeight < 80;
+            if (antesDeId) {
+                areaMensajes.querySelector('.mensajes-widget__load-older')?.remove();
+                if (mensajes.length) {
+                    areaMensajes.insertAdjacentHTML('afterbegin', mensajes.map(renderBubble).join(''));
+                    areaMensajes.scrollTop += areaMensajes.scrollHeight - scrollHeightAnterior;
+                }
+                hasMoreHistory = Boolean(datos.has_more);
+                if (hasMoreHistory) areaMensajes.insertAdjacentHTML('afterbegin', '<button class="mensajes-widget__load-older" type="button">Cargar mensajes anteriores</button>');
+                return true;
+            }
+            if (soloNuevos && lastMessageId) {
+                if (mensajes.length) {
+                    const idsVisibles = new Set([...areaMensajes.querySelectorAll('[data-message-id]')].map(elemento => elemento.dataset.messageId));
+                    const porAgregar = mensajes.filter(item => !idsVisibles.has(String(item.id)));
+                    if (porAgregar.length) areaMensajes.insertAdjacentHTML('beforeend', porAgregar.map(renderBubble).join(''));
+                    lastMessageId = Math.max(lastMessageId, ...mensajes.map(item => Number(item.id) || 0));
+                    if (cercaDelFinal && porAgregar.length) areaMensajes.scrollTop = areaMensajes.scrollHeight;
+                }
+                return true;
+            }
+            lastMessageId = mensajes.reduce((mayor, item) => Math.max(mayor, Number(item.id) || 0), 0);
+            hasMoreHistory = Boolean(datos.has_more);
+            areaMensajes.innerHTML = `${hasMoreHistory ? '<button class="mensajes-widget__load-older" type="button">Cargar mensajes anteriores</button>' : ''}${mensajes.length ? mensajes.map(renderBubble).join('') : '<p class="mensajes-widget__empty">Iniciá la conversación.</p>'}`;
+            if (reconstruir || cercaDelFinal) areaMensajes.scrollTop = areaMensajes.scrollHeight;
+            return true;
+        } catch (error) {
+            if (reconstruir) mostrarErrorChat(rutaApi, error.message);
+            else console.error('[mensajeria] No se pudo actualizar el historial:', error);
+            return false;
+        } finally {
+            historyRequestPending = false;
         }
-          /* Fault tolerance: durante polling se conserva la última conversación
-              válida; solo la carga manual inicial muestra el diagnóstico. */
-          if (reconstruir) mostrarErrorChat(rutas[0], ultimoError);
-        return false;
     }
     const cargarMensajes = cargarHistorialMensajes;
     // Alias legacy para páginas que todavía invocan cargarSoloMensajes().
@@ -198,9 +201,10 @@ window.chatIntervalId = window.chatIntervalId || null;
         try {
             const data = await request('conversaciones');
             const items = data.conversations || [];
-            const unread = items.reduce((total, item) => total + Number(item.no_leidos || 0), 0);
+            const unread = items.reduce((total, item) => total + Math.max(0, Number(item.no_leidos) || 0), 0);
             badge.textContent = unread;
             badge.hidden = unread === 0;
+            toggle.setAttribute('aria-label', unread === 0 ? 'Abrir mensajes' : `Abrir mensajes, ${unread} sin leer`);
             conversations.innerHTML = items.length ? items.map(item => { const avatarUrl = getAvatarUrl(item); const nombre = item.nickname || item.nombre_completo || 'Usuario'; const ultimo = item.ultimo_mensaje || 'Sin mensajes'; const estado = item.no_leidos ? `${item.no_leidos} sin leer` : 'Respondido'; const contexto = obtenerContexto(ultimo); return `<button type="button" class="mensajes-widget__conversation item-contacto${item.no_leidos ? ' has-unread' : ''}" data-id="${item.usuario_id}" data-nombre="${escapeHtml(nombre)}" data-contexto="${escapeHtml(contexto)}" data-user-id="${item.usuario_id}" data-user-name="${escapeHtml(nombre)}" data-user-avatar="${escapeHtml(avatarUrl)}"><img src="${escapeHtml(avatarUrl)}" onerror="this.onerror=null;this.src='${escapeHtml(avatarFallback)}'" alt="Avatar" class="chat-user-avatar"><span><strong>${escapeHtml(nombre)}</strong><small>${escapeHtml(ultimo)}</small><em>${escapeHtml(contexto)} · ${estado}</em></span></button>`; }).join('') : '<p class="mensajes-widget__empty">Todavía no tenés conversaciones.</p>';
         } catch (error) { conversations.innerHTML = `<p class="mensajes-widget__empty">${escapeHtml(error.message)}</p>`; }
     }
@@ -227,13 +231,14 @@ window.chatIntervalId = window.chatIntervalId || null;
         chat.innerHTML = `<div class="mensajes-widget__chat-header chat-header"><img src="${escapeHtml(activeAvatar)}" onerror="this.onerror=null;this.src='${escapeHtml(avatarFallback)}'" alt="Avatar" class="chat-user-avatar"><span><strong>${escapeHtml(activeName)}</strong><small class="mensajes-widget__contexto">🛠️ ${escapeHtml(activeContext)}</small></span></div><div class="mensajes-widget__messages chat-mensajes-list"><p class="mensajes-widget__empty">Cargando...</p></div>`;
         addComposer();
         try {
-            const cargado = await cargarHistorialMensajes(window.chatActivoId, true);
-            if (cargado) await request('leer', { method: 'POST', body: { usuario_id: window.chatActivoId } });
+            await cargarHistorialMensajes(window.chatActivoId, true);
             loadConversations();
             if (window.chatIntervalId) clearInterval(window.chatIntervalId);
             window.chatIntervalId = setInterval(() => {
-                if (window.chatActivoId === receptorId) cargarHistorialMensajes(receptorId, false);
-            }, 3000);
+                if (window.chatActivoId === receptorId && widget.classList.contains('is-open')) {
+                    cargarHistorialMensajes(receptorId, false, true);
+                }
+            }, 5000);
         } catch (error) {
             const areaMensajes = chat.querySelector('.mensajes-widget__messages');
             if (areaMensajes) areaMensajes.innerHTML = `<p class="mensajes-widget__error">${escapeHtml(error.message)}</p>`;
@@ -246,35 +251,55 @@ window.chatIntervalId = window.chatIntervalId || null;
         form.enctype = 'multipart/form-data';
         // CAMBIO APLICADO: el formulario se inyecta con un estado visual propio
         // para informar éxito/error sin borrar el texto antes de persistirlo.
-        form.innerHTML = '<label class="btn-chat-icon" title="Adjuntar imagen">📷<input type="file" name="foto" accept="image/*" hidden></label><button type="button" class="btn-chat-icon" data-audio-button title="Grabar audio">🎙️</button><textarea id="mensaje-texto" name="mensaje" rows="1" maxlength="500" placeholder="Escribí un mensaje..."></textarea><button id="btn-enviar-mensaje" type="submit">Enviar</button><div class="mensajes-widget__audio-status" aria-live="polite"></div><div class="mensajes-widget__preview"></div><div class="mensajes-widget__send-status" data-send-status role="status" aria-live="polite"></div>';
+        form.innerHTML = '<label class="btn-chat-icon" title="Adjuntar foto">📷<input type="file" name="foto" accept="image/jpeg,image/png,image/webp,image/gif" hidden></label><label class="btn-chat-icon" title="Adjuntar video">🎬<input type="file" name="video" accept="video/mp4,video/webm,video/quicktime" hidden></label><button type="button" class="btn-chat-icon" data-audio-button title="Grabar audio">🎙️</button><textarea id="mensaje-texto" name="mensaje" rows="1" maxlength="500" placeholder="Escribí un mensaje..."></textarea><button id="btn-enviar-mensaje" type="submit">Enviar</button><div class="mensajes-widget__audio-status" aria-live="polite"></div><div class="mensajes-widget__preview"></div><div class="mensajes-widget__send-status" data-send-status role="status" aria-live="polite"></div>';
         chat.appendChild(form);
         const input = form.querySelector('textarea');
-        const foto = form.querySelector('input[type="file"]');
+        const archivos = [...form.querySelectorAll('input[type="file"]')];
         const preview = form.querySelector('.mensajes-widget__preview');
         const sendStatus = form.querySelector('[data-send-status]');
         const sendButton = form.querySelector('#btn-enviar-mensaje');
-        foto.addEventListener('change', () => { const archivo = foto.files?.[0]; preview.textContent = archivo ? archivo.name : ''; });
+        const actualizarPreview = () => { preview.textContent = archivos.map(archivo => archivo.files?.[0]?.name).filter(Boolean).join(' · '); };
+        archivos.forEach(archivo => archivo.addEventListener('change', actualizarPreview));
+        input.addEventListener('keydown', event => {
+            if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+                event.preventDefault();
+                form.requestSubmit();
+            }
+        });
         let grabador = null;
         let partesAudio = [];
         form.querySelector('[data-audio-button]').addEventListener('click', async () => {
             const estado = form.querySelector('.mensajes-widget__audio-status');
             if (grabador?.state === 'recording') { grabador.stop(); return; }
             if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) { estado.textContent = 'Audio no disponible en este navegador.'; return; }
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            grabador = new MediaRecorder(stream); partesAudio = [];
-            grabador.ondataavailable = event => { if (event.data.size) partesAudio.push(event.data); };
-            grabador.onstop = () => { stream.getTracks().forEach(track => track.stop()); form.audioBlob = new Blob(partesAudio, { type: 'audio/webm' }); estado.textContent = 'Audio listo para enviar.'; };
-            grabador.start(); estado.textContent = 'Grabando... pulsa para detener.';
+            let stream;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const formato = MediaRecorder.isTypeSupported?.('audio/webm')
+                    ? 'audio/webm'
+                    : (MediaRecorder.isTypeSupported?.('audio/ogg') ? 'audio/ogg' : '');
+                grabador = formato ? new MediaRecorder(stream, { mimeType: formato }) : new MediaRecorder(stream); partesAudio = [];
+                grabador.ondataavailable = event => { if (event.data.size) partesAudio.push(event.data); };
+                grabador.onstop = () => {
+                    stream.getTracks().forEach(track => track.stop());
+                    form.audioBlob = new Blob(partesAudio, { type: grabador.mimeType || formato || partesAudio[0]?.type || 'audio/webm' });
+                    estado.textContent = 'Audio listo para enviar.';
+                };
+                grabador.start(); estado.textContent = 'Grabando... pulsa para detener.';
+            } catch (error) {
+                stream?.getTracks().forEach(track => track.stop());
+                estado.textContent = `No se pudo iniciar la grabación: ${error.message}`;
+            }
         });
         form.addEventListener('submit', async event => {
             event.preventDefault();
             if (!window.chatActivoId) return;
             const datos = new FormData(form); datos.set('accion', 'enviar'); datos.set('usuario_id', String(window.chatActivoId)); datos.set('destinatario_id', String(window.chatActivoId)); datos.set('texto', input.value.trim()); datos.set('contexto', activeContext || 'Consulta general');
             if (form.audioBlob) datos.append('audio', form.audioBlob, 'nota.webm');
-            if (!input.value.trim() && !foto.files?.length && !form.audioBlob) return;
+            if (!input.value.trim() && !archivos.some(archivo => archivo.files?.length) && !form.audioBlob) return;
             // DIAGNÓSTICO: mostramos exactamente las claves y valores enviados;
             // no se imprime el contenido binario de fotos/audio en consola.
-            console.log('[mensajeria] POST antes de fetch', Object.fromEntries([...datos.entries()].filter(([clave]) => !['foto', 'audio'].includes(clave))));
+            console.log('[mensajeria] POST antes de fetch', Object.fromEntries([...datos.entries()].filter(([clave]) => !['foto', 'video', 'audio'].includes(clave))));
             if (sendButton) sendButton.disabled = true;
             if (sendStatus) sendStatus.textContent = 'Enviando...';
             try {
@@ -302,7 +327,7 @@ window.chatIntervalId = window.chatIntervalId || null;
                 // historial; luego el servidor vuelve a ser la fuente final.
                 const areaMensajes = chat.querySelector('.mensajes-widget__messages');
                 if (areaMensajes) {
-                    areaMensajes.insertAdjacentHTML('beforeend', renderBubble({ remitente_id: window.sigturUserId, mensaje: input.value.trim(), hora: data.fecha || obtenerHora({}) }));
+                    areaMensajes.insertAdjacentHTML('beforeend', renderBubble({ id: data.id, remitente_id: window.sigturUserId, mensaje: input.value.trim(), foto_url: data.foto_url, video_url: data.video_url, audio_url: data.audio_url, hora: data.fecha || obtenerHora({}) }));
                     areaMensajes.scrollTop = areaMensajes.scrollHeight;
                 }
                 input.value = ''; form.reset(); form.audioBlob = null; preview.textContent = '';
@@ -338,6 +363,14 @@ window.chatIntervalId = window.chatIntervalId || null;
         }
         abrirChat(receptorId, button.dataset.userName || button.dataset.nombre || 'Usuario', button.dataset.userAvatar, button.dataset.contexto);
     });
+    chat.addEventListener('click', event => {
+        const boton = event.target.closest('.mensajes-widget__load-older');
+        if (!boton) return;
+        const areaMensajes = chat.querySelector('.mensajes-widget__messages');
+        const primerMensaje = areaMensajes?.querySelector('.mensajes-widget__message');
+        const primerId = Number(primerMensaje?.dataset.messageId || 0);
+        if (primerId && hasMoreHistory) cargarHistorialMensajes(window.chatActivoId, false, false, primerId);
+    });
     window.addEventListener('sigtur:abrir-mensajes', event => {
         const receptorId = normalizarReceptorId(event.detail?.userId ?? event.detail?.receptorId);
         if (receptorId) openWidget(receptorId, event.detail?.name);
@@ -348,6 +381,7 @@ window.chatIntervalId = window.chatIntervalId || null;
     window.sigturUserId = Number(widget.dataset.userId || 0);
     widget.hidden = false;
     if (document.body.classList.contains('pagina-mensajes-admin')) openWidget();
-    window.setInterval(() => { if (!widget.classList.contains('is-open')) return; loadConversations(); }, 15000);
+    loadConversations();
+    window.setInterval(loadConversations, 15000);
     window.addEventListener('beforeunload', () => { if (window.chatIntervalId) window.clearInterval(window.chatIntervalId); });
 })();

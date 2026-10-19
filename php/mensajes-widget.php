@@ -14,9 +14,9 @@ if (!$mensajesWidgetUsuario || !in_array($mensajesWidgetUsuario['rol'], ['admini
     return;
 }
 $mensajesWidgetUserId = (int) $mensajesWidgetUsuario['id'];
-$mensajesWidgetScript = htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') . 'js/mensajes.js?v=20260915-3';
+$mensajesWidgetScript = htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') . 'js/mensajes.js?v=20261019-2';
 ?>
-<link rel="stylesheet" href="<?= htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') ?>css/mensajes.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') ?>css/mensajes.css?v=20261019-2">
 <div class="mensajes-widget" id="mensajesWidget" data-user-id="<?= $mensajesWidgetUserId ?>" data-api="<?= htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') ?>php/api/mensajes.php" data-avatar-fallback="<?= htmlspecialchars($mensajesWidgetRoot, ENT_QUOTES, 'UTF-8') ?>img/user.png" hidden>
     <button class="mensajes-widget__toggle" type="button" aria-expanded="false" aria-controls="mensajesPanel">
         <span aria-hidden="true">&#128172;</span><span>Mensajes</span><b class="mensajes-widget__badge" hidden>0</b>

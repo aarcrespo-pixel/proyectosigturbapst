@@ -41,10 +41,10 @@ $tipoEvento = trim(is_string($_POST['tipo_evento'] ?? null) ? $_POST['tipo_event
 $tiposEventoPermitidos = ['Competencias', 'Carreras', 'Deportivo', 'Discotecas', 'Cultural', 'Feria', 'Otro'];
 if (
     $titulo === '' || mb_strlen($titulo, 'UTF-8') > 160
-    || $descripcion === '' || mb_strlen($descripcion, 'UTF-8') > 2000
+    || mb_strlen($descripcion, 'UTF-8') > 2000
     || !in_array($tipoEvento, $tiposEventoPermitidos, true)
 ) {
-    responderSubidaGaleria(['success' => false, 'message' => 'Completa un título, una descripción y un tipo de evento válidos.'], 422, $esAjax);
+    responderSubidaGaleria(['success' => false, 'message' => 'Completa un título y un tipo de evento válidos.'], 422, $esAjax);
 }
 
 $campoFoto = $_FILES['foto'] ?? null;

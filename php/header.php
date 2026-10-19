@@ -56,6 +56,7 @@ $headerLinks = [
     ['label' => 'Gastronomía', 'url' => BASE_URL . 'php/gastronomia.php', 'page' => 'gastronomia'],
 ];
 ?>
+<script src="<?= htmlspecialchars(BASE_URL . 'js/tema.js', ENT_QUOTES, 'UTF-8') ?>" defer></script>
 <header class="menu-principal">
     <button class="hamburguesa" aria-label="Abrir menú" data-i18n-aria-label="navMenuOpen">
         ☰

@@ -6,7 +6,7 @@ const menu = document.querySelector(".menu"); // barra principal del menu
 const menuPrincipal = document.querySelector(".menu-principal");
 const body = document.body; // cuerpo del html
 
-const isIndex = !document.querySelector("main.pagina-eventos, main.pagina-turismo, main.pagina-lugares"); // pagina principal, usa body en vez de main en el index
+const isIndex = !document.querySelector('main'); // la portada es la única vista sin un elemento main
 const isEventos = !!document.querySelector("main.pagina-eventos"); // pagina de eventos
 const isTurismo = !!document.querySelector("main.pagina-turismo"); // pagina de turismo
 const isLugares = !!document.querySelector("main.pagina-lugares"); // pagina de lugares
@@ -474,8 +474,9 @@ const traduccionesExtra = {
         tourismGastronomySeeAll: 'Ver toda la gastronomía salteña',
         tourismGalleryTitle: 'Galería turística',
         tourismGallerySeeAll: 'Ver todas las galerías',
-        tourismGalleryTitles: ['Parque Benito Solari', 'La Fosa', 'Shopping Salto', 'Cine Sarandi'],
-        tourismGalleryAlt: ['Parque Solari', 'La Fosa', 'Shopping Salto', 'Cine Sarandi'],
+        tourismGalleryIntro: 'Paisajes, paseos y lugares para inspirar tu próxima visita.',
+        tourismGalleryTitles: ['Parque Benito Solari', 'Termas del Dayman', 'Costanera Norte', 'Termas de Arapey', 'Plaza Artigas', 'Shopping Salto', 'Cine Sarandí', 'Paisajes del litoral'],
+        tourismGalleryAlt: ['Parque Solari', 'Piscinas de las Termas del Dayman', 'Paseo por la Costanera Norte', 'Complejo termal de Salto', 'Monumentos de la Plaza Artigas', 'Shopping Salto', 'Calle céntrica junto al Cine Sarandí', 'Paisaje natural de la región'],
         placesSectionEmblematicTitle: 'Lugares emblemáticos',
         placesSectionCategoriesTitle: 'Categorías de lugares',
         placesSectionLeisureTitle: 'Lugares para Distraerse',
@@ -504,8 +505,9 @@ const traduccionesExtra = {
             'Zona con vista al río para relajarse y pasar el rato con amigos.'
         ],
         placesLeisureAlt: ['Plaza Roosvelt', 'Costanera Norte', 'Muelle Negro'],
-        placesGalleryTitles: ['Plaza Treinta y Tres', 'Plaza Artigas', 'Parque Benito Solari', 'Termas del Dayman'],
-        placesGalleryAlt: ['Vista de evento', 'Plaza central', 'Espacio de descanso', 'Punto turístico']
+        placesGalleryIntro: 'Un recorrido visual por los espacios y las tradiciones que cuentan la historia de Salto.',
+        placesGalleryTitles: ['Plaza Treinta y Tres', 'Plaza Artigas', 'Centro histórico', 'Cultura salteña', 'Costanera de Salto'],
+        placesGalleryAlt: ['Plaza Treinta y Tres y su entorno histórico', 'Monumentos de la Plaza Artigas', 'Calle céntrica junto al Cine Sarandí', 'Expresión de la cultura popular salteña', 'Paseo costero de Salto']
     },
     en: {
         navProfile: 'Profile',
@@ -642,8 +644,9 @@ const traduccionesExtra = {
         tourismGastronomySeeAll: 'See all Salto gastronomy',
         tourismGalleryTitle: 'Tourist gallery',
         tourismGallerySeeAll: 'See all galleries',
-        tourismGalleryTitles: ['Parque Benito Solari', 'La Fosa', 'Salto Shopping', 'Cine Sarandi'],
-        tourismGalleryAlt: ['Parque Solari', 'La Fosa', 'Salto shopping', 'Cine Sarandi'],
+        tourismGalleryIntro: 'Landscapes, walks and places to inspire your next visit.',
+        tourismGalleryTitles: ['Benito Solari Park', 'Dayman Hot Springs', 'North Waterfront', 'Arapey Hot Springs', 'Artigas Square', 'Salto Shopping', 'Cine Sarandí', 'Litoral landscapes'],
+        tourismGalleryAlt: ['Benito Solari Park', 'Pools at Dayman Hot Springs', 'Walk along the North Waterfront', 'Salto hot springs resort', 'Monuments at Artigas Square', 'Salto Shopping', 'Downtown street by Cine Sarandí', 'Natural landscape in the region'],
         placesSectionEmblematicTitle: 'Iconic places',
         placesSectionCategoriesTitle: 'Place categories',
         placesSectionLeisureTitle: 'Places to have fun',
@@ -672,8 +675,9 @@ const traduccionesExtra = {
             'A zone with river views to relax and spend time with friends.'
         ],
         placesLeisureAlt: ['Plaza Roosvelt', 'North waterfront', 'Muelle Negro'],
-        placesGalleryTitles: ['Plaza Treinta y Tres', 'Plaza Artigas', 'Parque Benito Solari', 'Termas del Dayman'],
-        placesGalleryAlt: ['Event view', 'Central square', 'Rest area', 'Tourist spot']
+        placesGalleryIntro: 'A visual journey through the places and traditions that tell Salto’s story.',
+        placesGalleryTitles: ['Plaza Treinta y Tres', 'Artigas Square', 'Historic downtown', 'Salto culture', 'Salto waterfront'],
+        placesGalleryAlt: ['Plaza Treinta y Tres and its historic surroundings', 'Monuments at Artigas Square', 'Downtown street by Cine Sarandí', 'Expression of popular culture in Salto', 'Salto waterfront promenade']
     },
     pt: {
         navProfile: 'Perfil',
@@ -791,8 +795,9 @@ const traduccionesExtra = {
         tourismGastronomySeeAll: 'Ver toda a gastronomia de Salto',
         tourismGalleryTitle: 'Galeria turística',
         tourismGallerySeeAll: 'Ver todas as galerias',
-        tourismGalleryTitles: ['Parque Benito Solari', 'La Fosa', 'Salto Shopping', 'Cine Sarandi'],
-        tourismGalleryAlt: ['Parque Solari', 'La Fosa', 'Shopping de Salto', 'Cine Sarandi'],
+        tourismGalleryIntro: 'Paisagens, passeios e lugares para inspirar sua próxima visita.',
+        tourismGalleryTitles: ['Parque Benito Solari', 'Termas del Dayman', 'Costanera Norte', 'Termas de Arapey', 'Praça Artigas', 'Shopping Salto', 'Cine Sarandí', 'Paisagens do litoral'],
+        tourismGalleryAlt: ['Parque Solari', 'Piscinas das Termas del Dayman', 'Passeio pela Costanera Norte', 'Complexo termal de Salto', 'Monumentos da Praça Artigas', 'Shopping Salto', 'Rua central junto ao Cine Sarandí', 'Paisagem natural da região'],
         placesSectionEmblematicTitle: 'Lugares emblemáticos',
         placesSectionCategoriesTitle: 'Categorias de lugares',
         placesSectionLeisureTitle: 'Lugares para se divertir',
@@ -821,8 +826,9 @@ const traduccionesExtra = {
             'Uma zona com vista para o rio para relaxar e passar o tempo com amigos.'
         ],
         placesLeisureAlt: ['Praça Roosvelt', 'Costanera Norte', 'Muelle Negro'],
-        placesGalleryTitles: ['Praça Treinta y Tres', 'Praça Artigas', 'Parque Benito Solari', 'Termas del Dayman'],
-        placesGalleryAlt: ['Vista do evento', 'Praça central', 'Área de descanso', 'Ponto turístico'],
+        placesGalleryIntro: 'Um percurso visual pelos espaços e tradições que contam a história de Salto.',
+        placesGalleryTitles: ['Praça Treinta y Tres', 'Praça Artigas', 'Centro histórico', 'Cultura salteña', 'Costanera de Salto'],
+        placesGalleryAlt: ['Praça Treinta y Tres e seu entorno histórico', 'Monumentos da Praça Artigas', 'Rua central junto ao Cine Sarandí', 'Expressão da cultura popular salteña', 'Passeio costeiro de Salto'],
         todosEventsBack: '← Voltar ao início',
         todosEventsSearch: 'Buscar eventos',
         todosEventsCategoryLabel: 'Todas',
@@ -976,11 +982,8 @@ const esInfo = (elemento) => {
     identidad propia para no sobrescribir estilos específicos. */
 const aplicarTema = (oscuro, botonModoOscuro) => {
     const colorTexto = oscuro ? '#ffffff' : ''; // si estamos en modo oscuro, el texto debe ser blanco
-    const colorFondo = oscuro ? '#050505' : ''; // fondo negro mate para toda la pagina
     const fondoBoton = oscuro ? 'rgba(255,255,255,0.12)' : ''; // fondo tenue para botones menos importantes
 
-    setStyle(body, 'backgroundColor', colorFondo); // aplico el fondo oscuro al body
-    setStyle(body, 'backgroundImage', oscuro ? 'none' : ''); // saco imagen de fondo si hay una
     body.dataset.tema = oscuro ? 'oscuro' : 'claro'; // marca el tema actual para CSS
 
     const features = document.querySelectorAll('.feature, .feature-header');

@@ -30,6 +30,7 @@ $activePage = $activePage ?? '';
         <a href="<?= $navBase ?>lugares.php" data-i18n="navPlaces">Lugares</a>
         <a href="<?= $navBase ?>gastronomia.php" class="<?= $activePage === 'gastronomia' ? 'pagina-activa' : '' ?>" data-i18n="navGastronomy">Gastronomía</a>
     </nav>
+    <script src="<?= htmlspecialchars($rootBase . 'js/tema.js', ENT_QUOTES, 'UTF-8') ?>" defer></script>
 
     <div class="barra-busqueda" data-search-endpoint="<?= $rootBase ?>php/api/buscar.php" data-search-results="<?= $rootBase ?>php/buscar.php">
         <input id="global-search" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder" placeholder="Buscar eventos" aria-label="Buscar eventos">
@@ -166,7 +167,7 @@ $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
         <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
     </a>
     <a href="<?= $navBase ?>gastronomia.php" class="bottom-nav-item <?= $activePage === 'gastronomia' ? 'active' : '' ?>">
-        <img src="../img/gastronomia.jpg" class="bottom-nav-icon" alt="Gastronomía">
+        <img src="../img/gastronomia.png" class="bottom-nav-icon" alt="Gastronomía">
         <span class="bottom-nav-label" data-i18n="navGastronomy">Gastronomía</span>
     </a>
 </nav>

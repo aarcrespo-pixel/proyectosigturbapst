@@ -144,5 +144,6 @@ if ($reportes) {
             <?php endforeach; ?>
         </section>
     </main>
+    <script src="../js/tema.js" defer></script>
 </body>
 </html>

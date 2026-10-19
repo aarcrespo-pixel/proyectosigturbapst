@@ -80,6 +80,31 @@ const galeria = [
     { imagen: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/84/ae/39/trouville-pizzeria-y.jpg?w=1200&h=1200&s=1", titulo: "La Trouville", descripcion: "Una propuesta gastronómica para descubrir sabores locales y disfrutar una buena salida." }
 ];
 
+const fotosPersistidasGaleria = Array.isArray(window.galeriaDesdeBd)
+    ? window.galeriaDesdeBd.map((foto) => ({
+        id: Number(foto.id),
+        imagen: foto.imagen,
+        titulo: foto.titulo || 'Foto de evento',
+        descripcion: [foto.descripcion, foto.tipo_evento ? `Tipo de evento: ${foto.tipo_evento}` : ''].filter(Boolean).join(' · '),
+        categoria: foto.tipo_evento || '',
+        fecha: foto.fecha || '',
+        usuarioId: Number(foto.usuario_id),
+        usuarioNombre: foto.usuario_nombre || 'Usuario',
+        puedeEliminar: Boolean(foto.puede_eliminar)
+    }))
+    : [];
+galeria.push(...fotosPersistidasGaleria);
+
+function escaparHTML(valor) {
+    return String(valor ?? '').replace(/[&<>"']/g, (caracter) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[caracter]);
+}
+
 // Construir lista principal con slugs únicos para cada evento
 let eventosPrincipales = (() => {
     /* Unimos filas persistidas y catálogo legacy, eliminando duplicados por
@@ -236,29 +261,164 @@ function renderGaleria() {
     const fotosFiltradas = galeria
         .map((item, index) => ({ ...item, originalIndex: index }))
         .filter((item) => {
-            const descripcion = (item.imagen || "").toLowerCase();
+            const contenidoFoto = `${item.titulo || ''} ${item.descripcion || ''} ${item.categoria || ''}`.toLowerCase();
             const coincideCategoria = galeriaFiltro === 'todos' || (item.categoria && item.categoria.toLowerCase().includes(galeriaFiltro));
-            const coincideTexto = !textoBusqueda || descripcion.includes(textoBusqueda);
+            const coincideTexto = !textoBusqueda || contenidoFoto.includes(textoBusqueda);
             return coincideCategoria && coincideTexto;
         });
 
     contenedor.innerHTML = fotosFiltradas
         .map((item, index) => `
             <article class="imagen-galeria galeria-item" data-index="${index}" data-original-index="${item.originalIndex}">
-        <img src="${item.imagen}" alt="Galería ${index + 1}" loading="lazy" onerror="this.onerror=null;this.src='../img/porco.avif';">
+                <img src="${escaparHTML(item.imagen)}" alt="${escaparHTML(item.titulo || `Galería ${index + 1}`)}" loading="lazy" onerror="this.onerror=null;this.src='../img/porco.avif';">
+                ${item.puedeEliminar ? `<button class="galeria-foto-eliminar" type="button" data-gallery-delete="${Number(item.id)}" aria-label="Eliminar ${escaparHTML(item.titulo)}">Eliminar</button>` : ''}
             </article>
     `)
-        .join("");
+        .join("") + (window.gestionGaleria?.puedeSubir
+            ? '<button class="imagen-galeria galeria-agregar-foto" type="button" data-gallery-open aria-label="Agregar fotos a la galería"><span aria-hidden="true">+</span><small>Agregar fotos</small></button>'
+            : '');
 
     if (typeof window.initInteractiveCards === 'function') {
         window.initInteractiveCards(contenedor);
     }
 
     document.querySelectorAll(".galeria-item").forEach((boton) => {
-        boton.addEventListener("click", () => {
+        boton.addEventListener("click", (event) => {
+            if (event.target.closest('[data-gallery-delete]')) return;
             const indice = Number(boton.dataset.originalIndex || boton.dataset.index);
             abrirLightbox(indice);
         });
+    });
+    contenedor.querySelectorAll('[data-gallery-delete]').forEach((boton) => {
+        boton.addEventListener('click', async (event) => {
+            event.stopPropagation();
+            if (!window.confirm('¿Querés eliminar esta foto de la galería?')) return;
+            boton.disabled = true;
+            try {
+                const response = await fetch('api/eliminar_foto_galeria.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', Accept: 'application/json' },
+                    body: new URLSearchParams({
+                        foto_id: boton.dataset.galleryDelete,
+                        csrf_token: window.gestionGaleria?.csrfToken || ''
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok || data.success !== true) throw new Error(data.message || 'No se pudo eliminar la foto.');
+                const index = galeria.findIndex((foto) => Number(foto.id) === Number(boton.dataset.galleryDelete));
+                if (index !== -1) galeria.splice(index, 1);
+                renderGaleria();
+                if (data.warning) window.sigturAlert?.(data.warning);
+            } catch (error) {
+                window.sigturAlert?.(error.message || 'No se pudo eliminar la foto.');
+                boton.disabled = false;
+            }
+        });
+    });
+}
+
+function configurarSubidaGaleria() {
+    const overlay = document.getElementById('form-galeria-overlay');
+    const form = document.getElementById('form-galeria-fotos');
+    const input = form?.querySelector('[data-gallery-files]');
+    const uploadZone = form?.querySelector('[data-gallery-upload-zone]');
+    const fileNames = form?.querySelector('[data-gallery-file-names]');
+    const submitButton = form?.querySelector('[data-gallery-submit]');
+    const errorBox = form?.querySelector('[data-gallery-error]');
+    const status = form?.querySelector('[data-gallery-status]');
+    const contenedor = document.getElementById('galeria-contenedor');
+    if (!overlay || !form || !input) return;
+
+    const cerrar = () => {
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+    };
+    const mostrarError = (mensaje) => {
+        errorBox.textContent = mensaje;
+        errorBox.classList.toggle('show', Boolean(mensaje));
+    };
+    const abrir = () => {
+        mostrarError('');
+        if (status) status.textContent = '';
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        form.querySelector('[name="titulo"]')?.focus();
+    };
+
+    contenedor?.addEventListener('click', (event) => {
+        if (event.target.closest('[data-gallery-open]')) abrir();
+    });
+    overlay.querySelectorAll('[data-gallery-close]').forEach((button) => button.addEventListener('click', cerrar));
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) cerrar();
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && overlay.classList.contains('open')) cerrar();
+    });
+    form.querySelector('[data-gallery-file-select]')?.addEventListener('click', () => input.click());
+    input.addEventListener('change', () => {
+        const files = [...(input.files || [])];
+        fileNames.textContent = files.length ? files.map((file) => file.name).join(' · ') : 'Sin archivos seleccionados';
+        uploadZone.classList.toggle('has-file', files.length > 0);
+        mostrarError(files.length > 10 ? 'Podés subir hasta 10 fotos por vez.' : '');
+    });
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const files = [...(input.files || [])];
+        if (!files.length) {
+            mostrarError('Seleccioná al menos una foto.');
+            return;
+        }
+        if (files.length > 10) {
+            mostrarError('Podés subir hasta 10 fotos por vez.');
+            return;
+        }
+        if (files.some((file) => file.size > 5 * 1024 * 1024)) {
+            mostrarError('Cada foto debe pesar como máximo 5 MB.');
+            return;
+        }
+
+        mostrarError('');
+        if (status) status.textContent = 'Subiendo fotos…';
+        submitButton.disabled = true;
+        try {
+            const body = new FormData(form);
+            body.set('ajax', '1');
+            const response = await fetch('agregar-foto-galeria.php', {
+                method: 'POST',
+                body,
+                headers: { Accept: 'application/json' }
+            });
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch {
+                throw new Error(`El servidor devolvió una respuesta inesperada: ${responseText.slice(0, 180)}`);
+            }
+            if (!response.ok || data.success !== true) throw new Error(data.message || 'No se pudieron subir las fotos.');
+            const agregadas = (data.fotos || []).map((foto) => ({
+                ...foto,
+                descripcion: [foto.descripcion, foto.categoria ? `Tipo de evento: ${foto.categoria}` : ''].filter(Boolean).join(' · '),
+                usuarioId: Number(foto.usuario_id),
+                puedeEliminar: window.gestionGaleria?.rol === 'administrador'
+                    || Number(foto.usuario_id) === Number(window.gestionGaleria?.usuarioId)
+            }));
+            galeria.unshift(...agregadas);
+            form.reset();
+            fileNames.textContent = 'Sin archivos seleccionados';
+            uploadZone.classList.remove('has-file');
+            cerrar();
+            renderGaleria();
+            if ((data.results || []).some((resultado) => !resultado.success)) {
+                window.sigturAlert?.(`${data.message} Algunas imágenes no se pudieron subir.`);
+            }
+        } catch (error) {
+            mostrarError(error.message || 'No se pudieron subir las fotos.');
+            if (status) status.textContent = '';
+        } finally {
+            submitButton.disabled = false;
+        }
     });
 }
 
@@ -926,6 +1086,7 @@ function init() {
     renderEventosPrincipales();
     renderEventosAnteriores();
     renderGaleria();
+    configurarSubidaGaleria();
 
     document.getElementById("lightbox-close")?.addEventListener("click", cerrarLightbox);
     document.getElementById("lightbox-backdrop")?.addEventListener("click", cerrarLightbox);

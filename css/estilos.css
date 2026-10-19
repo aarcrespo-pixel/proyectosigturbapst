@@ -18,6 +18,10 @@
 }
 
 body[data-tema="oscuro"] {
+    --bg-card: #20242a;
+    --text-primary: #f3f4f6;
+    --text-secondary: #b4bec7;
+    --texto-oscuro: #f3f4f6;
     background: linear-gradient(180deg, #120f0b 0%, #1b1610 48%, #241d15 100%);
     color: #f6ead8;
 }

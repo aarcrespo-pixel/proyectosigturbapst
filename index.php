@@ -63,7 +63,7 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
             <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
         </a>
         <a href="php/gastronomia.php" class="bottom-nav-item">
-            <img src="img/gastronomia.jpg" class="bottom-nav-icon" alt="Gastronomía">
+            <img src="img/gastronomia.png" class="bottom-nav-icon" alt="Gastronomía">
             <span class="bottom-nav-label" data-i18n="navGastronomy">Gastronomía</span>
         </a>
     </nav>
@@ -117,7 +117,7 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
         </div>
         <div class="feature">
             <div class="feature-header">
-                <img src="img/gastronomia.jpg" alt="Gastronomía">
+                <img src="img/gastronomia.png" alt="Gastronomía">
                 <h3>Gastronomía</h3>
                 <button class="feature-toggle" aria-expanded="false">▼</button>
             </div>
@@ -237,26 +237,26 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
                 <div class="slide activo">
                     <div class="info-evento">
                         <h3>La Trouville</h3>
-                        <p>Sabores locales y una propuesta ideal para compartir una buena salida.</p>
-                        <div class="accion-boton"><a href="php/gastronomia.php" class="boton-amarillo">Ver gastronomía</a></div>
+                        <p>Una propuesta cálida para disfrutar café, algo rico y una buena charla en el centro.</p>
+                        <div class="accion-boton"><a href="php/gastronomia.php#propuestas-gastronomicas" class="boton-amarillo">Ver gastronomía</a></div>
                     </div>
                     <img src="img/Trouville.jpg" alt="La Trouville">
                 </div>
                 <div class="slide">
                     <div class="info-evento">
-                        <h3>Dulces y helados</h3>
-                        <p>Helados, tortas y opciones dulces para disfrutar una tarde de paseo.</p>
-                        <div class="accion-boton"><a href="php/gastronomia.php" class="boton-amarillo">Ver gastronomía</a></div>
+                        <h3>Salto Shopping</h3>
+                        <p>Un punto de encuentro para pasear, hacer una pausa y elegir entre distintas propuestas.</p>
+                        <div class="accion-boton"><a href="php/gastronomia.php#propuestas-gastronomicas" class="boton-amarillo">Ver gastronomía</a></div>
                     </div>
-                    <img src="img/r7.jfif" alt="Dulces y helados">
+                    <img src="img/Shopping_Salto.jpg" alt="Salto Shopping">
                 </div>
                 <div class="slide">
                     <div class="info-evento">
-                        <h3>Noche de picadas</h3>
-                        <p>Tablas, quesos, fiambres y panes para compartir una salida relajada.</p>
-                        <div class="accion-boton"><a href="php/gastronomia.php" class="boton-amarillo">Ver gastronomía</a></div>
+                        <h3>Cocina del centro</h3>
+                        <p>Propuestas de cocina casera, minutas y platos locales para un almuerzo completo.</p>
+                        <div class="accion-boton"><a href="php/gastronomia.php#propuestas-gastronomicas" class="boton-amarillo">Ver gastronomía</a></div>
                     </div>
-                    <img src="img/gastronomia.jpg" alt="Noche de picadas">
+                    <img src="img/r4.jpg" alt="Cocina del centro">
                 </div>
             </div>
             <button class="flecha derecha" aria-label="Siguiente lugar gastronómico"></button>

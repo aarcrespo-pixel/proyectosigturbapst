@@ -75,6 +75,7 @@ $mensajesPendientes = (int) $mensajesStmt->fetchColumn();
         </section>
 
     </main>
+    <script src="../js/tema.js" defer></script>
     <?php $mensajesWidgetRoot = '../'; include __DIR__ . '/mensajes-widget.php'; ?>
 </body>
 </html>

@@ -38,7 +38,7 @@
             <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
         </a>
         <a href="gastronomia.php" class="bottom-nav-item active">
-            <img src="../img/gastronomia.jpg" class="bottom-nav-icon" alt="Gastronomía">
+            <img src="../img/gastronomia.png" class="bottom-nav-icon" alt="Gastronomía">
             <span class="bottom-nav-label">Gastronomía</span>
         </a>
     </nav>

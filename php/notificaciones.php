@@ -37,6 +37,16 @@ $sinLeer = sigtur_contar_notificaciones_no_leidas($pdo, $usuarioId);
         .notificacion-item__status { font-size: 0.8rem; font-weight: 700; color: #4a667b; }
         .notificacion-item__status--read { color: #72839a; }
         .notificacion-empty { background: rgba(255,255,255,0.72); border: 1px dashed #d7dde5; border-radius: 18px; padding: 22px; color: #56677a; }
+        body[data-tema="oscuro"] { background: #151a1f; color: #edf2f5; color-scheme: dark; }
+        body[data-tema="oscuro"] .notificacion-item,
+        body[data-tema="oscuro"] .notificacion-empty { border-color: #3b454d; background: #20262c; color: #edf2f5; }
+        body[data-tema="oscuro"] .notificacion-item--unread { background: linear-gradient(180deg, #202e3b, #20262c); }
+        body[data-tema="oscuro"] .notificacion-item p,
+        body[data-tema="oscuro"] .notificacion-item__time,
+        body[data-tema="oscuro"] .notificacion-item__status,
+        body[data-tema="oscuro"] .notificacion-empty { color: #b5c0c7; }
+        body[data-tema="oscuro"] .notificacion-item__type { background: #25394a; color: #a9d6ff; }
+        body[data-tema="oscuro"] .notificaciones-page__button--secondary { background: #303941; color: #edf2f5; }
         @media (max-width: 700px) { .notificaciones-page__header { flex-direction: column; align-items: flex-start; } }
     </style>
 </head>
