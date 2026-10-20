@@ -50,7 +50,7 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
             <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
         </a>
         <a href="gastronomia.php" class="bottom-nav-item">
-            <img src="../img/gastronomia.jpg" class="bottom-nav-icon" alt="Gastronomía">
+            <img src="../img/gastronomia.png" class="bottom-nav-icon" alt="Gastronomía">
             <span class="bottom-nav-label">Gastronomía</span>
         </a>
     </nav>
@@ -61,6 +61,7 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                 <span data-i18n="tourismHeroLabel">Descubrí el turismo en Salto</span>
                 <h1 data-i18n="tourismHeroTitle">TURISMO</h1>
                 <p data-i18n="tourismHeroText">Explorá propuestas de turismo local, recorridos gastronómicos y experiencias al aire libre diseñadas para cada tipo de visitante.</p>
+                <a class="hero-gallery-link" href="#galeria-turistica" data-i18n="tourismGallerySeeAll">Ver todas las galerías</a>
             </div>
         </section>
 
@@ -183,18 +184,29 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
         </section>
 
         <section class="seccion-turismo" id="galeria-turistica">
-            <h2 data-i18n="tourismGalleryTitle">Galería turística</h2>
+            <div class="gallery-section-heading">
+                <div>
+                    <span class="gallery-section-kicker">Descubrí Salto</span>
+                    <h2 data-i18n="tourismGalleryTitle">Galería turística</h2>
+                    <p data-i18n="tourismGalleryIntro">Paisajes, paseos y lugares para inspirar tu próxima visita.</p>
+                </div>
+                <span class="gallery-section-count" aria-label="<?= count($fotosTurismo) + 8 ?> fotos destacadas"><?= count($fotosTurismo) + 8 ?> lugares</span>
+            </div>
             <?php if (isset($_GET['fotos_agregadas'])): ?>
                 <p class="turismo-galeria-feedback" role="status">
                     Se agregaron <?= max(1, (int) $_GET['fotos_agregadas']) ?> foto<?= (int) $_GET['fotos_agregadas'] === 1 ? '' : 's' ?> a la galería.
                     <?php if (isset($_GET['algunas_fotos_fallaron'])): ?>Algunas fotos no se pudieron subir.<?php endif; ?>
                 </p>
             <?php endif; ?>
-            <div class="galeria-grid">
-                <article class="tarjeta-galeria"><img src="../img/solari.jfif" alt="Parque Solari" data-i18n-alt="tourismGalleryAlt" data-i18n-index="0"><div class="contenido"><h3 data-i18n="tourismGalleryTitles" data-i18n-index="0">Parque Benito Solari</h3></div></article>
-                <article class="tarjeta-galeria"><img src="../img/fosa.webp" alt="La Fosa" data-i18n-alt="tourismGalleryAlt" data-i18n-index="1"><div class="contenido"><h3 data-i18n="tourismGalleryTitles" data-i18n-index="1">La Fosa</h3></div></article>
-                <article class="tarjeta-galeria"><img src="../img/Shopping_Salto.jpg" alt="Shopping Salto" data-i18n-alt="tourismGalleryAlt" data-i18n-index="2"><div class="contenido"><h3 data-i18n="tourismGalleryTitles" data-i18n-index="2">Shopping Salto</h3></div></article>
-                <article class="tarjeta-galeria"><img src="../img/Cine_Sarandi.jpg" alt="Cine Sarandi" data-i18n-alt="tourismGalleryAlt" data-i18n-index="3"><div class="contenido"><h3 data-i18n="tourismGalleryTitles" data-i18n-index="3">Cine Sarandi</h3></div></article>
+            <div class="galeria-grid gallery-photo-grid">
+                <article class="tarjeta-galeria"><img src="../img/solari.jfif" alt="Parque Benito Solari" loading="lazy" decoding="async" data-i18n-alt="tourismGalleryAlt" data-i18n-index="0"><div class="contenido"><span class="gallery-photo-tag">Naturaleza</span><h3 data-i18n="tourismGalleryTitles" data-i18n-index="0">Parque Benito Solari</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/Termas_Dayman.webp" alt="Piscinas de las Termas del Dayman" loading="lazy" decoding="async" data-i18n-alt="tourismGalleryAlt" data-i18n-index="1"><div class="contenido"><span class="gallery-photo-tag">Bienestar</span><h3 data-i18n="tourismGalleryTitles" data-i18n-index="1">Termas del Dayman</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/Costanera_Norte.jpeg" alt="Paseo por la Costanera Norte" loading="lazy" decoding="async" data-i18n-alt="tourismGalleryAlt" data-i18n-index="2"><div class="contenido"><span class="gallery-photo-tag">Aire libre</span><h3 data-i18n="tourismGalleryTitles" data-i18n-index="2">Costanera Norte</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/experiencias.webp" alt="Complejo termal de Salto" loading="lazy" decoding="async" data-i18n-alt="tourismGalleryAlt" data-i18n-index="3"><div class="contenido"><span class="gallery-photo-tag">Termas</span><h3 data-i18n="tourismGalleryTitles" data-i18n-index="3">Termas de Arapey</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/Plaza_artigas.webp" alt="Monumentos de la Plaza Artigas" loading="lazy" decoding="async"><div class="contenido"><span class="gallery-photo-tag">Ciudad</span><h3>Plaza Artigas</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/Shopping_Salto.jpg" alt="Shopping Salto" loading="lazy" decoding="async"><div class="contenido"><span class="gallery-photo-tag">Paseos</span><h3>Shopping Salto</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/Cine_Sarandi.jpg" alt="Calle céntrica junto al Cine Sarandí" loading="lazy" decoding="async"><div class="contenido"><span class="gallery-photo-tag">Cultura</span><h3>Cine Sarandí</h3></div></article>
+                <article class="tarjeta-galeria"><img src="../img/Naturaleza.webp" alt="Paisaje natural de la región" loading="lazy" decoding="async"><div class="contenido"><span class="gallery-photo-tag">Naturaleza</span><h3>Paisajes del litoral</h3></div></article>
                 <?php foreach ($fotosTurismo as $fotoTurismo): ?>
                     <?php $fotoTurismoUrl = sigtur_url_imagen_subida((string) $fotoTurismo['imagen'], 'galeria-eventos', '../img/porco.avif'); ?>
                     <article class="tarjeta-galeria">

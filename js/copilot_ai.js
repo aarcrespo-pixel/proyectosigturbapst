@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const messages = document.getElementById('copilot-assistant-messages');
     const historyButton = document.getElementById('copilot-assistant-history');
     const clearButton = document.getElementById('copilot-assistant-clear');
-    const deleteButton = document.getElementById('copilot-assistant-delete');
     const historyPanel = document.getElementById('copilot-assistant-history-panel');
     const apiUrl = root.dataset.api || '/php/api/copilot_ai.php';
     const csrfToken = root.dataset.csrf || '';
@@ -81,33 +80,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     question.textContent = `Vos: ${item.mensaje}`;
                     const answer = document.createElement('p');
                     answer.textContent = `IA: ${item.respuesta}`;
-                    entry.append(question, answer);
+                    const deleteChatButton = document.createElement('button');
+                    deleteChatButton.type = 'button';
+                    deleteChatButton.className = 'copilot-assistant__history-delete';
+                    deleteChatButton.textContent = 'Eliminar chat';
+                    deleteChatButton.addEventListener('click', async () => {
+                        if (!window.confirm('¿Querés eliminar este chat del historial?')) return;
+                        deleteChatButton.disabled = true;
+                        try {
+                            const deleteResponse = await fetch(apiUrl, {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                                body: new URLSearchParams({
+                                    accion: 'eliminar_chat',
+                                    id: String(item.id),
+                                    csrf_token: csrfToken,
+                                }),
+                            });
+                            const deleteData = await deleteResponse.json();
+                            if (!deleteResponse.ok || deleteData.success !== true) {
+                                throw new Error(deleteData.message || 'No se pudo eliminar este chat.');
+                            }
+                            entry.remove();
+                            if (!historyPanel.querySelector('.copilot-assistant__history-entry')) {
+                                historyPanel.textContent = 'Todavía no hay chats anteriores.';
+                            }
+                        } catch (error) {
+                            window.alert(error.message);
+                            deleteChatButton.disabled = false;
+                        }
+                    });
+                    entry.append(question, answer, deleteChatButton);
                     historyPanel.appendChild(entry);
                 });
             } catch (error) {
                 historyPanel.textContent = error.message;
-            }
-        });
-    }
-
-    if (deleteButton) {
-        deleteButton.addEventListener('click', async () => {
-            if (!window.confirm('¿Querés eliminar todo tu historial del asistente?')) return;
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-                body: new URLSearchParams({ accion: 'borrar_historial', csrf_token: csrfToken }),
-            });
-            const data = await response.json();
-            if (!response.ok || data.success !== true) {
-                window.alert(data.message || 'No se pudo eliminar el historial.');
-                return;
-            }
-            previousResponseId = null;
-            if (historyPanel) {
-                historyPanel.hidden = true;
-                historyPanel.textContent = '';
             }
         });
     }

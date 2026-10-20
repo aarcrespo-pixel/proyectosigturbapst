@@ -22,7 +22,7 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS `sigtur_schema_version` (
         `version` VARCHAR(40) NOT NULL PRIMARY KEY
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-    $versionEsperada = '2026-10-18-upload-image-filenames-1';
+    $versionEsperada = '2026-10-19-cuentas-verificadas-2';
     $versionEsquema = $pdo->query("SELECT `version` FROM `sigtur_schema_version` LIMIT 1")->fetchColumn();
     $bloqueoEsquema = false;
     if ($versionEsquema !== $versionEsperada) {
@@ -45,6 +45,7 @@ try {
             `avatar` varchar(255) NOT NULL DEFAULT 'default-avatar.png',
             `banner` varchar(255) NOT NULL DEFAULT 'default-banner.png',
             `nickname` varchar(50) DEFAULT NULL,
+            `verificado` TINYINT(1) NOT NULL DEFAULT 0,
             `biografia` text DEFAULT NULL,
             `perfil_publico` TINYINT(1) NOT NULL DEFAULT 1,
             `ubicacion` varchar(100) DEFAULT NULL,
@@ -217,6 +218,7 @@ try {
         'avatar_crop_zoom' => "ALTER TABLE `usuarios` ADD COLUMN `avatar_crop_zoom` DECIMAL(3,2) NOT NULL DEFAULT 1.00",
         'foto_perfil' => "ALTER TABLE `usuarios` ADD COLUMN `foto_perfil` varchar(255) DEFAULT NULL",
         'nickname' => "ALTER TABLE `usuarios` ADD COLUMN `nickname` varchar(50) DEFAULT NULL",
+        'verificado' => "ALTER TABLE `usuarios` ADD COLUMN `verificado` TINYINT(1) NOT NULL DEFAULT 0",
         'biografia' => "ALTER TABLE `usuarios` ADD COLUMN `biografia` text DEFAULT NULL",
         'ubicacion' => "ALTER TABLE `usuarios` ADD COLUMN `ubicacion` varchar(100) DEFAULT NULL",
         'sitio_web' => "ALTER TABLE `usuarios` ADD COLUMN `sitio_web` varchar(255) DEFAULT NULL",
@@ -228,6 +230,9 @@ try {
             $pdo->exec($sqlAlter);
         }
     }
+    $pdo->exec("UPDATE `usuarios` SET `verificado` = 1
+        WHERE LOWER(TRIM(`nickname`)) IN ('aarcrespo', '@aarcrespo')
+           OR LOWER(TRIM(`nombre_completo`)) = 'benjamin reina'");
 
     /* Estas tablas separan la identidad social de los comentarios: publicaciones
        alimenta la galería pública, seguidores guarda una relación única y
@@ -295,6 +300,7 @@ try {
         `leido` TINYINT(1) NOT NULL DEFAULT 0,
         KEY `idx_mensajes_destinatario` (`destinatario_id`),
         KEY `idx_mensajes_conversacion` (`remitente_id`, `destinatario_id`, `id`),
+        KEY `idx_mensajes_conversacion_inversa` (`destinatario_id`, `remitente_id`, `id`),
         CONSTRAINT `fk_mensajes_remitente` FOREIGN KEY (`remitente_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
         CONSTRAINT `fk_mensajes_destinatario` FOREIGN KEY (`destinatario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
@@ -388,6 +394,9 @@ try {
     $indicesMensajes = $pdo->query("SHOW INDEX FROM `mensajes`")->fetchAll(PDO::FETCH_COLUMN, 2);
     if (!in_array('idx_mensajes_conversacion', $indicesMensajes, true)) {
         $pdo->exec("ALTER TABLE `mensajes` ADD INDEX `idx_mensajes_conversacion` (`remitente_id`, `destinatario_id`, `id`)");
+    }
+    if (!in_array('idx_mensajes_conversacion_inversa', $indicesMensajes, true)) {
+        $pdo->exec("ALTER TABLE `mensajes` ADD INDEX `idx_mensajes_conversacion_inversa` (`destinatario_id`, `remitente_id`, `id`)");
     }
 
     /* La tabla de lugares normaliza los puntos turísticos y permite que una

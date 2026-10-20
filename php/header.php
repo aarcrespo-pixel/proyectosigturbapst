@@ -56,6 +56,7 @@ $headerLinks = [
     ['label' => 'Gastronomía', 'url' => BASE_URL . 'php/gastronomia.php', 'page' => 'gastronomia'],
 ];
 ?>
+<script src="<?= htmlspecialchars(BASE_URL . 'js/tema.js', ENT_QUOTES, 'UTF-8') ?>" defer></script>
 <header class="menu-principal">
     <button class="hamburguesa" aria-label="Abrir menú" data-i18n-aria-label="navMenuOpen">
         ☰
@@ -112,10 +113,9 @@ $headerLinks = [
                 </div>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/perfil.php?id=<?= (int) ($_SESSION['usuario_id'] ?? 0) ?>">Ver mi perfil</a>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/mis-eventos.php">Mis Eventos / Favoritos</a>
+                <?php if ($headerUserRole === 'turista'): ?><a class="perfil-item" href="<?= BASE_URL ?>php/notificaciones.php">Avisos de administradores</a><?php endif; ?>
                 <?php if (in_array($headerUserRole, ['turista', 'organizador'], true)): ?><a class="perfil-item" href="<?= BASE_URL ?>php/solicitud-rango.php"><?= $headerUserRole === 'organizador' ? 'Solicitud de cambio de rango' : 'Solicitud de rango' ?></a><?php endif; ?>
                 <?php if (($_SESSION['rol'] ?? '') === 'administrador'): ?><a class="perfil-item" href="<?= BASE_URL ?>php/panel-admin.php">Panel de administración</a><?php elseif (($_SESSION['rol'] ?? '') === 'organizador'): ?><a class="perfil-item" href="<?= BASE_URL ?>php/panel-organizador.php">Panel de organizador</a><?php endif; ?>
-                <a class="perfil-item" href="<?= BASE_URL ?>php/configuracion.php" data-i18n="navSettings">Configuración</a>
-                <a class="perfil-item" href="<?= BASE_URL ?>php/soporte.php" data-i18n="navSupport">Soporte</a>
             <?php else: ?>
                 <div class="perfil-user-header">
                     <img class="perfil-user-avatar" src="<?php echo htmlspecialchars($headerAssetPrefix . 'img/user.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar invitado">
@@ -126,8 +126,6 @@ $headerLinks = [
                     </div>
                 </div>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/login.php" data-i18n="navLogin">Ingresar Usuario</a>
-                <a class="perfil-item" href="<?= BASE_URL ?>php/configuracion.php" data-i18n="navSettings">Configuración</a>
-                <a class="perfil-item" href="<?= BASE_URL ?>php/soporte.php" data-i18n="navSupport">Soporte</a>
             <?php endif; ?>
         </div>
     </div>
@@ -147,12 +145,12 @@ $headerLinks = [
 <?php endif; ?>
 
 <?php if ($headerMostrarClima): ?><script src="<?= BASE_URL ?>js/weather.js" defer></script><?php endif; ?>
-<script src="<?= BASE_URL ?>js/translator.js" defer></script>
+<script src="<?= BASE_URL ?>js/translator.js?v=20261019-i18n-4" defer></script>
 <script src="<?= BASE_URL ?>js/search.js" defer></script>
 <script src="<?= BASE_URL ?>js/notificaciones.js" defer></script>
 <?php if ($headerCurrentPage === 'index'): ?>
 <?php if ($headerUserLoggedIn && $headerUserRole === 'turista'): ?>
-<script src="<?= BASE_URL ?>js/copilot_ai.js?v=20261015-gemini-1" defer></script>
+<script src="<?= BASE_URL ?>js/copilot_ai.js?v=20261019-history-delete-1" defer></script>
 <?php endif; ?>
 <?php $mensajesWidgetRoot = BASE_URL; include __DIR__ . '/mensajes-widget.php'; ?>
 <?php endif; ?>
@@ -173,8 +171,7 @@ $headerLinks = [
             </div>
             <div class="copilot-assistant__header-actions">
                 <button type="button" id="copilot-assistant-history" title="Ver chat anterior">Historial</button>
-                <button type="button" id="copilot-assistant-clear" title="Limpiar chat actual">Limpiar</button>
-                <button type="button" id="copilot-assistant-delete" title="Eliminar chat">Eliminar</button>
+                <button type="button" id="copilot-assistant-clear" title="Limpiar chat actual">Limpiar chat</button>
             </div>
             <button type="button" class="copilot-assistant__close" id="copilot-assistant-close" aria-label="Cerrar asistente">×</button>
         </div>

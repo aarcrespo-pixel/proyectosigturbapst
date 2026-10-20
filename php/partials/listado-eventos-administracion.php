@@ -1,4 +1,3 @@
-<?php require_once __DIR__ . '/../helpers/imagenes.php'; ?>
 <section class="admin-section" id="eventos" aria-labelledby="events-title">
     <div class="admin-section__heading">
         <div>
@@ -85,7 +84,7 @@
                             <label class="admin-form__wide admin-event__image-field">Foto del evento
                                 <img
                                     class="admin-event__image-preview"
-                                    src="<?= htmlspecialchars(sigtur_url_imagen_subida((string) ($evento['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif'), ENT_QUOTES, 'UTF-8') ?>"
+                                    src="<?= htmlspecialchars($evento['imagen_portada'] ?: '../img/porco.avif', ENT_QUOTES, 'UTF-8') ?>"
                                     alt="Foto actual de <?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>"
                                     loading="lazy"
                                 >

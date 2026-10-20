@@ -19,12 +19,16 @@ $q = trim((string) ($_GET['q'] ?? ''));
         .search-page-card span { color: var(--text-secondary, #5f6b7a); font-size: .85rem; }
         .search-page-empty { color: var(--text-secondary, #5f6b7a); padding: 24px 0; }
         body[data-tema="oscuro"] .search-page h1 { color: #f9fafb; }
+        body[data-tema="oscuro"] .search-page-card { border-color: rgba(255,255,255,.12); background: #20242a; }
+        body[data-tema="oscuro"] .search-page-card h2 { color: #f3f4f6; }
+        body[data-tema="oscuro"] .search-page-card span,
+        body[data-tema="oscuro"] .search-page-empty { color: #b4bec7; }
     </style>
 </head>
 <body>
 <?php $headerCurrentPage = 'buscar'; $headerActivePage = ''; include __DIR__ . '/header.php'; ?>
 <main class="search-page" data-query="<?= htmlspecialchars($q, ENT_QUOTES, 'UTF-8') ?>" data-endpoint="api/buscar.php">
-    <h1 data-i18n="searchResultsTitle">Resultados para: <?= htmlspecialchars($q, ENT_QUOTES, 'UTF-8') ?></h1>
+    <h1><span data-i18n="searchResultsTitle">Resultados para:</span> <?= htmlspecialchars($q, ENT_QUOTES, 'UTF-8') ?></h1>
     <div class="search-page-grid" id="search-page-results"><p class="search-page-empty">Buscando...</p></div>
 </main>
 <script>

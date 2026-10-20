@@ -3,6 +3,8 @@
     const LANGUAGE_STORAGE_KEY = 'sigtur-idioma';
     const CACHE_PREFIX = 'i18n_';
     const pendingTranslations = new Map();
+    const originalTextNodes = new WeakMap();
+    const translatedTextNodes = new WeakMap();
     let scanTimer = null;
 
     /* Convertimos cada frase en una clave estable y corta para que la caché
@@ -44,9 +46,9 @@
        script.js aplique sus traducciones locales. Así la API siempre recibe
        una frase fuente estable aunque el usuario cambie de idioma. */
     function captureOriginalValues(root = document) {
-        const selector = root === document ? 'body *' : ':scope, :scope *';
+        const selector = root === document ? 'head title, body *' : ':scope, :scope *';
         root.querySelectorAll?.(selector).forEach((element) => {
-            if (element.matches('script, style, noscript, svg, .weather-widget, [data-translator-ignore]')) return;
+            if (element.matches('script, style, noscript, svg, [data-translator-ignore]')) return;
             if (!element.dataset.translatorSource && element.children.length === 0 && element.textContent.trim()) {
                 element.dataset.translatorSource = element.textContent.trim();
             }
@@ -56,16 +58,23 @@
                 }
             });
         });
+
+        const textRoot = root === document ? document.body : root;
+        if (!textRoot) return;
+        const walker = document.createTreeWalker(textRoot, NodeFilter.SHOW_TEXT);
+        let textNode;
+        while ((textNode = walker.nextNode())) {
+            const parent = textNode.parentElement;
+            if (!parent || !textNode.nodeValue.trim() || parent.children.length === 0) continue;
+            if (parent.closest('script, style, noscript, svg, [data-translator-ignore], [data-i18n], [data-i18n-title]')) continue;
+            if (!originalTextNodes.has(textNode)) {
+                originalTextNodes.set(textNode, textNode.nodeValue);
+            }
+        }
     }
 
     function isUsefulSource(source) {
         return Boolean(source && source.trim() && /[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(source));
-    }
-
-    function canUseLocalTranslation(element, source, language) {
-        const hasLocalKey = ['data-i18n', 'data-i18n-placeholder', 'data-i18n-alt', 'data-i18n-title']
-            .some((attribute) => element.hasAttribute(attribute));
-        return hasLocalKey && element.dataset.translatorLanguage !== language && element.textContent.trim() !== source;
     }
 
     /* Esta función concentra la llamada fetch: primero reutiliza memoria o
@@ -99,18 +108,37 @@
     async function translateElement(element, language) {
         if (element.dataset.translatorLanguage === language) return;
         const source = element.dataset.translatorSource;
-        if (element.children.length === 0 && isUsefulSource(source) && !canUseLocalTranslation(element, source, language)) {
-            element.textContent = await translatePhrase(source, language);
-            element.dataset.translatorLanguage = language;
+        if (element.children.length === 0 && isUsefulSource(source) && element.dataset.translatorLocalTextLanguage !== language) {
+            const translation = await translatePhrase(source, language);
+            if (getActiveLanguage() === language) {
+                element.textContent = translation;
+                element.dataset.translatorLanguage = language;
+            }
         }
 
         for (const attribute of ['placeholder', 'alt', 'title']) {
             const sourceAttribute = element.dataset[`translator${attribute}Source`];
             if (!isUsefulSource(sourceAttribute)) continue;
-            const hasLocalKey = ['data-i18n', `data-i18n-${attribute}`].some((key) => element.hasAttribute(key));
-            if (hasLocalKey && element.dataset.translatorLanguage !== language && element.getAttribute(attribute) !== sourceAttribute) continue;
-            element.setAttribute(attribute, await translatePhrase(sourceAttribute, language));
-            element.dataset.translatorLanguage = language;
+            const localAttributeLanguage = element.dataset[`translatorLocal${attribute[0].toUpperCase()}${attribute.slice(1)}Language`];
+            if (localAttributeLanguage === language) continue;
+            const translation = await translatePhrase(sourceAttribute, language);
+            if (getActiveLanguage() === language) {
+                element.setAttribute(attribute, translation);
+                element.dataset.translatorLanguage = language;
+            }
+        }
+    }
+
+    async function translateTextNode(textNode, language) {
+        const original = originalTextNodes.get(textNode);
+        if (!original || translatedTextNodes.get(textNode) === language) return;
+        const match = original.match(/^(\s*)([\s\S]*?)(\s*)$/);
+        if (!match || !isUsefulSource(match[2])) return;
+
+        const translation = await translatePhrase(match[2], language);
+        if (getActiveLanguage() === language && textNode.isConnected) {
+            textNode.nodeValue = `${match[1]}${translation}${match[3]}`;
+            translatedTextNodes.set(textNode, language);
         }
     }
 
@@ -125,6 +153,15 @@
             });
             delete element.dataset.translatorLanguage;
         });
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        let textNode;
+        while ((textNode = walker.nextNode())) {
+            const original = originalTextNodes.get(textNode);
+            if (original !== undefined) {
+                textNode.nodeValue = original;
+                translatedTextNodes.delete(textNode);
+            }
+        }
     }
 
     async function translateDocument() {
@@ -136,8 +173,17 @@
         }
 
         const elements = [...document.querySelectorAll('[data-translator-source], [placeholder], [alt], [title]')]
-            .filter((element) => !element.matches('script, style, noscript, svg, .weather-widget, [data-translator-ignore]'));
-        await Promise.all(elements.map((element) => translateElement(element, language)));
+            .filter((element) => !element.matches('script, style, noscript, svg, [data-translator-ignore]'));
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        const textNodes = [];
+        let textNode;
+        while ((textNode = walker.nextNode())) {
+            if (originalTextNodes.has(textNode)) textNodes.push(textNode);
+        }
+        await Promise.all([
+            ...elements.map((element) => translateElement(element, language)),
+            ...textNodes.map((node) => translateTextNode(node, language))
+        ]);
     }
 
     function scheduleTranslation() {
@@ -162,7 +208,11 @@
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === Node.ELEMENT_NODE) captureOriginalValues(node);
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        captureOriginalValues(node);
+                    } else if (node.nodeType === Node.TEXT_NODE && node.parentElement) {
+                        captureOriginalValues(node.parentElement);
+                    }
                 });
             });
             scheduleTranslation();

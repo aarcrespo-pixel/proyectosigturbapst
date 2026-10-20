@@ -30,7 +30,7 @@ try {
     $consulta = mb_substr($consulta, 0, 80, 'UTF-8');
     $termino = '%' . strtr($consulta, ['!' => '!!', '%' => '!%', '_' => '!_']) . '%';
     $usuarioActual = (int) ($_SESSION['usuario_id'] ?? 0);
-    $buscar = $pdo->prepare("SELECT id, nombre_completo, nickname, avatar
+    $buscar = $pdo->prepare("SELECT id, nombre_completo, nickname, avatar, verificado
         FROM usuarios
         WHERE id <> :usuario_actual
           AND (nombre_completo LIKE :nombre ESCAPE '!' OR nickname LIKE :nickname ESCAPE '!')
@@ -56,6 +56,7 @@ try {
             'id' => (int) $usuario['id'],
             'nombre' => (string) ($usuario['nombre_completo'] ?? ''),
             'nickname' => (string) ($usuario['nickname'] ?? ''),
+            'verificado' => (bool) ($usuario['verificado'] ?? false),
             'avatar_url' => $avatarUrl,
         ];
     }, $buscar->fetchAll(PDO::FETCH_ASSOC));

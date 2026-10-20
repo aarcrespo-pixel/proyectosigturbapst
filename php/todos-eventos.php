@@ -416,6 +416,8 @@
         </main>
     </div>
 
+    <script src="../js/tema.js" defer></script>
     <script src="../js/todos-eventos.js"></script>
+    <script src="../js/translator.js" defer></script>
 </body>
 </html>

@@ -45,40 +45,59 @@ try {
     $receptorStmt = $pdo->prepare('SELECT rol FROM usuarios WHERE id = :id LIMIT 1');
     $receptorStmt->execute([':id' => $receptorId]);
     $rolReceptor = $receptorStmt->fetchColumn();
-    $rolesPermitidos = $usuarioActual['rol'] === 'administrador'
-        ? ['administrador', 'organizador']
-        : ['administrador'];
-    if (!$rolReceptor || !in_array(sigtur_normalizar_rol((string) $rolReceptor), $rolesPermitidos, true)) {
+    if (!$rolReceptor || sigtur_normalizar_rol((string) $rolReceptor) !== $usuarioActual['rol']) {
         responderHistorial(['status' => 'error', 'success' => false, 'message' => 'No tienes permiso para abrir esta conversación.'], 403);
     }
 
-     /* La condición bidireccional recupera ambos sentidos con una sentencia
-         preparada y orden temporal, sin interpolar IDs proporcionados por HTTP. */
-    // CAMBIO APLICADO: DATE_FORMAT entrega al frontend la hora exacta ya
-    // preparada por MySQL, sin depender del parseo ambiguo del navegador.
-    // FIX REFRESCO / SINCRONIZACIÓN: los placeholders son únicos. Con PDO en
-    // prepares nativos no se debe reutilizar :emisor o :receptor en el OR.
-    $sql = "SELECT m.id, m.remitente_id AS emisor_id, m.destinatario_id AS receptor_id,
-                   m.mensaje, m.contexto, m.foto_url, m.audio_url, m.fecha_creacion AS fecha,
-                   DATE_FORMAT(m.fecha_creacion, '%H:%i') AS hora, m.leido,
-                   u.nombre_completo AS nombre_usuario, u.nickname,
-                   COALESCE(u.foto_perfil, u.avatar) AS foto_perfil
-            FROM mensajes m
-            INNER JOIN usuarios u ON u.id = m.remitente_id
-                WHERE (m.remitente_id = :mi_id_a AND m.destinatario_id = :receptor_id_a)
-                    OR (m.remitente_id = :receptor_id_b AND m.destinatario_id = :mi_id_b)
-            ORDER BY m.fecha_creacion ASC, m.id ASC";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':mi_id_a' => $emisorId,
-        ':receptor_id_a' => $receptorId,
-        ':receptor_id_b' => $receptorId,
-        ':mi_id_b' => $emisorId,
-    ]);
-    $mensajes = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $marcar = $pdo->prepare('UPDATE mensajes SET leido = 1 WHERE remitente_id = :receptor AND destinatario_id = :emisor AND leido = 0');
-    $marcar->execute([':emisor' => $emisorId, ':receptor' => $receptorId]);
-    responderHistorial(['status' => 'success', 'success' => true, 'mensajes' => $mensajes, 'data' => $mensajes]);
+     $afterRaw = $_GET['after_id'] ?? null;
+     $beforeRaw = $_GET['before_id'] ?? null;
+     $afterId = $afterRaw === null ? 0 : filter_var($afterRaw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+     $beforeId = $beforeRaw === null ? 0 : filter_var($beforeRaw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+     if (($afterRaw !== null && !$afterId) || ($beforeRaw !== null && !$beforeId) || ($afterId && $beforeId)) {
+          responderHistorial(['status' => 'error', 'success' => false, 'message' => 'El cursor del historial no es válido.'], 422);
+     }
+
+     /* El historial se pagina y el polling consulta únicamente IDs nuevos para
+         evitar transferir y volver a pintar toda la conversación cada pocos segundos. */
+     $condicionCursor = '';
+     $parametros = [
+          ':mi_id_a' => $emisorId,
+          ':receptor_id_a' => $receptorId,
+          ':receptor_id_b' => $receptorId,
+          ':mi_id_b' => $emisorId,
+     ];
+     if ($afterId) {
+          $condicionCursor = ' AND m.id > :after_id';
+          $parametros[':after_id'] = $afterId;
+     } elseif ($beforeId) {
+          $condicionCursor = ' AND m.id < :before_id';
+          $parametros[':before_id'] = $beforeId;
+     }
+     $orden = $afterId ? 'ASC' : 'DESC';
+     $sql = "SELECT m.id, m.remitente_id AS emisor_id, m.destinatario_id AS receptor_id,
+                     m.mensaje, m.contexto, m.foto_url, m.video_url, m.audio_url, m.fecha_creacion AS fecha,
+                     DATE_FORMAT(m.fecha_creacion, '%H:%i') AS hora, m.leido,
+                     u.nombre_completo AS nombre_usuario, u.nickname,
+                     COALESCE(u.foto_perfil, u.avatar) AS foto_perfil
+              FROM mensajes m
+              INNER JOIN usuarios u ON u.id = m.remitente_id
+              WHERE ((m.remitente_id = :mi_id_a AND m.destinatario_id = :receptor_id_a)
+                  OR (m.remitente_id = :receptor_id_b AND m.destinatario_id = :mi_id_b)){$condicionCursor}
+              ORDER BY m.id {$orden}
+              LIMIT 101";
+     $stmt = $pdo->prepare($sql);
+     $stmt->execute($parametros);
+     $mensajes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+     $hayAnteriores = count($mensajes) > 100 && !$afterId;
+     if ($hayAnteriores || ($afterId && count($mensajes) > 100)) {
+          $mensajes = array_slice($mensajes, 0, 100);
+     }
+     if (!$afterId) {
+          $mensajes = array_reverse($mensajes);
+     }
+     $marcar = $pdo->prepare('UPDATE mensajes SET leido = 1 WHERE remitente_id = :receptor AND destinatario_id = :emisor AND leido = 0');
+     $marcar->execute([':emisor' => $emisorId, ':receptor' => $receptorId]);
+     responderHistorial(['status' => 'success', 'success' => true, 'mensajes' => $mensajes, 'data' => $mensajes, 'has_more' => $hayAnteriores]);
 } catch (Throwable $exception) {
     /* Incluso una excepción de PDO termina como JSON válido después de limpiar
        el buffer, nunca como una página HTML inyectada en la respuesta. */

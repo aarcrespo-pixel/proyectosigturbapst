@@ -214,6 +214,11 @@ html[data-tamano-letra="muyGrande"] .support-page .hero h1 {
 .notificaciones-item__head span, .notificaciones-item__footer small { color: var(--muted); font-size: .8rem; }
 .notificaciones-item p { margin: 8px 0; }
 .notificaciones-item__mark-read { border: 0; border-radius: 999px; padding: 6px 10px; background: var(--accent-deep); color: #fff; cursor: pointer; }
+.notificaciones-item__delete { border: 1px solid var(--border); border-radius: 999px; padding: 6px 10px; background: transparent; color: var(--muted); cursor: pointer; }
+.notificaciones-item__delete:hover { border-color: #e85d4a; color: #b83224; }
+.notificaciones-item__delete:disabled { cursor: wait; opacity: .6; }
+.config-notificaciones__action-status:empty { display: none; }
+.config-notificaciones__action-status { margin: 0; color: var(--muted); font-size: .9rem; }
 .config-notificaciones__login { display: grid; gap: 12px; justify-items: start; }
 .support-login-prompt { display: grid; gap: 12px; justify-items: start; }
 

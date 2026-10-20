@@ -1,17 +1,44 @@
 <?php
 session_start();
 require_once __DIR__ . '/php/conexion.php';
+require_once __DIR__ . '/php/helpers/imagenes.php';
+require_once __DIR__ . '/php/helpers/contenido_publico.php';
 
-// La portada precarga eventos para que las tarjetas puedan enlazar a IDs reales.
-/* La portada consulta por ID descendente para que el último evento publicado
-   esté disponible antes de renderizar cualquier tarjeta destacada. */
-$eventosPublicados = $pdo->query('SELECT * FROM eventos ORDER BY id DESC')->fetchAll();
-$eventosPorSlug = [];
-foreach ($eventosPublicados as $eventoPublicado) {
-    $eventosPorSlug[$eventoPublicado['slug']] = $eventoPublicado;
+sigtur_inicializar_contenido_publico($pdo);
+$eventosDestacados = $pdo->query('SELECT id, titulo, descripcion, fecha, ubicacion, imagen_portada FROM eventos WHERE es_pasado = 0 AND fecha >= CURDATE() ORDER BY fecha ASC, id DESC LIMIT 20')->fetchAll(PDO::FETCH_ASSOC);
+$lugaresDestacados = $pdo->query("SELECT id, slug, nombre, descripcion, imagen FROM lugares WHERE seccion_publica <> 'oculto' ORDER BY nombre ASC")->fetchAll(PDO::FETCH_ASSOC);
+$gastronomiaDestacada = $pdo->query('SELECT nombre, descripcion, imagen FROM gastronomia_catalogo ORDER BY orden ASC, nombre ASC')->fetchAll(PDO::FETCH_ASSOC);
+$resolverImagenIndex = static function (string $imagen, string $carpeta, string $fallback): string {
+    $ruta = sigtur_url_imagen_subida($imagen, $carpeta, $fallback);
+    return str_starts_with($ruta, '../') ? substr($ruta, 3) : $ruta;
+};
+$resumirTextoIndex = static function (string $texto, int $limite = 180): string {
+    $texto = trim(preg_replace('/\s+/', ' ', $texto) ?? '');
+    $longitud = function_exists('mb_strlen') ? mb_strlen($texto, 'UTF-8') : strlen($texto);
+    if ($longitud <= $limite) {
+        return $texto;
+    }
+
+    $resumen = function_exists('mb_substr') ? mb_substr($texto, 0, $limite, 'UTF-8') : substr($texto, 0, $limite);
+    $ultimoEspacio = strrpos($resumen, ' ');
+    if ($ultimoEspacio !== false) {
+        $resumen = substr($resumen, 0, $ultimoEspacio);
+    }
+
+    return rtrim($resumen, " \t\n\r\0\x0B.,;:") . '…';
+};
+foreach ($eventosDestacados as &$eventoDestacado) {
+    $eventoDestacado['imagen_portada'] = $resolverImagenIndex((string) ($eventoDestacado['imagen_portada'] ?? ''), 'eventos', 'img/porco.avif');
 }
-$rutaPorco = isset($eventosPorSlug['porco-negro']) ? 'php/evento.php?id=' . (int) $eventosPorSlug['porco-negro']['id'] : 'php/eventos.php';
-$rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) $eventosPorSlug['bambola']['id'] : 'php/eventos.php';
+unset($eventoDestacado);
+foreach ($lugaresDestacados as &$lugarDestacado) {
+    $lugarDestacado['imagen'] = $resolverImagenIndex((string) $lugarDestacado['imagen'], 'contenido-publico', 'img/Plaza_artigas.webp');
+}
+unset($lugarDestacado);
+foreach ($gastronomiaDestacada as &$propuestaGastronomica) {
+    $propuestaGastronomica['imagen'] = $resolverImagenIndex((string) $propuestaGastronomica['imagen'], 'contenido-publico', 'img/gastronomia.jpg');
+}
+unset($propuestaGastronomica);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -63,7 +90,7 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
             <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
         </a>
         <a href="php/gastronomia.php" class="bottom-nav-item">
-            <img src="img/gastronomia.jpg" class="bottom-nav-icon" alt="Gastronomía">
+            <img src="img/gastronomia.png" class="bottom-nav-icon" alt="Gastronomía">
             <span class="bottom-nav-label" data-i18n="navGastronomy">Gastronomía</span>
         </a>
     </nav>
@@ -117,13 +144,13 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
         </div>
         <div class="feature">
             <div class="feature-header">
-                <img src="img/gastronomia.jpg" alt="Gastronomía">
-                <h3>Gastronomía</h3>
+                <img class="feature-image-gastronomia" src="img/gastronomia.png" alt="Gastronomía">
+                <h3 data-i18n="homeFeatureGastronomy">Gastronomía</h3>
                 <button class="feature-toggle" aria-expanded="false">▼</button>
             </div>
             <div class="feature-text">
-                <p>Descubre sabores locales, cafeterías y propuestas para disfrutar cada momento.</p>
-                <p>Encuentra opciones para compartir, conocer la identidad de Salto y volver por más.</p>
+                <p data-i18n="homeFeatureGastronomyText1">Descubre sabores locales, cafeterías y propuestas para disfrutar cada momento.</p>
+                <p data-i18n="homeFeatureGastronomyText2">Encuentra opciones para compartir, conocer la identidad de Salto y volver por más.</p>
             </div>
         </div>
 
@@ -132,139 +159,106 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
     <section class="seccion-eventos" data-carrusel-seccion="eventos">
         <h2 data-i18n="homeEventsTitle">Eventos Destacados</h2>
         <div class="carrusel" data-carrusel="eventos">
-            <button class="flecha izquierda"></button>
+            <button class="flecha izquierda" type="button" aria-label="Evento anterior"></button>
             <div class="contenedor-slides">
-                <div class="slide activo">
-                    <div class="info-evento">
-                        <h3>PorcoNegro</h3>
-                        <p>Todos los sabados de las 00:00 a 06:00!</p>
-                        <div class="accion-boton">
-                            <a href="<?= htmlspecialchars($rutaPorco, ENT_QUOTES, 'UTF-8') ?>" class="boton-amarillo">Ver mas</a>
+                <?php if ($eventosDestacados): ?>
+                    <?php foreach ($eventosDestacados as $indiceEvento => $eventoDestacado): ?>
+                        <div class="slide<?= $indiceEvento === 0 ? ' activo' : '' ?>">
+                            <div class="info-evento">
+                                <h3><?= htmlspecialchars((string) $eventoDestacado['titulo'], ENT_QUOTES, 'UTF-8') ?></h3>
+                                <p><?= htmlspecialchars($resumirTextoIndex((string) ($eventoDestacado['descripcion'] ?: $eventoDestacado['ubicacion'])), ENT_QUOTES, 'UTF-8') ?></p>
+                                <div class="accion-boton">
+                                    <a href="php/evento.php?id=<?= (int) $eventoDestacado['id'] ?>" class="boton-amarillo">Ver más</a>
+                                </div>
+                            </div>
+                            <img src="<?= htmlspecialchars((string) $eventoDestacado['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string) $eventoDestacado['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
                         </div>
-                    </div>
-                    <img src="img/porco.avif" alt="Evento">
-                </div>
-                <div class="slide">
-                    <div class="info-evento">
-                        <h3>La Bambola</h3>
-                        <p>Todos los fines de semana!</p>
-                        <div class="accion-boton">
-                            <a href="<?= htmlspecialchars($rutaBambola, ENT_QUOTES, 'UTF-8') ?>" class="boton-amarillo">Ver mas</a>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="slide activo">
+                        <div class="info-evento">
+                            <h3>No hay eventos próximos</h3>
+                            <p>Explorá la agenda completa para conocer las novedades.</p>
+                            <div class="accion-boton"><a href="php/eventos.php" class="boton-amarillo">Ver eventos</a></div>
                         </div>
+                        <img src="img/porco.avif" alt="Agenda de eventos" loading="lazy">
                     </div>
-
-                    <img src="img/bambi.jpg" alt="Evento">
-                </div>
-                <div class="slide">
-                    <div class="info-evento">
-                        <h3>Carrera en Bicicleta</h3>
-                        <p>Recorrido en bicicleta por la ciudad.</p>
-                        <div class="accion-boton">
-                            <a href="php/eventos/carrera-de-bicicleta.php" class="boton-amarillo">Ver mas</a>
-                        </div>
-                    </div>
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7b44_MpWq3Wzray5_wVaB-4meo0Tam3gwbPNK_1AJ74I1Xo5EhmUKhTIE&amp;s=10" alt="Carrera en Bicicleta">
-                </div>
-                <div class="slide">
-                    <div class="info-evento">
-                        <h3>Halloween en Polo</h3>
-                        <p>Una noche temática para celebrar.</p>
-                        <div class="accion-boton">
-                            <a href="php/eventos/polo.php" class="boton-amarillo">Ver mas</a>
-                        </div>
-                    </div>
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrj22POvl9MEEF961dr53OM-Hpxz75raAMOqjgqS_fNJ15QnNkQmBHkx_z&amp;s=10" alt="Halloween en Polo">
-                </div>
+                <?php endif; ?>
             </div>
 
-            <button class="flecha derecha"></button>
+            <button class="flecha derecha" type="button" aria-label="Siguiente evento"></button>
 
         </div>
 
         <div class="indicadores">
-            <span class="indicador activo"></span>
-            <span class="indicador"></span>
-            <span class="indicador"></span>
-            <span class="indicador"></span>
+            <?php for ($indice = 0, $total = max(1, count($eventosDestacados)); $indice < $total; $indice++): ?>
+                <button class="indicador<?= $indice === 0 ? ' activo' : '' ?>" type="button" aria-label="Ver evento <?= $indice + 1 ?>"></button>
+            <?php endfor; ?>
         </div>
 
     </section>
 
     <section class="seccion-eventos" data-carrusel-seccion="lugares-destacados">
-        <h2>Lugares destacados</h2>
+        <h2 data-i18n="homePlacesTitle">Lugares destacados</h2>
         <div class="carrusel" data-carrusel="lugares-destacados">
-            <button class="flecha izquierda" aria-label="Lugar anterior"></button>
+            <button class="flecha izquierda" aria-label="Lugar anterior" data-i18n-aria-label="homePlacesPrev"></button>
             <div class="contenedor-slides">
-                <div class="slide activo">
-                    <div class="info-evento">
-                        <h3>Plaza Artigas</h3>
-                        <p>Un paseo céntrico para disfrutar de historia, arquitectura y movimiento local.</p>
-                        <div class="accion-boton"><a href="php/lugares.php" class="boton-amarillo">Ver lugares</a></div>
+                <?php if ($lugaresDestacados): ?>
+                    <?php foreach ($lugaresDestacados as $indiceLugar => $lugarDestacado): ?>
+                        <div class="slide<?= $indiceLugar === 0 ? ' activo' : '' ?>">
+                            <div class="info-evento">
+                                <h3><?= htmlspecialchars((string) $lugarDestacado['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
+                                <p><?= htmlspecialchars($resumirTextoIndex((string) $lugarDestacado['descripcion']), ENT_QUOTES, 'UTF-8') ?></p>
+                                <div class="accion-boton"><a href="php/lugar.php?slug=<?= rawurlencode((string) $lugarDestacado['slug']) ?>&amp;origen=lugares" class="boton-amarillo" data-i18n="homePlacesButton">Ver lugares</a></div>
+                            </div>
+                            <img src="<?= htmlspecialchars((string) $lugarDestacado['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string) $lugarDestacado['nombre'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="slide activo">
+                        <div class="info-evento"><h3>Descubrí Salto</h3><p>Explorá los lugares turísticos de la ciudad.</p><div class="accion-boton"><a href="php/lugares.php" class="boton-amarillo">Ver lugares</a></div></div>
+                        <img src="img/Plaza_artigas.webp" alt="Lugares de Salto" loading="lazy">
                     </div>
-                    <img src="img/Plaza_artigas.webp" alt="Plaza Artigas">
-                </div>
-                <div class="slide">
-                    <div class="info-evento">
-                        <h3>Costanera Norte</h3>
-                        <p>Un recorrido junto al río para caminar, descansar y disfrutar el atardecer.</p>
-                        <div class="accion-boton"><a href="php/lugares.php" class="boton-amarillo">Ver lugares</a></div>
-                    </div>
-                    <img src="img/Costanera_Norte.jpeg" alt="Costanera Norte">
-                </div>
-                <div class="slide">
-                    <div class="info-evento">
-                        <h3>Parque Benito Solari</h3>
-                        <p>Espacios verdes y aire libre para compartir una salida tranquila.</p>
-                        <div class="accion-boton"><a href="php/lugares.php" class="boton-amarillo">Ver lugares</a></div>
-                    </div>
-                    <img src="img/solari.jfif" alt="Parque Benito Solari">
-                </div>
+                <?php endif; ?>
             </div>
-            <button class="flecha derecha" aria-label="Siguiente lugar"></button>
+            <button class="flecha derecha" aria-label="Siguiente lugar" data-i18n-aria-label="homePlacesNext"></button>
         </div>
         <div class="indicadores">
-            <span class="indicador activo"></span>
-            <span class="indicador"></span>
-            <span class="indicador"></span>
+            <?php for ($indice = 0, $total = max(1, count($lugaresDestacados)); $indice < $total; $indice++): ?>
+                <button class="indicador<?= $indice === 0 ? ' activo' : '' ?>" type="button" aria-label="Ver lugar <?= $indice + 1 ?>"></button>
+            <?php endfor; ?>
         </div>
     </section>
 
     <section class="seccion-eventos" data-carrusel-seccion="gastronomia-destacada">
-        <h2>Gastronomía destacada</h2>
+        <h2 data-i18n="homeGastronomyTitle">Gastronomía destacada</h2>
         <div class="carrusel" data-carrusel="gastronomia-destacada">
-            <button class="flecha izquierda" aria-label="Lugar gastronómico anterior"></button>
+            <button class="flecha izquierda" aria-label="Lugar gastronómico anterior" data-i18n-aria-label="homeGastronomyPrev"></button>
             <div class="contenedor-slides">
-                <div class="slide activo">
-                    <div class="info-evento">
-                        <h3>La Trouville</h3>
-                        <p>Sabores locales y una propuesta ideal para compartir una buena salida.</p>
-                        <div class="accion-boton"><a href="php/gastronomia.php" class="boton-amarillo">Ver gastronomía</a></div>
+                <?php if ($gastronomiaDestacada): ?>
+                    <?php foreach ($gastronomiaDestacada as $indiceGastronomia => $propuestaGastronomica): ?>
+                        <div class="slide<?= $indiceGastronomia === 0 ? ' activo' : '' ?>">
+                            <div class="info-evento">
+                                <h3><?= htmlspecialchars((string) $propuestaGastronomica['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
+                                <p><?= htmlspecialchars($resumirTextoIndex((string) $propuestaGastronomica['descripcion']), ENT_QUOTES, 'UTF-8') ?></p>
+                                <div class="accion-boton"><a href="php/gastronomia.php#propuestas-gastronomicas" class="boton-amarillo" data-i18n="homeGastronomyButton">Ver gastronomía</a></div>
+                            </div>
+                            <img src="<?= htmlspecialchars((string) $propuestaGastronomica['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string) $propuestaGastronomica['nombre'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="slide activo">
+                        <div class="info-evento"><h3>Sabores de Salto</h3><p>Descubrí las propuestas gastronómicas locales.</p><div class="accion-boton"><a href="php/gastronomia.php#propuestas-gastronomicas" class="boton-amarillo">Ver gastronomía</a></div></div>
+                        <img src="img/gastronomia.jpg" alt="Gastronomía de Salto" loading="lazy">
                     </div>
-                    <img src="img/Trouville.jpg" alt="La Trouville">
-                </div>
-                <div class="slide">
-                    <div class="info-evento">
-                        <h3>Dulces y helados</h3>
-                        <p>Helados, tortas y opciones dulces para disfrutar una tarde de paseo.</p>
-                        <div class="accion-boton"><a href="php/gastronomia.php" class="boton-amarillo">Ver gastronomía</a></div>
-                    </div>
-                    <img src="img/r7.jfif" alt="Dulces y helados">
-                </div>
-                <div class="slide">
-                    <div class="info-evento">
-                        <h3>Noche de picadas</h3>
-                        <p>Tablas, quesos, fiambres y panes para compartir una salida relajada.</p>
-                        <div class="accion-boton"><a href="php/gastronomia.php" class="boton-amarillo">Ver gastronomía</a></div>
-                    </div>
-                    <img src="img/gastronomia.jpg" alt="Noche de picadas">
-                </div>
+                <?php endif; ?>
             </div>
-            <button class="flecha derecha" aria-label="Siguiente lugar gastronómico"></button>
+            <button class="flecha derecha" aria-label="Siguiente lugar gastronómico" data-i18n-aria-label="homeGastronomyNext"></button>
         </div>
         <div class="indicadores">
-            <span class="indicador activo"></span>
-            <span class="indicador"></span>
-            <span class="indicador"></span>
+            <?php for ($indice = 0, $total = max(1, count($gastronomiaDestacada)); $indice < $total; $indice++): ?>
+                <button class="indicador<?= $indice === 0 ? ' activo' : '' ?>" type="button" aria-label="Ver propuesta gastronómica <?= $indice + 1 ?>"></button>
+            <?php endfor; ?>
         </div>
     </section>
 
@@ -329,7 +323,8 @@ $rutaBambola = isset($eventosPorSlug['bambola']) ? 'php/evento.php?id=' . (int) 
         </div>
     </footer>
 
-    <script src="js/script.js?v=dark-features"></script>
+    <script src="js/translator.js?v=20261019-i18n-4" defer></script>
+    <script src="js/script.js?v=dark-features-20261019-i18n-4"></script>
 </body>
 
 </html>

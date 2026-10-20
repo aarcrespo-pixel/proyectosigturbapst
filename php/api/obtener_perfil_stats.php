@@ -29,22 +29,24 @@ try {
         responderPerfilStats(['success' => false, 'message' => 'Usuario no encontrado'], 404);
     }
     $viewerId = (int) ($_SESSION['usuario_id'] ?? 0);
+    $puedeVerDetallesPrivados = (bool) $perfilPublico || $viewerId === $perfilId;
     if (!(bool) $perfilPublico && $viewerId !== $perfilId) {
         $consultaSeguidor = $pdo->prepare('SELECT 1 FROM seguidores WHERE seguidor_id = :seguidor AND seguido_id = :seguido LIMIT 1');
         $consultaSeguidor->execute([':seguidor' => $viewerId, ':seguido' => $perfilId]);
-        if (!$consultaSeguidor->fetchColumn()) {
-            responderPerfilStats(['success' => false, 'message' => 'Este perfil es privado'], 403);
-        }
+        $puedeVerDetallesPrivados = (bool) $consultaSeguidor->fetchColumn();
     }
 
     $lista = (string) ($_GET['lista'] ?? '');
     if ($lista !== '') {
+        if (!$puedeVerDetallesPrivados) {
+            responderPerfilStats(['success' => false, 'message' => 'Solo los seguidores pueden ver esta lista.'], 403);
+        }
         if (!in_array($lista, ['seguidores', 'seguidos'], true)) {
             responderPerfilStats(['success' => false, 'message' => 'Tipo de lista inválido'], 422);
         }
         $sqlLista = $lista === 'seguidores'
-            ? 'SELECT u.id, u.nombre_completo, u.nickname, u.avatar FROM seguidores s INNER JOIN usuarios u ON u.id = s.seguidor_id WHERE s.seguido_id = :perfil_id ORDER BY s.fecha_creacion DESC, s.id DESC'
-            : 'SELECT u.id, u.nombre_completo, u.nickname, u.avatar FROM seguidores s INNER JOIN usuarios u ON u.id = s.seguido_id WHERE s.seguidor_id = :perfil_id ORDER BY s.fecha_creacion DESC, s.id DESC';
+            ? 'SELECT u.id, u.nombre_completo, u.nickname, u.avatar, u.verificado FROM seguidores s INNER JOIN usuarios u ON u.id = s.seguidor_id WHERE s.seguido_id = :perfil_id ORDER BY s.fecha_creacion DESC, s.id DESC'
+            : 'SELECT u.id, u.nombre_completo, u.nickname, u.avatar, u.verificado FROM seguidores s INNER JOIN usuarios u ON u.id = s.seguido_id WHERE s.seguidor_id = :perfil_id ORDER BY s.fecha_creacion DESC, s.id DESC';
         $consultaLista = $pdo->prepare($sqlLista);
         $consultaLista->execute([':perfil_id' => $perfilId]);
         $usuarios = array_map(static function (array $usuarioLista): array {
@@ -59,6 +61,7 @@ try {
                 'id' => (int) $usuarioLista['id'],
                 'nombre' => (string) ($usuarioLista['nombre_completo'] ?? ''),
                 'nickname' => (string) ($usuarioLista['nickname'] ?? ''),
+                'verificado' => (bool) ($usuarioLista['verificado'] ?? false),
                 'avatar_url' => $avatarUrl,
             ];
         }, $consultaLista->fetchAll(PDO::FETCH_ASSOC));

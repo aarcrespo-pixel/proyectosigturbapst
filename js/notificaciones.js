@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const estadoPermiso = document.getElementById('notificaciones-estado');
     const marcarTodasBtn = document.querySelector('[data-notificaciones-mark-all]');
     const activarDesactivarBtn = document.querySelector('[data-notificaciones-toggle-permission]');
+    const actionStatus = document.querySelector('[data-notificaciones-action-status]');
     const apiUrl = bell.dataset.api || '/php/api/notificaciones.php';
     const serviceWorkerUrl = bell.dataset.serviceWorker || '/sw.js';
     const csrfToken = bell.dataset.csrf || '';
@@ -66,10 +67,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="notificaciones-item__footer">
                         <small>${leida ? 'Leída' : 'No leída'}</small>
                         ${leida ? '' : '<button type="button" class="notificaciones-item__mark-read">Marcar</button>'}
+                        <button type="button" class="notificaciones-item__delete" aria-label="Eliminar notificación">Eliminar</button>
                     </div>
                 </li>
             `;
         }).join('');
+
+        list.querySelectorAll('.notificaciones-item__delete').forEach((button) => {
+            button.addEventListener('click', async (event) => {
+                const item = event.target.closest('.notificaciones-item');
+                const id = item?.dataset?.id;
+                if (!id) return;
+                button.disabled = true;
+                if (actionStatus) actionStatus.textContent = '';
+                try {
+                    const respuesta = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                        credentials: 'same-origin',
+                        body: new URLSearchParams({ accion: 'eliminar', id, csrf_token: csrfToken })
+                    });
+                    const datos = await respuesta.json();
+                    if (!respuesta.ok || datos.success !== true) {
+                        throw new Error(datos.message || 'No se pudo eliminar la notificación.');
+                    }
+                    if (actionStatus) actionStatus.textContent = datos.message || 'Notificación eliminada.';
+                    await cargarNotificaciones();
+                } catch (error) {
+                    if (actionStatus) actionStatus.textContent = error.message;
+                    button.disabled = false;
+                }
+            });
+        });
 
         list.querySelectorAll('.notificaciones-item__mark-read').forEach((button) => {
             button.addEventListener('click', async (event) => {

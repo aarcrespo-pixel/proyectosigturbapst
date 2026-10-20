@@ -5,6 +5,19 @@ require_once __DIR__ . '/helpers/imagenes.php';
 $usuarioActual = sigtur_usuario_actual($pdo);
 $puedeGestionarEventos = $usuarioActual && in_array($usuarioActual['rol'], ['organizador', 'administrador'], true);
 $csrfToken = $puedeGestionarEventos ? sigtur_csrf_token() : '';
+$fotosGaleriaEventos = $pdo->query("SELECT g.id, g.imagen, g.titulo, g.descripcion, g.tipo_evento, g.usuario_id,
+        u.nombre_completo AS usuario_nombre, u.perfil_publico AS usuario_perfil_publico, g.fecha_creacion
+    FROM galeria_eventos g
+    INNER JOIN usuarios u ON u.id = g.usuario_id
+    ORDER BY g.fecha_creacion DESC, g.id DESC")->fetchAll();
+foreach ($fotosGaleriaEventos as &$fotoGaleriaEvento) {
+    $fotoGaleriaEvento['imagen'] = sigtur_url_imagen_subida((string) $fotoGaleriaEvento['imagen'], 'galeria-eventos', '../img/porco.avif');
+    $fotoGaleriaEvento['fecha'] = date('d/m/Y', strtotime($fotoGaleriaEvento['fecha_creacion']));
+    $fotoGaleriaEvento['puede_eliminar'] = $usuarioActual
+        && ($usuarioActual['rol'] === 'administrador' || (int) $fotoGaleriaEvento['usuario_id'] === (int) $usuarioActual['id']);
+    unset($fotoGaleriaEvento['fecha_creacion']);
+}
+unset($fotoGaleriaEvento);
 
 /* Esta página tiene dos salidas: HTML para la vista normal y JSON cuando
     ajax=1. Mantener ambas en el mismo controlador evita duplicar filtros. */
@@ -104,7 +117,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
             <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
         </a>
         <a href="gastronomia.php" class="bottom-nav-item">
-            <img src="../img/gastronomia.jpg" class="bottom-nav-icon" alt="Gastronomía">
+            <img src="../img/gastronomia.png" class="bottom-nav-icon" alt="Gastronomía">
             <span class="bottom-nav-label">Gastronomía</span>
         </a>
     </nav>
@@ -315,6 +328,49 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
             </div>
         </div><?php endif; ?>
 
+        <?php if ($puedeGestionarEventos): ?>
+            <div class="form-evento-overlay" id="form-galeria-overlay" aria-hidden="true">
+                <div class="form-evento-modal" role="dialog" aria-modal="true" aria-labelledby="form-galeria-title">
+                    <button class="form-evento-close" type="button" data-gallery-close aria-label="Cerrar formulario">×</button>
+                    <div class="form-evento-header">
+                        <h3 id="form-galeria-title">Agregar fotos a la galería</h3>
+                        <p>Elegí el título, el tipo de evento y hasta 10 fotos JPG, PNG o WEBP.</p>
+                    </div>
+                    <form class="form-evento" id="form-galeria-fotos" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                        <div class="form-error" data-gallery-error role="alert"></div>
+                        <label class="field">
+                            <span>Título de las fotos</span>
+                            <input type="text" name="titulo" maxlength="160" required placeholder="Ej. Festival de la Naranja">
+                        </label>
+                        <label class="field">
+                            <span>Tipo de evento</span>
+                            <select name="tipo_evento" required>
+                                <option value="">Seleccioná un tipo</option>
+                                <?php foreach (['Competencias', 'Carreras', 'Deportivo', 'Discotecas', 'Cultural', 'Feria', 'Otro'] as $tipoFoto): ?>
+                                    <option value="<?= htmlspecialchars($tipoFoto, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($tipoFoto, ENT_QUOTES, 'UTF-8') ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label class="field upload-field">
+                            <span>Fotos</span>
+                            <div class="upload-zone" data-gallery-upload-zone>
+                                <input type="file" name="foto[]" accept="image/jpeg,image/png,image/webp" multiple required hidden data-gallery-files>
+                                <button type="button" class="upload-button" data-gallery-file-select>Elegir fotos</button>
+                                <p>Podés seleccionar hasta 10 imágenes, de máximo 5 MB cada una.</p>
+                                <p class="upload-name" data-gallery-file-names>Sin archivos seleccionados</p>
+                            </div>
+                        </label>
+                        <p class="gallery-upload-status" data-gallery-status role="status" aria-live="polite"></p>
+                        <div class="form-actions">
+                            <button type="button" class="btn-cancelar" data-gallery-close>Cancelar</button>
+                            <button type="submit" class="btn-crear-form" data-gallery-submit>Subir fotos</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- El drawer se mantiene fuera del flujo del grid para animarse sin desplazar tarjetas. -->
         <aside class="filtros-drawer" id="filtros-drawer" aria-hidden="true" aria-labelledby="filtros-title">
             <div class="filtros-drawer__backdrop" data-cerrar-filtros></div>
@@ -410,6 +466,13 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <script>window.sigturEventoIds = <?= json_encode($eventoIdsPorSlug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosDesdeBd = <?= json_encode($eventosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosAnterioresDesdeBd = <?= json_encode($eventosAnterioresDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
+    <script>window.galeriaDesdeBd = <?= json_encode($fotosGaleriaEventos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;</script>
+    <script>window.gestionGaleria = <?= json_encode([
+        'puedeSubir' => (bool) $puedeGestionarEventos,
+        'usuarioId' => (int) ($usuarioActual['id'] ?? 0),
+        'rol' => (string) ($usuarioActual['rol'] ?? ''),
+        'csrfToken' => $csrfToken,
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script src="../js/eventos.js" defer></script>
 </body>
 

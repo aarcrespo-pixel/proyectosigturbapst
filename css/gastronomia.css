@@ -315,64 +315,10 @@ input {
     line-height: 1.7;
 }
 
-.tarjeta-gastronomia__datos {
-    display: grid;
-    gap: 0.45rem;
+.tarjeta-gastronomia__nota {
     padding-top: 0.75rem;
     border-top: 1px solid rgba(31, 26, 26, 0.08);
-}
-
-.tarjeta-gastronomia__datos span {
-    display: grid;
-    gap: 0.2rem;
-    color: var(--gastronomia-muted);
-    line-height: 1.5;
-}
-
-.tarjeta-gastronomia__datos strong {
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--gastronomia-ink);
-}
-
-.tarjeta-gastronomia__menu {
-    border-radius: 18px;
-    background: rgba(247, 244, 239, 0.9);
-    border: 1px solid rgba(31, 26, 26, 0.06);
-}
-
-.tarjeta-gastronomia__menu summary {
-    padding: 0.9rem 1rem;
-    list-style: none;
-    cursor: pointer;
-    font-weight: 700;
-    color: var(--gastronomia-ink);
-}
-
-.tarjeta-gastronomia__menu summary::-webkit-details-marker {
-    display: none;
-}
-
-.tarjeta-gastronomia__menu ul {
-    margin: 0;
-    padding: 0 1rem 1rem;
-    list-style: none;
-    display: grid;
-    gap: 0.4rem;
-    color: var(--gastronomia-muted);
-}
-
-.tarjeta-gastronomia__menu li {
-    position: relative;
-    padding-left: 0.9rem;
-}
-
-.tarjeta-gastronomia__menu li::before {
-    content: '•';
-    position: absolute;
-    left: 0;
-    color: var(--gastronomia-accent);
+    font-size: 0.92rem;
 }
 
 .tarjeta-gastronomia a {
@@ -651,9 +597,7 @@ body[data-tema="oscuro"] .historia-gastronomia__grid article {
 body[data-tema="oscuro"] .gastronomia-resumen span,
 body[data-tema="oscuro"] .seccion-gastronomia__encabezado p,
 body[data-tema="oscuro"] .tarjeta-gastronomia p,
-body[data-tema="oscuro"] .tarjeta-gastronomia__datos span,
-body[data-tema="oscuro"] .tarjeta-gastronomia__menu,
-body[data-tema="oscuro"] .tarjeta-gastronomia__menu ul,
+body[data-tema="oscuro"] .tarjeta-gastronomia__nota,
 body[data-tema="oscuro"] .gastronomia-nota,
 body[data-tema="oscuro"] .datos-gastronomia__lista span,
 body[data-tema="oscuro"] .agenda-gastronomia__grid p,

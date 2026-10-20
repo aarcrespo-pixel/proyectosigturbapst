@@ -183,6 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </section>
     </main>
 
+    <script src="../js/translator.js" defer></script>
     <script src="../js/script.js" defer></script>
     <script src="../js/login.js" defer></script>
 </body>

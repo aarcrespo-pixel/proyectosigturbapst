@@ -1,0 +1,35 @@
+body[data-tema="oscuro"] {
+    color-scheme: dark;
+    background: #151a1f !important;
+    color: #edf2f5 !important;
+}
+
+body[data-tema="oscuro"] .place,
+body[data-tema="oscuro"] .publication,
+body[data-tema="oscuro"] .user,
+body[data-tema="oscuro"] .empty {
+    border-color: #3b454d !important;
+    background: #20262c !important;
+    color: #edf2f5;
+}
+
+body[data-tema="oscuro"] .user p {
+    color: #b0bdc5;
+}
+
+body[data-tema="oscuro"] .role {
+    background: #29353b;
+    color: #bfe6ee;
+}
+
+body[data-tema="oscuro"] .notice {
+    background: #1d382a;
+    color: #a6e2bb;
+}
+
+body[data-tema="oscuro"] input,
+body[data-tema="oscuro"] textarea {
+    border-color: #3b454d !important;
+    background: #171c21;
+    color: #edf2f5;
+}

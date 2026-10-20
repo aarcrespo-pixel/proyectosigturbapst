@@ -199,5 +199,7 @@ $solicitudEnviada = ($_GET['enviada'] ?? '') === '1';
             </section>
         <?php endif; ?>
     </main>
+    <script src="../js/tema.js" defer></script>
+<script src="../js/translator.js" defer></script>
 </body>
 </html>

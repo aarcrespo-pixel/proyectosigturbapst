@@ -30,6 +30,7 @@ $activePage = $activePage ?? '';
         <a href="<?= $navBase ?>lugares.php" data-i18n="navPlaces">Lugares</a>
         <a href="<?= $navBase ?>gastronomia.php" class="<?= $activePage === 'gastronomia' ? 'pagina-activa' : '' ?>" data-i18n="navGastronomy">Gastronomía</a>
     </nav>
+    <script src="<?= htmlspecialchars($rootBase . 'js/tema.js', ENT_QUOTES, 'UTF-8') ?>" defer></script>
 
     <div class="barra-busqueda" data-search-endpoint="<?= $rootBase ?>php/api/buscar.php" data-search-results="<?= $rootBase ?>php/buscar.php">
         <input id="global-search" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder" placeholder="Buscar eventos" aria-label="Buscar eventos">
@@ -67,9 +68,8 @@ $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
                 </div>
                 <a class="perfil-item" href="<?= $navBase ?>perfil.php?id=<?= (int) ($_SESSION['usuario_id'] ?? 0) ?>">Ver mi perfil</a>
                 <a class="perfil-item" href="<?= $navBase ?>mis-eventos.php">Mis Eventos / Favoritos</a>
+                <?php if (sigtur_normalizar_rol($_SESSION['rol'] ?? null) === 'turista'): ?><a class="perfil-item" href="<?= $navBase ?>notificaciones.php">Avisos de administradores</a><?php endif; ?>
                 <?php if (($_SESSION['rol'] ?? '') === 'administrador'): ?><a class="perfil-item" href="<?= $navBase ?>panel-admin.php">Panel de administración</a><?php elseif (($_SESSION['rol'] ?? '') === 'organizador'): ?><a class="perfil-item" href="<?= $navBase ?>panel-organizador.php">Panel de organizador</a><?php endif; ?>
-                <a class="perfil-item" href="<?= $navBase ?>configuracion.php" data-i18n="navSettings">Configuración</a>
-                <a class="perfil-item" href="<?= $navBase ?>soporte.php" data-i18n="navSupport">Soporte</a>
             <?php else: ?>
                 <div class="perfil-user-header">
                     <img class="perfil-user-avatar" src="<?= htmlspecialchars($rootBase . 'img/user.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar invitado">
@@ -80,8 +80,6 @@ $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
                     </div>
                 </div>
                 <a class="perfil-item" href="<?= $navBase ?>login.php" data-i18n="navLogin">Ingresar Usuario</a>
-                <a class="perfil-item" href="<?= $navBase ?>configuracion.php" data-i18n="navSettings">Configuración</a>
-                <a class="perfil-item" href="<?= $navBase ?>soporte.php" data-i18n="navSupport">Soporte</a>
             <?php endif; ?>
         </div>
     </div>
@@ -96,7 +94,7 @@ $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
 </header>
 
 <script src="<?= $rootBase ?>js/weather.js" defer></script>
-<script src="<?= $rootBase ?>js/translator.js" defer></script>
+<script src="<?= $rootBase ?>js/translator.js?v=20261019-i18n-4" defer></script>
 <script src="<?= $rootBase ?>js/search.js" defer></script>
 <?php $mensajesWidgetRoot = $rootBase; include __DIR__ . '/mensajes-widget.php'; ?>
 
@@ -166,7 +164,7 @@ $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
         <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
     </a>
     <a href="<?= $navBase ?>gastronomia.php" class="bottom-nav-item <?= $activePage === 'gastronomia' ? 'active' : '' ?>">
-        <img src="../img/gastronomia.jpg" class="bottom-nav-icon" alt="Gastronomía">
+        <img src="../img/gastronomia.png" class="bottom-nav-icon" alt="Gastronomía">
         <span class="bottom-nav-label" data-i18n="navGastronomy">Gastronomía</span>
     </a>
 </nav>

@@ -293,5 +293,7 @@ unset($contenido);
         <?php endif; ?>
     </section>
 </main>
+<script src="../js/tema.js" defer></script>
+<script src="../js/translator.js" defer></script>
 </body>
 </html>

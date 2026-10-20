@@ -37,6 +37,34 @@ function sigtur_notificar_turistas(PDO $pdo, string $titulo, string $mensaje, st
     return $cantidad;
 }
 
+function sigtur_notificar_consulta_evento(PDO $pdo, int $organizadorId, int $usuarioId, string $tituloEvento, string $pregunta): void
+{
+    $destinatarios = [];
+    if ($organizadorId > 0) {
+        $destinatarios[] = $organizadorId;
+    } else {
+        $organizadores = $pdo->prepare("SELECT id FROM usuarios WHERE LOWER(rol) = 'organizador' AND id <> :usuario_id");
+        $organizadores->execute([':usuario_id' => $usuarioId]);
+        $destinatarios = array_map('intval', $organizadores->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    $consultaUsuario = $pdo->prepare('SELECT COALESCE(NULLIF(nickname, \'\'), nombre_completo) FROM usuarios WHERE id = :usuario_id LIMIT 1');
+    $consultaUsuario->execute([':usuario_id' => $usuarioId]);
+    $nombreUsuario = (string) ($consultaUsuario->fetchColumn() ?: 'Un turista');
+
+    foreach (array_unique($destinatarios) as $destinatarioId) {
+        if ($destinatarioId > 0 && $destinatarioId !== $usuarioId) {
+            sigtur_crear_notificacion(
+                $pdo,
+                $destinatarioId,
+                'Nueva pregunta de un turista',
+                $nombreUsuario . ' preguntó sobre "' . $tituloEvento . '": ' . $pregunta,
+                'consulta_evento'
+            );
+        }
+    }
+}
+
 function sigtur_generar_recordatorios_eventos(PDO $pdo, int $usuarioId): int
 {
     if ($usuarioId <= 0) {
@@ -92,28 +120,39 @@ function sigtur_generar_recordatorios_eventos(PDO $pdo, int $usuarioId): int
     return $creados;
 }
 
-function sigtur_listar_notificaciones(PDO $pdo, int $usuarioId, int $limite = 20): array
+function sigtur_listar_notificaciones(PDO $pdo, int $usuarioId, int $limite = 20, bool $incluirRecordatoriosEvento = true, ?string $tipo = null): array
 {
     if ($usuarioId <= 0) {
         return [];
     }
 
-    $stmt = $pdo->prepare('SELECT id, usuario_id, titulo, mensaje, tipo, leida, fecha_creacion FROM notificaciones WHERE usuario_id = :usuario_id ORDER BY fecha_creacion DESC, id DESC LIMIT :limite');
+    $filtroRecordatorios = $incluirRecordatoriosEvento ? '' : " AND tipo <> 'recordatorio_evento'";
+    $filtroTipo = $tipo !== null ? ' AND tipo = :tipo' : '';
+    $stmt = $pdo->prepare('SELECT id, usuario_id, titulo, mensaje, tipo, leida, fecha_creacion FROM notificaciones WHERE usuario_id = :usuario_id' . $filtroRecordatorios . $filtroTipo . ' ORDER BY fecha_creacion DESC, id DESC LIMIT :limite');
     $stmt->bindValue(':usuario_id', $usuarioId, PDO::PARAM_INT);
+    if ($tipo !== null) {
+        $stmt->bindValue(':tipo', $tipo, PDO::PARAM_STR);
+    }
     $stmt->bindValue(':limite', max(1, $limite), PDO::PARAM_INT);
     $stmt->execute();
 
     return $stmt->fetchAll();
 }
 
-function sigtur_contar_notificaciones_no_leidas(PDO $pdo, int $usuarioId): int
+function sigtur_contar_notificaciones_no_leidas(PDO $pdo, int $usuarioId, bool $incluirRecordatoriosEvento = true, ?string $tipo = null): int
 {
     if ($usuarioId <= 0) {
         return 0;
     }
 
-    $stmt = $pdo->prepare('SELECT COUNT(*) FROM notificaciones WHERE usuario_id = :usuario_id AND leida = 0');
-    $stmt->execute([':usuario_id' => $usuarioId]);
+    $filtroRecordatorios = $incluirRecordatoriosEvento ? '' : " AND tipo <> 'recordatorio_evento'";
+    $filtroTipo = $tipo !== null ? ' AND tipo = :tipo' : '';
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM notificaciones WHERE usuario_id = :usuario_id AND leida = 0' . $filtroRecordatorios . $filtroTipo);
+    $parametros = [':usuario_id' => $usuarioId];
+    if ($tipo !== null) {
+        $parametros[':tipo'] = $tipo;
+    }
+    $stmt->execute($parametros);
 
     return (int) $stmt->fetchColumn();
 }

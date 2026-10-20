@@ -23,7 +23,7 @@ $recordatoriosGenerados = sigtur_generar_recordatorios_eventos($pdo, $usuarioId)
 $accion = (string) ($_POST['accion'] ?? $_GET['accion'] ?? 'lista');
 
 $csrfToken = $_POST['csrf_token'] ?? null;
-if (in_array($accion, ['leer', 'marcar_todas', 'suscribir', 'crear'], true) && !sigtur_validar_csrf(is_string($csrfToken) ? $csrfToken : null)) {
+if (in_array($accion, ['leer', 'eliminar', 'marcar_todas', 'suscribir', 'crear'], true) && !sigtur_validar_csrf(is_string($csrfToken) ? $csrfToken : null)) {
     responderNotificaciones(['success' => false, 'status' => 'error', 'message' => 'La sesión expiró. Recargá la página e intentá otra vez.'], 403);
 }
 
@@ -60,6 +60,28 @@ if ($accion === 'leer') {
     responderNotificaciones([
         'success' => true,
         'count' => sigtur_contar_notificaciones_no_leidas($pdo, $usuarioId),
+    ]);
+}
+
+if ($accion === 'eliminar') {
+    $notificacionId = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+    if (!$notificacionId) {
+        responderNotificaciones(['success' => false, 'status' => 'error', 'message' => 'La notificación seleccionada no es válida.'], 422);
+    }
+
+    $eliminar = $pdo->prepare('DELETE FROM notificaciones WHERE id = :id AND usuario_id = :usuario_id LIMIT 1');
+    $eliminar->execute([
+        ':id' => $notificacionId,
+        ':usuario_id' => $usuarioId,
+    ]);
+    if ($eliminar->rowCount() !== 1) {
+        responderNotificaciones(['success' => false, 'status' => 'error', 'message' => 'No se encontró la notificación para eliminar.'], 404);
+    }
+
+    responderNotificaciones([
+        'success' => true,
+        'count' => sigtur_contar_notificaciones_no_leidas($pdo, $usuarioId),
+        'message' => 'Notificación eliminada.',
     ]);
 }
 
@@ -115,6 +137,7 @@ if ($accion === 'crear') {
                 $destinatarios[] = (int) $fila['usuario_id'];
             }
         } else {
+            $tipo = 'aviso';
             $todosTuristas = $pdo->query("SELECT id FROM usuarios WHERE rol = 'turista' ORDER BY id ASC");
             foreach ($todosTuristas->fetchAll() as $fila) {
                 $destinatarios[] = (int) $fila['id'];

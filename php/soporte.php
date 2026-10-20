@@ -4,7 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
-
 $soporteUsuario = sigtur_usuario_actual($pdo);
 $soporteCsrfToken = $soporteUsuario ? sigtur_csrf_token() : '';
 $soportePreguntas = [];

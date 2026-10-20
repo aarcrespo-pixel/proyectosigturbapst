@@ -6,7 +6,7 @@ const menu = document.querySelector(".menu"); // barra principal del menu
 const menuPrincipal = document.querySelector(".menu-principal");
 const body = document.body; // cuerpo del html
 
-const isIndex = !document.querySelector("main.pagina-eventos, main.pagina-turismo, main.pagina-lugares"); // pagina principal, usa body en vez de main en el index
+const isIndex = !document.querySelector('main'); // la portada es la única vista sin un elemento main
 const isEventos = !!document.querySelector("main.pagina-eventos"); // pagina de eventos
 const isTurismo = !!document.querySelector("main.pagina-turismo"); // pagina de turismo
 const isLugares = !!document.querySelector("main.pagina-lugares"); // pagina de lugares
@@ -50,20 +50,7 @@ const guardarTamanoLetra = (tamano) => {
 const leerTamanoLetra = () => localStorage.getItem(storageClaveTamanoLetra) || 'normal';
 
 aplicarTamanoLetra(leerTamanoLetra());
-const idiomasDisponibles = ['es', 'en', 'pt', 'fr', 'it', 'de', 'ja', 'zh', 'ar', 'ru'];
-
-const clavesTraducibles = new Set([
-    'navHome','navEvents','navTourism','navPlaces','navLogin','navSettings','navSupport','navLogout','navMenuOpen','navProfile','navSearch',
-    'searchPlaceholder',
-    'homeScroll','homeInfoButton','homeInfoTitle','homeInfoText1','homeInfoText2','homeFeaturesTitle','homeFeatureEvents','homeFeatureTourism','homeFeaturePlaces',
-    'homeEventsTitle','homeEventButton',
-    'configBack','configEyebrow','configTitle','configDescription','configGeneralTitle','configGeneralText','configLabelSiteName','configLabelEmail','configLabelCity','configVisualTitle','configVisualText','configLabelTheme','configLabelLanguage','configLabelDescription','configNotificationsTitle','configNotificationsText','configNotificationEventsTitle','configNotificationEventsText','configNotificationRemindersTitle','configNotificationRemindersText','configSecurityTitle','configSecurityText','configAccessPublicTitle','configAccessPublicText','configAdminPanelTitle','configAdminPanelText','configSave','configReset','themeDark','themeLight','languageOptionEs','languageOptionEn','languageOptionPt','languageOptionFr','languageOptionIt','languageOptionDe','languageOptionJa','languageOptionZh','languageOptionAr','languageOptionRu',
-    'eventsHeroLabel','eventsHeroTitle','eventsHeroText','eventsFeaturedLabel','tourismHeroLabel','tourismHeroTitle','tourismHeroText','placesHeroLabel','placesHeroTitle','placesHeroText',
-    'supportBack','supportEyebrow','supportTitle','supportLead','supportFaqTitle','supportFaqText','supportFaq1Question','supportFaq1Answer','supportFaq2Question','supportFaq2Answer','supportFaq3Question','supportFaq3Answer','supportReportTitle','supportReportText',    'supportReportName','supportReportEmail','supportReportMessage','supportReportButton','supportContactTitle','supportContactText','supportContactEmail','supportContactWhatsapp','supportContactInstagram','supportContactHours',
-    'loginBack','loginBackAlt','loginTitle','loginIntro','loginUsername','loginUsernamePlaceholder','loginPassword','loginPasswordPlaceholder','loginForgot','loginSubmit','loginRegister','loginRemember','loginError','loginSuccess',
-    'registerTitle','registerIntro','registerName','registerNamePlaceholder','registerEmail','registerEmailPlaceholder','registerPassword','registerPasswordPlaceholder','registerSubmit','registerLogin','registerTerms',
-    'pageLoginTitle','pageRegisterTitle','pageSupportTitle'
-]);
+const idiomasDisponibles = ['es', 'en', 'pt'];
 
 const traducciones = {
     es: {
@@ -71,6 +58,7 @@ const traducciones = {
         navEvents: 'Eventos',
         navTourism: 'Turismo',
         navPlaces: 'Lugares',
+        navGastronomy: 'Gastronomía',
         navLogin: 'Ingresar Usuario',
         navSettings: 'Configuración',
         navSupport: 'Soporte',
@@ -91,8 +79,25 @@ const traducciones = {
         homeFeatureTourismText2: 'Conecta con opciones de paseos, experiencias y consejos para tu viaje.',
         homeFeaturePlacesText1: 'Conoce los puntos más emblemáticos y los sitios imperdibles de Salto.',
         homeFeaturePlacesText2: 'Descubre lugares únicos donde vivir momentos especiales y recordar la visita.',
+        homeFeatureGastronomy: 'Gastronomía',
+        homeFeatureGastronomyText1: 'Descubre sabores locales, cafeterías y propuestas para disfrutar cada momento.',
+        homeFeatureGastronomyText2: 'Encuentra opciones para compartir, conocer la identidad de Salto y volver por más.',
         homeEventsTitle: 'Eventos Destacados',
         homeEventButton: 'Ver más',
+        homePlacesTitle: 'Lugares destacados',
+        homeGastronomyTitle: 'Gastronomía destacada',
+        homePlacesButton: 'Ver lugares',
+        homeGastronomyButton: 'Ver gastronomía',
+        homePlacesPrev: 'Lugar anterior',
+        homePlacesNext: 'Siguiente lugar',
+        homeGastronomyPrev: 'Lugar gastronómico anterior',
+        homeGastronomyNext: 'Siguiente lugar gastronómico',
+        homePlaceArtigasText: 'Un paseo céntrico para disfrutar de historia, arquitectura y movimiento local.',
+        homePlaceWaterfrontText: 'Un recorrido junto al río para caminar, descansar y disfrutar el atardecer.',
+        homePlaceSolariText: 'Espacios verdes y aire libre para compartir una salida tranquila.',
+        homeGastronomyTrouvilleText: 'Una propuesta cálida para disfrutar café, algo rico y una buena charla en el centro.',
+        homeGastronomyShoppingText: 'Un punto de encuentro para pasear, hacer una pausa y elegir entre distintas propuestas.',
+        homeGastronomyCuisineText: 'Propuestas de cocina casera, minutas y platos locales para un almuerzo completo.',
         footerEvents: 'EVENTOS',
         footerPlaces: 'LUGARES',
         footerTourism: 'TURISMO',
@@ -159,6 +164,7 @@ const traducciones = {
         navEvents: 'Events',
         navTourism: 'Tourism',
         navPlaces: 'Places',
+        navGastronomy: 'Cuisine',
         navLogin: 'Log in',
         navSettings: 'Settings',
         navSupport: 'Support',
@@ -179,8 +185,25 @@ const traducciones = {
         homeFeatureTourismText2: 'Connect with walking experiences, activities and tips for your trip.',
         homeFeaturePlacesText1: 'Discover the city’s most emblematic points and must-see spots in Salto.',
         homeFeaturePlacesText2: 'Find unique places where you can create special memories.',
+        homeFeatureGastronomy: 'Cuisine',
+        homeFeatureGastronomyText1: 'Discover local flavours, cafés and proposals to enjoy every moment.',
+        homeFeatureGastronomyText2: 'Find options to share, learn about Salto’s identity and come back for more.',
         homeEventsTitle: 'Featured Events',
         homeEventButton: 'See more',
+        homePlacesTitle: 'Featured Places',
+        homeGastronomyTitle: 'Featured Cuisine',
+        homePlacesButton: 'View places',
+        homeGastronomyButton: 'View cuisine',
+        homePlacesPrev: 'Previous place',
+        homePlacesNext: 'Next place',
+        homeGastronomyPrev: 'Previous cuisine spot',
+        homeGastronomyNext: 'Next cuisine spot',
+        homePlaceArtigasText: 'A central promenade to enjoy history, architecture and local life.',
+        homePlaceWaterfrontText: 'A riverside route for walking, relaxing and enjoying the sunset.',
+        homePlaceSolariText: 'Green spaces and fresh air for a peaceful outing.',
+        homeGastronomyTrouvilleText: 'A welcoming spot to enjoy coffee, a treat and a good conversation downtown.',
+        homeGastronomyShoppingText: 'A meeting point to stroll, take a break and choose from different options.',
+        homeGastronomyCuisineText: 'Home-style cooking, quick meals and local dishes for a complete lunch.',
         footerEvents: 'EVENTS',
         footerPlaces: 'PLACES',
         footerTourism: 'TOURISM',
@@ -247,6 +270,7 @@ const traducciones = {
         navEvents: 'Eventos',
         navTourism: 'Turismo',
         navPlaces: 'Locais',
+        navGastronomy: 'Gastronomia',
         navLogin: 'Entrar',
         navSettings: 'Configurações',
         navSupport: 'Suporte',
@@ -267,8 +291,25 @@ const traducciones = {
         homeFeatureTourismText2: 'Conecte-se a passeios, experiências e conselhos para sua viagem.',
         homeFeaturePlacesText1: 'Conheça os pontos mais emblemáticos e os lugares imperdíveis de Salto.',
         homeFeaturePlacesText2: 'Descubra lugares únicos onde viver momentos especiais e lembrar da visita.',
+        homeFeatureGastronomy: 'Gastronomia',
+        homeFeatureGastronomyText1: 'Descubra sabores locais, cafeterias e propostas para aproveitar cada momento.',
+        homeFeatureGastronomyText2: 'Encontre opções para compartilhar, conhecer a identidade de Salto e voltar sempre.',
         homeEventsTitle: 'Eventos em destaque',
         homeEventButton: 'Ver mais',
+        homePlacesTitle: 'Lugares em destaque',
+        homeGastronomyTitle: 'Gastronomia em destaque',
+        homePlacesButton: 'Ver lugares',
+        homeGastronomyButton: 'Ver gastronomia',
+        homePlacesPrev: 'Lugar anterior',
+        homePlacesNext: 'Próximo lugar',
+        homeGastronomyPrev: 'Lugar gastronômico anterior',
+        homeGastronomyNext: 'Próximo lugar gastronômico',
+        homePlaceArtigasText: 'Um passeio central para aproveitar a história, a arquitetura e a vida local.',
+        homePlaceWaterfrontText: 'Um percurso junto ao rio para caminhar, descansar e apreciar o pôr do sol.',
+        homePlaceSolariText: 'Áreas verdes e ar livre para um passeio tranquilo.',
+        homeGastronomyTrouvilleText: 'Um lugar acolhedor para tomar café, comer algo gostoso e conversar no centro.',
+        homeGastronomyShoppingText: 'Um ponto de encontro para passear, fazer uma pausa e escolher entre várias opções.',
+        homeGastronomyCuisineText: 'Comida caseira, pratos rápidos e receitas locais para um almoço completo.',
         footerEvents: 'EVENTOS',
         footerPlaces: 'LOCAIS',
         footerTourism: 'TURISMO',
@@ -337,6 +378,19 @@ const traduccionesExtra = {
         navProfile: 'Perfil',
         navMenuOpen: 'Abrir menú',
         navSearch: 'Buscar',
+        searchResultsTitle: 'Resultados para:',
+        placeAboutKicker: 'Descubrí Salto',
+        placeAboutTitle: 'Sobre este lugar',
+        placeEventsKicker: 'Agenda local',
+        placeEventsTitle: 'Próximos eventos en este lugar',
+        placeHistoryTitle: 'Historia y patrimonio',
+        placeHoursLabel: 'Horarios',
+        placeMapButton: 'Abrir ubicación en Maps',
+        placeNoEvents: 'No hay eventos próximos en este lugar.',
+        placeRecommendationsLabel: 'Recomendaciones',
+        placeThingsTitle: 'Qué hacer y atractivos',
+        placeUsefulTitle: 'Información útil y ubicación',
+        placeViewMore: 'Ver más',
         pageHomeTitle: 'Inicio | SIGTUR',
         pageEventsTitle: 'Eventos | SIGTUR',
         pageTourismTitle: 'Turismo | SIGTUR',
@@ -474,8 +528,9 @@ const traduccionesExtra = {
         tourismGastronomySeeAll: 'Ver toda la gastronomía salteña',
         tourismGalleryTitle: 'Galería turística',
         tourismGallerySeeAll: 'Ver todas las galerías',
-        tourismGalleryTitles: ['Parque Benito Solari', 'La Fosa', 'Shopping Salto', 'Cine Sarandi'],
-        tourismGalleryAlt: ['Parque Solari', 'La Fosa', 'Shopping Salto', 'Cine Sarandi'],
+        tourismGalleryIntro: 'Paisajes, paseos y lugares para inspirar tu próxima visita.',
+        tourismGalleryTitles: ['Parque Benito Solari', 'Termas del Dayman', 'Costanera Norte', 'Termas de Arapey', 'Plaza Artigas', 'Shopping Salto', 'Cine Sarandí', 'Paisajes del litoral'],
+        tourismGalleryAlt: ['Parque Solari', 'Piscinas de las Termas del Dayman', 'Paseo por la Costanera Norte', 'Complejo termal de Salto', 'Monumentos de la Plaza Artigas', 'Shopping Salto', 'Calle céntrica junto al Cine Sarandí', 'Paisaje natural de la región'],
         placesSectionEmblematicTitle: 'Lugares emblemáticos',
         placesSectionCategoriesTitle: 'Categorías de lugares',
         placesSectionLeisureTitle: 'Lugares para Distraerse',
@@ -504,13 +559,27 @@ const traduccionesExtra = {
             'Zona con vista al río para relajarse y pasar el rato con amigos.'
         ],
         placesLeisureAlt: ['Plaza Roosvelt', 'Costanera Norte', 'Muelle Negro'],
-        placesGalleryTitles: ['Plaza Treinta y Tres', 'Plaza Artigas', 'Parque Benito Solari', 'Termas del Dayman'],
-        placesGalleryAlt: ['Vista de evento', 'Plaza central', 'Espacio de descanso', 'Punto turístico']
+        placesGalleryIntro: 'Un recorrido visual por los espacios y las tradiciones que cuentan la historia de Salto.',
+        placesGalleryTitles: ['Plaza Treinta y Tres', 'Plaza Artigas', 'Centro histórico', 'Cultura salteña', 'Costanera de Salto'],
+        placesGalleryAlt: ['Plaza Treinta y Tres y su entorno histórico', 'Monumentos de la Plaza Artigas', 'Calle céntrica junto al Cine Sarandí', 'Expresión de la cultura popular salteña', 'Paseo costero de Salto']
     },
     en: {
         navProfile: 'Profile',
         navMenuOpen: 'Open menu',
         navSearch: 'Search',
+        searchResultsTitle: 'Search results for:',
+        placeAboutKicker: 'Discover Salto',
+        placeAboutTitle: 'About this place',
+        placeEventsKicker: 'Local events',
+        placeEventsTitle: 'Upcoming events at this place',
+        placeHistoryTitle: 'History and heritage',
+        placeHoursLabel: 'Hours',
+        placeMapButton: 'Open location in Maps',
+        placeNoEvents: 'There are no upcoming events at this place.',
+        placeRecommendationsLabel: 'Recommendations',
+        placeThingsTitle: 'Things to do and attractions',
+        placeUsefulTitle: 'Useful information and location',
+        placeViewMore: 'See more',
         pageHomeTitle: 'Home | SIGTUR',
         pageEventsTitle: 'Events | SIGTUR',
         pageTourismTitle: 'Tourism | SIGTUR',
@@ -548,6 +617,8 @@ const traduccionesExtra = {
         registerGoogleAlt: 'Continue with Google',
         registerLegal: 'By signing up you accept the company terms and conditions, the rules of use and the privacy policy.',
         supportBack: '← Back',
+        loginBack: '← Back to home',
+        loginBackAlt: 'Back to home',
         supportEyebrow: 'Support center',
         supportTitle: 'We are here to help',
         supportLead: 'Find quick answers, submit a report or contact the support team to resolve any questions about the project.',
@@ -642,8 +713,9 @@ const traduccionesExtra = {
         tourismGastronomySeeAll: 'See all Salto gastronomy',
         tourismGalleryTitle: 'Tourist gallery',
         tourismGallerySeeAll: 'See all galleries',
-        tourismGalleryTitles: ['Parque Benito Solari', 'La Fosa', 'Salto Shopping', 'Cine Sarandi'],
-        tourismGalleryAlt: ['Parque Solari', 'La Fosa', 'Salto shopping', 'Cine Sarandi'],
+        tourismGalleryIntro: 'Landscapes, walks and places to inspire your next visit.',
+        tourismGalleryTitles: ['Benito Solari Park', 'Dayman Hot Springs', 'North Waterfront', 'Arapey Hot Springs', 'Artigas Square', 'Salto Shopping', 'Cine Sarandí', 'Litoral landscapes'],
+        tourismGalleryAlt: ['Benito Solari Park', 'Pools at Dayman Hot Springs', 'Walk along the North Waterfront', 'Salto hot springs resort', 'Monuments at Artigas Square', 'Salto Shopping', 'Downtown street by Cine Sarandí', 'Natural landscape in the region'],
         placesSectionEmblematicTitle: 'Iconic places',
         placesSectionCategoriesTitle: 'Place categories',
         placesSectionLeisureTitle: 'Places to have fun',
@@ -672,13 +744,27 @@ const traduccionesExtra = {
             'A zone with river views to relax and spend time with friends.'
         ],
         placesLeisureAlt: ['Plaza Roosvelt', 'North waterfront', 'Muelle Negro'],
-        placesGalleryTitles: ['Plaza Treinta y Tres', 'Plaza Artigas', 'Parque Benito Solari', 'Termas del Dayman'],
-        placesGalleryAlt: ['Event view', 'Central square', 'Rest area', 'Tourist spot']
+        placesGalleryIntro: 'A visual journey through the places and traditions that tell Salto’s story.',
+        placesGalleryTitles: ['Plaza Treinta y Tres', 'Artigas Square', 'Historic downtown', 'Salto culture', 'Salto waterfront'],
+        placesGalleryAlt: ['Plaza Treinta y Tres and its historic surroundings', 'Monuments at Artigas Square', 'Downtown street by Cine Sarandí', 'Expression of popular culture in Salto', 'Salto waterfront promenade']
     },
     pt: {
         navProfile: 'Perfil',
         navMenuOpen: 'Abrir menu',
         navSearch: 'Pesquisar',
+        searchResultsTitle: 'Resultados para:',
+        placeAboutKicker: 'Descubra Salto',
+        placeAboutTitle: 'Sobre este lugar',
+        placeEventsKicker: 'Agenda local',
+        placeEventsTitle: 'Próximos eventos neste lugar',
+        placeHistoryTitle: 'História e patrimônio',
+        placeHoursLabel: 'Horários',
+        placeMapButton: 'Abrir localização no Maps',
+        placeNoEvents: 'Não há eventos próximos neste lugar.',
+        placeRecommendationsLabel: 'Recomendações',
+        placeThingsTitle: 'O que fazer e atrações',
+        placeUsefulTitle: 'Informações úteis e localização',
+        placeViewMore: 'Ver mais',
         pageHomeTitle: 'Início | SIGTUR',
         pageEventsTitle: 'Eventos | SIGTUR',
         pageTourismTitle: 'Turismo | SIGTUR',
@@ -791,8 +877,9 @@ const traduccionesExtra = {
         tourismGastronomySeeAll: 'Ver toda a gastronomia de Salto',
         tourismGalleryTitle: 'Galeria turística',
         tourismGallerySeeAll: 'Ver todas as galerias',
-        tourismGalleryTitles: ['Parque Benito Solari', 'La Fosa', 'Salto Shopping', 'Cine Sarandi'],
-        tourismGalleryAlt: ['Parque Solari', 'La Fosa', 'Shopping de Salto', 'Cine Sarandi'],
+        tourismGalleryIntro: 'Paisagens, passeios e lugares para inspirar sua próxima visita.',
+        tourismGalleryTitles: ['Parque Benito Solari', 'Termas del Dayman', 'Costanera Norte', 'Termas de Arapey', 'Praça Artigas', 'Shopping Salto', 'Cine Sarandí', 'Paisagens do litoral'],
+        tourismGalleryAlt: ['Parque Solari', 'Piscinas das Termas del Dayman', 'Passeio pela Costanera Norte', 'Complexo termal de Salto', 'Monumentos da Praça Artigas', 'Shopping Salto', 'Rua central junto ao Cine Sarandí', 'Paisagem natural da região'],
         placesSectionEmblematicTitle: 'Lugares emblemáticos',
         placesSectionCategoriesTitle: 'Categorias de lugares',
         placesSectionLeisureTitle: 'Lugares para se divertir',
@@ -821,8 +908,9 @@ const traduccionesExtra = {
             'Uma zona com vista para o rio para relaxar e passar o tempo com amigos.'
         ],
         placesLeisureAlt: ['Praça Roosvelt', 'Costanera Norte', 'Muelle Negro'],
-        placesGalleryTitles: ['Praça Treinta y Tres', 'Praça Artigas', 'Parque Benito Solari', 'Termas del Dayman'],
-        placesGalleryAlt: ['Vista do evento', 'Praça central', 'Área de descanso', 'Ponto turístico'],
+        placesGalleryIntro: 'Um percurso visual pelos espaços e tradições que contam a história de Salto.',
+        placesGalleryTitles: ['Praça Treinta y Tres', 'Praça Artigas', 'Centro histórico', 'Cultura salteña', 'Costanera de Salto'],
+        placesGalleryAlt: ['Praça Treinta y Tres e seu entorno histórico', 'Monumentos da Praça Artigas', 'Rua central junto ao Cine Sarandí', 'Expressão da cultura popular salteña', 'Passeio costeiro de Salto'],
         todosEventsBack: '← Voltar ao início',
         todosEventsSearch: 'Buscar eventos',
         todosEventsCategoryLabel: 'Todas',
@@ -886,15 +974,16 @@ const aplicarIdioma = (idioma = leerIdioma(), persistir = true) => {
             elemento.dataset.translatorSource = elemento.textContent.trim();
         }
         const clave = elemento.getAttribute('data-i18n');
-        if (!clavesTraducibles.has(clave)) return;
         const valor = traduccion[clave] ?? traducciones.es[clave] ?? traducciones.en[clave];
         if (!valor) return;
         if (elemento.tagName === 'INPUT' || elemento.tagName === 'TEXTAREA') {
             if (elemento.getAttribute('data-i18n-placeholder')) {
                 elemento.placeholder = valor;
+                elemento.dataset.translatorLocalPlaceholderLanguage = idiomaActivo;
             }
             return;
         }
+        elemento.dataset.translatorLocalTextLanguage = idiomaActivo;
         if (Array.isArray(valor)) {
             const indice = parseInt(elemento.getAttribute('data-i18n-index') || '0', 10);
             elemento.textContent = valor[indice] || valor[0];
@@ -908,9 +997,11 @@ const aplicarIdioma = (idioma = leerIdioma(), persistir = true) => {
             elemento.dataset.translatorPlaceholderSource = elemento.getAttribute('placeholder');
         }
         const clave = elemento.getAttribute('data-i18n-placeholder');
-        if (!clavesTraducibles.has(clave)) return;
         const valor = traduccion[clave] ?? traducciones.es[clave] ?? traducciones.en[clave];
-        if (valor) elemento.placeholder = valor;
+        if (valor) {
+            elemento.placeholder = valor;
+            elemento.dataset.translatorLocalPlaceholderLanguage = idiomaActivo;
+        }
     });
 
     document.querySelectorAll('[data-i18n-title]').forEach((elemento) => {
@@ -918,10 +1009,10 @@ const aplicarIdioma = (idioma = leerIdioma(), persistir = true) => {
             elemento.dataset.translatorTitleSource = elemento.textContent.trim();
         }
         const clave = elemento.getAttribute('data-i18n-title');
-        if (!clavesTraducibles.has(clave)) return;
         const valor = traduccion[clave] ?? traducciones.es[clave] ?? traducciones.en[clave];
         if (valor) {
             elemento.textContent = valor;
+            elemento.dataset.translatorLocalTitleLanguage = idiomaActivo;
             if (elemento.tagName === 'TITLE') {
                 document.title = valor;
             }
@@ -930,9 +1021,11 @@ const aplicarIdioma = (idioma = leerIdioma(), persistir = true) => {
 
     document.querySelectorAll('[data-i18n-aria-label]').forEach((elemento) => {
         const clave = elemento.getAttribute('data-i18n-aria-label');
-        if (!clavesTraducibles.has(clave)) return;
         const valor = traduccion[clave] ?? traducciones.es[clave] ?? traducciones.en[clave];
-        if (valor) elemento.setAttribute('aria-label', valor);
+        if (valor) {
+            elemento.setAttribute('aria-label', valor);
+            elemento.dataset.translatorLocalAriaLabelLanguage = idiomaActivo;
+        }
     });
 
     document.querySelectorAll('[data-i18n-alt]').forEach((elemento) => {
@@ -940,16 +1033,20 @@ const aplicarIdioma = (idioma = leerIdioma(), persistir = true) => {
             elemento.dataset.translatorAltSource = elemento.getAttribute('alt');
         }
         const clave = elemento.getAttribute('data-i18n-alt');
-        if (!clavesTraducibles.has(clave)) return;
         const valor = traduccion[clave] ?? traducciones.es[clave] ?? traducciones.en[clave];
-        if (valor) elemento.setAttribute('alt', valor);
+        if (valor) {
+            elemento.setAttribute('alt', valor);
+            elemento.dataset.translatorLocalAltLanguage = idiomaActivo;
+        }
     });
 
     document.querySelectorAll('option[data-i18n]').forEach((option) => {
         const clave = option.getAttribute('data-i18n');
-        if (!clavesTraducibles.has(clave)) return;
         const valor = traduccion[clave] ?? traducciones.es[clave] ?? traducciones.en[clave];
-        if (valor) option.textContent = valor;
+        if (valor) {
+            option.textContent = valor;
+            option.dataset.translatorLocalTextLanguage = idiomaActivo;
+        }
     });
 
     const selectorIdioma = document.getElementById('idioma');
@@ -976,11 +1073,8 @@ const esInfo = (elemento) => {
     identidad propia para no sobrescribir estilos específicos. */
 const aplicarTema = (oscuro, botonModoOscuro) => {
     const colorTexto = oscuro ? '#ffffff' : ''; // si estamos en modo oscuro, el texto debe ser blanco
-    const colorFondo = oscuro ? '#050505' : ''; // fondo negro mate para toda la pagina
     const fondoBoton = oscuro ? 'rgba(255,255,255,0.12)' : ''; // fondo tenue para botones menos importantes
 
-    setStyle(body, 'backgroundColor', colorFondo); // aplico el fondo oscuro al body
-    setStyle(body, 'backgroundImage', oscuro ? 'none' : ''); // saco imagen de fondo si hay una
     body.dataset.tema = oscuro ? 'oscuro' : 'claro'; // marca el tema actual para CSS
 
     const features = document.querySelectorAll('.feature, .feature-header');

@@ -48,7 +48,7 @@ $nombreLugar = htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8');
         <div class="lugar-hero__overlay"></div>
         <div class="lugar-hero__content">
             <?php if ($origenDetalle !== ''): ?><a class="lugar-back" href="<?= $origenDetalle ?>.php">← Volver a <?= $origenDetalle === 'turismo' ? 'turismo' : 'lugares' ?></a><?php endif; ?>
-            <span class="lugar-badge" data-i18n="placeCategoryLabel"> <?= htmlspecialchars($lugar['categoria'], ENT_QUOTES, 'UTF-8') ?> </span>
+            <span class="lugar-badge"> <?= htmlspecialchars($lugar['categoria'], ENT_QUOTES, 'UTF-8') ?> </span>
             <h1 class="lugar-hero-titulo"><?= $nombreLugar ?></h1>
             <p class="lugar-location">⌖ <?= htmlspecialchars($lugar['direccion'], ENT_QUOTES, 'UTF-8') ?></p>
         </div>

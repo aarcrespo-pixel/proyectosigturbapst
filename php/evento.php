@@ -5,6 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/imagenes.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
+require_once __DIR__ . '/helpers/notificaciones.php';
 
 $eventos = [
     'bambola' => ['La Bambola', 'Discoteca', '+18', 'Costanera Sur 1535', 'Todos los fines de semana.', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRh8BnVQ1qdPDXqoHVHylKrGhwk3guImN0d1ZRYbBNmSXoKPhqmCE-pMsE&s', '2026-09-19', false, -31.3921, -57.9606],
@@ -40,7 +41,7 @@ if ($esEventoDinamico) {
     $eventoDb = $consultaEvento->fetch();
     if (!$eventoDb) {
         http_response_code(404);
-        ?><!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Evento no encontrado | SIGTUR</title><link rel="stylesheet" href="../css/estilos.css"><style>body{min-height:100vh;display:grid;place-items:center;background:#111827;color:#f8fafc;font-family:Arial,sans-serif;text-align:center}.error-box{max-width:520px;padding:3rem}.error-box a{color:#fbbf24}</style></head><body><main class="error-box"><h1>Evento no encontrado</h1><p>El evento solicitado no existe o ya no está disponible.</p><a href="eventos.php">Volver a eventos</a></main></body></html><?php
+        ?><!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Evento no encontrado | SIGTUR</title><link rel="stylesheet" href="../css/estilos.css"><style>body{min-height:100vh;display:grid;place-items:center;background:#111827;color:#f8fafc;font-family:Arial,sans-serif;text-align:center}.error-box{max-width:520px;padding:3rem}.error-box a{color:#fbbf24}</style></head><body><main class="error-box"><h1>Evento no encontrado</h1><p>El evento solicitado no existe o ya no está disponible.</p><a href="eventos.php">Volver a eventos</a></main><script src="../js/translator.js" defer></script></body></html><?php
         exit;
     }
     $slug = $eventoDb['slug'];
@@ -109,14 +110,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['accion']))
         exit;
     }
     if ($_POST['accion'] === 'pregunta') {
-        $pregunta = trim($_POST['pregunta'] ?? '');
-        if ($pregunta === '') {
+        $pregunta = trim((string) ($_POST['pregunta'] ?? ''));
+        if ($pregunta === '' || mb_strlen($pregunta) > 500) {
             http_response_code(422);
-            echo json_encode(['error' => 'Escribí una pregunta']);
+            echo json_encode(['error' => 'La pregunta debe tener entre 1 y 500 caracteres']);
             exit;
         }
         $stmt = $pdo->prepare('INSERT INTO preguntas_eventos (evento_slug, usuario_id, pregunta) VALUES (:evento, :usuario, :pregunta)');
         $stmt->execute([':evento' => $slug, ':usuario' => $usuarioId, ':pregunta' => $pregunta]);
+        $organizadorId = (int) ($eventoDb['organizador_id'] ?? 0);
+        sigtur_notificar_consulta_evento($pdo, $organizadorId, $usuarioId, $nombre, $pregunta);
         echo json_encode(['ok' => true]);
         exit;
     }
@@ -181,6 +184,7 @@ foreach (array_slice($recs, 0, 3) as $rec):$recSlug = array_search($rec, $evento
 <?php endif; ?>
 </main>
 <?php if ($inscripto): ?><div class="event-qr-backdrop" id="ticketModal" hidden><article class="event-ticket"><header><strong>Pase digital</strong><button class="event-ticket-close" type="button" id="ticketClose">×</button></header><img src="<?= htmlspecialchars($qrUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Código QR de acreditación"><h2><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?></h2><dl><div><dt>Fecha</dt><dd><?= htmlspecialchars($fechaLegible) ?></dd></div><div><dt>Lugar</dt><dd><?= htmlspecialchars($lugar) ?></dd></div><div><dt>Asistente</dt><dd><?= htmlspecialchars($_SESSION['usuario_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?></dd></div></dl></article></div><?php endif; ?>
+<script src="<?= $assetBase ?>js/tema.js" defer></script>
 <script src="<?= $assetBase ?>js/interacciones-tarjetas.js"></script>
 <script src="<?= $assetBase ?>js/evento.js" defer></script>
 <script>
@@ -223,4 +227,5 @@ favoriteEventButton?.addEventListener('click', async () => {
     }
 });
 </script>
+<script src="<?= $assetBase ?>js/translator.js" defer></script>
 </body></html>

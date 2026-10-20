@@ -18,6 +18,10 @@
 }
 
 body[data-tema="oscuro"] {
+    --bg-card: #20242a;
+    --text-primary: #f3f4f6;
+    --text-secondary: #b4bec7;
+    --texto-oscuro: #f3f4f6;
     background: linear-gradient(180deg, #120f0b 0%, #1b1610 48%, #241d15 100%);
     color: #f6ead8;
 }
@@ -640,6 +644,16 @@ body[data-tema="oscuro"] .feature{
 body[data-tema="oscuro"] .feature-toggle {
     background: #000000 !important;
     color: #ffffff !important;
+}
+
+body[data-tema="oscuro"] .feature-image-gastronomia {
+    width: clamp(130px, 15vw, 190px);
+    max-width: 100%;
+    height: clamp(130px, 15vw, 190px);
+    box-sizing: border-box;
+    object-fit: contain;
+    padding: 16px;
+    background: #ffffff;
 }
 body:has(main.detalle-hero) .menu a:not(.logo-link):not(.pagina-activa),
 body:has(main.detalle-hero) .menu a:not(.logo-link):not(.pagina-activa):hover {
@@ -1778,6 +1792,8 @@ body[data-tema="oscuro"] .perfil-form-grid textarea {
 .indicador {
     width: clamp(10px, 1vw, 12px);
     height: clamp(10px, 1vw, 12px);
+    padding: 0;
+    border: 0;
     border-radius: 50%;
     background: #d2d2d2;
     cursor: pointer;
@@ -2282,6 +2298,9 @@ body[data-tema="oscuro"] .mapa-lugares a {
 .copilot-assistant__history-entry { padding: .55rem 0; border-bottom: 1px solid #d9e4ee; color: #17324b; font-size: .82rem; line-height: 1.4; }
 .copilot-assistant__history-entry:last-child { border-bottom: 0; }
 .copilot-assistant__history-entry p { margin: .2rem 0; }
+.copilot-assistant__history-delete { margin-top: .4rem; border: 1px solid #c94c42; border-radius: 7px; padding: .3rem .55rem; background: #fff; color: #a52f27; font: inherit; font-size: .72rem; cursor: pointer; }
+.copilot-assistant__history-delete:hover { background: #fff1ef; }
+.copilot-assistant__history-delete:disabled { cursor: wait; opacity: .6; }
 
 .copilot-assistant__close {
     width: 2rem;

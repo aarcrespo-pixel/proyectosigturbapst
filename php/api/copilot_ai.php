@@ -210,6 +210,29 @@ if ($accion === 'borrar_historial') {
     exit;
 }
 
+if ($accion === 'eliminar_chat') {
+    $chatId = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+    if (!$chatId) {
+        http_response_code(422);
+        echo json_encode(['success' => false, 'message' => 'El chat seleccionado no es válido.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    $eliminarChat = $pdo->prepare('DELETE FROM copilot_ai_historial WHERE id = :id AND usuario_id = :usuario_id LIMIT 1');
+    $eliminarChat->execute([
+        ':id' => $chatId,
+        ':usuario_id' => (int) $usuarioActual['id'],
+    ]);
+    if ($eliminarChat->rowCount() !== 1) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'No se encontró ese chat en tu historial.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    echo json_encode(['success' => true, 'message' => 'Chat eliminado del historial.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $mensaje = trim((string) ($_POST['message'] ?? ''));
 $longitudMensaje = function_exists('mb_strlen') ? mb_strlen($mensaje) : strlen($mensaje);
 if ($mensaje === '' || $longitudMensaje > 800) {

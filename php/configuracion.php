@@ -92,6 +92,7 @@ $configCsrfToken = sigtur_csrf_token();
                 <button type="button" class="btn btn-secondary" data-notificaciones-toggle-permission>Activar notificaciones</button>
               </div>
 
+              <p class="config-notificaciones__action-status" data-notificaciones-action-status aria-live="polite"></p>
               <div class="config-notificaciones__panel" id="notificaciones-panel" hidden>
                 <ul class="config-notificaciones__lista" id="notificaciones-lista">
                   <li class="config-notificaciones__empty">Cargando notificaciones...</li>
@@ -138,8 +139,8 @@ $configCsrfToken = sigtur_csrf_token();
       </div>
     </section>
   </div>
-  <script src="../js/translator.js?v=20261001-1"></script>
-  <script src="../js/script.js?v=20261001-1"></script>
+  <script src="../js/translator.js?v=20261019-i18n-4"></script>
+  <script src="../js/script.js?v=20261019-i18n-4"></script>
   <script src="../js/notificaciones.js?v=<?= time() ?>"></script>
   <script>
     /* Estos selectores conectan preferencias visuales, idioma y tamaño de

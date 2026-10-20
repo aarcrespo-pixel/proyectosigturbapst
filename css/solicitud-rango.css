@@ -152,6 +152,25 @@
     margin-top: 20px;
 }
 
+body[data-tema="oscuro"] .solicitud-form input:not([type="checkbox"]),
+body[data-tema="oscuro"] .solicitud-form select,
+body[data-tema="oscuro"] .solicitud-form textarea,
+body[data-tema="oscuro"] .solicitud-form input[readonly] {
+    border-color: var(--admin-line);
+    background: #171c21;
+    color: var(--admin-ink);
+}
+
+body[data-tema="oscuro"] .solicitud-alert--success {
+    background: #1d382a;
+    color: #a6e2bb;
+}
+
+body[data-tema="oscuro"] .solicitud-alert--error {
+    background: #3a2422;
+    color: #ffc1b8;
+}
+
 @media (max-width: 600px) {
     .solicitud-datos,
     .solicitud-identidad {

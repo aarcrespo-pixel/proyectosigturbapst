@@ -4,7 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
-require_once __DIR__ . '/helpers/imagenes.php';
 
 $usuario = sigtur_requerir_rol($pdo, ['organizador'], 'login.php', 'eventos.php');
 $csrfToken = sigtur_csrf_token();
@@ -16,10 +15,7 @@ $todosEventosStmt = $pdo->query("SELECT e.id, e.titulo, e.descripcion, e.fecha, 
         CASE WHEN fecha < CURDATE() THEN fecha END DESC,
         e.id DESC");
 $todosEventos = $todosEventosStmt->fetchAll();
-$fotosGaleriaStmt = $pdo->prepare('SELECT id, imagen, titulo, descripcion, tipo_evento FROM galeria_eventos WHERE usuario_id = :organizador ORDER BY fecha_creacion DESC, id DESC');
-$fotosGaleriaStmt->execute([':organizador' => (int) $usuario['id']]);
-$fotosGaleria = $fotosGaleriaStmt->fetchAll();
-$consultasStmt = $pdo->prepare('SELECT p.id, p.pregunta, p.respuesta, p.fecha_creacion, e.titulo, e.id AS evento_id, u.nombre_completo FROM preguntas_eventos p INNER JOIN eventos e ON e.slug = p.evento_slug INNER JOIN usuarios u ON u.id = p.usuario_id WHERE e.organizador_id = :organizador OR e.organizador_id = 0 ORDER BY p.fecha_creacion DESC');
+$consultasStmt = $pdo->prepare('SELECT p.id, p.pregunta, p.respuesta, p.fecha_creacion, e.titulo, e.id AS evento_id, u.nombre_completo FROM preguntas_eventos p INNER JOIN eventos e ON e.slug = p.evento_slug INNER JOIN usuarios u ON u.id = p.usuario_id WHERE e.organizador_id = :organizador ORDER BY p.fecha_creacion DESC');
 $consultasStmt->execute([':organizador' => (int) $usuario['id']]);
 $consultas = $consultasStmt->fetchAll();
 ?>
@@ -64,8 +60,8 @@ $consultas = $consultasStmt->fetchAll();
             <div class="admin-section__heading">
                 <div>
                     <p class="admin-eyebrow">Atención a visitantes</p>
-                    <h2 id="event-questions-title">Consultas de eventos</h2>
-                    <p>Responde las preguntas de tus eventos y de los que todavía no tienen organizador asignado.</p>
+                    <h2 id="event-questions-title">Consultas de mis eventos</h2>
+                    <p>Responde las preguntas realizadas desde las páginas de tus eventos.</p>
                 </div>
             </div>
             <?php if (!$consultas): ?>
@@ -128,6 +124,7 @@ $consultas = $consultasStmt->fetchAll();
                                 </div>
                                 <a class="admin-text-link admin-event__open" href="evento.php?id=<?= (int) $evento['id'] ?>">Ver evento</a>
                             </div>
+                            <?php if ((int) $evento['organizador_id'] === (int) $usuario['id']): ?>
                             <details class="admin-event__editor">
                                 <summary>Editar evento</summary>
                                 <form class="admin-form" method="post" enctype="multipart/form-data" action="crear-evento.php">
@@ -149,7 +146,7 @@ $consultas = $consultasStmt->fetchAll();
                                     </label>
                                     <label>Precio<input type="number" min="0" step="0.01" name="precio" value="<?= htmlspecialchars((string) ($evento['precio'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"></label>
                                     <label class="admin-form__wide admin-event__image-field">Foto del evento
-                                        <img class="admin-event__image-preview" src="<?= htmlspecialchars(sigtur_url_imagen_subida((string) ($evento['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif'), ENT_QUOTES, 'UTF-8') ?>" alt="Foto actual de <?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
+                                        <img class="admin-event__image-preview" src="<?= htmlspecialchars($evento['imagen_portada'] ?: '../img/porco.avif', ENT_QUOTES, 'UTF-8') ?>" alt="Foto actual de <?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
                                         <input class="admin-event__image-input" type="file" name="imagen" accept="image/jpeg,image/png,image/webp">
                                         <span class="admin-field-hint">Si no seleccionas otra foto, se conserva la actual.</span>
                                     </label>
@@ -158,73 +155,20 @@ $consultas = $consultasStmt->fetchAll();
                                         <a class="admin-text-link" href="evento.php?id=<?= (int) $evento['id'] ?>">Abrir evento</a>
                                     </div>
                                 </form>
-                                <?php if ((int) $evento['organizador_id'] === (int) $usuario['id']): ?>
                                 <form method="post" action="crear-evento.php" onsubmit="return confirm('¿Eliminar este evento? Esta acción no se puede deshacer.')">
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="accion" value="eliminar">
                                     <input type="hidden" name="evento_id" value="<?= (int) $evento['id'] ?>">
                                     <button class="admin-button admin-button--danger" type="submit">Eliminar evento</button>
                                 </form>
-                                <?php endif; ?>
                             </details>
+                            <?php endif; ?>
                         </article>
                     <?php endforeach; ?>
                 </div>
                 <?php if (count($todosEventos) > 4): ?>
                     <button class="admin-button admin-events-toggle" type="button" data-admin-events-toggle aria-expanded="false" aria-controls="admin-event-list">Ver más eventos</button>
                 <?php endif; ?>
-            <?php endif; ?>
-        </section>
-
-        <section class="admin-section" id="mis-fotos" aria-labelledby="organizer-gallery-title">
-            <div class="admin-section__heading">
-                <div>
-                    <p class="admin-eyebrow">Fotos publicadas</p>
-                    <h2 id="organizer-gallery-title">Mis fotos de la galería</h2>
-                    <p>Edita la información o reemplaza las fotos que subiste.</p>
-                </div>
-                <span class="admin-count"><?= count($fotosGaleria) ?> fotos</span>
-            </div>
-            <?php if (isset($_GET['galeria']) && $_GET['galeria'] === 'actualizada'): ?>
-                <p class="admin-notice" role="status">La foto y su información se actualizaron correctamente.</p>
-            <?php endif; ?>
-            <?php if (!$fotosGaleria): ?>
-                <p class="admin-empty">Todavía no subiste fotos a la galería de eventos.</p>
-            <?php else: ?>
-                <div class="admin-event-list">
-                    <?php foreach ($fotosGaleria as $foto): ?>
-                        <article class="admin-event">
-                            <details class="admin-event__editor">
-                                <summary><?= htmlspecialchars($foto['titulo'], ENT_QUOTES, 'UTF-8') ?> · <?= htmlspecialchars($foto['tipo_evento'], ENT_QUOTES, 'UTF-8') ?></summary>
-                                <form class="admin-form" method="post" enctype="multipart/form-data" action="editar-foto-galeria.php">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-                                    <input type="hidden" name="foto_id" value="<?= (int) $foto['id'] ?>">
-                                    <label>Título
-                                        <input name="titulo" maxlength="160" required value="<?= htmlspecialchars($foto['titulo'], ENT_QUOTES, 'UTF-8') ?>">
-                                    </label>
-                                    <label>Tipo de evento
-                                        <select name="tipo_evento" required>
-                                            <?php foreach (['Competencias', 'Carreras', 'Deportivo', 'Discotecas', 'Cultural', 'Feria', 'Otro'] as $tipoFoto): ?>
-                                                <option value="<?= htmlspecialchars($tipoFoto, ENT_QUOTES, 'UTF-8') ?>" <?= $foto['tipo_evento'] === $tipoFoto ? 'selected' : '' ?>><?= htmlspecialchars($tipoFoto, ENT_QUOTES, 'UTF-8') ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </label>
-                                    <label class="admin-form__wide">Descripción
-                                        <textarea name="descripcion" maxlength="2000" required><?= htmlspecialchars($foto['descripcion'], ENT_QUOTES, 'UTF-8') ?></textarea>
-                                    </label>
-                                    <label class="admin-form__wide admin-event__image-field">Foto actual
-                                        <img class="admin-event__image-preview" src="<?= htmlspecialchars(sigtur_url_imagen_subida((string) $foto['imagen'], 'galeria-eventos'), ENT_QUOTES, 'UTF-8') ?>" alt="Foto actual: <?= htmlspecialchars($foto['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
-                                        <input class="admin-event__image-input" type="file" name="foto" accept="image/jpeg,image/png,image/webp">
-                                        <span class="admin-field-hint">Selecciona una imagen JPG, PNG o WEBP para reemplazarla; si no seleccionas otra, se conserva la actual.</span>
-                                    </label>
-                                    <div class="admin-form__wide admin-form__actions">
-                                        <button class="admin-button" type="submit">Guardar cambios</button>
-                                    </div>
-                                </form>
-                            </details>
-                        </article>
-                    <?php endforeach; ?>
-                </div>
             <?php endif; ?>
         </section>
     </main>

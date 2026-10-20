@@ -58,30 +58,13 @@ $ok = $insertar->execute([
 ]);
 
 if ($ok) {
-    $organizadorId = (int) $evento['organizador_id'];
-    $destinatarios = [];
-    if ($organizadorId > 0) {
-        $destinatarios[] = $organizadorId;
-    } else {
-        $organizadores = $pdo->prepare("SELECT id FROM usuarios WHERE LOWER(rol) = 'organizador' AND id <> :usuario_id");
-        $organizadores->execute([':usuario_id' => $usuarioId]);
-        $destinatarios = array_map('intval', $organizadores->fetchAll(PDO::FETCH_COLUMN));
-    }
-
-    $consultaTurista = $pdo->prepare('SELECT COALESCE(NULLIF(nickname, \'\'), nombre_completo) FROM usuarios WHERE id = :usuario_id LIMIT 1');
-    $consultaTurista->execute([':usuario_id' => $usuarioId]);
-    $nombreTurista = (string) ($consultaTurista->fetchColumn() ?: 'Un turista');
-    foreach (array_unique($destinatarios) as $destinatarioId) {
-        if ($destinatarioId > 0 && $destinatarioId !== $usuarioId) {
-            sigtur_crear_notificacion(
-                $pdo,
-                $destinatarioId,
-                'Nueva pregunta de un turista',
-                $nombreTurista . ' preguntó sobre "' . (string) $evento['titulo'] . '": ' . $texto,
-                'consulta_evento'
-            );
-        }
-    }
+    sigtur_notificar_consulta_evento(
+        $pdo,
+        (int) $evento['organizador_id'],
+        $usuarioId,
+        (string) $evento['titulo'],
+        $texto
+    );
 }
 
 echo json_encode([

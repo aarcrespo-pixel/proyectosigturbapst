@@ -82,5 +82,6 @@ $itemKey = 'evento-' . $slug;
         document.getElementById('lightbox-prev').addEventListener('click', () => { pastPhotoIndex = (pastPhotoIndex + pastPhotos.length - 1) % pastPhotos.length; renderPastPhoto(); });
         document.getElementById('lightbox-next').addEventListener('click', () => { pastPhotoIndex = (pastPhotoIndex + 1) % pastPhotos.length; renderPastPhoto(); });
     </script>
+<script src="../js/translator.js" defer></script>
 </body>
 </html>
