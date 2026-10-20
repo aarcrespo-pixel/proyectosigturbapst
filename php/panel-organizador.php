@@ -172,6 +172,7 @@ $consultas = $consultasStmt->fetchAll();
             <?php endif; ?>
         </section>
     </main>
+    <script src="../js/tema.js" defer></script>
     <script src="../js/panel-admin.js" defer></script>
     <?php $mensajesWidgetRoot = '../'; include __DIR__ . '/mensajes-widget.php'; ?>
 </body>
