@@ -27,6 +27,7 @@ try {
     require_once __DIR__ . '/../helpers/autorizacion.php';
     require_once __DIR__ . '/../helpers/censura.php';
     require_once __DIR__ . '/../helpers/imagenes.php';
+    require_once __DIR__ . '/../helpers/notificaciones.php';
     $usuarioActual = sigtur_usuario_actual($pdo);
     if (!$usuarioActual) responderMensajes(['success' => false, 'status' => 'error', 'message' => 'Sesión no iniciada'], 401);
     $usuarioId = (int) $usuarioActual['id'];
@@ -35,7 +36,7 @@ try {
     if ($accion !== 'consulta' && !in_array($usuarioActual['rol'], ['administrador', 'organizador'], true)) {
         responderMensajes(['success' => false, 'status' => 'error', 'message' => 'La mensajería directa es exclusiva para administradores y organizadores.'], 403);
     }
-    if ($accion === 'consulta' && !sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
+    if (in_array($accion, ['consulta', 'editar', 'eliminar', 'eliminar_para_mi', 'eliminar_para_todos'], true) && !sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
         responderMensajes(['success' => false, 'status' => 'error', 'message' => 'La sesión expiró. Recargá la página e intentá otra vez.'], 403);
     }
     // CAMBIO APLICADO: aceptamos los nombres usados por el widget y por los
@@ -56,15 +57,117 @@ try {
             // FIX RESPUESTA: todos los errores usan status, success y message.
             responderMensajes(['status' => 'error', 'success' => false, 'message' => 'La consulta debe tener entre 1 y 500 caracteres.'], 422);
         }
-        $admin = $pdo->query("SELECT id FROM usuarios WHERE rol IN ('administrador', 'admin', 'moderador') ORDER BY FIELD(rol, 'administrador', 'admin', 'moderador'), id ASC LIMIT 1")->fetchColumn();
-        if (!$admin) {
+        $equipo = $pdo->query("SELECT id FROM usuarios WHERE LOWER(rol) IN ('administrador', 'admin', 'moderador', 'organizador')")->fetchAll(PDO::FETCH_COLUMN);
+        if (!$equipo) {
             responderMensajes(['status' => 'error', 'success' => false, 'message' => 'No hay una cuenta de soporte disponible.'], 503);
         }
         $mensajeContextual = '[Consulta ' . $contexto . ']: ' . $textoConsulta;
         $insertarConsulta = $pdo->prepare('INSERT INTO mensajes (remitente_id, destinatario_id, mensaje, contexto) VALUES (:remitente, :destinatario, :mensaje, :contexto)');
-        $insertarConsulta->execute([':remitente' => $usuarioId, ':destinatario' => (int) $admin, ':mensaje' => $mensajeContextual, ':contexto' => $contexto]);
+        $pdo->beginTransaction();
+        $contextoHilo = null;
+        $consultaId = 0;
+        foreach ($equipo as $destinatarioId) {
+            $insertarConsulta->execute([
+                ':remitente' => $usuarioId,
+                ':destinatario' => (int) $destinatarioId,
+                ':mensaje' => $mensajeContextual,
+                ':contexto' => $contextoHilo ?? $contexto,
+            ]);
+            if ($contextoHilo === null) {
+                $consultaId = (int) $pdo->lastInsertId();
+                $contextoHilo = 'soporte:reporte:' . $consultaId;
+                $actualizarContextoHilo = $pdo->prepare('UPDATE mensajes SET contexto = :contexto WHERE id = :id');
+                $actualizarContextoHilo->execute([
+                    ':contexto' => $contextoHilo,
+                    ':id' => $consultaId,
+                ]);
+            }
+        }
+        sigtur_notificar_equipo_consulta(
+            $pdo,
+            $usuarioId,
+            'Nueva consulta de un usuario',
+            'Se recibió una consulta nueva en ' . $contexto . '.',
+            'consulta'
+        );
+        $pdo->commit();
         // FIX RESPUESTA: soporte comparte el contrato JSON del envío directo.
-        responderMensajes(['status' => 'success', 'success' => true, 'id' => (int) $pdo->lastInsertId(), 'hora' => date('H:i'), 'message' => 'Consulta enviada correctamente.'], 201);
+        responderMensajes(['status' => 'success', 'success' => true, 'id' => $consultaId, 'hora' => date('H:i'), 'message' => 'Consulta enviada a administradores y organizadores.'], 201);
+    }
+
+    if (in_array($accion, ['eliminar_para_mi', 'eliminar_para_todos'], true)) {
+        $mensajeId = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if (!$mensajeId) responderMensajes(['success' => false, 'status' => 'error', 'message' => 'El mensaje seleccionado no es válido.'], 422);
+        $mensajeStmt = $pdo->prepare('SELECT remitente_id, destinatario_id, eliminado_para_todos, contexto, mensaje
+            FROM mensajes WHERE id = :id LIMIT 1');
+        $mensajeStmt->execute([':id' => $mensajeId]);
+        $mensaje = $mensajeStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$mensaje) responderMensajes(['success' => false, 'status' => 'error', 'message' => 'No se encontró el mensaje.'], 404);
+        $participa = in_array($usuarioId, [(int) $mensaje['remitente_id'], (int) $mensaje['destinatario_id']], true);
+        $esModerador = in_array($usuarioActual['rol'], ['administrador', 'organizador'], true);
+        $puedeModeradorSinParticipar = $esModerador
+            && $accion === 'eliminar_para_mi'
+            && (int) $mensaje['eliminado_para_todos'] === 1;
+        if (!$participa && !$puedeModeradorSinParticipar) {
+            responderMensajes(['success' => false, 'status' => 'error', 'message' => 'No tienes permiso para gestionar este mensaje.'], 403);
+        }
+
+        if ($accion === 'eliminar_para_mi') {
+            if ((int) $mensaje['remitente_id'] !== $usuarioId && (int) $mensaje['eliminado_para_todos'] !== 1) {
+                responderMensajes(['success' => false, 'status' => 'error', 'message' => 'Solo puedes quitar de tu chat un mensaje ajeno después de que se haya eliminado para todos.'], 403);
+            }
+            $ocultar = $pdo->prepare('INSERT IGNORE INTO mensajes_ocultos_usuario (mensaje_id, usuario_id) VALUES (:mensaje_id, :usuario_id)');
+            $ocultar->execute([':mensaje_id' => $mensajeId, ':usuario_id' => $usuarioId]);
+            responderMensajes(['success' => true, 'status' => 'success', 'id' => $mensajeId, 'accion' => $accion]);
+        }
+        if ((int) $mensaje['remitente_id'] !== $usuarioId) {
+            responderMensajes(['success' => false, 'status' => 'error', 'message' => 'Solo quien envió el mensaje puede eliminarlo para todos.'], 403);
+        }
+        if ((int) $mensaje['eliminado_para_todos'] !== 1) {
+            $pdo->beginTransaction();
+            $eliminarTodos = $pdo->prepare('UPDATE mensajes SET eliminado_para_todos = 1 WHERE id = :id');
+            $eliminarTodos->execute([':id' => $mensajeId]);
+            if (
+                preg_match('/^soporte:reporte:\d+$/', (string) ($mensaje['contexto'] ?? '')) === 1
+                && str_starts_with((string) $mensaje['mensaje'], '[Consulta ')
+            ) {
+                $eliminarDuplicados = $pdo->prepare("UPDATE mensajes
+                    SET eliminado_para_todos = 1
+                    WHERE contexto = :contexto AND mensaje LIKE '[Consulta %'");
+                $eliminarDuplicados->execute([':contexto' => $mensaje['contexto']]);
+            }
+            $pdo->commit();
+        }
+        responderMensajes(['success' => true, 'status' => 'success', 'id' => $mensajeId, 'accion' => $accion]);
+    }
+
+    if (in_array($accion, ['editar', 'eliminar'], true)) {
+        $mensajeId = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if (!$mensajeId) responderMensajes(['success' => false, 'status' => 'error', 'message' => 'El mensaje seleccionado no es válido.'], 422);
+        $mensajeStmt = $pdo->prepare('SELECT id, remitente_id, destinatario_id, mensaje, contexto, eliminado_para_todos FROM mensajes WHERE id = :id LIMIT 1');
+        $mensajeStmt->execute([':id' => $mensajeId]);
+        $mensaje = $mensajeStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$mensaje) responderMensajes(['success' => false, 'status' => 'error', 'message' => 'No se encontró el mensaje.'], 404);
+        $esPropio = (int) $mensaje['remitente_id'] === $usuarioId;
+        if (!$esPropio) {
+            responderMensajes(['success' => false, 'status' => 'error', 'message' => 'No tienes permiso para gestionar este mensaje.'], 403);
+        }
+        if ($accion === 'editar') {
+            if (!$esPropio) responderMensajes(['success' => false, 'status' => 'error', 'message' => 'Solo puedes editar tus propios mensajes.'], 403);
+            $textoEditado = censurarTexto(trim((string) ($_POST['texto'] ?? '')));
+            if ($textoEditado === '' || mb_strlen($textoEditado, 'UTF-8') > 500) {
+                responderMensajes(['success' => false, 'status' => 'error', 'message' => 'El mensaje debe tener entre 1 y 500 caracteres.'], 422);
+            }
+            if (!empty($mensaje['eliminado_para_todos'])) {
+                responderMensajes(['success' => false, 'status' => 'error', 'message' => 'No se puede editar un mensaje eliminado para todos.'], 409);
+            }
+            $actualizar = $pdo->prepare('UPDATE mensajes SET mensaje = :mensaje WHERE id = :id AND remitente_id = :usuario_id');
+            $actualizar->execute([':mensaje' => $textoEditado, ':id' => $mensajeId, ':usuario_id' => $usuarioId]);
+            responderMensajes(['success' => true, 'status' => 'success', 'id' => $mensajeId, 'mensaje' => $textoEditado]);
+        }
+        $eliminar = $pdo->prepare('UPDATE mensajes SET eliminado_para_todos = 1 WHERE id = :id');
+        $eliminar->execute([':id' => $mensajeId]);
+        responderMensajes(['success' => true, 'status' => 'success', 'id' => $mensajeId]);
     }
 
     if ($otroUsuarioId > 0 && in_array($accion, ['enviar', 'leer', 'conversacion'], true)) {
@@ -213,8 +316,19 @@ try {
     if ($accion === 'conversacion' && $otroUsuarioId > 0) {
         /* CAMBIO APLICADO: cada placeholder tiene nombre propio. PDO con
            prepares nativos no permite reutilizar el mismo parámetro nombrado. */
-        $consulta = $pdo->prepare("SELECT m.id, m.remitente_id, m.destinatario_id, m.mensaje, m.contexto, m.foto_url, m.video_url, m.audio_url, m.fecha_creacion, DATE_FORMAT(m.fecha_creacion, '%H:%i') AS hora, m.leido, u.nombre_completo, u.nickname, COALESCE(u.foto_perfil, u.avatar) AS foto_perfil FROM mensajes m INNER JOIN usuarios u ON u.id = m.remitente_id WHERE (m.remitente_id = :usuario_emisor AND m.destinatario_id = :otro_receptor) OR (m.remitente_id = :otro_emisor AND m.destinatario_id = :usuario_receptor) ORDER BY m.fecha_creacion ASC, m.id ASC LIMIT 100");
-        $consulta->execute([':usuario_emisor' => $usuarioId, ':otro_receptor' => $otroUsuarioId, ':otro_emisor' => $otroUsuarioId, ':usuario_receptor' => $usuarioId]);
+        $consulta = $pdo->prepare("SELECT m.id, m.remitente_id, m.destinatario_id,
+            CASE WHEN m.eliminado_para_todos = 1 THEN '' ELSE m.mensaje END AS mensaje,
+            m.eliminado_para_todos, m.contexto, m.foto_url, m.video_url, m.audio_url,
+            m.fecha_creacion, DATE_FORMAT(m.fecha_creacion, '%H:%i') AS hora, m.leido,
+            u.nombre_completo, u.nickname, COALESCE(u.foto_perfil, u.avatar) AS foto_perfil
+            FROM mensajes m
+            INNER JOIN usuarios u ON u.id = m.remitente_id
+            LEFT JOIN mensajes_ocultos_usuario oculto ON oculto.mensaje_id = m.id AND oculto.usuario_id = :usuario_oculto
+            WHERE ((m.remitente_id = :usuario_emisor AND m.destinatario_id = :otro_receptor)
+                OR (m.remitente_id = :otro_emisor AND m.destinatario_id = :usuario_receptor))
+                AND oculto.mensaje_id IS NULL
+            ORDER BY m.fecha_creacion ASC, m.id ASC LIMIT 100");
+        $consulta->execute([':usuario_oculto' => $usuarioId, ':usuario_emisor' => $usuarioId, ':otro_receptor' => $otroUsuarioId, ':otro_emisor' => $otroUsuarioId, ':usuario_receptor' => $usuarioId]);
         $mensajes = $consulta->fetchAll();
         responderMensajes(['success' => true, 'data' => $mensajes, 'messages' => $mensajes]);
     }
@@ -236,7 +350,8 @@ try {
         $parametrosGrupo[$marcador] = $rol;
     }
     $rolesSql = implode(', ', $marcadoresGrupo);
-    $consulta = $pdo->prepare("SELECT u.id AS usuario_id, u.nombre_completo, u.nickname, COALESCE(u.foto_perfil, u.avatar) AS foto_perfil, MAX(m.fecha_creacion) AS ultima_fecha, SUBSTRING_INDEX(GROUP_CONCAT(m.mensaje ORDER BY m.fecha_creacion DESC, m.id DESC SEPARATOR '||'), '||', 1) AS ultimo_mensaje, SUM(CASE WHEN m.destinatario_id = :usuario_no_leido AND m.leido = 0 THEN 1 ELSE 0 END) AS no_leidos FROM mensajes m INNER JOIN usuarios u ON u.id = CASE WHEN m.remitente_id = :usuario_contacto THEN m.destinatario_id ELSE m.remitente_id END WHERE (m.remitente_id = :usuario_emisor OR m.destinatario_id = :usuario_receptor) AND u.rol IN ({$rolesSql}) GROUP BY u.id, u.nombre_completo, u.nickname, u.foto_perfil, u.avatar ORDER BY ultima_fecha DESC");
+    $consulta = $pdo->prepare("SELECT u.id AS usuario_id, u.nombre_completo, u.nickname, COALESCE(u.foto_perfil, u.avatar) AS foto_perfil, MAX(m.fecha_creacion) AS ultima_fecha, SUBSTRING_INDEX(GROUP_CONCAT(CASE WHEN m.eliminado_para_todos = 1 THEN 'Mensaje eliminado para todos' ELSE m.mensaje END ORDER BY m.fecha_creacion DESC, m.id DESC SEPARATOR '||'), '||', 1) AS ultimo_mensaje, SUM(CASE WHEN m.destinatario_id = :usuario_no_leido AND m.leido = 0 THEN 1 ELSE 0 END) AS no_leidos FROM mensajes m LEFT JOIN mensajes_ocultos_usuario oculto ON oculto.mensaje_id = m.id AND oculto.usuario_id = :usuario_oculto INNER JOIN usuarios u ON u.id = CASE WHEN m.remitente_id = :usuario_contacto THEN m.destinatario_id ELSE m.remitente_id END WHERE (m.remitente_id = :usuario_emisor OR m.destinatario_id = :usuario_receptor) AND oculto.mensaje_id IS NULL AND u.rol IN ({$rolesSql}) GROUP BY u.id, u.nombre_completo, u.nickname, u.foto_perfil, u.avatar ORDER BY ultima_fecha DESC");
+    $parametrosGrupo[':usuario_oculto'] = $usuarioId;
     $consulta->execute($parametrosGrupo);
     $conversaciones = $consulta->fetchAll();
     $parametrosContactos = [':usuario' => $usuarioId];
@@ -259,5 +374,9 @@ try {
 } catch (Throwable $exception) {
     /* El buffer se limpia también en errores de MySQL para que el cliente reciba
        JSON válido en lugar del HTML generado por un warning o notice. */
+    if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log('Error en la mensajería: ' . $exception->getMessage());
     responderMensajes(['success' => false, 'error' => 'No se pudo cargar la mensajería.'], 500);
 }

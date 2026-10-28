@@ -30,7 +30,9 @@ try {
     $consulta = mb_substr($consulta, 0, 80, 'UTF-8');
     $termino = '%' . strtr($consulta, ['!' => '!!', '%' => '!%', '_' => '!_']) . '%';
     $usuarioActual = (int) ($_SESSION['usuario_id'] ?? 0);
-    $buscar = $pdo->prepare("SELECT id, nombre_completo, nickname, avatar, verificado
+    $buscar = $pdo->prepare("SELECT id, nombre_completo, nickname, avatar,
+            CASE WHEN LOWER(TRIM(rol)) IN ('administrador', 'admin', 'moderador', 'organizador')
+                THEN 1 ELSE verificado END AS verificado
         FROM usuarios
         WHERE id <> :usuario_actual
           AND (nombre_completo LIKE :nombre ESCAPE '!' OR nickname LIKE :nickname ESCAPE '!')

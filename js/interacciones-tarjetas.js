@@ -8,6 +8,7 @@
                desde index.php, /php/ y subcarpetas de eventos. */
     const COMMENTS_API_URL = `${projectPhpPath}comentarios.php`;
     const DELETE_COMMENT_API_URL = `${projectPhpPath}comentarios.php`;
+    const commentPermissionsReady = new Set();
     const csrfToken = document.querySelector('.menu-principal')?.dataset.csrf
         || document.querySelector('.perfil-publico')?.dataset.csrf
         || document.body?.dataset.csrf
@@ -53,11 +54,12 @@
     function readState(key) {
         const storage = getStoredData();
         const state = storage[key] || { likes: 0, comments: [] };
+        const trustPermissions = commentPermissionsReady.has(key);
         /* Conservamos id y avatar al hidratar el estado: el ID vincula el
            nodo visual con la fila exacta que debe borrar el backend. */
         state.comments = (state.comments || []).map((comment) => typeof comment === 'string'
             ? { id: null, parent_id: null, name: 'Usuario SIGTUR', text: comment, likes: 0, replies: [] }
-            : { id: comment.id || null, parent_id: comment.parent_id || null, user_id: comment.user_id || null, profile_url: comment.profile_url || '', name: comment.name || 'Usuario SIGTUR', avatar_url: comment.avatar_url || '', text: comment.text || '', likes: comment.likes || 0, replies: comment.replies || [] });
+            : { id: comment.id || null, parent_id: comment.parent_id || null, user_id: comment.user_id || null, profile_url: comment.profile_url || '', name: comment.name || 'Usuario SIGTUR', avatar_url: comment.avatar_url || '', text: comment.text || '', deleted: comment.deleted === true, can_edit: trustPermissions && comment.can_edit === true, can_delete_everyone: trustPermissions && comment.can_delete_everyone === true, can_delete_me: trustPermissions && comment.can_delete_me === true, likes: comment.likes || 0, replies: comment.replies || [] });
         return state;
     }
 
@@ -117,7 +119,7 @@
         comentariosPorId.forEach(comment => {
             if (comment.parent_id && comentariosPorId.has(comment.parent_id)) comentariosPorId.get(comment.parent_id).replies.push(comment);
         });
-        const arbol = [...comentariosPorId.values()].filter(comment => !comment.parent_id);
+        const arbol = [...comentariosPorId.values()].filter(comment => !comment.parent_id || !comentariosPorId.has(comment.parent_id));
         const visibles = expanded ? arbol : arbol.slice(0, 1);
         const renderOne = (comment, index, depth = 0) => {
             const isReply = depth > 0;
@@ -132,13 +134,12 @@
                     </a>
                 </div>
                 <div class="comentario-cuerpo card-engagement__comment-body">
-                    <div class="comentario-texto">${escapeHtml(comment.text)}</div>
-                    <div class="comentario-footer-actions comentario-footer comentario-actions">
-                        <button type="button" class="card-engagement__comment-action ${comment.likes ? 'active' : ''}" data-comment-action="like" data-comment-id="${comment.id || ''}">♥ ${comment.likes || 0}</button>
-                        <button type="button" class="card-engagement__comment-action" data-comment-action="reply" data-comment-id="${comment.id || ''}">Responder</button>
-                        <button type="button" class="card-engagement__delete" data-comment-id="${comment.id || ''}" aria-label="Eliminar comentario">Eliminar</button>
+                    <div class="comentario-texto">${comment.deleted ? 'Comentario eliminado para todos' : escapeHtml(comment.text)}</div>
+                        <div class="comentario-footer-actions comentario-footer comentario-actions">
+                            ${!comment.deleted ? `<button type="button" class="card-engagement__comment-action ${comment.likes ? 'active' : ''}" data-comment-action="like" data-comment-id="${comment.id || ''}">♥ ${comment.likes || 0}</button><button type="button" class="card-engagement__comment-action" data-comment-action="reply" data-comment-id="${comment.id || ''}">Responder</button>` : ''}
+                            ${comment.id ? `<details class="message-actions"><summary aria-label="Opciones del comentario">⋮</summary><div class="message-actions__menu">${comment.can_edit && !comment.deleted ? `<button type="button" data-comment-action="edit" data-comment-id="${comment.id || ''}">Editar</button>` : ''}<button type="button" data-comment-action="delete-me" data-comment-id="${comment.id || ''}"${comment.can_delete_me ? '' : ' disabled'}>Eliminar para mí</button>${comment.can_delete_everyone && !comment.deleted ? `<button type="button" data-comment-action="delete-everyone" data-comment-id="${comment.id || ''}">Eliminar para todos</button>` : ''}</div></details>` : ''}
                     </div>
-                    <form class="card-engagement__reply-form" data-parent-id="${comment.id || ''}"><textarea class="card-engagement__reply-input" rows="1" maxlength="140" placeholder="Escribe una respuesta..."></textarea><button type="submit" class="card-engagement__reply-submit">Responder</button></form>
+                    ${!comment.deleted ? `<form class="card-engagement__reply-form" data-parent-id="${comment.id || ''}"><textarea class="card-engagement__reply-input" rows="1" maxlength="140" placeholder="Escribe una respuesta..."></textarea><button type="submit" class="card-engagement__reply-submit">Responder</button></form>` : ''}
                 </div>
             </li>
             ${(comment.replies || []).map(reply => renderOne(reply, list.indexOf(reply), depth + 1)).join('')}`;
@@ -221,6 +222,7 @@
         };
 
         const applyCommentsPage = (data, reset) => {
+            commentPermissionsReady.add(key);
             const currentState = readState(key);
             const nuevosComentarios = Array.isArray(data.comments) ? data.comments : [];
             currentState.comments = reset
@@ -277,8 +279,24 @@
         });
 
         commentsList?.addEventListener('click', (event) => {
+            const editButton = event.target.closest('[data-comment-action="edit"]');
+            if (editButton) {
+                const commentId = Number(editButton.dataset.commentId);
+                const comment = readState(key).comments.find((item) => Number(item.id) === commentId);
+                const item = editButton.closest('.card-engagement__comment-item');
+                const text = item?.querySelector('.comentario-texto');
+                if (!comment || !text) return;
+                text.innerHTML = `<form class="comment-edit-form"><textarea maxlength="140" required>${escapeHtml(comment.text)}</textarea><div><button type="submit">Guardar</button><button type="button" data-comment-edit-cancel>Cancelar</button></div></form>`;
+                text.querySelector('textarea')?.focus();
+                editButton.closest('details')?.removeAttribute('open');
+                return;
+            }
+            if (event.target.closest('[data-comment-edit-cancel]')) {
+                updateView();
+                return;
+            }
             const actionButton = event.target.closest('[data-comment-action]');
-            if (actionButton) {
+            if (actionButton && ['like', 'reply'].includes(actionButton.dataset.commentAction)) {
                 const currentState = readState(key);
                 const commentId = Number(actionButton.dataset.commentId);
                 const comment = currentState.comments.find((item) => Number(item.id) === commentId);
@@ -287,17 +305,19 @@
                     comment.likes = comment.likes ? 0 : 1;
                     writeState(key, currentState);
                     updateView();
-                } else {
+                } else if (actionButton.dataset.commentAction === 'reply') {
                     updateView();
                     commentsList.querySelector(`.card-engagement__reply-form[data-parent-id="${commentId}"]`)?.classList.toggle('open');
                 }
                 return;
             }
-            const button = event.target.closest('.card-engagement__delete');
-            if (!button) return;
+            const button = event.target.closest('[data-comment-action="delete-me"], [data-comment-action="delete-everyone"]');
+            if (!button || button.disabled) return;
             const commentId = Number(button.dataset.commentId);
             const comment = readState(key).comments.find((item) => Number(item.id) === commentId);
             if (!comment?.id) return;
+            const deleteEveryone = button.dataset.commentAction === 'delete-everyone';
+            if (!window.confirm(deleteEveryone ? '¿Eliminar este comentario para todos?' : '¿Eliminar este comentario solo de tu vista?')) return;
             const comentarioElement = button.closest('.card-engagement__comment-item');
             button.disabled = true;
                 /* Confirmamos el borrado en el servidor antes de tocar el estado
@@ -305,23 +325,66 @@
                 fetch(DELETE_COMMENT_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-                body: new URLSearchParams({ accion: 'eliminar', id: String(comment.id), item_key: key, csrf_token: csrfToken })
+                body: new URLSearchParams({ accion: deleteEveryone ? 'eliminar_para_todos' : 'eliminar_para_mi', id: String(comment.id), item_key: key, csrf_token: csrfToken })
             })
                 .then(async (response) => {
                     const data = await response.json();
                     if (!response.ok || data.success !== true) throw new Error(data.error || 'No se pudo eliminar el comentario');
-                    document.getElementById(`comentario-${comment.id}`)?.remove();
-                    comentarioElement?.remove();
                     const currentState = readState(key);
-                    currentState.comments = currentState.comments.filter((item) => item.id !== comment.id);
+                    if (deleteEveryone) {
+                        const comentarioActualizado = currentState.comments.find((item) => Number(item.id) === commentId);
+                        if (comentarioActualizado) {
+                            comentarioActualizado.deleted = true;
+                            comentarioActualizado.text = '';
+                            comentarioActualizado.can_edit = false;
+                            comentarioActualizado.can_delete_me = true;
+                            comentarioActualizado.can_delete_everyone = false;
+                        }
+                    } else {
+                        currentState.comments = currentState.comments.filter((item) => Number(item.id) !== commentId);
+                        document.getElementById(`comentario-${comment.id}`)?.remove();
+                        comentarioElement?.remove();
+                        commentsOffset = Math.max(0, commentsOffset - 1);
+                    }
                     writeState(key, currentState);
-                    commentsOffset = Math.max(0, commentsOffset - 1);
                     updateView();
                 })
                 .catch((error) => {
                     button.disabled = false;
-                    window.sigturAlert?.(error.message);
+                    if (typeof window.sigturAlert === 'function') window.sigturAlert(error.message);
+                    else window.alert(error.message);
                 });
+        });
+
+        commentsList?.addEventListener('submit', async (event) => {
+            const editForm = event.target.closest('.comment-edit-form');
+            if (!editForm) return;
+            event.preventDefault();
+            const commentItem = editForm.closest('.card-engagement__comment-item');
+            const commentId = Number(commentItem?.dataset.commentId);
+            const input = editForm.querySelector('textarea');
+            const text = input?.value.trim();
+            if (!text || !commentId) return;
+            const submit = editForm.querySelector('[type="submit"]');
+            submit.disabled = true;
+            try {
+                const response = await fetch(COMMENTS_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                    body: new URLSearchParams({ accion: 'editar', id: String(commentId), item_key: key, texto: text, csrf_token: csrfToken })
+                });
+                const data = await response.json();
+                if (!response.ok || data.success !== true) throw new Error(data.error || 'No se pudo editar el comentario');
+                const currentState = readState(key);
+                const comment = currentState.comments.find((item) => Number(item.id) === commentId);
+                if (comment) comment.text = data.text;
+                writeState(key, currentState);
+                updateView();
+            } catch (error) {
+                submit.disabled = false;
+                if (typeof window.sigturAlert === 'function') window.sigturAlert(error.message);
+                else window.alert(error.message);
+            }
         });
 
         commentsList?.addEventListener('submit', (event) => {

@@ -21,6 +21,32 @@
     document.addEventListener('DOMContentLoaded', () => {
         const origenTurismo = window.location.pathname.endsWith('/turismo.php');
         const origenLugares = window.location.pathname.endsWith('/lugares.php');
+        const initialMapPlaces = 5;
+        const setupMapToggle = (listId, toggleId) => {
+            const mapList = document.getElementById(listId);
+            const mapPlaces = mapList ? [...mapList.querySelectorAll('a')] : [];
+            const mapToggle = document.getElementById(toggleId);
+
+            if (!mapToggle || mapPlaces.length <= initialMapPlaces) return;
+
+            mapPlaces.forEach((place, index) => {
+                place.hidden = index >= initialMapPlaces;
+            });
+            mapToggle.hidden = false;
+
+            mapToggle.addEventListener('click', () => {
+                const expanded = mapToggle.getAttribute('aria-expanded') === 'true';
+                mapPlaces.forEach((place, index) => {
+                    place.hidden = expanded && index >= initialMapPlaces;
+                });
+                mapToggle.setAttribute('aria-expanded', String(!expanded));
+                mapToggle.textContent = expanded ? 'Ver más' : 'Ver menos';
+            });
+        };
+
+        setupMapToggle('mapa-lugares-lista', 'mapa-lugares-toggle');
+        setupMapToggle('mapa-turismo-lista', 'mapa-turismo-toggle');
+
         document.querySelectorAll('.tarjeta-destino, .tarjeta-ruta, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria').forEach((card) => {
             const title = card.querySelector('h3')?.textContent.trim();
             const slug = placeSlugs[title];

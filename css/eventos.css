@@ -1151,6 +1151,33 @@ body[data-tema="oscuro"] .evento-card-pasado .evento-status,
     position: relative;
 }
 
+/* Las fotos de contenido comparten proporción y se recortan sin deformarse. */
+.evento-card-media {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+}
+
+.evento-card-media img {
+    height: 100%;
+}
+
+.imagen-tarjeta {
+    height: auto;
+    aspect-ratio: 4 / 3;
+}
+
+.card-img-container {
+    height: auto;
+    aspect-ratio: 4 / 3;
+}
+
+.imagen-galeria,
+.galeria-item {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+}
+
 .galeria-foto-eliminar {
     position: absolute;
     top: .75rem;
@@ -2312,7 +2339,9 @@ body[data-tema="oscuro"] .drawer-field select { background: #24252a; border-colo
 
     .evento-card-media {
         width: 100%;
-        min-height: 160px;
+        min-height: 0;
+        height: auto;
+        aspect-ratio: 4 / 3;
     }
 
     .eventos-anteriores-grid {
@@ -2423,7 +2452,8 @@ body[data-tema="oscuro"] .drawer-field select { background: #24252a; border-colo
     }
 
     .imagen-tarjeta {
-        height: 160px;
+        height: auto;
+        aspect-ratio: 4 / 3;
     }
 
     .detalles-tarjeta {
@@ -2474,7 +2504,8 @@ body[data-tema="oscuro"] .drawer-field select { background: #24252a; border-colo
 
     .imagen-galeria,
     .galeria-item {
-        min-height: 200px;
+        min-height: 0;
+        aspect-ratio: 4 / 3;
     }
 
     .form-grid {
@@ -2545,7 +2576,8 @@ body[data-tema="oscuro"] .drawer-field select { background: #24252a; border-colo
     }
 
     .imagen-tarjeta {
-        height: 140px;
+        height: auto;
+        aspect-ratio: 4 / 3;
     }
 
     .detalles-tarjeta {

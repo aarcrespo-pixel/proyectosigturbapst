@@ -6,6 +6,9 @@ require_once __DIR__ . '/helpers/autorizacion.php';
 $configUsuario = sigtur_usuario_actual($pdo);
 $configBaseUrl = rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/'))), '/') . '/';
 $configCsrfToken = sigtur_csrf_token();
+$configUrlVolver = $configUsuario
+    ? 'perfil.php?id=' . (int) $configUsuario['id']
+    : '../index.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -26,7 +29,7 @@ $configCsrfToken = sigtur_csrf_token();
     <section class="support-container">
       <header class="hero">
         <div class="hero-top">
-          <a class="back-pill" href="../index.php" aria-label="Volver al inicio" data-config-exit data-i18n-aria-label="configBack" data-i18n="configBack">← Volver</a>
+          <a class="back-pill" href="<?= htmlspecialchars($configUrlVolver, ENT_QUOTES, 'UTF-8') ?>" aria-label="Volver al perfil" data-config-exit data-i18n-aria-label="configBack" data-i18n="configBack">← Volver</a>
           <span class="eyebrow" data-i18n="configEyebrow">⚙️ Configuración</span>
         </div> 
         <h1 data-i18n="configTitle">Personaliza tu experiencia en la página</h1>

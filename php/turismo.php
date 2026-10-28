@@ -233,18 +233,26 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
             </div>
             <div class="mapa-contenido">
                 <iframe src="https://www.google.com/maps?q=Salto%2C%20Uruguay&output=embed" loading="lazy" title="Mapa turístico de Salto"></iframe>
-                <div class="mapa-lugares">
+                <div class="mapa-lugares" id="mapa-turismo-lista">
                     <a href="https://www.google.com/maps/search/?api=1&query=Termas%20del%20Dayman%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Termas del Dayman</a>
-                    <a href="https://www.google.com/maps/search/?api=1&query=Termas%20de%20Arapey%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Termas de Arapey</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Termas%20de%20la%20Arapey%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Termas de la Arapey</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Parque%20Benito%20Solari%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Parque Benito Solari</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Costanera%20Norte%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Costanera Norte</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=BaSalto%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">BaSalto</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=La%20Trouville%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">La Trouville</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Cine%20Sarand%C3%AD%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Cine Sarandí</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=La%20Fosa%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">La Fosa</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Salto%20Shopping%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Salto Shopping</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Acuamania%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Acuamania</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Agua%20Clara%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Agua Clara</a>
+                    <button class="mapa-lugares__toggle" id="mapa-turismo-toggle" type="button" aria-expanded="false" aria-controls="mapa-turismo-lista" hidden>Ver más</button>
                 </div>
             </div>
         </section>
     </main>
 
     <script src="../js/script.js" defer></script>
-    <script src="../js/lugar-links.js" defer></script>
+    <script src="../js/lugar-links.js?v=20261027-2" defer></script>
     <?php if ($puedeAgregarFotosTurismo): ?>
         <script>
             const botonAgregarFotosTurismo = document.querySelector('.turismo-galeria-add__button');

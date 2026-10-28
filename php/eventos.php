@@ -423,11 +423,12 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
             </div>
             <div class="mapa-contenido">
                 <iframe src="https://www.google.com/maps?q=Salto%2C%20Uruguay&output=embed" loading="lazy" title="Mapa de eventos en Salto"></iframe>
-                <div class="mapa-lugares">
+                <div class="mapa-lugares" id="mapa-eventos-lugares">
                     <a href="https://www.google.com/maps/search/?api=1&query=Costanera%20Norte%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Costanera Norte</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20Artigas%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza Artigas</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20de%20Deportes%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza de Deportes</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Playa%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Playa Salto</a>
+                    <button class="mapa-lugares__toggle" id="mapa-eventos-toggle" type="button" aria-expanded="false" aria-controls="mapa-eventos-lugares" hidden>Ver más</button>
                 </div>
             </div>
         </section>
@@ -473,7 +474,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         'rol' => (string) ($usuarioActual['rol'] ?? ''),
         'csrfToken' => $csrfToken,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script src="../js/eventos.js" defer></script>
+    <script src="../js/eventos.js?v=20261027-1" defer></script>
 </body>
 
 </html>

@@ -60,7 +60,7 @@ unset($propuestaGastronomica);
     <link rel="stylesheet" href="css/intro.css"> <!-- Animación de intro -->
 </head>
 
-<body>
+<body class="pagina-inicio">
     <!-- Pantalla de carga inicial -->
     <div class="intro">
         <img src="img/logoblanco.png">
@@ -144,7 +144,7 @@ unset($propuestaGastronomica);
         </div>
         <div class="feature">
             <div class="feature-header">
-                <img class="feature-image-gastronomia" src="img/gastronomia.png" alt="Gastronomía">
+                <img class="feature-image-gastronomia" src="img/gastronomia.jpg" alt="Propuesta gastronómica de Salto" loading="lazy">
                 <h3 data-i18n="homeFeatureGastronomy">Gastronomía</h3>
                 <button class="feature-toggle" aria-expanded="false">▼</button>
             </div>

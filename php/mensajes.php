@@ -55,18 +55,23 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     exit;
 }
 
-$reportesStmt = $pdo->prepare("SELECT m.id, m.remitente_id, m.mensaje, m.contexto, m.fecha_creacion, u.nombre_completo, u.email
+$reportesStmt = $pdo->prepare("SELECT m.id, m.remitente_id, m.mensaje, m.eliminado_para_todos, m.contexto, m.fecha_creacion, u.nombre_completo, u.email
     FROM mensajes m
     INNER JOIN usuarios u ON u.id = m.remitente_id
     WHERE m.destinatario_id = :administrador AND m.mensaje LIKE '[Consulta %'
+      AND NOT EXISTS (SELECT 1 FROM mensajes_ocultos_usuario oculto WHERE oculto.mensaje_id = m.id AND oculto.usuario_id = :oculto_administrador)
     ORDER BY m.fecha_creacion DESC, m.id DESC
     LIMIT 100");
-$reportesStmt->execute([':administrador' => $administradorId]);
+$reportesStmt->execute([':administrador' => $administradorId, ':oculto_administrador' => $administradorId]);
 $reportes = $reportesStmt->fetchAll();
 $respuestasPorReporte = [];
 if ($reportes) {
-    $respuestasStmt = $pdo->prepare("SELECT contexto, mensaje, fecha_creacion FROM mensajes WHERE remitente_id = :administrador AND contexto LIKE 'soporte:reporte:%' ORDER BY id ASC");
-    $respuestasStmt->execute([':administrador' => $administradorId]);
+    $respuestasStmt = $pdo->prepare("SELECT m.id, m.contexto, m.mensaje, m.eliminado_para_todos, m.fecha_creacion
+        FROM mensajes m
+        WHERE m.remitente_id = :administrador AND m.contexto LIKE 'soporte:reporte:%'
+          AND NOT EXISTS (SELECT 1 FROM mensajes_ocultos_usuario oculto WHERE oculto.mensaje_id = m.id AND oculto.usuario_id = :oculto_administrador)
+        ORDER BY m.id ASC");
+    $respuestasStmt->execute([':administrador' => $administradorId, ':oculto_administrador' => $administradorId]);
     foreach ($respuestasStmt->fetchAll() as $respuestaGuardada) {
         if (preg_match('/^soporte:reporte:(\d+)$/', (string) $respuestaGuardada['contexto'], $coincidencia) === 1) {
             $respuestasPorReporte[(int) $coincidencia[1]][] = $respuestaGuardada;
@@ -121,12 +126,16 @@ if ($reportes) {
                         </div>
                         <span class="admin-mensajes-estado <?= $respuestas ? '' : 'admin-mensajes-estado--pendiente' ?>"><?= $respuestas ? 'Respondido' : 'Pendiente' ?></span>
                     </header>
-                    <p><?= nl2br(htmlspecialchars(preg_replace('/^\[Consulta [^\]]+\]:\s*/', '', $reporte['mensaje']) ?? $reporte['mensaje'], ENT_QUOTES, 'UTF-8')) ?></p>
+                    <div class="admin-question-chat__message admin-question-chat__message--visitor" data-message-item data-message-type="direct" data-message-api="api/mensajes.php" data-message-id="<?= (int) $reporte['id'] ?>" data-can-edit="0" data-can-delete="0">
+                        <details class="message-actions"><summary aria-label="Opciones del mensaje">⋮</summary><div class="message-actions__menu"><button type="button" data-message-action="delete-me"<?= !empty($reporte['eliminado_para_todos']) ? '' : ' disabled' ?>>Eliminar para mí</button></div></details>
+                        <p data-message-text><?= !empty($reporte['eliminado_para_todos']) ? 'Mensaje eliminado para todos' : nl2br(htmlspecialchars(preg_replace('/^\[Consulta [^\]]+\]:\s*/', '', $reporte['mensaje']) ?? $reporte['mensaje'], ENT_QUOTES, 'UTF-8')) ?></p>
+                    </div>
                     <small><?= htmlspecialchars($reporte['contexto'] ?? 'Soporte', ENT_QUOTES, 'UTF-8') ?> · <?= htmlspecialchars(date('d/m/Y H:i', strtotime($reporte['fecha_creacion'])), ENT_QUOTES, 'UTF-8') ?></small>
                     <?php foreach ($respuestas as $respuestaGuardada): ?>
-                        <div class="admin-mensajes-respuesta">
+                        <div class="admin-mensajes-respuesta" data-message-item data-message-type="direct" data-message-api="api/mensajes.php" data-message-id="<?= (int) $respuestaGuardada['id'] ?>" data-can-edit="<?= empty($respuestaGuardada['eliminado_para_todos']) ? '1' : '0' ?>" data-can-delete="1">
                             <strong>Respuesta del equipo</strong>
-                            <p><?= nl2br(htmlspecialchars($respuestaGuardada['mensaje'], ENT_QUOTES, 'UTF-8')) ?></p>
+                            <details class="message-actions"><summary aria-label="Opciones del mensaje">⋮</summary><div class="message-actions__menu"><?php if (empty($respuestaGuardada['eliminado_para_todos'])): ?><button type="button" data-message-action="edit">Editar</button><button type="button" data-message-action="delete-me">Eliminar para mí</button><button type="button" data-message-action="delete-everyone">Eliminar para todos</button><?php else: ?><button type="button" data-message-action="delete-me">Eliminar para mí</button><?php endif; ?></div></details>
+                            <p data-message-text><?= !empty($respuestaGuardada['eliminado_para_todos']) ? 'Mensaje eliminado para todos' : nl2br(htmlspecialchars($respuestaGuardada['mensaje'], ENT_QUOTES, 'UTF-8')) ?></p>
                             <small><?= htmlspecialchars(date('d/m/Y H:i', strtotime($respuestaGuardada['fecha_creacion'])), ENT_QUOTES, 'UTF-8') ?></small>
                         </div>
                     <?php endforeach; ?>
@@ -145,5 +154,6 @@ if ($reportes) {
         </section>
     </main>
     <script src="../js/tema.js" defer></script>
+    <script src="../js/mensajes-acciones.js"></script>
 </body>
 </html>

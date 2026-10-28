@@ -15,6 +15,7 @@ body {
     font-family: 'Instrument Sans', sans-serif;
     background: var(--gastronomia-bg);
     color: var(--gastronomia-ink);
+    overflow-x: clip;
 }
 
 body[data-tema="oscuro"] {
@@ -51,7 +52,7 @@ input {
 .pagina-gastronomia {
     max-width: 1380px;
     margin: 0 auto;
-    padding: 0 2rem 4rem;
+    padding: 0 2rem calc(4rem + env(safe-area-inset-bottom));
 }
 
 .hero-gastronomia {
@@ -183,20 +184,21 @@ input {
 }
 
 .gastronomia-filtros {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1.2fr);
     align-items: center;
     gap: 0.8rem;
     margin: 1.2rem 0 1.5rem;
 }
 
 .gastronomia-buscador {
-    flex: 1 1 260px;
+    min-width: 0;
 }
 
 .gastronomia-buscador input {
     width: 100%;
-    padding: 0.9rem 1rem;
+    min-height: 48px;
+    padding: 0.75rem 1rem;
     border: 1px solid rgba(31, 26, 26, 0.1);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.9);
@@ -210,7 +212,8 @@ input {
 }
 
 .gastronomia-filtro {
-    padding: 0.72rem 1rem;
+    min-height: 44px;
+    padding: 0.65rem 1rem;
     border: 1px solid rgba(31, 26, 26, 0.08);
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.8);
@@ -218,6 +221,14 @@ input {
     font-weight: 700;
     cursor: pointer;
     transition: all 0.25s ease;
+}
+
+.gastronomia-categorias {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
 }
 
 .gastronomia-filtro:hover,
@@ -260,6 +271,10 @@ input {
     gap: 1.35rem;
 }
 
+.gastronomia-grid > [hidden] {
+    display: none;
+}
+
 .tarjeta-gastronomia {
     display: flex;
     flex-direction: column;
@@ -278,7 +293,8 @@ input {
 
 .tarjeta-gastronomia img {
     width: 100%;
-    aspect-ratio: 16 / 10;
+    height: auto;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
     border-bottom: 1px solid var(--gastronomia-line);
 }
@@ -349,6 +365,10 @@ input {
     color: var(--gastronomia-accent);
     font-weight: 800;
     cursor: pointer;
+}
+
+.gastronomia-ver-todos[hidden] {
+    display: none;
 }
 
 .gastronomia-nota {
@@ -508,7 +528,8 @@ input {
 
 .productos-gastronomia__imagen img {
     width: 100%;
-    min-height: 360px;
+    height: auto;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
     border-radius: 22px;
 }
@@ -648,20 +669,24 @@ body[data-tema="oscuro"] .historia-gastronomia__numero {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .productos-gastronomia {
-        grid-template-columns: 1fr;
-    }
 }
 
 @media (max-width: 900px) {
+    .hero-gastronomia {
+        min-height: min(84svh, 760px);
+    }
+
+    .productos-gastronomia {
+        grid-template-columns: 1fr;
+    }
+
     .gastronomia-resumen {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .recorridos-grid,
-    .datos-gastronomia__lista,
     .historia-gastronomia__grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -669,30 +694,191 @@ body[data-tema="oscuro"] .historia-gastronomia__numero {
     .pagina-gastronomia {
         padding-right: 1rem;
         padding-left: 1rem;
+        padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+    }
+
+    .hero-gastronomia {
+        min-height: min(78svh, 650px);
+        padding: 6.5rem 1rem 2rem;
+    }
+
+    .hero-gastronomia__contenido {
+        width: min(100%, 38rem);
+    }
+
+    .hero-gastronomia__contenido span {
+        margin-bottom: 0.9rem;
+        padding: 0.65rem 1rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+    }
+
+    .hero-gastronomia h1 {
+        font-size: clamp(2.1rem, 9vw, 4rem);
+        line-height: 1;
+    }
+
+    .hero-gastronomia p {
+        font-size: clamp(1rem, 4vw, 1.15rem);
+        line-height: 1.55;
+    }
+
+    .seccion-gastronomia {
+        padding-top: 2.75rem;
+    }
+
+    .seccion-gastronomia__encabezado h2,
+    .productos-gastronomia__contenido h2,
+    .datos-gastronomia__intro h2,
+    .historia-gastronomia__intro h2 {
+        font-size: clamp(1.8rem, 7vw, 2.5rem);
+    }
+
+    .gastronomia-filtros {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.75rem;
+    }
+
+    .gastronomia-categorias {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overscroll-behavior-inline: contain;
+        padding: 0.1rem 0.1rem 0.55rem;
+        scrollbar-width: thin;
+        scroll-snap-type: x proximity;
+    }
+
+    .gastronomia-filtro {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
     }
 
     .gastronomia-grid,
     .agenda-gastronomia__grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .gastronomia-carrusel {
-        grid-template-columns: 1fr;
+    .tarjeta-gastronomia {
+        border-radius: 22px;
     }
 
-    .gastronomia-carrusel__flecha {
-        display: none;
+    .tarjeta-gastronomia__contenido {
+        gap: 0.65rem;
+        padding: 1rem;
     }
 
-    .gastronomia-filtros {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding-bottom: 0.2rem;
+    .tarjeta-gastronomia h3 {
+        font-size: clamp(1.15rem, 3vw, 1.45rem);
     }
 
-    .gastronomia-filtro,
-    .gastronomia-buscador {
-        flex: 0 0 auto;
-        width: auto;
+    .tarjeta-gastronomia p {
+        font-size: 0.94rem;
+        line-height: 1.55;
+    }
+
+    .productos-gastronomia {
+        gap: 1.25rem;
+        padding: 1rem;
+        border-radius: 24px;
+    }
+
+    .productos-gastronomia__imagen img {
+        aspect-ratio: 16 / 10;
+    }
+
+    .mapa-gastronomia {
+        margin-top: 2.75rem;
+        padding: 1.1rem;
+        border-radius: 22px;
+    }
+
+    .mapa-gastronomia .mapa-contenido iframe {
+        min-height: 280px;
+        border-radius: 16px;
+    }
+}
+
+@media (max-width: 560px) {
+    .hero-gastronomia {
+        min-height: min(72svh, 590px);
+        padding-top: 6rem;
+    }
+
+    .gastronomia-grid,
+    .agenda-gastronomia__grid,
+    .recorridos-grid,
+    .datos-gastronomia__lista,
+    .historia-gastronomia__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .gastronomia-resumen {
+        gap: 0.65rem;
+        margin-top: 1rem;
+    }
+
+    .gastronomia-resumen div {
+        padding: 1rem 0.85rem;
+        border-radius: 18px;
+    }
+
+    .gastronomia-resumen span {
+        font-size: 0.88rem;
+    }
+
+    .tarjeta-gastronomia img {
+        aspect-ratio: 16 / 10;
+    }
+
+    .tarjeta-gastronomia__contenido {
+        padding: 1rem 1.05rem 1.15rem;
+    }
+
+    .recorrido-gastronomia {
+        padding: 1.25rem;
+        border-radius: 22px;
+    }
+
+    .productos-gastronomia__contenido li {
+        padding: 0.85rem;
+    }
+
+    .mapa-encabezado h2 {
+        font-size: clamp(1.55rem, 7vw, 2rem);
+    }
+
+    .mapa-gastronomia .mapa-contenido iframe {
+        min-height: 250px;
+    }
+}
+
+@media (max-width: 360px) {
+    .pagina-gastronomia {
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+    }
+
+    .gastronomia-resumen {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hero-gastronomia__contenido span {
+        font-size: 0.68rem;
+    }
+
+    .gastronomia-ver-todos {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
     }
 }

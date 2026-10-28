@@ -6,6 +6,7 @@ require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/imagenes.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 require_once __DIR__ . '/helpers/notificaciones.php';
+require_once __DIR__ . '/helpers/consultas_eventos.php';
 
 $eventos = [
     'bambola' => ['La Bambola', 'Discoteca', '+18', 'Costanera Sur 1535', 'Todos los fines de semana.', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRh8BnVQ1qdPDXqoHVHylKrGhwk3guImN0d1ZRYbBNmSXoKPhqmCE-pMsE&s', '2026-09-19', false, -31.3921, -57.9606],
@@ -61,6 +62,12 @@ if ($esEventoDinamico) {
     [$nombre, $categoria, $edad, $lugar, $descripcion, $imagen, $fecha, $aireLibre, $latitud, $longitud] = $evento;
 }
 $usuarioId = (int) ($_SESSION['usuario_id'] ?? 0);
+$usuarioRolEvento = 'turista';
+if ($usuarioId > 0) {
+    $rolEventoStmt = $pdo->prepare('SELECT rol FROM usuarios WHERE id = :id LIMIT 1');
+    $rolEventoStmt->execute([':id' => $usuarioId]);
+    $usuarioRolEvento = sigtur_normalizar_rol((string) ($rolEventoStmt->fetchColumn() ?: 'turista'));
+}
 $favoritoQuery = $pdo->prepare('SELECT 1 FROM favoritos_eventos WHERE usuario_id = :usuario AND evento_slug = :slug');
 $favoritoQuery->execute([':usuario' => $usuarioId, ':slug' => $slug]);
 $esFavorito = $usuarioId > 0 && (bool) $favoritoQuery->fetchColumn();
@@ -69,6 +76,7 @@ $assetBase = $esEventoDinamico ? '../' : '../../';
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS inscripciones_eventos (id INT AUTO_INCREMENT PRIMARY KEY, evento_slug VARCHAR(120) NOT NULL, usuario_id INT NOT NULL, fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP, UNIQUE KEY unica_inscripcion (evento_slug, usuario_id), INDEX (evento_slug)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 $pdo->exec("CREATE TABLE IF NOT EXISTS preguntas_eventos (id INT AUTO_INCREMENT PRIMARY KEY, evento_slug VARCHAR(120) NOT NULL, usuario_id INT NOT NULL, pregunta TEXT NOT NULL, respuesta TEXT NULL, fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX (evento_slug)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+sigtur_asegurar_mensajes_consulta_evento($pdo);
 if (!$esEventoDinamico) {
     // Los wrappers legacy se catalogan al vuelo para convivir con la tabla nueva.
     $catalogo = $pdo->prepare('INSERT INTO eventos (slug, titulo, descripcion, fecha, ubicacion, categoria, imagen_portada, es_pasado, organizador_id) VALUES (:slug, :titulo, :descripcion, :fecha, :ubicacion, :categoria, :imagen, :pasado, :organizador) ON DUPLICATE KEY UPDATE slug = VALUES(slug)');
@@ -116,10 +124,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['accion']))
             echo json_encode(['error' => 'La pregunta debe tener entre 1 y 500 caracteres']);
             exit;
         }
+        $pdo->beginTransaction();
         $stmt = $pdo->prepare('INSERT INTO preguntas_eventos (evento_slug, usuario_id, pregunta) VALUES (:evento, :usuario, :pregunta)');
         $stmt->execute([':evento' => $slug, ':usuario' => $usuarioId, ':pregunta' => $pregunta]);
-        $organizadorId = (int) ($eventoDb['organizador_id'] ?? 0);
-        sigtur_notificar_consulta_evento($pdo, $organizadorId, $usuarioId, $nombre, $pregunta);
+        $mensaje = $pdo->prepare("INSERT INTO preguntas_eventos_mensajes (pregunta_id, autor_id, autor_rol, mensaje, clave_migracion)
+            VALUES (:pregunta_id, :autor_id, 'turista', :mensaje, 'pregunta_inicial')");
+        $mensaje->execute([':pregunta_id' => (int) $pdo->lastInsertId(), ':autor_id' => $usuarioId, ':mensaje' => $pregunta]);
+        $pdo->commit();
+        sigtur_notificar_consulta_evento($pdo, $usuarioId, $nombre, $pregunta);
         echo json_encode(['ok' => true]);
         exit;
     }
@@ -135,8 +147,22 @@ $asistentes = (int) $stmt->fetchColumn();
 $stmt = $pdo->prepare('SELECT u.nombre_completo, u.avatar FROM inscripciones_eventos i INNER JOIN usuarios u ON u.id = i.usuario_id WHERE i.evento_slug = :evento ORDER BY i.fecha_registro DESC LIMIT 4');
 $stmt->execute([':evento' => $slug]);
 $avatares = $stmt->fetchAll();
-$stmt = $pdo->prepare('SELECT pregunta, respuesta FROM preguntas_eventos WHERE evento_slug = :evento AND respuesta IS NOT NULL AND respuesta <> "" ORDER BY fecha_creacion DESC');
-$stmt->execute([':evento' => $slug]);
+$stmt = $pdo->prepare("SELECT p.id AS pregunta_id, p.usuario_id, p.pregunta, p.respuesta,
+        pregunta_msg.id AS pregunta_mensaje_id, pregunta_msg.eliminado AS pregunta_eliminada,
+        respuesta_msg.id AS respuesta_mensaje_id, respuesta_msg.autor_id AS respuesta_autor_id,
+        respuesta_msg.eliminado AS respuesta_eliminada,
+        EXISTS (SELECT 1 FROM mensajes_conversacion_ocultos oculto
+            WHERE oculto.tipo = 'evento' AND oculto.mensaje_id = pregunta_msg.id AND oculto.usuario_id = :usuario_pregunta) AS pregunta_oculta,
+        EXISTS (SELECT 1 FROM mensajes_conversacion_ocultos oculto
+            WHERE oculto.tipo = 'evento' AND oculto.mensaje_id = respuesta_msg.id AND oculto.usuario_id = :usuario_respuesta) AS respuesta_oculta
+    FROM preguntas_eventos p
+    LEFT JOIN preguntas_eventos_mensajes pregunta_msg
+        ON pregunta_msg.pregunta_id = p.id AND pregunta_msg.clave_migracion = 'pregunta_inicial'
+    LEFT JOIN preguntas_eventos_mensajes respuesta_msg
+        ON respuesta_msg.pregunta_id = p.id AND respuesta_msg.clave_migracion = 'respuesta_inicial'
+    WHERE p.evento_slug = :evento AND p.respuesta IS NOT NULL AND p.respuesta <> ''
+    ORDER BY p.fecha_creacion DESC");
+$stmt->execute([':evento' => $slug, ':usuario_pregunta' => $usuarioId, ':usuario_respuesta' => $usuarioId]);
 $preguntasRespondidas = $stmt->fetchAll();
 $mapUrl = 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($latitud . ',' . $longitud);
 $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . rawurlencode('SIGTUR|' . $slug . '|' . $usuarioId);
@@ -186,6 +212,100 @@ foreach (array_slice($recs, 0, 3) as $rec):$recSlug = array_search($rec, $evento
 <?php if ($inscripto): ?><div class="event-qr-backdrop" id="ticketModal" hidden><article class="event-ticket"><header><strong>Pase digital</strong><button class="event-ticket-close" type="button" id="ticketClose">×</button></header><img src="<?= htmlspecialchars($qrUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Código QR de acreditación"><h2><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?></h2><dl><div><dt>Fecha</dt><dd><?= htmlspecialchars($fechaLegible) ?></dd></div><div><dt>Lugar</dt><dd><?= htmlspecialchars($lugar) ?></dd></div><div><dt>Asistente</dt><dd><?= htmlspecialchars($_SESSION['usuario_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?></dd></div></dl></article></div><?php endif; ?>
 <script src="<?= $assetBase ?>js/tema.js" defer></script>
 <script src="<?= $assetBase ?>js/interacciones-tarjetas.js"></script>
+<script>
+(() => {
+    const preguntas = <?= json_encode(array_map(static fn (array $pregunta): array => [
+        'preguntaId' => (int) ($pregunta['pregunta_mensaje_id'] ?? 0),
+        'autorPreguntaId' => (int) $pregunta['usuario_id'],
+        'preguntaEliminada' => (bool) $pregunta['pregunta_eliminada'],
+        'preguntaOculta' => (bool) $pregunta['pregunta_oculta'],
+        'respuestaId' => (int) ($pregunta['respuesta_mensaje_id'] ?? 0),
+        'autorRespuestaId' => (int) ($pregunta['respuesta_autor_id'] ?? 0),
+        'respuestaEliminada' => (bool) $pregunta['respuesta_eliminada'],
+        'respuestaOculta' => (bool) $pregunta['respuesta_oculta'],
+    ], $preguntasRespondidas), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    const usuarioId = <?= $usuarioId ?>;
+    const rol = <?= json_encode($usuarioRolEvento, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    const api = <?= json_encode($apiBase . 'gestionar_mensaje.php', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    const moderador = ['administrador', 'organizador'].includes(rol);
+    const seccion = [...document.querySelectorAll('.event-faq')].find(elemento => elemento.querySelector('h2')?.textContent.trim() === 'Preguntas respondidas');
+    const detalles = seccion ? [...seccion.querySelectorAll('details')] : [];
+
+    function agregarAcciones(contenedor, objetivoTexto, id, autorId, propietarioId, eliminado, oculto, esPregunta) {
+        if (!id) return;
+        const propio = usuarioId > 0 && usuarioId === autorId;
+        const participa = usuarioId > 0 && usuarioId === propietarioId;
+        const puedeEditar = propio && !eliminado;
+        const puedeEliminarTodos = !eliminado && propio;
+        const puedeEliminarMi = propio || (eliminado && (participa || moderador));
+        contenedor.dataset.messageItem = '';
+        contenedor.dataset.messageType = 'evento';
+        contenedor.dataset.messageId = String(id);
+        contenedor.dataset.messageApi = api;
+        contenedor.dataset.canEdit = puedeEditar ? '1' : '0';
+        contenedor.dataset.canDelete = puedeEliminarTodos ? '1' : '0';
+        contenedor.dataset.messageHideLabel = esPregunta ? 'Pregunta oculta para ti' : 'Respuesta oculta para ti';
+        const textoOriginal = objetivoTexto.textContent.trim();
+        const texto = document.createElement('span');
+        texto.dataset.messageText = '';
+        texto.textContent = oculto
+            ? (esPregunta ? 'Pregunta oculta para ti' : 'Respuesta oculta para ti')
+            : eliminado ? 'Mensaje eliminado para todos' : textoOriginal;
+        if (eliminado && !oculto) contenedor.classList.add('is-deleted');
+        objetivoTexto.replaceChildren(texto);
+        if (oculto) return;
+        const acciones = [];
+        if (puedeEditar) acciones.push(['edit', 'Editar']);
+        acciones.push(['delete-me', 'Eliminar para mí', !puedeEliminarMi]);
+        if (puedeEliminarTodos) acciones.push(['delete-everyone', 'Eliminar para todos']);
+        if (!acciones.length) return;
+        const menu = document.createElement('details');
+        menu.className = 'message-actions';
+        const resumen = document.createElement('summary');
+        resumen.setAttribute('aria-label', 'Opciones del mensaje');
+        resumen.textContent = '⋮';
+        const contenido = document.createElement('div');
+        contenido.className = 'message-actions__menu';
+        acciones.forEach(([accion, etiqueta, deshabilitada]) => {
+            const boton = document.createElement('button');
+            boton.type = 'button';
+            boton.dataset.messageAction = accion;
+            boton.disabled = Boolean(deshabilitada);
+            boton.textContent = etiqueta;
+            contenido.append(boton);
+        });
+        menu.append(resumen, contenido);
+        menu.addEventListener('click', event => event.stopPropagation());
+        contenedor.append(menu);
+    }
+
+    detalles.forEach((detalle, indice) => {
+        const pregunta = preguntas[indice];
+        if (!pregunta) return;
+        const resumen = detalle.querySelector('summary');
+        const respuesta = detalle.querySelector('p');
+        if (resumen && pregunta.preguntaId) {
+            const preguntaItem = document.createElement('div');
+            preguntaItem.className = 'event-qa-message';
+            detalle.before(preguntaItem);
+            preguntaItem.append(detalle);
+            const editContainer = document.createElement('div');
+            editContainer.dataset.messageEditContainer = '';
+            preguntaItem.append(editContainer);
+            agregarAcciones(preguntaItem, resumen, pregunta.preguntaId, pregunta.autorPreguntaId, pregunta.autorPreguntaId, pregunta.preguntaEliminada, pregunta.preguntaOculta, true);
+        }
+        if (respuesta && pregunta.respuestaId) {
+            const contenedor = document.createElement('div');
+            contenedor.className = 'event-qa-answer';
+            respuesta.replaceWith(contenedor);
+            contenedor.append(respuesta);
+            respuesta.dataset.messageText = '';
+            agregarAcciones(contenedor, respuesta, pregunta.respuestaId, pregunta.autorRespuestaId, pregunta.autorPreguntaId, pregunta.respuestaEliminada, pregunta.respuestaOculta, false);
+        }
+    });
+})();
+</script>
+<script src="<?= $assetBase ?>js/mensajes-acciones.js"></script>
 <script src="<?= $assetBase ?>js/evento.js" defer></script>
 <script>
 const favoriteEventButton = document.getElementById('favoriteEventButton');

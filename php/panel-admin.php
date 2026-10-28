@@ -31,7 +31,7 @@ $mensajesPendientes = (int) $mensajesStmt->fetchColumn();
             <nav class="admin-nav" aria-label="Accesos de administración">
                 <a class="admin-nav__link" href="admin-usuarios.php">Gestionar usuarios</a>
                 <a class="admin-nav__link" href="admin-solicitudes-rango.php">Solicitud de rango</a>
-                <a class="admin-nav__link" href="mensajes.php">Gestionar mensajes</a>
+                <a class="admin-nav__link" href="mensajes-usuarios.php">Mensajes de usuarios</a>
                 <a class="admin-nav__link admin-nav__link--subtle" href="../index.php">Inicio</a>
             </nav>
         </header>

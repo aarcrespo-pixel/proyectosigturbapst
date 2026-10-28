@@ -646,15 +646,6 @@ body[data-tema="oscuro"] .feature-toggle {
     color: #ffffff !important;
 }
 
-body[data-tema="oscuro"] .feature-image-gastronomia {
-    width: clamp(130px, 15vw, 190px);
-    max-width: 100%;
-    height: clamp(130px, 15vw, 190px);
-    box-sizing: border-box;
-    object-fit: contain;
-    padding: 16px;
-    background: #ffffff;
-}
 body:has(main.detalle-hero) .menu a:not(.logo-link):not(.pagina-activa),
 body:has(main.detalle-hero) .menu a:not(.logo-link):not(.pagina-activa):hover {
     color: #ffffff;
@@ -2064,6 +2055,26 @@ body[data-tema="oscuro"] .perfil-form-grid textarea {
     transition: background .2s ease, transform .2s ease, border-color .2s ease;
 }
 
+.mapa-lugares__toggle {
+    width: fit-content;
+    padding: .8rem 1rem;
+    border: 1px solid rgba(211, 98, 72, .25);
+    border-radius: 999px;
+    background: rgba(211, 98, 72, .08);
+    color: #d36248;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.mapa-lugares__toggle:hover {
+    background: rgba(211, 98, 72, .16);
+}
+
+.mapa-lugares > [hidden] {
+    display: none;
+}
+
 .mapa-lugares a:hover {
     border-color: rgba(211, 98, 72, .35);
     background: #fff;
@@ -2086,6 +2097,12 @@ body[data-tema="oscuro"] .mapa-lugares {
 
 body[data-tema="oscuro"] .mapa-lugares a {
     border-color: rgba(255, 223, 177, .14);
+    color: #f6ead8;
+}
+
+body[data-tema="oscuro"] .mapa-lugares__toggle {
+    border-color: rgba(255, 223, 177, .2);
+    background: rgba(255, 223, 177, .1);
     color: #f6ead8;
 }
 
@@ -2958,6 +2975,10 @@ body[data-tema="oscuro"] .mapa-lugares a {
         object-fit: contain;
     }
 
+    .bottom-nav-item .bottom-nav-icon[src*="gastronomia.png"] {
+        filter: brightness(0);
+    }
+
     .bottom-nav-item.active {
         background: #ffffff;
         color: #000000;
@@ -3279,3 +3300,226 @@ select {
         height: min(420px, calc(100dvh - 210px - env(safe-area-inset-bottom)));
     }
 }
+
+    .card-engagement__comment-item,
+    .event-qa-message,
+    .event-qa-answer,
+    .support-conversation__message,
+    .admin-question-chat__message,
+    .admin-mensajes-respuesta,
+    .mensajes-widget__message {
+        position: relative;
+    }
+
+    .message-actions {
+        position: absolute;
+        top: 6px;
+        right: 7px;
+        z-index: 4;
+    }
+
+    .message-actions > summary {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, .8);
+        color: #26333b;
+        cursor: pointer;
+        font-size: 1.25rem;
+        line-height: 1;
+        list-style: none;
+    }
+
+    .message-actions > summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .message-actions__menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        right: 0;
+        display: grid;
+        min-width: 120px;
+        padding: 5px;
+        border: 1px solid rgba(30, 45, 55, .16);
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(20, 35, 45, .2);
+    }
+
+    .message-actions__menu button,
+    .message-edit-form button {
+        padding: 7px 10px;
+        border: 0;
+        border-radius: 7px;
+        background: transparent;
+        color: #26333b;
+        cursor: pointer;
+        font: inherit;
+        text-align: left;
+    }
+
+    .message-actions__menu button:hover,
+    .message-edit-form button:hover {
+        background: rgba(30, 45, 55, .08);
+    }
+
+    .message-edit-form {
+        display: grid;
+        gap: 7px;
+        margin: 8px 0;
+    }
+
+    .message-edit-form textarea {
+        width: 100%;
+        min-height: 70px;
+        padding: 8px;
+        border: 1px solid #aeb9c1;
+        border-radius: 8px;
+        font: inherit;
+        resize: vertical;
+    }
+
+    .message-edit-form > div {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+    }
+
+    .message-edit-form button[type="submit"] {
+        background: #263f50;
+        color: #fff;
+    }
+
+    .mensajes-widget__message .message-actions > summary {
+        width: 25px;
+        height: 25px;
+        background: rgba(255, 255, 255, .45);
+    }
+
+    .mensajes-widget__message-text {
+        white-space: pre-line;
+    }
+
+    @media (max-width: 900px) {
+        body.pagina-inicio .menu-principal {
+            box-sizing: border-box;
+            top: 0;
+            left: 0;
+            width: 100%;
+            transform: none;
+            padding: 0;
+        }
+
+        body.pagina-inicio .menu-principal > .weather-widget {
+            position: fixed;
+            top: max(16px, env(safe-area-inset-top));
+            right: auto;
+            left: max(16px, env(safe-area-inset-left));
+            transform: none;
+            gap: 0.45rem;
+            width: max-content;
+            min-width: 0;
+            max-width: calc(100vw - 180px);
+            padding: 0.55rem 0.75rem;
+            font-size: 0.76rem;
+        }
+
+        body.pagina-inicio .menu-principal > .weather-widget .weather-icon {
+            font-size: 1rem;
+        }
+
+        body.pagina-inicio .menu-principal > .weather-widget .weather-humidity,
+        body.pagina-inicio .menu-principal > .weather-widget .weather-ith {
+            display: none;
+        }
+
+        body.pagina-inicio .menu-principal > .perfil {
+            position: fixed;
+            top: calc(max(16px, env(safe-area-inset-top)) + 60px);
+            right: auto;
+            left: max(16px, env(safe-area-inset-left));
+            transform: none;
+            z-index: 1200;
+        }
+
+        body.pagina-inicio .menu-principal > .perfil .perfil-menu {
+            position: fixed;
+            top: calc(max(16px, env(safe-area-inset-top)) + 114px);
+            right: auto;
+            left: max(16px, env(safe-area-inset-left));
+            width: min(250px, calc(100vw - 32px));
+        }
+
+        body.pagina-inicio .menu-principal > .barra-busqueda {
+            position: fixed !important;
+            top: max(16px, env(safe-area-inset-top));
+            right: max(16px, env(safe-area-inset-right)) !important;
+            left: auto !important;
+            display: flex !important;
+            width: clamp(160px, 48vw, 190px) !important;
+            height: 44px;
+            margin: 0 !important;
+            padding: 0 12px;
+            border: 1px solid rgba(255, 255, 255, .42);
+            border-radius: 999px;
+            background: rgba(23, 30, 37, .72);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255, 255, 255, .1);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            color: #fff;
+            transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+        }
+
+        body.pagina-inicio .menu-principal > .barra-busqueda:focus-within {
+            border-color: rgba(255, 255, 255, .8);
+            background: rgba(23, 30, 37, .9);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, .3), 0 0 0 3px rgba(255, 255, 255, .14);
+        }
+
+        body.pagina-inicio .menu-principal > .barra-busqueda input {
+            min-width: 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        body.pagina-inicio .menu-principal > .barra-busqueda input::placeholder {
+            color: rgba(255, 255, 255, .82);
+        }
+
+        body.pagina-inicio .menu-principal > .barra-busqueda img {
+            width: 18px;
+            height: 18px;
+            filter: brightness(0) invert(1);
+            opacity: .9;
+        }
+
+        body.pagina-inicio .menu-principal > .barra-busqueda .search-results-dropdown {
+            overflow: hidden auto;
+            border: 1px solid rgba(255, 255, 255, .16);
+            border-radius: 18px;
+            background: rgba(23, 30, 37, .96);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, .35);
+        }
+
+        body.pagina-inicio .menu-principal > .barra-busqueda .search-results-dropdown {
+            right: 0;
+            left: auto;
+            width: min(320px, calc(100vw - 32px));
+            max-height: min(55dvh, 420px);
+        }
+    }
+
+    @media (max-width: 360px) {
+        body.pagina-inicio .menu-principal > .weather-widget .weather-condition {
+            display: none;
+        }
+    }
+
+    .admin-question-chat__message,
+    .support-conversation__message {
+        padding-top: 30px;
+    }

@@ -11,6 +11,11 @@ $categoriasGastronomicas = array_values(array_unique(array_filter(array_map(
 ))));
 foreach ($propuestasGastronomicas as &$propuesta) {
     $propuesta['imagen'] = sigtur_url_imagen_subida((string) $propuesta['imagen'], 'contenido-publico', '../img/gastronomia.jpg');
+    $urlMapa = trim((string) ($propuesta['url_mapa'] ?? ''));
+    if (filter_var($urlMapa, FILTER_VALIDATE_URL) === false || !str_starts_with(strtolower($urlMapa), 'https://')) {
+        $urlMapa = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode((string) $propuesta['nombre'] . ', Salto, Uruguay');
+    }
+    $propuesta['url_mapa'] = $urlMapa;
 }
 unset($propuesta);
 ?>
@@ -26,7 +31,7 @@ unset($propuesta);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>">
-    <link rel="stylesheet" href="../css/gastronomia.css?v=20261019-2">
+    <link rel="stylesheet" href="../css/gastronomia.css?v=20261027-3">
 </head>
 
 <body>
@@ -81,15 +86,17 @@ unset($propuesta);
                 <h2>Sabores para cada momento</h2>
                 <p>Conocé los establecimientos gastronómicos publicados en SIGTUR, consultá la información de cada uno y encontrá su ubicación.</p>
             </div>
-            <div class="gastronomia-filtros" role="tablist" aria-label="Filtrar propuestas gastronómicas">
+            <div class="gastronomia-filtros">
                 <label class="gastronomia-buscador">
                     <span class="visually-hidden">Buscar propuestas</span>
                     <input type="search" id="buscar-gastronomia" placeholder="Buscar una propuesta..." autocomplete="off">
                 </label>
-                <button class="gastronomia-filtro activo" type="button" data-gastronomia-filtro="todos" aria-pressed="true">Todos</button>
-                <?php foreach ($categoriasGastronomicas as $categoria): ?>
-                    <button class="gastronomia-filtro" type="button" data-gastronomia-filtro="<?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>" aria-pressed="false"><?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?></button>
-                <?php endforeach; ?>
+                <div class="gastronomia-categorias" role="group" aria-label="Filtrar por categoría">
+                    <button class="gastronomia-filtro activo" type="button" data-gastronomia-filtro="todos" aria-pressed="true">Todos</button>
+                    <?php foreach ($categoriasGastronomicas as $categoria): ?>
+                        <button class="gastronomia-filtro" type="button" data-gastronomia-filtro="<?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>" aria-pressed="false"><?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?></button>
+                    <?php endforeach; ?>
+                </div>
             </div>
             <div class="gastronomia-grid" id="gastronomia-grid" aria-label="Lugares gastronómicos">
                 <?php foreach ($propuestasGastronomicas as $propuesta):
@@ -99,10 +106,6 @@ unset($propuesta);
                     if ($descripcion === '') {
                         $descripcion = 'Conocé ' . $nombre . ', una propuesta gastronómica de Salto. Consultá directamente con el establecimiento para obtener información actualizada.';
                     }
-                    $urlMapa = trim((string) ($propuesta['url_mapa'] ?? ''));
-                    if (filter_var($urlMapa, FILTER_VALIDATE_URL) === false || !str_starts_with(strtolower($urlMapa), 'https://')) {
-                        $urlMapa = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($nombre . ', Salto, Uruguay');
-                    }
                 ?>
                     <article class="tarjeta-gastronomia" data-gastronomia-categoria="<?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>">
                         <img src="<?= htmlspecialchars($propuesta['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
@@ -111,11 +114,14 @@ unset($propuesta);
                             <h3><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?></h3>
                             <p><?= htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8') ?></p>
                             <p class="tarjeta-gastronomia__nota">Para consultar la propuesta vigente, servicios o disponibilidad, comunicate directamente con el establecimiento.</p>
-                            <a href="<?= htmlspecialchars($urlMapa, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Ver ubicación <span aria-hidden="true">↗</span></a>
+                            <a href="<?= htmlspecialchars($propuesta['url_mapa'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Ver ubicación <span aria-hidden="true">↗</span></a>
                         </div>
                     </article>
                 <?php endforeach; ?>
             </div>
+            <?php if (count($propuestasGastronomicas) > 6): ?>
+                <button class="gastronomia-ver-todos" id="gastronomia-grid-toggle" type="button" aria-expanded="false" aria-controls="gastronomia-grid" hidden>Ver más</button>
+            <?php endif; ?>
             <p class="gastronomia-nota" id="gastronomia-sin-resultados" hidden>No se encontraron lugares con esos criterios.</p>
         </section>
 
@@ -189,10 +195,29 @@ unset($propuesta);
             </div>
         </section>
 
+        <section class="mapa-seccion mapa-gastronomia" aria-labelledby="mapa-gastronomia-titulo">
+            <div class="mapa-encabezado">
+                <span class="mapa-kicker">Ubicaciones</span>
+                <h2 id="mapa-gastronomia-titulo">Encontrá cada propuesta gastronómica</h2>
+                <p>Explorá el mapa de Salto y abrí la ubicación de cada establecimiento para planificar tu visita.</p>
+            </div>
+            <div class="mapa-contenido">
+                <iframe src="https://www.google.com/maps?q=Salto%2C%20Uruguay&output=embed" loading="lazy" title="Mapa de propuestas gastronómicas en Salto"></iframe>
+                <div class="mapa-lugares" id="gastronomia-mapa-lugares">
+                    <?php foreach ($propuestasGastronomicas as $propuesta): ?>
+                        <a href="<?= htmlspecialchars($propuesta['url_mapa'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener"><?= htmlspecialchars((string) $propuesta['nombre'], ENT_QUOTES, 'UTF-8') ?></a>
+                    <?php endforeach; ?>
+                    <?php if (count($propuestasGastronomicas) > 5): ?>
+                        <button class="gastronomia-ver-todos" id="gastronomia-mapa-toggle" type="button" aria-expanded="false" aria-controls="gastronomia-mapa-lugares" hidden>Ver más</button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <script src="../js/script.js" defer></script>
-    <script src="../js/gastronomia.js?v=20261019-2" defer></script>
+    <script src="../js/gastronomia.js?v=20261027-2" defer></script>
 </body>
 
 </html>

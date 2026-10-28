@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../conexion.php';
+require_once __DIR__ . '/../helpers/notificaciones.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -38,5 +39,13 @@ $insertar->execute([
     ':email' => $email !== '' ? $email : null,
     ':pregunta' => $pregunta,
 ]);
+
+sigtur_notificar_equipo_consulta(
+    $pdo,
+    (int) ($usuarioId ?? 0),
+    'Nueva pregunta de soporte',
+    'Se recibió una pregunta nueva en Soporte.',
+    'consulta_soporte'
+);
 
 echo json_encode(['success' => true, 'message' => 'Pregunta enviada correctamente'], JSON_UNESCAPED_UNICODE);

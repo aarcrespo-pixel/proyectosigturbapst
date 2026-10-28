@@ -343,8 +343,10 @@ html[data-tamano-letra="muyGrande"] .support-page .hero h1 {
 }
 
 .support-conversation__message {
+  position: relative;
   width: min(88%, 620px);
   padding: 13px 15px;
+  padding-top: 30px;
   border: 1px solid var(--border);
   border-radius: 15px;
   background: rgba(108, 174, 219, .12);
@@ -374,6 +376,78 @@ html[data-tamano-letra="muyGrande"] .support-page .hero h1 {
 .support-conversation__message small {
   color: var(--muted);
   font-size: .76rem;
+}
+
+.message-actions {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  z-index: 4;
+}
+
+.message-actions > summary {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .8);
+  color: #26333b;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  list-style: none;
+}
+
+.message-actions > summary::-webkit-details-marker {
+  display: none;
+}
+
+.message-actions__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  display: grid;
+  min-width: 120px;
+  padding: 5px;
+  border: 1px solid rgba(30, 45, 55, .16);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(20, 35, 45, .2);
+}
+
+.message-actions__menu button,
+.message-edit-form button {
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #26333b;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.message-edit-form {
+  display: grid;
+  gap: 7px;
+  margin: 8px 0;
+}
+
+.message-edit-form textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 8px;
+  border: 1px solid #aeb9c1;
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+}
+
+.message-edit-form > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
 .support-reply-form {

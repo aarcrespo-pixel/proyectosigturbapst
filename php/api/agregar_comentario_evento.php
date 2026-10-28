@@ -4,6 +4,7 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../conexion.php';
 require_once __DIR__ . '/../helpers/autorizacion.php';
 require_once __DIR__ . '/../helpers/notificaciones.php';
+require_once __DIR__ . '/../helpers/consultas_eventos.php';
 
 $usuarioId = (int) ($_SESSION['usuario_id'] ?? 0);
 $eventoId = filter_input(INPUT_POST, 'evento_id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
@@ -49,7 +50,9 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS preguntas_eventos (
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX (evento_slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+sigtur_asegurar_mensajes_consulta_evento($pdo);
 
+$pdo->beginTransaction();
 $insertar = $pdo->prepare('INSERT INTO preguntas_eventos (evento_slug, usuario_id, pregunta) VALUES (:evento_slug, :usuario_id, :pregunta)');
 $ok = $insertar->execute([
     ':evento_slug' => $evento['slug'],
@@ -58,9 +61,19 @@ $ok = $insertar->execute([
 ]);
 
 if ($ok) {
+    $mensaje = $pdo->prepare("INSERT INTO preguntas_eventos_mensajes (pregunta_id, autor_id, autor_rol, mensaje, clave_migracion)
+        VALUES (:pregunta_id, :autor_id, 'turista', :mensaje, 'pregunta_inicial')");
+    $mensaje->execute([
+        ':pregunta_id' => (int) $pdo->lastInsertId(),
+        ':autor_id' => $usuarioId,
+        ':mensaje' => $texto,
+    ]);
+}
+$pdo->commit();
+
+if ($ok) {
     sigtur_notificar_consulta_evento(
         $pdo,
-        (int) $evento['organizador_id'],
         $usuarioId,
         (string) $evento['titulo'],
         $texto

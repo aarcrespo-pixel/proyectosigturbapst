@@ -15,9 +15,11 @@ $todosEventosStmt = $pdo->query("SELECT e.id, e.titulo, e.descripcion, e.fecha, 
         CASE WHEN fecha < CURDATE() THEN fecha END DESC,
         e.id DESC");
 $todosEventos = $todosEventosStmt->fetchAll();
-$consultasStmt = $pdo->prepare('SELECT p.id, p.pregunta, p.respuesta, p.fecha_creacion, e.titulo, e.id AS evento_id, u.nombre_completo FROM preguntas_eventos p INNER JOIN eventos e ON e.slug = p.evento_slug INNER JOIN usuarios u ON u.id = p.usuario_id WHERE e.organizador_id = :organizador ORDER BY p.fecha_creacion DESC');
-$consultasStmt->execute([':organizador' => (int) $usuario['id']]);
-$consultas = $consultasStmt->fetchAll();
+$consultasPendientesStmt = $pdo->prepare('SELECT COUNT(*)
+    FROM preguntas_eventos p
+    WHERE p.respuesta IS NULL OR p.respuesta = \'\'');
+$consultasPendientesStmt->execute();
+$consultasPendientes = (int) $consultasPendientesStmt->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -37,6 +39,12 @@ $consultas = $consultasStmt->fetchAll();
                 <p>Gestiona todos los eventos y responde las consultas relacionadas con tus eventos.</p>
             </div>
             <nav class="admin-nav" aria-label="Accesos de organizador">
+                <a class="admin-nav__link" href="consultas-eventos-organizador.php">
+                    Consultas de los eventos
+                    <?php if ($consultasPendientes > 0): ?>
+                        <span class="admin-count admin-count--pending-nav"><?= $consultasPendientes ?> pendientes</span>
+                    <?php endif; ?>
+                </a>
                 <a class="admin-nav__link admin-nav__link--subtle" href="../index.php">Inicio</a>
             </nav>
         </header>
@@ -54,39 +62,6 @@ $consultas = $consultasStmt->fetchAll();
                 <a class="admin-content-link" href="organizar-contenido.php?seccion=lugares"><strong>Lugares</strong><span>Lugares emblemáticos y de recreación</span></a>
                 <a class="admin-content-link" href="organizar-contenido.php?seccion=gastronomia"><strong>Gastronomía</strong><span>Restaurantes y propuestas locales</span></a>
             </div>
-        </section>
-
-        <section class="admin-section" id="consultas" aria-labelledby="event-questions-title">
-            <div class="admin-section__heading">
-                <div>
-                    <p class="admin-eyebrow">Atención a visitantes</p>
-                    <h2 id="event-questions-title">Consultas de mis eventos</h2>
-                    <p>Responde las preguntas realizadas desde las páginas de tus eventos.</p>
-                </div>
-            </div>
-            <?php if (!$consultas): ?>
-                <p class="admin-empty">Todavía no hay consultas vinculadas a tus eventos.</p>
-            <?php else: ?>
-                <div class="admin-question-list">
-                    <?php foreach ($consultas as $consulta): ?>
-                        <article class="admin-question">
-                            <strong><?= htmlspecialchars($consulta['titulo'], ENT_QUOTES, 'UTF-8') ?></strong>
-                            <p><strong><?= htmlspecialchars($consulta['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>:</strong> <?= nl2br(htmlspecialchars($consulta['pregunta'], ENT_QUOTES, 'UTF-8')) ?></p>
-                            <?php if ($consulta['respuesta']): ?>
-                                <p class="admin-answer"><strong>Respuesta:</strong> <?= nl2br(htmlspecialchars($consulta['respuesta'], ENT_QUOTES, 'UTF-8')) ?></p>
-                            <?php endif; ?>
-                            <form class="admin-form admin-reply-form" method="post" action="api/responder_consulta_evento.php">
-                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-                                <input type="hidden" name="pregunta_id" value="<?= (int) $consulta['id'] ?>">
-                                <label>Responder
-                                    <textarea name="respuesta" maxlength="2000" required><?= htmlspecialchars($consulta['respuesta'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
-                                </label>
-                                <button class="admin-button" type="submit">Enviar respuesta</button>
-                            </form>
-                        </article>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
         </section>
 
         <section class="admin-section" id="mis-eventos" aria-labelledby="organizer-events-title">

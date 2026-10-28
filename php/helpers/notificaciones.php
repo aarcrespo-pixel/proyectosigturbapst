@@ -37,30 +37,35 @@ function sigtur_notificar_turistas(PDO $pdo, string $titulo, string $mensaje, st
     return $cantidad;
 }
 
-function sigtur_notificar_consulta_evento(PDO $pdo, int $organizadorId, int $usuarioId, string $tituloEvento, string $pregunta): void
+function sigtur_notificar_consulta_evento(PDO $pdo, int $usuarioId, string $tituloEvento, string $pregunta): void
 {
-    $destinatarios = [];
-    if ($organizadorId > 0) {
-        $destinatarios[] = $organizadorId;
-    } else {
-        $organizadores = $pdo->prepare("SELECT id FROM usuarios WHERE LOWER(rol) = 'organizador' AND id <> :usuario_id");
-        $organizadores->execute([':usuario_id' => $usuarioId]);
-        $destinatarios = array_map('intval', $organizadores->fetchAll(PDO::FETCH_COLUMN));
-    }
-
     $consultaUsuario = $pdo->prepare('SELECT COALESCE(NULLIF(nickname, \'\'), nombre_completo) FROM usuarios WHERE id = :usuario_id LIMIT 1');
     $consultaUsuario->execute([':usuario_id' => $usuarioId]);
     $nombreUsuario = (string) ($consultaUsuario->fetchColumn() ?: 'Un turista');
 
-    foreach (array_unique($destinatarios) as $destinatarioId) {
-        if ($destinatarioId > 0 && $destinatarioId !== $usuarioId) {
+    $organizadores = $pdo->query("SELECT id FROM usuarios WHERE LOWER(rol) = 'organizador'");
+    foreach ($organizadores->fetchAll(PDO::FETCH_COLUMN) as $organizadorId) {
+        $organizadorId = (int) $organizadorId;
+        if ($organizadorId > 0 && $organizadorId !== $usuarioId) {
             sigtur_crear_notificacion(
                 $pdo,
-                $destinatarioId,
-                'Nueva pregunta de un turista',
+                $organizadorId,
+                'Nueva pregunta de un usuario',
                 $nombreUsuario . ' preguntó sobre "' . $tituloEvento . '": ' . $pregunta,
                 'consulta_evento'
             );
+        }
+    }
+}
+
+function sigtur_notificar_equipo_consulta(PDO $pdo, int $usuarioId, string $titulo, string $mensaje, string $tipo = 'consulta'): void
+{
+    $equipo = $pdo->query("SELECT id FROM usuarios
+        WHERE LOWER(rol) IN ('administrador', 'admin', 'moderador', 'organizador')");
+    foreach ($equipo->fetchAll(PDO::FETCH_COLUMN) as $destinatarioId) {
+        $destinatarioId = (int) $destinatarioId;
+        if ($destinatarioId > 0 && $destinatarioId !== $usuarioId) {
+            sigtur_crear_notificacion($pdo, $destinatarioId, $titulo, $mensaje, $tipo);
         }
     }
 }

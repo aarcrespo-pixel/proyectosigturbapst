@@ -8,13 +8,20 @@ require_once __DIR__ . '/helpers/autorizacion.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $itemKey = trim($_GET['item_key'] ?? $_POST['item_key'] ?? '');
+$usuarioIdActual = (int) ($_SESSION['usuario_id'] ?? 0);
+$rolActual = 'turista';
+if ($usuarioIdActual > 0) {
+    $rolConsulta = $pdo->prepare('SELECT rol FROM usuarios WHERE id = :usuario_id LIMIT 1');
+    $rolConsulta->execute([':usuario_id' => $usuarioIdActual]);
+    $rolActual = sigtur_normalizar_rol((string) ($rolConsulta->fetchColumn() ?: 'turista'));
+}
 // Limitamos la paginación para evitar respuestas excesivas y mantener el feed fluido.
 $offset = max(0, (int) ($_GET['offset'] ?? 0));
 $limit = min(20, max(1, (int) ($_GET['limit'] ?? 10)));
 /* El borrado identifica el registro por ID y autorización; la lectura y alta
     sí requieren item_key para aislar los comentarios del recurso correcto. */
-$esEliminacion = $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'eliminar';
-if ((!$esEliminacion && $itemKey === '') || strlen($itemKey) > 255) {
+$accionesComentario = ['eliminar', 'eliminar_para_mi', 'eliminar_para_todos', 'editar'];
+if ($itemKey === '' || strlen($itemKey) > 255) {
     http_response_code(400);
     echo json_encode(['error' => 'Elemento inválido']);
     exit;
@@ -29,32 +36,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    /* La eliminación comparte este controlador con la publicación: se valida
-       sesión y autorización antes de ejecutar el DELETE parametrizado. */
-    if (($_POST['accion'] ?? '') === 'eliminar') {
+    if (in_array($_POST['accion'] ?? '', $accionesComentario, true)) {
         $comentarioId = (int) ($_POST['id'] ?? $_POST['id_comentario'] ?? 0);
         if ($usuarioId <= 0 || $comentarioId <= 0) {
             http_response_code(401);
             echo json_encode(['error' => 'Solicitud no autorizada']);
             exit;
         }
-          /* Leemos el rol vigente desde MySQL para que una sesión antigua no
-              conserve permisos incorrectos después de la migración de usuarios. */
-          $rolConsulta = $pdo->prepare('SELECT rol FROM usuarios WHERE id = :usuario_id LIMIT 1');
-          $rolConsulta->execute([':usuario_id' => $usuarioId]);
-          $rol = (string) ($rolConsulta->fetchColumn() ?: 'usuario');
-        $eliminar = $pdo->prepare("DELETE FROM comentarios WHERE id = :id AND (usuario_id = :usuario_id OR :rol = 'administrador')");
-        $eliminar->execute([
-            ':id' => $comentarioId,
-            ':usuario_id' => $usuarioId,
-            ':rol' => $rol,
-        ]);
-        if ($eliminar->rowCount() !== 1) {
+        $comentarioStmt = $pdo->prepare('SELECT usuario_id, item_key, eliminado_para_todos FROM comentarios WHERE id = :id LIMIT 1');
+        $comentarioStmt->execute([':id' => $comentarioId]);
+        $comentario = $comentarioStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$comentario || !hash_equals((string) $comentario['item_key'], $itemKey)) {
             http_response_code(404);
-            echo json_encode(['error' => 'Comentario no encontrado o sin permisos']);
+            echo json_encode(['error' => 'Comentario no encontrado']);
             exit;
         }
-        echo json_encode(['success' => true, 'id' => $comentarioId]);
+        $autorId = (int) $comentario['usuario_id'];
+        $esPropio = $autorId === $usuarioId;
+        if ($_POST['accion'] === 'editar') {
+            if (!$esPropio || (int) $comentario['eliminado_para_todos'] === 1) {
+                http_response_code(403);
+                echo json_encode(['error' => 'Solo puedes editar tus propios comentarios activos']);
+                exit;
+            }
+            $textoEditado = censurarTexto(trim((string) ($_POST['texto'] ?? '')));
+            if ($textoEditado === '' || strlen($textoEditado) > 140) {
+                http_response_code(422);
+                echo json_encode(['error' => 'El comentario debe tener entre 1 y 140 caracteres']);
+                exit;
+            }
+            $actualizar = $pdo->prepare('UPDATE comentarios SET texto = :texto WHERE id = :id AND usuario_id = :usuario_id AND eliminado_para_todos = 0');
+            $actualizar->execute([':texto' => $textoEditado, ':id' => $comentarioId, ':usuario_id' => $usuarioId]);
+            if ($actualizar->rowCount() !== 1) {
+                $verificar = $pdo->prepare('SELECT 1 FROM comentarios WHERE id = :id AND usuario_id = :usuario_id');
+                $verificar->execute([':id' => $comentarioId, ':usuario_id' => $usuarioId]);
+                if (!$verificar->fetchColumn()) {
+                    http_response_code(404);
+                    echo json_encode(['error' => 'Comentario no encontrado o sin permisos']);
+                    exit;
+                }
+            }
+            echo json_encode(['success' => true, 'id' => $comentarioId, 'text' => $textoEditado]);
+            exit;
+        }
+
+        $accionEliminar = $_POST['accion'] === 'eliminar' ? 'eliminar_para_todos' : $_POST['accion'];
+        if ($accionEliminar === 'eliminar_para_mi') {
+            if (!$esPropio && (int) $comentario['eliminado_para_todos'] !== 1) {
+                http_response_code(403);
+                echo json_encode(['error' => 'Solo puedes quitar de tu vista un comentario ajeno después de que su autor lo haya eliminado']);
+                exit;
+            }
+            $ocultar = $pdo->prepare('INSERT IGNORE INTO comentarios_ocultos_usuario (comentario_id, usuario_id) VALUES (:comentario_id, :usuario_id)');
+            $ocultar->execute([':comentario_id' => $comentarioId, ':usuario_id' => $usuarioId]);
+            echo json_encode(['success' => true, 'id' => $comentarioId, 'accion' => $accionEliminar]);
+            exit;
+        }
+        if (!$esPropio) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Solo quien escribió el comentario puede eliminarlo para todos']);
+            exit;
+        }
+        $pdo->prepare('UPDATE comentarios SET eliminado_para_todos = 1 WHERE id = :id')->execute([':id' => $comentarioId]);
+        echo json_encode(['success' => true, 'id' => $comentarioId, 'accion' => $accionEliminar]);
         exit;
     }
 
@@ -108,15 +152,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /* CAMBIO APLICADO: parent_id se devuelve junto con cada fila. El frontend arma
     el árbol anidado sin una segunda consulta y conserva la relación padre-hijo. */
 $consulta = $pdo->prepare(
-        'SELECT comentarios.id, comentarios.usuario_id, comentarios.parent_id, comentarios.texto, comentarios.fecha_creacion,
+        'SELECT comentarios.id, comentarios.usuario_id, comentarios.parent_id, comentarios.texto,
+            comentarios.eliminado_para_todos, comentarios.fecha_creacion,
             usuarios.nombre_completo, usuarios.nickname, COALESCE(usuarios.foto_perfil, usuarios.avatar) AS avatar
      FROM comentarios
      INNER JOIN usuarios ON comentarios.usuario_id = usuarios.id
      WHERE comentarios.item_key = :item_key
+       AND NOT EXISTS (SELECT 1 FROM comentarios_ocultos_usuario oculto
+           WHERE oculto.comentario_id = comentarios.id AND oculto.usuario_id = :usuario_id)
     ORDER BY comentarios.fecha_creacion ASC, comentarios.id ASC
     LIMIT :limit OFFSET :offset'
 );
 $consulta->bindValue(':item_key', $itemKey, PDO::PARAM_STR);
+$consulta->bindValue(':usuario_id', $usuarioIdActual, PDO::PARAM_INT);
 $consulta->bindValue(':limit', $limit + 1, PDO::PARAM_INT);
 $consulta->bindValue(':offset', $offset, PDO::PARAM_INT);
 $consulta->execute();
@@ -128,7 +176,7 @@ if ($hayMasComentarios) {
 }
 
 // Adaptamos las filas SQL al contrato simple que consume el renderer JavaScript.
-$comentarios = array_map(static function (array $comentario): array {
+$comentarios = array_map(static function (array $comentario) use ($usuarioIdActual, $rolActual): array {
     $avatarFilename = basename((string) ($comentario['avatar'] ?? ''));
     $avatarComentario = '../img/user.png';
     if (
@@ -146,7 +194,12 @@ $comentarios = array_map(static function (array $comentario): array {
         'parent_id' => $comentario['parent_id'] !== null ? (int) $comentario['parent_id'] : null,
         'name' => $comentario['nickname'] ?: $comentario['nombre_completo'],
         'avatar_url' => $avatarComentario,
-        'text' => $comentario['texto'],
+        'text' => (int) $comentario['eliminado_para_todos'] === 1 ? '' : $comentario['texto'],
+        'deleted' => (int) $comentario['eliminado_para_todos'] === 1,
+        'can_edit' => (int) $comentario['usuario_id'] === $usuarioIdActual && (int) $comentario['eliminado_para_todos'] !== 1,
+        'can_delete_everyone' => (int) $comentario['eliminado_para_todos'] !== 1
+            && (int) $comentario['usuario_id'] === $usuarioIdActual,
+        'can_delete_me' => (int) $comentario['usuario_id'] === $usuarioIdActual || (int) $comentario['eliminado_para_todos'] === 1,
         'likes' => 0,
         'replies' => [],
     ];
@@ -155,4 +208,6 @@ $comentarios = array_map(static function (array $comentario): array {
 echo json_encode([
     'comments' => $comentarios,
     'has_more' => $hayMasComentarios,
+    'viewer_id' => $usuarioIdActual,
+    'viewer_role' => $rolActual,
 ], JSON_UNESCAPED_UNICODE);

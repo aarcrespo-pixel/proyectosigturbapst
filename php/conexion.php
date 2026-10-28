@@ -22,7 +22,7 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS `sigtur_schema_version` (
         `version` VARCHAR(40) NOT NULL PRIMARY KEY
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-    $versionEsperada = '2026-10-19-cuentas-verificadas-2';
+    $versionEsperada = '2026-10-27-msg-borrado-3';
     $versionEsquema = $pdo->query("SELECT `version` FROM `sigtur_schema_version` LIMIT 1")->fetchColumn();
     $bloqueoEsquema = false;
     if ($versionEsquema !== $versionEsperada) {
@@ -81,6 +81,16 @@ try {
         $pdo->exec("ALTER TABLE `comentarios` ADD COLUMN `parent_id` INT NULL DEFAULT NULL AFTER `usuario_id`");
         $pdo->exec("ALTER TABLE `comentarios` ADD INDEX `idx_comentarios_parent` (`parent_id`)");
     }
+    if (!in_array('eliminado_para_todos', $columnasComentarios, true)) {
+        $pdo->exec("ALTER TABLE `comentarios` ADD COLUMN `eliminado_para_todos` TINYINT(1) NOT NULL DEFAULT 0");
+    }
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `comentarios_ocultos_usuario` (
+        `comentario_id` INT NOT NULL,
+        `usuario_id` INT NOT NULL,
+        `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`comentario_id`, `usuario_id`),
+        KEY `idx_comentarios_ocultos_usuario` (`usuario_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
     /* Las preguntas generales viven separadas de preguntas_eventos porque no
        dependen de un evento concreto. Esta migración es idempotente: puede
@@ -90,12 +100,16 @@ try {
         `usuario_id` INT NULL,
         `email` VARCHAR(150) NULL,
         `pregunta` TEXT NOT NULL,
+        `pregunta_eliminada` TINYINT(1) NOT NULL DEFAULT 0,
         `estado` VARCHAR(30) NOT NULL DEFAULT 'pendiente',
         `fecha_creacion` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         INDEX `idx_faq_estado` (`estado`),
         INDEX `idx_faq_usuario` (`usuario_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $columnasPreguntasFaq = $pdo->query("SHOW COLUMNS FROM `preguntas_frecuentes`")->fetchAll(PDO::FETCH_COLUMN, 0);
+    if (!in_array('pregunta_eliminada', $columnasPreguntasFaq, true)) {
+        $pdo->exec("ALTER TABLE `preguntas_frecuentes` ADD COLUMN `pregunta_eliminada` TINYINT(1) NOT NULL DEFAULT 0");
+    }
     if (!in_array('respuesta', $columnasPreguntasFaq, true)) {
         $pdo->exec("ALTER TABLE `preguntas_frecuentes` ADD COLUMN `respuesta` TEXT NULL AFTER `pregunta`");
     }
@@ -111,11 +125,16 @@ try {
         `autor_id` INT NULL,
         `autor_rol` VARCHAR(20) NOT NULL,
         `mensaje` TEXT NOT NULL,
+        `eliminado` TINYINT(1) NOT NULL DEFAULT 0,
         `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         `clave_migracion` VARCHAR(40) NULL,
         UNIQUE KEY `uniq_faq_mensaje_migracion` (`pregunta_id`, `clave_migracion`),
         KEY `idx_faq_mensajes_conversacion` (`pregunta_id`, `id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $columnasMensajesFaq = $pdo->query("SHOW COLUMNS FROM `preguntas_frecuentes_mensajes`")->fetchAll(PDO::FETCH_COLUMN, 0);
+    if (!in_array('eliminado', $columnasMensajesFaq, true)) {
+        $pdo->exec("ALTER TABLE `preguntas_frecuentes_mensajes` ADD COLUMN `eliminado` TINYINT(1) NOT NULL DEFAULT 0");
+    }
     $pdo->exec("INSERT IGNORE INTO `preguntas_frecuentes_mensajes`
         (`pregunta_id`, `autor_id`, `autor_rol`, `mensaje`, `fecha_creacion`, `clave_migracion`)
         SELECT `id`, `respondido_por`, 'administrador', `respuesta`,
@@ -293,6 +312,7 @@ try {
         `remitente_id` INT NOT NULL,
         `destinatario_id` INT NOT NULL,
         `mensaje` VARCHAR(500) NOT NULL,
+        `eliminado_para_todos` TINYINT(1) NOT NULL DEFAULT 0,
         `foto_url` VARCHAR(255) DEFAULT NULL,
         `video_url` VARCHAR(255) DEFAULT NULL,
         `audio_url` VARCHAR(255) DEFAULT NULL,
@@ -305,6 +325,9 @@ try {
         CONSTRAINT `fk_mensajes_destinatario` FOREIGN KEY (`destinatario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $columnasMensajes = $pdo->query("SHOW COLUMNS FROM `mensajes`")->fetchAll(PDO::FETCH_COLUMN, 0);
+    if (!in_array('eliminado_para_todos', $columnasMensajes, true)) {
+        $pdo->exec("ALTER TABLE `mensajes` ADD COLUMN `eliminado_para_todos` TINYINT(1) NOT NULL DEFAULT 0");
+    }
     if (!in_array('leido', $columnasMensajes, true)) {
         $pdo->exec("ALTER TABLE `mensajes` ADD COLUMN `leido` TINYINT(1) NOT NULL DEFAULT 0");
     }
@@ -315,6 +338,24 @@ try {
     ] as $campoMensaje => $sqlMensaje) {
         if (!in_array($campoMensaje, $columnasMensajes, true)) $pdo->exec($sqlMensaje);
     }
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `mensajes_ocultos_usuario` (
+        `mensaje_id` INT NOT NULL,
+        `usuario_id` INT NOT NULL,
+        `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`mensaje_id`, `usuario_id`),
+        KEY `idx_mensajes_ocultos_usuario` (`usuario_id`, `mensaje_id`),
+        CONSTRAINT `fk_mensajes_ocultos_mensaje` FOREIGN KEY (`mensaje_id`) REFERENCES `mensajes` (`id`) ON DELETE CASCADE,
+        CONSTRAINT `fk_mensajes_ocultos_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `mensajes_conversacion_ocultos` (
+        `tipo` VARCHAR(30) NOT NULL,
+        `mensaje_id` INT NOT NULL,
+        `usuario_id` INT NOT NULL,
+        `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`tipo`, `mensaje_id`, `usuario_id`),
+        KEY `idx_conversacion_oculta_usuario` (`usuario_id`, `tipo`, `mensaje_id`),
+        CONSTRAINT `fk_conversacion_oculta_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS `notificaciones` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,

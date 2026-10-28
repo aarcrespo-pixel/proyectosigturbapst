@@ -9,13 +9,15 @@ if (!$usuarioId) {
     exit('Perfil no especificado.');
 }
 
-$consultaUsuario = $pdo->prepare('SELECT id, nombre_completo, nickname, verificado, biografia, avatar, avatar_crop_x, avatar_crop_zoom, banner, fecha_registro, perfil_publico FROM usuarios WHERE id = :id LIMIT 1');
+$consultaUsuario = $pdo->prepare('SELECT id, nombre_completo, nickname, verificado, rol, biografia, avatar, avatar_crop_x, avatar_crop_zoom, banner, fecha_registro, perfil_publico FROM usuarios WHERE id = :id LIMIT 1');
 $consultaUsuario->execute([':id' => $usuarioId]);
 $usuario = $consultaUsuario->fetch();
 if (!$usuario) {
     http_response_code(404);
     exit('Usuario no encontrado.');
 }
+$usuario['verificado'] = (bool) $usuario['verificado']
+    || in_array(sigtur_normalizar_rol((string) $usuario['rol']), ['administrador', 'organizador'], true);
 $avatarCropX = max(0, min(100, (float) ($usuario['avatar_crop_x'] ?? 50)));
 $avatarCropY = 50.0;
 $avatarCropZoom = max(1, min(2.5, (float) ($usuario['avatar_crop_zoom'] ?? 1)));
@@ -52,7 +54,7 @@ if (!(bool) $usuario['perfil_publico'] && !$esPropio && !$seguido) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Perfil privado | SIGTUR</title>
         <link rel="stylesheet" href="../css/estilos.css">
-        <link rel="stylesheet" href="../css/perfil.css?v=20261019-2">
+        <link rel="stylesheet" href="../css/perfil.css?v=20261027-unfollow-confirm-1">
     </head>
     <body class="perfil-publico-page">
         <main class="perfil-publico" data-user-id="<?= $usuarioId ?>" data-own-profile="0" data-profile-public="0" data-following="0" data-pending-follow="<?= $solicitudPendiente ? '1' : '0' ?>" data-csrf="<?= !empty($_SESSION['usuario_id']) ? htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') : '' ?>">
@@ -68,7 +70,7 @@ if (!(bool) $usuario['perfil_publico'] && !$esPropio && !$seguido) {
                     <div class="stat-item"><span class="stat-numero" id="cnt-likes">0</span><span class="stat-etiqueta">Me gusta</span></div>
                 </div>
                 <?php if (!empty($_SESSION['usuario_id'])): ?>
-                    <button type="button" id="followButton" class="perfil-action perfil-action--primary" data-requires-login="0" <?= $solicitudPendiente ? 'disabled' : '' ?>><?= $solicitudPendiente ? 'Pendiente' : 'Seguir' ?></button>
+                    <button type="button" id="followButton" class="perfil-action perfil-action--primary" data-requires-login="0"><?= $solicitudPendiente ? 'Pendiente' : 'Seguir' ?></button>
                     <p class="perfil-follow-status" data-follow-status role="status" aria-live="polite"></p>
                 <?php else: ?>
                     <a class="perfil-action perfil-action--primary" href="login.php">Iniciar sesión para seguir</a>
@@ -77,7 +79,7 @@ if (!(bool) $usuario['perfil_publico'] && !$esPropio && !$seguido) {
             </section>
         </main>
         <script src="../js/tema.js" defer></script>
-        <script src="../js/perfil.js?v=20261018-follow-requests-1" defer></script>
+        <script src="../js/perfil.js?v=20261027-unfollow-confirm-1" defer></script>
         <script src="../js/translator.js" defer></script>
         <?php $mensajesWidgetRoot = '../'; include __DIR__ . '/mensajes-widget.php'; ?>
     </body>
@@ -153,7 +155,7 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?> | SIGTUR</title>
     <link rel="stylesheet" href="../css/estilos.css">
-    <link rel="stylesheet" href="../css/perfil.css?v=20261019-2">
+    <link rel="stylesheet" href="../css/perfil.css?v=20261027-unfollow-confirm-1">
 </head>
 <body class="perfil-publico-page">
 <main class="perfil-publico" data-user-id="<?= $usuarioId ?>" data-following="<?= $seguido ? '1' : '0' ?>" data-pending-follow="<?= $solicitudPendiente ? '1' : '0' ?>" data-own-profile="<?= $esPropio ? '1' : '0' ?>" data-profile-public="<?= (bool) $usuario['perfil_publico'] ? '1' : '0' ?>" data-csrf="<?= !empty($_SESSION['usuario_id']) ? htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') : '' ?>">
@@ -242,7 +244,7 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
             </div>
             <?php if (!$esPropio): ?>
                 <div class="perfil-publico__actions">
-                    <button type="button" class="perfil-action perfil-action--primary<?= $seguido ? ' is-following' : '' ?>" id="followButton" <?= empty($_SESSION['usuario_id']) ? 'data-requires-login="1"' : '' ?> <?= $solicitudPendiente ? 'disabled' : '' ?>><?= $seguido ? 'Siguiendo' : ($solicitudPendiente ? 'Pendiente' : 'Seguir') ?></button>
+                    <button type="button" class="perfil-action perfil-action--primary<?= $seguido ? ' is-following' : '' ?>" id="followButton" <?= empty($_SESSION['usuario_id']) ? 'data-requires-login="1"' : '' ?>><?= $seguido ? 'Siguiendo' : ($solicitudPendiente ? 'Pendiente' : 'Seguir') ?></button>
                     <span class="perfil-follow-status" data-follow-status role="status" aria-live="polite"></span>
                 </div>
             <?php endif; ?>
@@ -305,6 +307,17 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
     </section>
 </main>
 
+<div class="perfil-unfollow-modal" data-unfollow-confirmation hidden>
+    <button class="perfil-unfollow-modal__backdrop" type="button" data-unfollow-cancel aria-label="Cancelar"></button>
+    <section class="perfil-unfollow-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="perfil-unfollow-title">
+        <h2 id="perfil-unfollow-title">¿Seguro que quieres dejar de seguir a <?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>?</h2>
+        <div class="perfil-unfollow-modal__actions">
+            <button class="perfil-action perfil-action--cancel" type="button" data-unfollow-cancel>Cancelar</button>
+            <button class="perfil-action perfil-action--primary" type="button" data-unfollow-confirm>Dejar de seguir</button>
+        </div>
+    </section>
+</div>
+
 <div class="perfil-connections-modal" id="perfil-connections-modal" aria-hidden="true" hidden>
     <button class="perfil-connections-modal__backdrop" type="button" data-connections-close aria-label="Cerrar lista"></button>
     <section class="perfil-connections-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="perfil-connections-title">
@@ -340,7 +353,7 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
 
 <script src="../js/interacciones-tarjetas.js" defer></script>
 <script src="../js/tema.js" defer></script>
-<script src="../js/perfil.js?v=20261018-1" defer></script>
+<script src="../js/perfil.js?v=20261027-unfollow-confirm-1" defer></script>
 <script src="../js/translator.js" defer></script>
 <?php $mensajesWidgetRoot = '../'; include __DIR__ . '/mensajes-widget.php'; ?>
 </body>

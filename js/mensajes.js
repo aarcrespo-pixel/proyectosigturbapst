@@ -60,6 +60,10 @@ window.chatIntervalId = window.chatIntervalId || null;
         const idValido = Number.parseInt(String(rawValue ?? ''), 10);
         return Number.isInteger(idValido) && idValido > 0 ? idValido : null;
     }
+    function mostrarErrorAccion(mensaje) {
+        if (typeof window.sigturAlert === 'function') window.sigturAlert(mensaje);
+        else window.alert(mensaje);
+    }
 
     function openWidget(userId = 0, name = '') {
         widget.classList.add('is-open');
@@ -89,7 +93,36 @@ window.chatIntervalId = window.chatIntervalId || null;
         const media = `${item.foto_url ? `<img class="mensajes-widget__photo" src="${escapeHtml(getMediaUrl(item.foto_url))}" alt="Imagen adjunta" loading="lazy" onerror="this.remove()">` : ''}${item.video_url ? `<video class="mensajes-widget__video" controls preload="metadata" src="${escapeHtml(getMediaUrl(item.video_url))}"></video>` : ''}${item.audio_url ? `<audio class="mensajes-widget__audio" controls preload="none" src="${escapeHtml(getMediaUrl(item.audio_url))}"></audio>` : ''}`;
         const emisorId = item.remitente_id ?? item.emisor_id ?? item.emisor;
         const textoMensaje = item.mensaje ?? item.texto ?? '';
-        return `<div class="mensajes-widget__message ${Number(emisorId) === Number(window.sigturUserId) ? 'mine' : ''}" data-message-id="${escapeHtml(item.id || '')}">${textoMensaje ? `<span>${escapeHtml(textoMensaje)}</span>` : ''}${media}<time class="mensajes-widget__time" datetime="${escapeHtml(item.fecha || item.created_at || '')}">${escapeHtml(obtenerHora(item))} hs</time></div>`;
+        const propio = Number(emisorId) === Number(window.sigturUserId);
+        const eliminadoParaTodos = Number(item.eliminado_para_todos) === 1;
+        const opciones = eliminadoParaTodos
+            ? '<button type="button" data-message-action="delete-me">Eliminar para mí</button>'
+            : propio
+                ? `${textoMensaje ? '<button type="button" data-message-action="edit">Editar</button>' : ''}<button type="button" data-message-action="delete-me">Eliminar para mí</button><button type="button" data-message-action="delete-everyone">Eliminar para todos</button>`
+                : '<button type="button" data-message-action="delete-me" disabled>Eliminar para mí</button>';
+        const menu = `<details class="message-actions"><summary aria-label="Opciones del mensaje">⋮</summary><div class="message-actions__menu">${opciones}</div></details>`;
+        const contenidoMensaje = eliminadoParaTodos
+            ? '<span class="mensajes-widget__message-deleted">Mensaje eliminado para todos</span>'
+            : `${textoMensaje ? `<span class="mensajes-widget__message-text">${escapeHtml(textoMensaje)}</span>` : ''}${media}`;
+        return `<div class="mensajes-widget__message ${propio ? 'mine' : ''}${eliminadoParaTodos ? ' is-deleted' : ''}" data-message-id="${escapeHtml(item.id || '')}" data-deleted-for-everyone="${eliminadoParaTodos ? '1' : '0'}">${menu}${contenidoMensaje}<time class="mensajes-widget__time" datetime="${escapeHtml(item.fecha || item.created_at || '')}">${escapeHtml(obtenerHora(item))} hs</time></div>`;
+    }
+    function actualizarMensajeSincronizado(bubble, item) {
+        const eliminado = Number(item.eliminado_para_todos) === 1;
+        if (eliminado) {
+            bubble.dataset.deletedForEveryone = '1';
+            bubble.classList.add('is-deleted');
+            bubble.querySelectorAll('.mensajes-widget__message-text, .mensajes-widget__photo, .mensajes-widget__video, .mensajes-widget__audio, .mensajes-widget__message-deleted').forEach(element => element.remove());
+            const placeholder = document.createElement('span');
+            placeholder.className = 'mensajes-widget__message-deleted';
+            placeholder.textContent = 'Mensaje eliminado para todos';
+            bubble.querySelector('.mensajes-widget__time')?.before(placeholder);
+            const menu = bubble.querySelector('.message-actions__menu');
+            if (menu) menu.innerHTML = '<button type="button" data-message-action="delete-me">Eliminar para mí</button>';
+            return;
+        }
+        if (bubble.dataset.deletedForEveryone === '1') return;
+        const text = bubble.querySelector('.mensajes-widget__message-text');
+        if (text && text.textContent !== String(item.mensaje || '')) text.textContent = item.mensaje || '';
     }
 
     function obtenerContexto(texto) {
@@ -171,6 +204,22 @@ window.chatIntervalId = window.chatIntervalId || null;
                     if (porAgregar.length) areaMensajes.insertAdjacentHTML('beforeend', porAgregar.map(renderBubble).join(''));
                     lastMessageId = Math.max(lastMessageId, ...mensajes.map(item => Number(item.id) || 0));
                     if (cercaDelFinal && porAgregar.length) areaMensajes.scrollTop = areaMensajes.scrollHeight;
+                }
+                const visibles = [...areaMensajes.querySelectorAll('.mensajes-widget__message[data-message-id]')];
+                if (visibles.length) {
+                    const syncParams = new URLSearchParams({
+                        receptor_id: String(idValido),
+                        sync_ids: visibles.map(element => element.dataset.messageId).join(',')
+                    });
+                    const syncResponse = await fetch(`${historyApi}?${syncParams.toString()}`, { headers: { Accept: 'application/json' } });
+                    const syncData = await syncResponse.json();
+                    if (!syncResponse.ok || syncData.success !== true) throw new Error(syncData.message || 'No se pudieron sincronizar los mensajes.');
+                    const porId = new Map((syncData.mensajes || []).map(item => [String(item.id), item]));
+                    visibles.forEach(element => {
+                        const item = porId.get(element.dataset.messageId);
+                        if (!item) element.remove();
+                        else actualizarMensajeSincronizado(element, item);
+                    });
                 }
                 return true;
             }
@@ -364,6 +413,32 @@ window.chatIntervalId = window.chatIntervalId || null;
         abrirChat(receptorId, button.dataset.userName || button.dataset.nombre || 'Usuario', button.dataset.userAvatar, button.dataset.contexto);
     });
     chat.addEventListener('click', event => {
+        const action = event.target.closest('[data-message-action]');
+        if (action) {
+            if (action.disabled) return;
+            const bubble = action.closest('[data-message-id]');
+            const menu = action.closest('details');
+            const id = Number(bubble?.dataset.messageId);
+            if (!bubble || !id) return;
+            if (action.dataset.messageAction === 'edit') {
+                const text = bubble.querySelector('.mensajes-widget__message-text');
+                if (!text) return;
+                text.outerHTML = `<form class="message-edit-form"><textarea maxlength="500" required>${escapeHtml(text.textContent)}</textarea><div><button type="submit">Guardar</button><button type="button" data-message-edit-cancel>Cancelar</button></div></form>`;
+                bubble.querySelector('textarea')?.focus();
+                menu?.removeAttribute('open');
+                return;
+            }
+            if (action.dataset.messageAction === 'delete-me' || action.dataset.messageAction === 'delete-everyone') {
+                const paraTodos = action.dataset.messageAction === 'delete-everyone';
+                if (!window.confirm(paraTodos ? '¿Eliminar este mensaje para todos los participantes?' : '¿Eliminar este mensaje solo de tu chat?')) return;
+                gestionarMensaje(bubble, paraTodos ? 'eliminar_para_todos' : 'eliminar_para_mi');
+            }
+            return;
+        }
+        if (event.target.closest('[data-message-edit-cancel]')) {
+            cargarHistorialMensajes(window.chatActivoId, true);
+            return;
+        }
         const boton = event.target.closest('.mensajes-widget__load-older');
         if (!boton) return;
         const areaMensajes = chat.querySelector('.mensajes-widget__messages');
@@ -371,6 +446,38 @@ window.chatIntervalId = window.chatIntervalId || null;
         const primerId = Number(primerMensaje?.dataset.messageId || 0);
         if (primerId && hasMoreHistory) cargarHistorialMensajes(window.chatActivoId, false, false, primerId);
     });
+    chat.addEventListener('submit', event => {
+        const form = event.target.closest('.message-edit-form');
+        if (!form) return;
+        event.preventDefault();
+        const bubble = form.closest('[data-message-id]');
+        gestionarMensaje(bubble, 'editar', form.querySelector('textarea')?.value.trim() || '');
+    });
+    async function gestionarMensaje(bubble, accion, texto = '') {
+        if (!bubble) return;
+        const buttons = bubble.querySelectorAll('button');
+        buttons.forEach(button => { button.disabled = true; });
+        try {
+            const response = await fetch(api, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', Accept: 'application/json' },
+                body: new URLSearchParams({ accion, id: bubble.dataset.messageId, texto, csrf_token: widget.dataset.csrf || '' })
+            });
+            const data = await response.json();
+            if (!response.ok || data.success !== true) throw new Error(data.message || data.error || 'No se pudo actualizar el mensaje.');
+            if (accion === 'eliminar_para_mi') {
+                bubble.remove();
+            } else if (accion === 'eliminar_para_todos') {
+                actualizarMensajeSincronizado(bubble, { eliminado_para_todos: 1 });
+            } else {
+                const form = bubble.querySelector('.message-edit-form');
+                form.outerHTML = `<span class="mensajes-widget__message-text">${escapeHtml(data.mensaje)}</span>`;
+            }
+        } catch (error) {
+            buttons.forEach(button => { button.disabled = false; });
+            mostrarErrorAccion(error.message);
+        }
+    }
     window.addEventListener('sigtur:abrir-mensajes', event => {
         const receptorId = normalizarReceptorId(event.detail?.userId ?? event.detail?.receptorId);
         if (receptorId) openWidget(receptorId, event.detail?.name);
@@ -379,6 +486,7 @@ window.chatIntervalId = window.chatIntervalId || null;
     window.cargarMensajes = cargarHistorialMensajes;
     window.abrirChat = abrirChat;
     window.sigturUserId = Number(widget.dataset.userId || 0);
+    window.sigturUserRole = widget.dataset.userRole || '';
     widget.hidden = false;
     if (document.body.classList.contains('pagina-mensajes-admin')) openWidget();
     loadConversations();

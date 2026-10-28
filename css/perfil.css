@@ -63,6 +63,15 @@
 .stat-etiqueta { font-size: .8rem; color: var(--text-secondary, #9ca3af); text-transform: uppercase; letter-spacing: .05em; }
 .stat-divider { width: 1px; height: 28px; background: rgba(255, 255, 255, .12); }
 .perfil-publico__actions { display: flex; flex-wrap: wrap; gap: .65rem; align-self: center; }
+.perfil-action--cancel { border-color: var(--perfil-line); background: transparent; color: var(--perfil-ink); }
+.perfil-unfollow-modal[hidden] { display: none; }
+.perfil-unfollow-modal { position: fixed; inset: 0; z-index: 1200; display: grid; place-items: center; padding: 20px; }
+.perfil-unfollow-modal__backdrop { position: absolute; inset: 0; border: 0; background: rgba(15, 23, 42, .58); cursor: pointer; }
+.perfil-unfollow-modal__dialog { position: relative; width: min(480px, 100%); padding: 28px; border: 1px solid var(--perfil-line); border-radius: 20px; background: #fff; color: var(--perfil-ink); box-shadow: 0 24px 70px rgba(15, 23, 42, .25); }
+.perfil-unfollow-modal__dialog h2 { margin: 0; font-size: 1.25rem; line-height: 1.4; }
+.perfil-unfollow-modal__actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.perfil-unfollow-modal__actions [data-unfollow-confirm] { background: #176b5b; color: #fff; }
+.perfil-unfollow-modal__actions [data-unfollow-cancel]:not(.perfil-unfollow-modal__backdrop) { background: rgba(40, 83, 107, .08); color: #28536b; }
 .perfil-action { display: inline-flex; flex: 0 0 auto; justify-content: center; align-items: center; width: max-content; min-width: max-content; white-space: nowrap; border: 1px solid transparent; border-radius: 16px; padding: .75rem 1.15rem; font: inherit; font-weight: 600; letter-spacing: -0.01em; cursor: pointer; transition: opacity 160ms ease, background 160ms ease; }
 .perfil-action:hover { opacity: .78; }
 .perfil-action:disabled { cursor: wait; opacity: .55; }

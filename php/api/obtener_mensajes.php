@@ -49,6 +49,38 @@ try {
         responderHistorial(['status' => 'error', 'success' => false, 'message' => 'No tienes permiso para abrir esta conversación.'], 403);
     }
 
+    if (isset($_GET['sync_ids'])) {
+        $ids = array_slice(array_values(array_unique(array_filter(
+            array_map('intval', explode(',', (string) $_GET['sync_ids'])),
+            static fn (int $id): bool => $id > 0
+        ))), 0, 100);
+        if (!$ids) responderHistorial(['status' => 'success', 'success' => true, 'mensajes' => []]);
+        $marcadores = [];
+        $parametrosSync = [
+            ':sync_emisor_a' => $emisorId,
+            ':sync_receptor_a' => $receptorId,
+            ':sync_emisor_b' => $receptorId,
+            ':sync_receptor_b' => $emisorId,
+            ':sync_usuario_oculto' => $emisorId,
+        ];
+        foreach ($ids as $indice => $id) {
+            $marcador = ':sync_id_' . $indice;
+            $marcadores[] = $marcador;
+            $parametrosSync[$marcador] = $id;
+        }
+        $sync = $pdo->prepare("SELECT m.id, m.eliminado_para_todos,
+                CASE WHEN m.eliminado_para_todos = 1 THEN '' ELSE m.mensaje END AS mensaje
+            FROM mensajes m
+            LEFT JOIN mensajes_ocultos_usuario oculto
+                ON oculto.mensaje_id = m.id AND oculto.usuario_id = :sync_usuario_oculto
+            WHERE m.id IN (" . implode(', ', $marcadores) . ")
+              AND ((m.remitente_id = :sync_emisor_a AND m.destinatario_id = :sync_receptor_a)
+                OR (m.remitente_id = :sync_emisor_b AND m.destinatario_id = :sync_receptor_b))
+              AND oculto.mensaje_id IS NULL");
+        $sync->execute($parametrosSync);
+        responderHistorial(['status' => 'success', 'success' => true, 'mensajes' => $sync->fetchAll(PDO::FETCH_ASSOC)]);
+    }
+
      $afterRaw = $_GET['after_id'] ?? null;
      $beforeRaw = $_GET['before_id'] ?? null;
      $afterId = $afterRaw === null ? 0 : filter_var($afterRaw, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
@@ -75,16 +107,21 @@ try {
      }
      $orden = $afterId ? 'ASC' : 'DESC';
      $sql = "SELECT m.id, m.remitente_id AS emisor_id, m.destinatario_id AS receptor_id,
-                     m.mensaje, m.contexto, m.foto_url, m.video_url, m.audio_url, m.fecha_creacion AS fecha,
+                     CASE WHEN m.eliminado_para_todos = 1 THEN '' ELSE m.mensaje END AS mensaje,
+                     m.eliminado_para_todos, m.contexto, m.foto_url, m.video_url, m.audio_url, m.fecha_creacion AS fecha,
                      DATE_FORMAT(m.fecha_creacion, '%H:%i') AS hora, m.leido,
                      u.nombre_completo AS nombre_usuario, u.nickname,
                      COALESCE(u.foto_perfil, u.avatar) AS foto_perfil
               FROM mensajes m
               INNER JOIN usuarios u ON u.id = m.remitente_id
+              LEFT JOIN mensajes_ocultos_usuario oculto
+                  ON oculto.mensaje_id = m.id AND oculto.usuario_id = :usuario_oculto
               WHERE ((m.remitente_id = :mi_id_a AND m.destinatario_id = :receptor_id_a)
                   OR (m.remitente_id = :receptor_id_b AND m.destinatario_id = :mi_id_b)){$condicionCursor}
+                  AND oculto.mensaje_id IS NULL
               ORDER BY m.id {$orden}
               LIMIT 101";
+     $parametros[':usuario_oculto'] = $emisorId;
      $stmt = $pdo->prepare($sql);
      $stmt->execute($parametros);
      $mensajes = $stmt->fetchAll(PDO::FETCH_ASSOC);

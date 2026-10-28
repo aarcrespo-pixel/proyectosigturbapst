@@ -406,15 +406,33 @@
     });
 
     const followStatus = profile.querySelector('[data-follow-status]');
+    const unfollowConfirmation = document.querySelector('[data-unfollow-confirmation]');
+    const confirmUnfollowButton = unfollowConfirmation?.querySelector('[data-unfollow-confirm]');
+    const cancelUnfollowButtons = unfollowConfirmation
+        ? [...unfollowConfirmation.querySelectorAll('[data-unfollow-cancel]')]
+        : [];
     let pendingFollowPoll = null;
+    let followRequestInProgress = false;
+    let followStateRevision = 0;
 
-    const actualizarEstadoSeguimiento = (data) => {
+    const cerrarConfirmacionDejarDeSeguir = () => {
+        if (!unfollowConfirmation) return;
+        unfollowConfirmation.hidden = true;
+        followButton?.focus();
+    };
+
+    const actualizarEstadoSeguimiento = (data, solicitudCancelada = false) => {
         const estabaPendiente = profile.dataset.pendingFollow === '1';
         profile.dataset.following = data.following ? '1' : '0';
         profile.dataset.pendingFollow = data.pending ? '1' : '0';
         followButton.textContent = data.label;
         followButton.classList.toggle('is-following', data.following);
-        followButton.disabled = data.pending;
+        followButton.disabled = followRequestInProgress;
+        if (!data.following) cerrarConfirmacionDejarDeSeguir();
+        if (!data.pending && pendingFollowPoll) {
+            window.clearInterval(pendingFollowPoll);
+            pendingFollowPoll = null;
+        }
         if (Object.prototype.hasOwnProperty.call(data, 'followers')) {
             const seguidoresCounter = document.getElementById('cnt-seguidores');
             if (seguidoresCounter) {
@@ -426,7 +444,7 @@
             if (profile.dataset.profilePublic === '0') window.location.reload();
             if (!Object.prototype.hasOwnProperty.call(data, 'followers')) cargarEstadisticas();
         } else if (!data.pending && estabaPendiente && followStatus) {
-            followStatus.textContent = 'La solicitud ya no está pendiente.';
+            followStatus.textContent = solicitudCancelada ? 'Solicitud cancelada.' : 'La solicitud ya no está pendiente.';
         }
     };
 
@@ -436,6 +454,8 @@
             pendingFollowPoll = null;
             return;
         }
+        if (followRequestInProgress) return;
+        const revision = followStateRevision;
         try {
             const response = await fetch(`${phpBase}api/seguir.php`, {
                 method: 'POST',
@@ -447,7 +467,7 @@
                 })
             });
             const data = await response.json();
-            if (!response.ok || data.success !== true) return;
+            if (revision !== followStateRevision || !response.ok || data.success !== true) return;
             actualizarEstadoSeguimiento(data);
             if (!data.pending) {
                 window.clearInterval(pendingFollowPoll);
@@ -458,9 +478,14 @@
         }
     };
 
-    followButton?.addEventListener('click', async () => {
-        if (followButton.dataset.requiresLogin === '1') { window.location.href = `${phpBase}login.php`; return; }
+    const alternarSeguimiento = async () => {
+        if (followRequestInProgress) return;
+        const estabaPendiente = profile.dataset.pendingFollow === '1';
+        followRequestInProgress = true;
+        followStateRevision += 1;
         followButton.disabled = true;
+        if (confirmUnfollowButton) confirmUnfollowButton.disabled = true;
+        cancelUnfollowButtons.forEach((button) => { button.disabled = true; });
         if (followStatus) followStatus.textContent = '';
         try {
             const response = await fetch(`${phpBase}api/seguir.php`, {
@@ -474,16 +499,39 @@
             });
             const data = await response.json();
             if (!response.ok || data.success !== true) throw new Error(data.error || 'No se pudo actualizar el seguimiento.');
-            actualizarEstadoSeguimiento(data);
+            actualizarEstadoSeguimiento(data, estabaPendiente && !data.pending && !data.following);
             if (data.pending) {
                 if (followStatus) followStatus.textContent = 'Tu solicitud está pendiente de aprobación.';
                 if (!pendingFollowPoll) pendingFollowPoll = window.setInterval(consultarEstadoSolicitud, 4000);
             }
         } catch (error) {
-            followButton.disabled = false;
             if (followStatus) followStatus.textContent = error.message || 'No se pudo actualizar el seguimiento.';
             else window.sigturAlert?.(error.message);
+        } finally {
+            followRequestInProgress = false;
+            followButton.disabled = false;
+            if (confirmUnfollowButton) confirmUnfollowButton.disabled = false;
+            cancelUnfollowButtons.forEach((button) => { button.disabled = false; });
         }
+    };
+
+    followButton?.addEventListener('click', () => {
+        if (followButton.dataset.requiresLogin === '1') { window.location.href = `${phpBase}login.php`; return; }
+        if (profile.dataset.following === '1' && profile.dataset.pendingFollow !== '1' && unfollowConfirmation) {
+            unfollowConfirmation.hidden = false;
+            confirmUnfollowButton?.focus();
+            return;
+        }
+        alternarSeguimiento();
+    });
+
+    confirmUnfollowButton?.addEventListener('click', alternarSeguimiento);
+    cancelUnfollowButtons.forEach((button) => button.addEventListener('click', () => {
+        cerrarConfirmacionDejarDeSeguir();
+    }));
+
+    unfollowConfirmation?.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') cerrarConfirmacionDejarDeSeguir();
     });
 
     profile.querySelectorAll('[data-follow-request-action]').forEach((button) => {

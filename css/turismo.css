@@ -205,7 +205,8 @@ body[data-tema="oscuro"] .info-panel article {
 .tarjeta-galeria img,
 .tarjeta-ruta img {
     width: 100%;
-    height: 260px;
+    height: auto;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
     display: block;
 }
@@ -217,7 +218,7 @@ body[data-tema="oscuro"] .info-panel article {
 }
 
 .tarjeta-ruta img {
-    height: 100%;
+    align-self: start;
 }
 
 .contenido {
@@ -486,10 +487,6 @@ body[data-tema="oscuro"] .gallery-photo-grid .tarjeta-galeria {
 
     .gallery-section-count {
         margin-top: .25rem;
-    }
-
-    .gallery-photo-grid .tarjeta-galeria img {
-        aspect-ratio: 16 / 11;
     }
 
     .hero-turismo {

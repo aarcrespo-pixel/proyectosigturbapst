@@ -1056,9 +1056,56 @@ function cambiarImagen(delta) {
     actualizarLightbox();
 }
 
+function configurarMapaEventos() {
+    const mapList = document.getElementById('mapa-eventos-lugares');
+    const mapToggle = document.getElementById('mapa-eventos-toggle');
+    if (!mapList || !mapToggle) return;
+
+    const ubicaciones = new Map();
+    const todosLosEventos = [
+        ...eventosPersistidos,
+        ...eventosAnterioresPersistidos,
+        ...Object.values(datos).flat()
+    ];
+
+    todosLosEventos.forEach((evento) => {
+        const lugar = String(evento.lugar || '').trim();
+        if (lugar && !ubicaciones.has(lugar.toLocaleLowerCase())) {
+            ubicaciones.set(lugar.toLocaleLowerCase(), lugar);
+        }
+    });
+
+    const nombresUbicaciones = [...ubicaciones.values()].sort((a, b) => a.localeCompare(b, 'es'));
+    const lugares = nombresUbicaciones.map((nombre) => {
+        const enlace = document.createElement('a');
+        enlace.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${nombre}, Salto, Uruguay}`)}`;
+        enlace.target = '_blank';
+        enlace.rel = 'noopener';
+        enlace.textContent = nombre;
+        return enlace;
+    });
+
+    mapList.replaceChildren(...lugares, mapToggle);
+    if (lugares.length <= 5) return;
+
+    lugares.forEach((lugar, index) => {
+        lugar.hidden = index >= 5;
+    });
+    mapToggle.hidden = false;
+    mapToggle.addEventListener('click', () => {
+        const expanded = mapToggle.getAttribute('aria-expanded') === 'true';
+        lugares.forEach((lugar, index) => {
+            lugar.hidden = expanded && index >= 5;
+        });
+        mapToggle.setAttribute('aria-expanded', String(!expanded));
+        mapToggle.textContent = expanded ? 'Ver más' : 'Ver menos';
+    });
+}
+
 function init() {
     for (const nombre in datos) renderSeccion(nombre);
 
+    configurarMapaEventos();
     document.querySelectorAll(".flecha").forEach((boton) => {
         boton.addEventListener("click", () => {
             const nombre = boton.dataset.carrusel;

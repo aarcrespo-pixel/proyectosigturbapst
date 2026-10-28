@@ -200,18 +200,23 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
             </div>
             <div class="mapa-contenido">
                 <iframe src="https://www.google.com/maps?q=Salto%2C%20Uruguay&output=embed" loading="lazy" title="Mapa de lugares destacados en Salto"></iframe>
-                <div class="mapa-lugares">
+                <div class="mapa-lugares" id="mapa-lugares-lista">
                     <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20Artigas%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza Artigas</a>
-                    <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20Treinta%20y%20Tres%20Orientales%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza Treinta y Tres</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20Treinta%20y%20Tres%20Orientales%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza Treinta y Tres Orientales</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Parque%20Benito%20Solari%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Parque Benito Solari</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Muelle%20Negro%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Muelle Negro</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20Roosvelt%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza Roosvelt</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Costanera%20Norte%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Costanera Norte</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Cine%20Sarand%C3%AD%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Cine Sarandí</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Centro%20hist%C3%B3rico%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Centro histórico</a>
+                    <button class="mapa-lugares__toggle" id="mapa-lugares-toggle" type="button" aria-expanded="false" aria-controls="mapa-lugares-lista" hidden>Ver más</button>
                 </div>
             </div>
         </section>
     </main>
 
     <script src="../js/script.js" defer></script>
-    <script src="../js/lugar-links.js" defer></script>
+    <script src="../js/lugar-links.js?v=20261027-2" defer></script>
     <?php if ($puedeAgregarFotosLugares): ?>
         <script>
             const botonAgregarFotosLugares = document.querySelector('.lugares-galeria-add__button');

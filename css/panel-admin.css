@@ -80,6 +80,10 @@ body.admin-panel-page {
 .admin-dashboard-page .admin-hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
+    }
+
+    .admin-question-chat__message {
+    width: 100%;
     align-items: start;
 }
 
@@ -368,6 +372,17 @@ body.admin-panel-page {
     color: #a63e32;
 }
 
+.admin-button--secondary {
+    border: 1px solid var(--admin-line);
+    background: var(--admin-soft);
+    color: var(--admin-accent-dark);
+}
+
+.admin-button--secondary:hover {
+    background: #e1edf0;
+    box-shadow: none;
+}
+
 .admin-button--danger:hover {
     background: #ffe6e0;
     box-shadow: none;
@@ -394,6 +409,16 @@ body.admin-panel-page {
     color: var(--admin-accent-dark);
     font-size: .8rem;
     font-weight: 800;
+}
+
+.admin-nav__link .admin-count--pending-nav {
+    min-height: 20px;
+    padding: 2px 8px;
+    background: rgba(255, 255, 255, .16);
+    color: #d7f4f4;
+    font-size: .68rem;
+    line-height: 1.2;
+    letter-spacing: .01em;
 }
 
 .admin-empty {
@@ -452,6 +477,17 @@ body.admin-panel-page {
     border: 1px solid var(--admin-line);
     border-radius: 16px;
     background: var(--admin-paper);
+}
+
+.admin-question__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.admin-question__header > strong {
+    padding-top: 9px;
 }
 
 .admin-question__top {
@@ -612,6 +648,113 @@ body.admin-panel-page {
     margin-top: 16px;
 }
 
+.admin-question-chat {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.admin-question-chat__message {
+    width: min(88%, 620px);
+    padding: 13px 15px;
+    border: 1px solid var(--admin-line);
+    border-radius: 15px;
+    background: var(--admin-soft);
+}
+
+.admin-question-chat__message--organizer {
+    justify-self: end;
+}
+
+.admin-question-chat__message--visitor {
+    justify-self: start;
+    background: var(--admin-paper);
+}
+
+.admin-question-chat__message strong {
+    color: var(--admin-accent-dark);
+    font-size: .88rem;
+}
+
+.admin-question-chat__message p {
+    margin: 7px 0;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.admin-question-chat__message small {
+    color: var(--admin-muted);
+    font-size: .76rem;
+}
+
+.admin-support-chat {
+    margin-top: 14px;
+}
+
+.admin-support-chat > summary {
+    width: fit-content;
+    color: var(--admin-accent-dark);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.admin-support-chat__actions {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    align-items: center;
+    gap: 9px;
+    margin-left: auto;
+}
+
+.admin-support-chat__actions form {
+    display: flex;
+    margin: 0;
+}
+
+.admin-support-chat__actions .admin-button {
+    white-space: nowrap;
+}
+
+.admin-event-question-chat > summary.admin-button {
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: .8rem;
+    white-space: nowrap;
+}
+
+.admin-event-question-chat {
+    margin-top: 14px;
+}
+
+.admin-event-question-chat > summary {
+    list-style: none;
+}
+
+.admin-event-question-chat > summary::-webkit-details-marker {
+    display: none;
+}
+
+.admin-event-question-chat__hide,
+.admin-event-question-chat[open] .admin-event-question-chat__show {
+    display: none;
+}
+
+.admin-event-question-chat[open] .admin-event-question-chat__hide {
+    display: inline;
+}
+
+.admin-event-question-chat .admin-question-chat {
+    position: static;
+    width: 100%;
+    max-height: none;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
 .admin-reply-form label {
     grid-column: 1 / -1;
 }
@@ -691,6 +834,10 @@ body.admin-panel-page {
     .admin-form {
         grid-template-columns: 1fr;
         gap: 13px;
+    }
+
+    .admin-question__header {
+        flex-wrap: wrap;
     }
 
     .admin-content-links {
@@ -809,4 +956,14 @@ body[data-tema="oscuro"].admin-panel-page .admin-button--danger {
     border-color: #6d3934;
     background: #382522;
     color: #ffc1b8;
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-button--secondary {
+    border-color: var(--admin-line);
+    background: var(--admin-soft);
+    color: var(--admin-accent-dark);
+}
+
+body[data-tema="oscuro"].admin-panel-page .admin-button--secondary:hover {
+    background: #34444c;
 }

@@ -45,8 +45,16 @@ try {
             responderPerfilStats(['success' => false, 'message' => 'Tipo de lista inválido'], 422);
         }
         $sqlLista = $lista === 'seguidores'
-            ? 'SELECT u.id, u.nombre_completo, u.nickname, u.avatar, u.verificado FROM seguidores s INNER JOIN usuarios u ON u.id = s.seguidor_id WHERE s.seguido_id = :perfil_id ORDER BY s.fecha_creacion DESC, s.id DESC'
-            : 'SELECT u.id, u.nombre_completo, u.nickname, u.avatar, u.verificado FROM seguidores s INNER JOIN usuarios u ON u.id = s.seguido_id WHERE s.seguidor_id = :perfil_id ORDER BY s.fecha_creacion DESC, s.id DESC';
+            ? "SELECT u.id, u.nombre_completo, u.nickname, u.avatar,
+                    CASE WHEN LOWER(TRIM(u.rol)) IN ('administrador', 'admin', 'moderador', 'organizador')
+                        THEN 1 ELSE u.verificado END AS verificado
+                FROM seguidores s INNER JOIN usuarios u ON u.id = s.seguidor_id
+                WHERE s.seguido_id = :perfil_id ORDER BY s.fecha_creacion DESC, s.id DESC"
+            : "SELECT u.id, u.nombre_completo, u.nickname, u.avatar,
+                    CASE WHEN LOWER(TRIM(u.rol)) IN ('administrador', 'admin', 'moderador', 'organizador')
+                        THEN 1 ELSE u.verificado END AS verificado
+                FROM seguidores s INNER JOIN usuarios u ON u.id = s.seguidor_id
+                WHERE s.seguidor_id = :perfil_id ORDER BY s.fecha_creacion DESC, s.id DESC";
         $consultaLista = $pdo->prepare($sqlLista);
         $consultaLista->execute([':perfil_id' => $perfilId]);
         $usuarios = array_map(static function (array $usuarioLista): array {

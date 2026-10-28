@@ -97,10 +97,16 @@ try {
         $siguiendo = false;
         $pendiente = false;
     } elseif (!(bool) $perfilPublico) {
-        $insertarSolicitud = $pdo->prepare('INSERT IGNORE INTO solicitudes_seguimiento (seguidor_id, seguido_id) VALUES (:seguidor, :seguido)');
-        $insertarSolicitud->execute([':seguidor' => $seguidorId, ':seguido' => $seguidoId]);
+        $eliminarSolicitud = $pdo->prepare('DELETE FROM solicitudes_seguimiento WHERE seguidor_id = :seguidor AND seguido_id = :seguido');
+        $eliminarSolicitud->execute([':seguidor' => $seguidorId, ':seguido' => $seguidoId]);
         $siguiendo = false;
-        $pendiente = true;
+        if ($eliminarSolicitud->rowCount() > 0) {
+            $pendiente = false;
+        } else {
+            $insertarSolicitud = $pdo->prepare('INSERT IGNORE INTO solicitudes_seguimiento (seguidor_id, seguido_id) VALUES (:seguidor, :seguido)');
+            $insertarSolicitud->execute([':seguidor' => $seguidorId, ':seguido' => $seguidoId]);
+            $pendiente = true;
+        }
     } else {
         $eliminarSolicitud = $pdo->prepare('DELETE FROM solicitudes_seguimiento WHERE seguidor_id = :seguidor AND seguido_id = :seguido');
         $eliminarSolicitud->execute([':seguidor' => $seguidorId, ':seguido' => $seguidoId]);
