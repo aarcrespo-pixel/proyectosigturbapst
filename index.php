@@ -36,7 +36,7 @@ foreach ($lugaresDestacados as &$lugarDestacado) {
 }
 unset($lugarDestacado);
 foreach ($gastronomiaDestacada as &$propuestaGastronomica) {
-    $propuestaGastronomica['imagen'] = $resolverImagenIndex((string) $propuestaGastronomica['imagen'], 'contenido-publico', 'img/gastronomia.jpg');
+    $propuestaGastronomica['imagen'] = $resolverImagenIndex((string) $propuestaGastronomica['imagen'], 'contenido-publico', 'img/gastronomia.png');
 }
 unset($propuestaGastronomica);
 ?>
@@ -144,7 +144,7 @@ unset($propuestaGastronomica);
         </div>
         <div class="feature">
             <div class="feature-header">
-                <img class="feature-image-gastronomia" src="img/gastronomia.jpg" alt="Propuesta gastronómica de Salto" loading="lazy">
+                <img class="feature-image-gastronomia" src="img/gastronomia.png" alt="Propuesta gastronómica de Salto" loading="lazy">
                 <h3 data-i18n="homeFeatureGastronomy">Gastronomía</h3>
                 <button class="feature-toggle" aria-expanded="false">▼</button>
             </div>
@@ -249,7 +249,7 @@ unset($propuestaGastronomica);
                 <?php else: ?>
                     <div class="slide activo">
                         <div class="info-evento"><h3>Sabores de Salto</h3><p>Descubrí las propuestas gastronómicas locales.</p><div class="accion-boton"><a href="php/gastronomia.php#propuestas-gastronomicas" class="boton-amarillo">Ver gastronomía</a></div></div>
-                        <img src="img/gastronomia.jpg" alt="Gastronomía de Salto" loading="lazy">
+                        <img src="img/gastronomia.png" alt="Gastronomía de Salto" loading="lazy">
                     </div>
                 <?php endif; ?>
             </div>
