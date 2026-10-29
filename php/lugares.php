@@ -2,8 +2,10 @@
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 require_once __DIR__ . '/helpers/imagenes.php';
+require_once __DIR__ . '/helpers/eventos_mapa.php';
 
 $usuarioActual = sigtur_usuario_actual($pdo);
+$eventosMapa = sigtur_eventos_visibles_en_mapa($pdo);
 $puedeAgregarFotosLugares = $usuarioActual && $usuarioActual['rol'] === 'organizador';
 $fotosLugaresStmt = $pdo->prepare("SELECT imagen, titulo FROM galeria_eventos WHERE tipo_evento = 'Lugares' ORDER BY fecha_creacion DESC, id DESC");
 $fotosLugaresStmt->execute();
@@ -201,6 +203,10 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
             <div class="mapa-contenido">
                 <iframe src="https://www.google.com/maps?q=Salto%2C%20Uruguay&output=embed" loading="lazy" title="Mapa de lugares destacados en Salto"></iframe>
                 <div class="mapa-lugares" id="mapa-lugares-lista">
+                    <label class="mapa-lugares__buscador">
+                        <span class="visually-hidden">Buscar un lugar o evento en el mapa</span>
+                        <input type="search" data-map-search placeholder="Buscar un lugar o evento..." autocomplete="off">
+                    </label>
                     <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20Artigas%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza Artigas</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20Treinta%20y%20Tres%20Orientales%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza Treinta y Tres Orientales</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Parque%20Benito%20Solari%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Parque Benito Solari</a>
@@ -209,6 +215,14 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                     <a href="https://www.google.com/maps/search/?api=1&query=Costanera%20Norte%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Costanera Norte</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Cine%20Sarand%C3%AD%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Cine Sarandí</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Centro%20hist%C3%B3rico%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Centro histórico</a>
+                    <?php foreach ($eventosMapa as $eventoMapa):
+                        $ubicacionMapa = trim((string) $eventoMapa['ubicacion']);
+                        $consultaMapa = $ubicacionMapa . ', Salto, Uruguay';
+                        $urlMapaEvento = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($consultaMapa);
+                    ?>
+                        <a href="<?= htmlspecialchars($urlMapaEvento, ENT_QUOTES, 'UTF-8') ?>" data-map-query="<?= htmlspecialchars($consultaMapa, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Evento: <?= htmlspecialchars((string) $eventoMapa['titulo'], ENT_QUOTES, 'UTF-8') ?> — <?= htmlspecialchars($ubicacionMapa, ENT_QUOTES, 'UTF-8') ?></a>
+                    <?php endforeach; ?>
+                    <p class="mapa-lugares__sin-resultados" data-map-empty hidden>No se encontraron ubicaciones.</p>
                     <button class="mapa-lugares__toggle" id="mapa-lugares-toggle" type="button" aria-expanded="false" aria-controls="mapa-lugares-lista" hidden>Ver más</button>
                 </div>
             </div>
@@ -216,7 +230,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
     </main>
 
     <script src="../js/script.js" defer></script>
-    <script src="../js/lugar-links.js?v=20261027-2" defer></script>
+    <script src="../js/lugar-links.js?v=20261028-event-map-1" defer></script>
     <?php if ($puedeAgregarFotosLugares): ?>
         <script>
             const botonAgregarFotosLugares = document.querySelector('.lugares-galeria-add__button');

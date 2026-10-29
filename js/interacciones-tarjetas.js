@@ -59,7 +59,8 @@
            nodo visual con la fila exacta que debe borrar el backend. */
         state.comments = (state.comments || []).map((comment) => typeof comment === 'string'
             ? { id: null, parent_id: null, name: 'Usuario SIGTUR', text: comment, likes: 0, replies: [] }
-            : { id: comment.id || null, parent_id: comment.parent_id || null, user_id: comment.user_id || null, profile_url: comment.profile_url || '', name: comment.name || 'Usuario SIGTUR', avatar_url: comment.avatar_url || '', text: comment.text || '', deleted: comment.deleted === true, can_edit: trustPermissions && comment.can_edit === true, can_delete_everyone: trustPermissions && comment.can_delete_everyone === true, can_delete_me: trustPermissions && comment.can_delete_me === true, likes: comment.likes || 0, replies: comment.replies || [] });
+            : { id: comment.id || null, parent_id: comment.parent_id || null, user_id: comment.user_id || null, profile_url: comment.profile_url || '', name: comment.name || 'Usuario SIGTUR', avatar_url: comment.avatar_url || '', text: comment.text || '', deleted: comment.deleted === true, can_edit: trustPermissions && comment.can_edit === true, can_delete_everyone: trustPermissions && comment.can_delete_everyone === true, can_delete_me: trustPermissions && comment.can_delete_me === true, likes: comment.likes || 0, replies: comment.replies || [] })
+            .filter((comment) => !comment.deleted);
         return state;
     }
 
@@ -132,12 +133,12 @@
                         <img class="comentario-avatar card-engagement__comment-avatar" src="${escapeHtml(getCommentAvatar(comment))}" alt="Avatar de ${escapeHtml(comment.name)}">
                         <span class="comentario-nombre">${escapeHtml(comment.name)}</span>
                     </a>
+                    ${comment.id ? `<details class="message-actions"><summary aria-label="Opciones del comentario">⋮</summary><div class="message-actions__menu">${comment.can_edit && !comment.deleted ? `<button type="button" data-comment-action="edit" data-comment-id="${comment.id}">Editar</button>` : ''}<button type="button" data-comment-action="delete-me" data-comment-id="${comment.id}"${comment.can_delete_me ? '' : ' disabled'}>Eliminar para mí</button>${comment.can_delete_everyone && !comment.deleted ? `<button type="button" data-comment-action="delete-everyone" data-comment-id="${comment.id}">Eliminar para todos</button>` : ''}</div></details>` : ''}
                 </div>
                 <div class="comentario-cuerpo card-engagement__comment-body">
-                    <div class="comentario-texto">${comment.deleted ? 'Comentario eliminado para todos' : escapeHtml(comment.text)}</div>
+                    <div class="comentario-texto">${escapeHtml(comment.text)}</div>
                         <div class="comentario-footer-actions comentario-footer comentario-actions">
                             ${!comment.deleted ? `<button type="button" class="card-engagement__comment-action ${comment.likes ? 'active' : ''}" data-comment-action="like" data-comment-id="${comment.id || ''}">♥ ${comment.likes || 0}</button><button type="button" class="card-engagement__comment-action" data-comment-action="reply" data-comment-id="${comment.id || ''}">Responder</button>` : ''}
-                            ${comment.id ? `<details class="message-actions"><summary aria-label="Opciones del comentario">⋮</summary><div class="message-actions__menu">${comment.can_edit && !comment.deleted ? `<button type="button" data-comment-action="edit" data-comment-id="${comment.id || ''}">Editar</button>` : ''}<button type="button" data-comment-action="delete-me" data-comment-id="${comment.id || ''}"${comment.can_delete_me ? '' : ' disabled'}>Eliminar para mí</button>${comment.can_delete_everyone && !comment.deleted ? `<button type="button" data-comment-action="delete-everyone" data-comment-id="${comment.id || ''}">Eliminar para todos</button>` : ''}</div></details>` : ''}
                     </div>
                     ${!comment.deleted ? `<form class="card-engagement__reply-form" data-parent-id="${comment.id || ''}"><textarea class="card-engagement__reply-input" rows="1" maxlength="140" placeholder="Escribe una respuesta..."></textarea><button type="submit" class="card-engagement__reply-submit">Responder</button></form>` : ''}
                 </div>
@@ -331,21 +332,15 @@
                     const data = await response.json();
                     if (!response.ok || data.success !== true) throw new Error(data.error || 'No se pudo eliminar el comentario');
                     const currentState = readState(key);
-                    if (deleteEveryone) {
-                        const comentarioActualizado = currentState.comments.find((item) => Number(item.id) === commentId);
-                        if (comentarioActualizado) {
-                            comentarioActualizado.deleted = true;
-                            comentarioActualizado.text = '';
-                            comentarioActualizado.can_edit = false;
-                            comentarioActualizado.can_delete_me = true;
-                            comentarioActualizado.can_delete_everyone = false;
+                    currentState.comments.forEach((item) => {
+                        if (Number(item.parent_id) === commentId) {
+                            item.parent_id = comment.parent_id || null;
                         }
-                    } else {
-                        currentState.comments = currentState.comments.filter((item) => Number(item.id) !== commentId);
-                        document.getElementById(`comentario-${comment.id}`)?.remove();
-                        comentarioElement?.remove();
-                        commentsOffset = Math.max(0, commentsOffset - 1);
-                    }
+                    });
+                    currentState.comments = currentState.comments.filter((item) => Number(item.id) !== commentId);
+                    document.getElementById(`comentario-${comment.id}`)?.remove();
+                    comentarioElement?.remove();
+                    commentsOffset = Math.max(0, commentsOffset - 1);
                     writeState(key, currentState);
                     updateView();
                 })

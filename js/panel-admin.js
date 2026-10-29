@@ -14,6 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    document.querySelectorAll('[data-event-editor-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const editor = document.getElementById(button.getAttribute('aria-controls'));
+            if (!editor) return;
+            const abrir = editor.hidden;
+            editor.hidden = !abrir;
+            button.setAttribute('aria-expanded', String(abrir));
+        });
+    });
+
     const toggle = document.querySelector('[data-admin-events-toggle]');
     const events = [...document.querySelectorAll('.admin-event-list > .admin-event')];
     const groupTitles = [...document.querySelectorAll('.admin-event-group-title')];
@@ -34,7 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
         toggle.textContent = expanded ? 'Ver menos' : 'Ver más eventos';
     };
 
-    syncVisibility(false);
+    const updatedEventId = document.querySelector('#admin-event-list')?.dataset.openEventId;
+    syncVisibility(Boolean(updatedEventId && events.some((event) => event.id === `evento-${updatedEventId}`)));
     toggle.addEventListener('click', () => {
         syncVisibility(toggle.getAttribute('aria-expanded') !== 'true');
     });

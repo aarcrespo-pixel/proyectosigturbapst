@@ -2,8 +2,10 @@
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 require_once __DIR__ . '/helpers/imagenes.php';
+require_once __DIR__ . '/helpers/eventos_mapa.php';
 
 $usuarioActual = sigtur_usuario_actual($pdo);
+$eventosMapa = sigtur_eventos_visibles_en_mapa($pdo);
 $puedeAgregarFotosTurismo = $usuarioActual && $usuarioActual['rol'] === 'organizador';
 $fotosTurismoStmt = $pdo->prepare("SELECT imagen, titulo FROM galeria_eventos WHERE tipo_evento = 'Turismo' ORDER BY fecha_creacion DESC, id DESC");
 $fotosTurismoStmt->execute();
@@ -234,6 +236,10 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
             <div class="mapa-contenido">
                 <iframe src="https://www.google.com/maps?q=Salto%2C%20Uruguay&output=embed" loading="lazy" title="Mapa turístico de Salto"></iframe>
                 <div class="mapa-lugares" id="mapa-turismo-lista">
+                    <label class="mapa-lugares__buscador">
+                        <span class="visually-hidden">Buscar un lugar o evento en el mapa</span>
+                        <input type="search" data-map-search placeholder="Buscar un lugar o evento..." autocomplete="off">
+                    </label>
                     <a href="https://www.google.com/maps/search/?api=1&query=Termas%20del%20Dayman%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Termas del Dayman</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Termas%20de%20la%20Arapey%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Termas de la Arapey</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Parque%20Benito%20Solari%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Parque Benito Solari</a>
@@ -245,6 +251,14 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                     <a href="https://www.google.com/maps/search/?api=1&query=Salto%20Shopping%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Salto Shopping</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Acuamania%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Acuamania</a>
                     <a href="https://www.google.com/maps/search/?api=1&query=Agua%20Clara%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Agua Clara</a>
+                    <?php foreach ($eventosMapa as $eventoMapa):
+                        $ubicacionMapa = trim((string) $eventoMapa['ubicacion']);
+                        $consultaMapa = $ubicacionMapa . ', Salto, Uruguay';
+                        $urlMapaEvento = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($consultaMapa);
+                    ?>
+                        <a href="<?= htmlspecialchars($urlMapaEvento, ENT_QUOTES, 'UTF-8') ?>" data-map-query="<?= htmlspecialchars($consultaMapa, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Evento: <?= htmlspecialchars((string) $eventoMapa['titulo'], ENT_QUOTES, 'UTF-8') ?> — <?= htmlspecialchars($ubicacionMapa, ENT_QUOTES, 'UTF-8') ?></a>
+                    <?php endforeach; ?>
+                    <p class="mapa-lugares__sin-resultados" data-map-empty hidden>No se encontraron ubicaciones.</p>
                     <button class="mapa-lugares__toggle" id="mapa-turismo-toggle" type="button" aria-expanded="false" aria-controls="mapa-turismo-lista" hidden>Ver más</button>
                 </div>
             </div>
@@ -252,7 +266,7 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
     </main>
 
     <script src="../js/script.js" defer></script>
-    <script src="../js/lugar-links.js?v=20261027-2" defer></script>
+    <script src="../js/lugar-links.js?v=20261028-event-map-1" defer></script>
     <?php if ($puedeAgregarFotosTurismo): ?>
         <script>
             const botonAgregarFotosTurismo = document.querySelector('.turismo-galeria-add__button');

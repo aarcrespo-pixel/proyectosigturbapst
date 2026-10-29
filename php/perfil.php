@@ -23,6 +23,9 @@ $avatarCropY = 50.0;
 $avatarCropZoom = max(1, min(2.5, (float) ($usuario['avatar_crop_zoom'] ?? 1)));
 
 $esPropio = !empty($_SESSION['usuario_id']) && (int) $_SESSION['usuario_id'] === $usuarioId;
+$perfilVolverUrl = !$esPropio && !empty($_SESSION['usuario_id'])
+    ? 'perfil.php?id=' . (int) $_SESSION['usuario_id']
+    : '../index.php';
 $perfilPuedeGestionar = $esPropio && in_array(strtolower((string) ($_SESSION['rol'] ?? '')), ['turista', 'administrador', 'organizador'], true);
 $seguido = false;
 $solicitudPendiente = false;
@@ -53,8 +56,8 @@ if (!(bool) $usuario['perfil_publico'] && !$esPropio && !$seguido) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Perfil privado | SIGTUR</title>
-        <link rel="stylesheet" href="../css/estilos.css">
-        <link rel="stylesheet" href="../css/perfil.css?v=20261027-unfollow-confirm-1">
+        <link rel="stylesheet" href="../css/estilos.css?v=20261028-comment-options-5">
+        <link rel="stylesheet" href="../css/perfil.css?v=20261028-comment-avatar-1">
     </head>
     <body class="perfil-publico-page">
         <main class="perfil-publico" data-user-id="<?= $usuarioId ?>" data-own-profile="0" data-profile-public="0" data-following="0" data-pending-follow="<?= $solicitudPendiente ? '1' : '0' ?>" data-csrf="<?= !empty($_SESSION['usuario_id']) ? htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') : '' ?>">
@@ -75,7 +78,7 @@ if (!(bool) $usuario['perfil_publico'] && !$esPropio && !$seguido) {
                 <?php else: ?>
                     <a class="perfil-action perfil-action--primary" href="login.php">Iniciar sesión para seguir</a>
                 <?php endif; ?>
-                <a class="perfil-private-card__back" href="../index.php">Volver al inicio</a>
+                <a class="perfil-private-card__back" href="<?= htmlspecialchars($perfilVolverUrl, ENT_QUOTES, 'UTF-8') ?>"><?= !$esPropio && !empty($_SESSION['usuario_id']) ? 'Volver a mi perfil' : 'Volver al inicio' ?></a>
             </section>
         </main>
         <script src="../js/tema.js" defer></script>
@@ -154,15 +157,15 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?> | SIGTUR</title>
-    <link rel="stylesheet" href="../css/estilos.css">
-    <link rel="stylesheet" href="../css/perfil.css?v=20261027-unfollow-confirm-1">
+    <link rel="stylesheet" href="../css/estilos.css?v=20261028-comment-options-5">
+    <link rel="stylesheet" href="../css/perfil.css?v=20261028-comment-avatar-1">
 </head>
 <body class="perfil-publico-page">
 <main class="perfil-publico" data-user-id="<?= $usuarioId ?>" data-following="<?= $seguido ? '1' : '0' ?>" data-pending-follow="<?= $solicitudPendiente ? '1' : '0' ?>" data-own-profile="<?= $esPropio ? '1' : '0' ?>" data-profile-public="<?= (bool) $usuario['perfil_publico'] ? '1' : '0' ?>" data-csrf="<?= !empty($_SESSION['usuario_id']) ? htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') : '' ?>">
     <div class="profile-header-actions">
-        <a href="../index.php" class="btn-volver-glass">
+        <a href="<?= htmlspecialchars($perfilVolverUrl, ENT_QUOTES, 'UTF-8') ?>" class="btn-volver-glass">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            <span>Volver</span>
+            <span><?= !$esPropio && !empty($_SESSION['usuario_id']) ? 'Volver a mi perfil' : 'Volver' ?></span>
         </a>
     </div>
     <div class="profile-header-tools">
@@ -351,7 +354,7 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
     </section>
 </div>
 
-<script src="../js/interacciones-tarjetas.js" defer></script>
+<script src="../js/interacciones-tarjetas.js?v=20261028-comment-options-2" defer></script>
 <script src="../js/tema.js" defer></script>
 <script src="../js/perfil.js?v=20261027-unfollow-confirm-1" defer></script>
 <script src="../js/translator.js" defer></script>

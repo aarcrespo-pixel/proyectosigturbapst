@@ -3,6 +3,7 @@ session_start();
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 require_once __DIR__ . '/helpers/consultas_eventos.php';
+require_once __DIR__ . '/helpers/censura.php';
 
 $usuario = sigtur_requerir_rol($pdo, ['organizador'], 'login.php', 'panel-organizador.php');
 $csrfToken = sigtur_csrf_token();
@@ -101,7 +102,13 @@ if ($consultas) {
                                         <div class="admin-question-chat__message <?= $esRespuestaEquipo ? 'admin-question-chat__message--organizer' : 'admin-question-chat__message--visitor' ?>" data-message-item data-message-type="evento" data-message-id="<?= (int) $mensajeConsulta['id'] ?>" data-can-edit="<?= $puedeEditarMensaje ? '1' : '0' ?>" data-can-delete="<?= $esMensajePropio ? '1' : '0' ?>">
                                             <strong><?= $esRespuestaEquipo ? htmlspecialchars(ucfirst($mensajeConsulta['autor_rol']), ENT_QUOTES, 'UTF-8') : htmlspecialchars($consulta['nombre_completo'], ENT_QUOTES, 'UTF-8') ?></strong>
                                             <details class="message-actions"><summary aria-label="Opciones del mensaje">⋮</summary><div class="message-actions__menu"><?php if (!$mensajeEliminado && $puedeEditarMensaje): ?><button type="button" data-message-action="edit">Editar</button><?php endif; ?><button type="button" data-message-action="delete-me"<?= $puedeEliminarMiMensaje ? '' : ' disabled' ?>>Eliminar para mí</button><?php if (!$mensajeEliminado && $esMensajePropio): ?><button type="button" data-message-action="delete-everyone">Eliminar para todos</button><?php endif; ?></div></details>
-                                            <p data-message-text><?= !$mensajeEliminado ? nl2br(htmlspecialchars($mensajeConsulta['mensaje'], ENT_QUOTES, 'UTF-8')) : 'Mensaje eliminado para todos' ?></p>
+                                            <p data-message-text><?= !$mensajeEliminado ? nl2br(htmlspecialchars(
+                                                $mensajeConsulta['autor_rol'] === 'turista'
+                                                    ? censurarComentario((string) $mensajeConsulta['mensaje'])
+                                                    : (string) $mensajeConsulta['mensaje'],
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            )) : 'Mensaje eliminado para todos' ?></p>
                                             <small><?= htmlspecialchars($mensajeConsulta['fecha_creacion'], ENT_QUOTES, 'UTF-8') ?></small>
                                         </div>
                                     <?php endforeach; ?>
@@ -109,6 +116,7 @@ if ($consultas) {
                             </details>
                             <form class="admin-form admin-reply-form" method="post" action="api/responder_consulta_evento.php">
                                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                                <input type="hidden" name="submission_key" value="<?= htmlspecialchars(bin2hex(random_bytes(16)), ENT_QUOTES, 'UTF-8') ?>">
                                 <input type="hidden" name="pregunta_id" value="<?= (int) $consulta['id'] ?>">
                                 <label>Responder al visitante
                                     <textarea name="respuesta" maxlength="2000" required></textarea>

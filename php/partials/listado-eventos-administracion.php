@@ -71,7 +71,7 @@
                                 </select>
                             </label>
                             <label>Precio
-                                <input type="number" min="0" step="0.01" name="precio" value="<?= htmlspecialchars((string) ($evento['precio'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                                <input type="text" maxlength="120" name="precio" value="<?= htmlspecialchars((string) ($evento['precio_texto'] ?? $evento['precio'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                             </label>
                             <label>Organizador
                                 <select name="organizador_id">

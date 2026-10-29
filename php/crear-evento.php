@@ -34,10 +34,6 @@ if ($accion !== 'crear') {
         http_response_code(404);
         exit('El evento no existe.');
     }
-    if (!$esAdministrador && $accion === 'eliminar' && (int) $eventoExistente['organizador_id'] !== $usuarioId) {
-        http_response_code(403);
-        exit('Solo puedes eliminar tus propios eventos.');
-    }
 }
 $nuevoOrganizadorId = $accion === 'crear' ? $usuarioId : (int) $eventoExistente['organizador_id'];
 if ($accion === 'editar' && $esAdministrador && isset($_POST['organizador_id'])) {
@@ -77,14 +73,26 @@ $ubicacion = trim($_POST['ubicacion'] ?? '');
 $categoria = trim($_POST['categoria'] ?? 'General');
 $tipoEntrada = trim($_POST['tipoEntrada'] ?? 'Gratuito');
 $precioEntrada = trim($_POST['precio'] ?? '');
+$precioTexto = $tipoEntrada === 'De Pago' ? $precioEntrada : '';
 $imagenActual = $accion === 'editar' ? (string) ($eventoExistente['imagen_portada'] ?? 'default.jpg') : 'default.jpg';
 $imagen = trim(is_string($_POST['imagen_portada'] ?? null) ? $_POST['imagen_portada'] : $imagenActual);
 
 /* Los campos obligatorios se validan en servidor porque el formulario puede
     ser enviado fuera del navegador o manipulado desde las herramientas web. */
-if ($titulo === '' || $descripcion === '' || $fecha === '' || $ubicacion === '') {
+if ($titulo === '' || $fecha === '' || $ubicacion === '') {
     http_response_code(422);
-    exit('Completa título, descripción, fecha y ubicación.');
+    exit('Completa título, fecha y ubicación.');
+}
+$longitudPrecioTexto = function_exists('mb_strlen')
+    ? mb_strlen($precioTexto, 'UTF-8')
+    : strlen($precioTexto);
+if ($longitudPrecioTexto > 120) {
+    http_response_code(422);
+    exit('El valor de la entrada no puede superar los 120 caracteres.');
+}
+if ($tipoEntrada === 'De Pago' && $precioTexto === '') {
+    http_response_code(422);
+    exit('Escribe el precio o valor de la entrada.');
 }
 
 $archivoImagen = $_FILES['imagen'] ?? null;
@@ -144,7 +152,7 @@ if ($accion === 'crear') {
 
 /* El Prepared Statement separa datos y SQL, evitando inyección y dejando
    que lastInsertId() identifique el evento que se acaba de publicar. */
-$precio = $tipoEntrada === 'De Pago' && is_numeric($precioEntrada) ? (float) $precioEntrada : null;
+$precio = $precioTexto !== '' && is_numeric($precioTexto) ? (float) $precioTexto : null;
 /* El precio solo se persiste para eventos pagos; los gratuitos quedan con NULL
     y el filtro SQL puede tratarlos como cero mediante COALESCE. */
 /* Buscamos la ubicación normalizada antes del INSERT para que los eventos
@@ -164,13 +172,14 @@ $parametrosEvento = [
     ':categoria' => $categoria,
     ':tipo_entrada' => $tipoEntrada === 'De Pago' ? 'De Pago' : 'Gratuito',
     ':precio' => $precio,
+    ':precio_texto' => $precioTexto !== '' ? $precioTexto : null,
     ':imagen' => $imagen !== '' ? $imagen : 'default.jpg',
     ':es_pasado' => strtotime($fecha) < strtotime(date('Y-m-d')) ? 1 : 0,
     ':organizador' => $accion === 'crear' ? $usuarioId : $nuevoOrganizadorId,
 ];
 
 if ($accion === 'editar') {
-    $actualizar = $pdo->prepare('UPDATE eventos SET titulo = :titulo, descripcion = :descripcion, fecha = :fecha, ubicacion = :ubicacion, lugar_id = :lugar_id, categoria = :categoria, tipo_entrada = :tipo_entrada, precio = :precio, imagen_portada = :imagen, es_pasado = :es_pasado, organizador_id = :organizador WHERE id = :id');
+    $actualizar = $pdo->prepare('UPDATE eventos SET titulo = :titulo, descripcion = :descripcion, fecha = :fecha, ubicacion = :ubicacion, lugar_id = :lugar_id, categoria = :categoria, tipo_entrada = :tipo_entrada, precio = :precio, precio_texto = :precio_texto, imagen_portada = :imagen, es_pasado = :es_pasado, organizador_id = :organizador WHERE id = :id');
     $parametrosEvento[':id'] = $eventoId;
     unset($parametrosEvento[':slug']);
     try {
@@ -181,11 +190,13 @@ if ($accion === 'editar') {
         }
         throw $error;
     }
-    header('Location: evento.php?id=' . $eventoId);
+    header('Location: ' . ($esAdministrador
+        ? 'evento.php?id=' . $eventoId
+        : 'panel-organizador.php?evento_actualizado=' . $eventoId . '#evento-' . $eventoId));
     exit;
 }
 
-$insertar = $pdo->prepare('INSERT INTO eventos (titulo, slug, descripcion, fecha, ubicacion, lugar_id, categoria, tipo_entrada, precio, imagen_portada, es_pasado, organizador_id) VALUES (:titulo, :slug, :descripcion, :fecha, :ubicacion, :lugar_id, :categoria, :tipo_entrada, :precio, :imagen, :es_pasado, :organizador)');
+$insertar = $pdo->prepare('INSERT INTO eventos (titulo, slug, descripcion, fecha, ubicacion, lugar_id, categoria, tipo_entrada, precio, precio_texto, imagen_portada, es_pasado, organizador_id) VALUES (:titulo, :slug, :descripcion, :fecha, :ubicacion, :lugar_id, :categoria, :tipo_entrada, :precio, :precio_texto, :imagen, :es_pasado, :organizador)');
 try {
     $insertar->execute($parametrosEvento);
 } catch (Throwable $error) {
@@ -194,6 +205,7 @@ try {
     }
     throw $error;
 }
+$nuevoEventoId = (int) $pdo->lastInsertId();
 
 sigtur_notificar_turistas(
     $pdo,
@@ -204,5 +216,5 @@ sigtur_notificar_turistas(
 
 /* Redirigimos usando el ID generado por MySQL, no el slug recibido, para abrir
     exactamente la fila recién creada aunque el slug haya sido numerado. */
-header('Location: evento.php?id=' . (int) $pdo->lastInsertId());
+header('Location: evento.php?id=' . $nuevoEventoId);
 exit;

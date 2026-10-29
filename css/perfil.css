@@ -114,7 +114,7 @@
 .perfil-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
 .perfil-gallery__item { overflow: hidden; border: 1px solid var(--perfil-line); border-radius: 16px; background: rgba(255,255,255,.72); }
 .perfil-gallery__open { display: block; width: 100%; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
-.perfil-gallery__item img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; transition: transform 180ms ease; }
+.perfil-gallery__open > img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; transition: transform 180ms ease; }
 .perfil-gallery__open:hover img { transform: scale(1.025); }
 .perfil-gallery__caption { padding: .8rem .9rem 1rem; }
 .perfil-gallery__footer { display: flex; align-items: center; justify-content: space-between; gap: .5rem; min-height: 56px; }
@@ -725,7 +725,7 @@ body[data-tema="oscuro"] main:has(#editForm) .back-link {
     box-shadow: 0 10px 24px rgba(26, 39, 52, .1);
 }
 
-.perfil-gallery__item img {
+.perfil-gallery__open > img {
     aspect-ratio: 1 / 1;
 }
 

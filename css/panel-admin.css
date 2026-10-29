@@ -555,7 +555,7 @@ body.admin-panel-page {
 
 .admin-event__summary {
     display: grid;
-    grid-template-columns: 64px minmax(0, 1fr) auto;
+    grid-template-columns: 64px minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 16px;
     padding: 18px;
@@ -620,22 +620,25 @@ body.admin-panel-page {
     padding: 8px 0 8px 10px;
 }
 
+.admin-event__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-event__feature-form {
+    margin: 0;
+}
+
+.admin-event__edit-toggle {
+    min-height: 36px;
+    padding: 0 14px;
+    white-space: nowrap;
+}
+
 .admin-event__editor {
     border-top: 1px solid var(--admin-line);
     background: #fbfcfd;
-}
-
-.admin-event__editor summary {
-    padding: 13px 18px;
-    color: var(--admin-accent-dark);
-    font-size: .86rem;
-    font-weight: 800;
-    cursor: pointer;
-    list-style-position: inside;
-}
-
-.admin-event__editor[open] summary {
-    border-bottom: 1px solid var(--admin-line);
 }
 
 .admin-event__editor > .admin-form {
@@ -696,6 +699,18 @@ body.admin-panel-page {
     color: var(--admin-accent-dark);
     font-weight: 800;
     cursor: pointer;
+}
+
+.admin-support-chat > summary [data-chat-label-open] {
+    display: none;
+}
+
+.admin-support-chat[open] > summary [data-chat-label-open] {
+    display: inline;
+}
+
+.admin-support-chat[open] > summary [data-chat-label-closed] {
+    display: none;
 }
 
 .admin-support-chat__actions {
@@ -854,9 +869,9 @@ body.admin-panel-page {
         padding: 14px;
     }
 
-    .admin-event__open {
+    .admin-event__actions {
         grid-column: 2;
-        padding: 0;
+        flex-wrap: wrap;
     }
 
     .admin-question,

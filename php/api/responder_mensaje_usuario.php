@@ -4,6 +4,7 @@ require_once __DIR__ . '/../conexion.php';
 require_once __DIR__ . '/../helpers/autorizacion.php';
 require_once __DIR__ . '/../helpers/notificaciones.php';
 require_once __DIR__ . '/../helpers/consultas_eventos.php';
+require_once __DIR__ . '/../helpers/idempotencia.php';
 
 $usuario = sigtur_usuario_actual($pdo);
 if (!$usuario || !in_array($usuario['rol'], ['administrador', 'organizador'], true)) {
@@ -76,6 +77,15 @@ if (!$id || $respuesta === '' || $longitud > 2000) {
     http_response_code(422);
     exit('La respuesta debe tener entre 1 y 2000 caracteres.');
 }
+$claveEnvio = $_POST['submission_key'] ?? null;
+$ambitoEnvio = 'respuesta-' . $tipo . ':' . $id . ':' . (int) $usuario['id'];
+if (sigtur_envio_ya_procesado($ambitoEnvio, $claveEnvio)) {
+    $destino = $tipo === 'soporte'
+        ? '../mensajes-usuarios.php?chat=' . $id . '#soporte-' . $id
+        : '../mensajes-usuarios.php#' . $tipo . '-' . $id;
+    header('Location: ' . $destino);
+    exit;
+}
 
 if ($tipo === 'evento') {
     sigtur_asegurar_mensajes_consulta_evento($pdo);
@@ -102,6 +112,7 @@ if ($tipo === 'evento') {
     $pdo->prepare('UPDATE preguntas_eventos SET respuesta = :respuesta WHERE id = :id')
         ->execute([':respuesta' => $respuesta, ':id' => $id]);
     $pdo->commit();
+    sigtur_marcar_envio_procesado($ambitoEnvio, $claveEnvio);
 
     sigtur_crear_notificacion(
         $pdo,
@@ -137,6 +148,7 @@ if ($tipo === 'evento') {
             ':id' => $id,
         ]);
     $pdo->commit();
+    sigtur_marcar_envio_procesado($ambitoEnvio, $claveEnvio);
 
     if ($destinatarioId > 0) {
         sigtur_crear_notificacion(
@@ -185,6 +197,7 @@ if ($tipo === 'evento') {
         ':id' => $id,
     ]);
     $pdo->commit();
+    sigtur_marcar_envio_procesado($ambitoEnvio, $claveEnvio);
 
     sigtur_crear_notificacion(
         $pdo,
@@ -198,5 +211,8 @@ if ($tipo === 'evento') {
     exit('El tipo de mensaje no es válido.');
 }
 
-header('Location: ../mensajes-usuarios.php#' . $tipo . '-' . $id);
+$destino = $tipo === 'soporte'
+    ? '../mensajes-usuarios.php?chat=' . $id . '#soporte-' . $id
+    : '../mensajes-usuarios.php#' . $tipo . '-' . $id;
+header('Location: ' . $destino);
 exit;

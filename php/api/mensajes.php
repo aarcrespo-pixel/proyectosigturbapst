@@ -28,6 +28,7 @@ try {
     require_once __DIR__ . '/../helpers/censura.php';
     require_once __DIR__ . '/../helpers/imagenes.php';
     require_once __DIR__ . '/../helpers/notificaciones.php';
+    require_once __DIR__ . '/../helpers/idempotencia.php';
     $usuarioActual = sigtur_usuario_actual($pdo);
     if (!$usuarioActual) responderMensajes(['success' => false, 'status' => 'error', 'message' => 'Sesión no iniciada'], 401);
     $usuarioId = (int) $usuarioActual['id'];
@@ -56,6 +57,11 @@ try {
         if ($textoConsulta === '' || mb_strlen($textoConsulta) > 500) {
             // FIX RESPUESTA: todos los errores usan status, success y message.
             responderMensajes(['status' => 'error', 'success' => false, 'message' => 'La consulta debe tener entre 1 y 500 caracteres.'], 422);
+        }
+        $claveEnvio = $_POST['submission_key'] ?? null;
+        $ambitoEnvio = 'consulta-soporte:' . $usuarioId;
+        if (sigtur_envio_ya_procesado($ambitoEnvio, $claveEnvio)) {
+            responderMensajes(['status' => 'success', 'success' => true, 'message' => 'Consulta enviada a administradores y organizadores.'], 200);
         }
         $equipo = $pdo->query("SELECT id FROM usuarios WHERE LOWER(rol) IN ('administrador', 'admin', 'moderador', 'organizador')")->fetchAll(PDO::FETCH_COLUMN);
         if (!$equipo) {
@@ -91,6 +97,7 @@ try {
             'consulta'
         );
         $pdo->commit();
+        sigtur_marcar_envio_procesado($ambitoEnvio, $claveEnvio);
         // FIX RESPUESTA: soporte comparte el contrato JSON del envío directo.
         responderMensajes(['status' => 'success', 'success' => true, 'id' => $consultaId, 'hora' => date('H:i'), 'message' => 'Consulta enviada a administradores y organizadores.'], 201);
     }

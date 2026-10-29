@@ -9,6 +9,12 @@ window.chatIntervalId = window.chatIntervalId || null;
        módulo aunque la página no monte el widget flotante de chats. */
     const soporteForm = document.querySelector('[data-soporte-mensajes]');
     if (soporteForm) {
+        const nuevaClaveEnvio = () => {
+            const bytes = new Uint8Array(16);
+            window.crypto.getRandomValues(bytes);
+            return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+        };
+        let claveEnvioSoporte = nuevaClaveEnvio();
         soporteForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const texto = soporteForm.querySelector('[name="mensaje"]')?.value.trim() || '';
@@ -26,11 +32,12 @@ window.chatIntervalId = window.chatIntervalId || null;
                 const respuesta = await fetch(soporteForm.action, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', Accept: 'application/json' },
-                    body: new URLSearchParams({ accion: 'consulta', mensaje: texto, contexto, csrf_token: csrfToken })
+                    body: new URLSearchParams({ accion: 'consulta', mensaje: texto, contexto, csrf_token: csrfToken, submission_key: claveEnvioSoporte })
                 });
                 const datos = await respuesta.json().catch(() => ({}));
                 if (!respuesta.ok || datos.success !== true) throw new Error(datos.message || datos.error || 'No se pudo enviar la consulta.');
                 soporteForm.reset();
+                claveEnvioSoporte = nuevaClaveEnvio();
                 if (estado) estado.textContent = datos.message || 'Consulta enviada.';
             } catch (error) {
                 if (estado) estado.textContent = error.message;

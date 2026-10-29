@@ -4,6 +4,7 @@ require_once __DIR__ . '/../conexion.php';
 require_once __DIR__ . '/../helpers/autorizacion.php';
 require_once __DIR__ . '/../helpers/notificaciones.php';
 require_once __DIR__ . '/../helpers/consultas_eventos.php';
+require_once __DIR__ . '/../helpers/idempotencia.php';
 $usuario = sigtur_usuario_actual($pdo);
 if (!$usuario) {
     header('Location: ../login.php');
@@ -22,6 +23,14 @@ if (!sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_
 sigtur_asegurar_mensajes_consulta_evento($pdo);
 $accion = (string) ($_POST['accion'] ?? 'responder');
 $preguntaId = (int) ($_POST['pregunta_id'] ?? 0);
+$claveEnvio = $_POST['submission_key'] ?? null;
+$ambitoEnvio = 'consulta-evento:' . $preguntaId . ':' . (int) $usuario['id'] . ':' . $accion;
+if (in_array($accion, ['mensaje', 'responder', 'respuesta'], true)
+    && sigtur_envio_ya_procesado($ambitoEnvio, $claveEnvio)) {
+    $destino = $accion === 'mensaje' ? '../soporte.php#chat-organizadores' : '../consultas-eventos-organizador.php?chat=' . $preguntaId . '#consulta-' . $preguntaId;
+    header('Location: ' . $destino);
+    exit;
+}
 $consulta = $pdo->prepare('SELECT p.evento_slug, p.usuario_id, p.pregunta, e.organizador_id, e.titulo
     FROM preguntas_eventos p
     INNER JOIN eventos e ON e.slug = p.evento_slug
@@ -99,6 +108,7 @@ if ($accion === 'mensaje') {
     ]);
     $pdo->prepare('UPDATE preguntas_eventos SET respuesta = NULL WHERE id = :id')->execute([':id' => $preguntaId]);
     $pdo->commit();
+    sigtur_marcar_envio_procesado($ambitoEnvio, $claveEnvio);
 
     sigtur_notificar_consulta_evento(
         $pdo,
@@ -131,6 +141,7 @@ $agregarRespuesta->execute([
 $actualizar = $pdo->prepare('UPDATE preguntas_eventos SET respuesta = :respuesta WHERE id = :id');
 $actualizar->execute([':respuesta' => $mensajeTexto, ':id' => $preguntaId]);
 $pdo->commit();
+sigtur_marcar_envio_procesado($ambitoEnvio, $claveEnvio);
 
 $destinatarioId = (int) ($pregunta['usuario_id'] ?? 0);
 if ($destinatarioId > 0) {

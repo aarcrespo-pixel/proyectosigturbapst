@@ -124,6 +124,7 @@ CREATE TABLE IF NOT EXISTS `eventos` (
   `categoria` varchar(100) NOT NULL,
   `tipo_entrada` varchar(30) NOT NULL DEFAULT 'Gratuito',
   `precio` decimal(10,2) DEFAULT NULL,
+  `precio_texto` varchar(120) DEFAULT NULL,
   `imagen_portada` varchar(255) DEFAULT 'default.jpg',
   `es_pasado` tinyint(1) DEFAULT 0,
   `organizador_id` int NOT NULL,

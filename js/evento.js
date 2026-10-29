@@ -1,4 +1,9 @@
 (() => {
+    const nuevaClaveEnvio = () => {
+        const bytes = new Uint8Array(16);
+        window.crypto.getRandomValues(bytes);
+        return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    };
     const form = document.getElementById('form-comentario-evento');
     if (!form) return;
 
@@ -55,6 +60,7 @@
             }
 
             this.reset();
+            this.elements.namedItem('submission_key').value = nuevaClaveEnvio();
             mostrarToastExito(datos.message || '¡Pregunta/Comentario enviado con éxito!');
             if (typeof window.cargarComentarios === 'function') window.cargarComentarios();
         } catch (error) {

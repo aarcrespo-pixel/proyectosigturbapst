@@ -29,6 +29,29 @@ function sigtur_url_imagen_subida(string $valor, string $carpeta, string $fallba
     return $valor;
 }
 
+function sigtur_url_imagen_evento(string $slug, string $valor, string $fallback = '../img/porco.avif'): string
+{
+    $url = sigtur_url_imagen_subida($valor, 'eventos', $fallback);
+    if (!str_contains(strtolower($url), 'encrypted-tbn')) {
+        return $url;
+    }
+
+    $imagenesCatalogo = [
+        'bambola' => '../img/bambi.jpg',
+        'carrera-de-bicicleta' => '../img/moto_cross.jpg',
+        'circuito-en-bicicleta' => '../img/evento2.jpg',
+        'copa-de-natacion' => '../img/TER%202.jpg',
+        'futbol-x5' => '../img/lsf.jpg',
+        'la-ferne' => '../img/porco.avif',
+        'polo' => '../img/porco.avif',
+        'rally' => '../img/moto_cross.jpg',
+        'streetball-salto' => '../img/lsb.jpg',
+        'torneo-de-beach-volley' => '../img/TER%202.jpg',
+    ];
+
+    return $imagenesCatalogo[$slug] ?? $url;
+}
+
 function sigtur_nombre_imagen_desde_ruta(string $valor, string $prefijoUploads): string
 {
     $valor = str_replace('\\', '/', $valor);

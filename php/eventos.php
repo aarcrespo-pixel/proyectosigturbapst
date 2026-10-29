@@ -4,6 +4,7 @@ require_once __DIR__ . '/helpers/autorizacion.php';
 require_once __DIR__ . '/helpers/imagenes.php';
 $usuarioActual = sigtur_usuario_actual($pdo);
 $puedeGestionarEventos = $usuarioActual && in_array($usuarioActual['rol'], ['organizador', 'administrador'], true);
+$puedeCrearEvento = $usuarioActual && $usuarioActual['rol'] === 'organizador';
 $csrfToken = $puedeGestionarEventos ? sigtur_csrf_token() : '';
 $fotosGaleriaEventos = $pdo->query("SELECT g.id, g.imagen, g.titulo, g.descripcion, g.tipo_evento, g.usuario_id,
         u.nombre_completo AS usuario_nombre, u.perfil_publico AS usuario_perfil_publico, g.fecha_creacion
@@ -24,15 +25,38 @@ unset($fotoGaleriaEvento);
 /* La consulta base excluye eventos finalizados y ordena por fecha para que el
    listado principal sea una agenda real, no una copia del catálogo JS. */
 $eventosDesdeBd = $pdo->query('SELECT * FROM eventos WHERE es_pasado = 0 AND fecha >= CURDATE() ORDER BY fecha ASC, id DESC')->fetchAll();
-$eventosAnterioresDesdeBd = $pdo->query('SELECT * FROM eventos WHERE es_pasado = 1 OR fecha < CURDATE() ORDER BY fecha DESC, id DESC')->fetchAll();
+$eventosDestacadosDesdeBd = $pdo->query('SELECT e.id, e.titulo, e.slug, e.categoria, e.ubicacion, e.imagen_portada
+    FROM eventos_destacados d
+    INNER JOIN eventos e ON e.id = d.evento_id
+    WHERE e.es_pasado = 0 AND e.fecha >= CURDATE()
+    ORDER BY d.orden ASC, d.fecha_destacado ASC, e.id DESC')->fetchAll();
+$eventosAnterioresDesdeBd = $pdo->query('SELECT * FROM eventos
+    WHERE fecha < CURDATE()
+        AND fecha >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+    ORDER BY fecha DESC, id DESC')->fetchAll();
 foreach ($eventosDesdeBd as &$evento) {
-    $evento['imagen_portada'] = sigtur_url_imagen_subida((string) ($evento['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif');
+    $evento['imagen_portada'] = sigtur_url_imagen_evento((string) $evento['slug'], (string) ($evento['imagen_portada'] ?? ''));
 }
 unset($evento);
+foreach ($eventosDestacadosDesdeBd as &$eventoDestacado) {
+    $eventoDestacado['imagen_portada'] = sigtur_url_imagen_evento((string) $eventoDestacado['slug'], (string) ($eventoDestacado['imagen_portada'] ?? ''));
+}
+unset($eventoDestacado);
 foreach ($eventosAnterioresDesdeBd as &$eventoAnterior) {
-    $eventoAnterior['imagen_portada'] = sigtur_url_imagen_subida((string) ($eventoAnterior['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif');
+    $eventoAnterior['imagen_portada'] = sigtur_url_imagen_evento((string) $eventoAnterior['slug'], (string) ($eventoAnterior['imagen_portada'] ?? ''));
 }
 unset($eventoAnterior);
+$ubicacionesEventosMapa = [];
+foreach (array_merge($eventosDesdeBd, $eventosAnterioresDesdeBd) as $eventoMapa) {
+    $ubicacionMapa = trim((string) ($eventoMapa['ubicacion'] ?? ''));
+    if ($ubicacionMapa === '') {
+        continue;
+    }
+    $ubicacionNormalizada = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $ubicacionMapa) ?: $ubicacionMapa;
+    $claveUbicacionMapa = strtolower(preg_replace('/\s+/', ' ', $ubicacionNormalizada) ?? $ubicacionNormalizada);
+    $ubicacionesEventosMapa[$claveUbicacionMapa] = $ubicacionesEventosMapa[$claveUbicacionMapa] ?? $ubicacionMapa;
+}
+asort($ubicacionesEventosMapa, SORT_LOCALE_STRING);
 $eventoIdsPorSlug = [];
 foreach ($pdo->query('SELECT id, slug FROM eventos')->fetchAll() as $eventoCatalogo) {
     $eventoIdsPorSlug[(string) $eventoCatalogo['slug']] = (int) $eventoCatalogo['id'];
@@ -67,7 +91,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     $consultaFiltrada->execute($parametros);
     $eventosFiltrados = $consultaFiltrada->fetchAll();
     foreach ($eventosFiltrados as &$eventoFiltrado) {
-        $eventoFiltrado['imagen_portada'] = sigtur_url_imagen_subida((string) ($eventoFiltrado['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif');
+        $eventoFiltrado['imagen_portada'] = sigtur_url_imagen_evento((string) $eventoFiltrado['slug'], (string) ($eventoFiltrado['imagen_portada'] ?? ''));
     }
     unset($eventoFiltrado);
     echo json_encode($eventosFiltrados, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -89,7 +113,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Estilos CSS -->
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>"> <!-- Estilos generales -->
-    <link rel="stylesheet" href="../css/eventos.css"> <!-- Estilos específicos de eventos -->
+    <link rel="stylesheet" href="../css/eventos.css?v=20261028-event-price-text-1"> <!-- Estilos específicos de eventos -->
 </head>
 
 <body class="page-eventos">
@@ -169,13 +193,13 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         <section class="seccion eventos-principales">
             <div class="titulo-seccion eventos-header">
                 <h2>Listado de Eventos</h2>
-                <div class="eventos-header-actions"><button type="button" class="btn-filtros" id="btn-filtros" aria-expanded="false">Filtros ⚙️</button><?php if ($puedeGestionarEventos): ?><button type="button" class="btn-crear-evento" id="btn-crear-evento">Crear Evento +</button><?php endif; ?></div>
+                <div class="eventos-header-actions"><button type="button" class="btn-filtros" id="btn-filtros" aria-expanded="false">Filtros ⚙️</button><?php if ($puedeCrearEvento): ?><button type="button" class="btn-crear-evento" id="btn-crear-evento">Crear Evento +</button><?php endif; ?></div>
             </div>
             <div class="eventos-lista" id="eventos-principales-contenedor">
                 <?php foreach ($eventosDesdeBd as $evento): ?>
                     <article class="evento-card" data-item-key="evento-<?= (int) $evento['id'] ?>" data-engagement="like-only">
                         <div class="evento-card-media"><img src="<?= htmlspecialchars($evento['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy"></div>
-                        <div class="evento-card-body"><span class="categoria"><?= htmlspecialchars($evento['categoria'] . ' · ' . ($evento['tipo_entrada'] ?? 'Gratuito'), ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><p class="lugar"><?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></p></div>
+                        <div class="evento-card-body"><span class="categoria"><?= htmlspecialchars($evento['categoria'] . ' · ' . ($evento['tipo_entrada'] ?? 'Gratuito'), ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><p class="lugar"><?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></p><?php $valorEntrada = trim((string) ($evento['precio_texto'] ?? $evento['precio'] ?? '')); ?><?php if (($evento['tipo_entrada'] ?? '') === 'De Pago' && $valorEntrada !== ''): ?><p class="precio-evento"><?= htmlspecialchars($valorEntrada, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?></div>
                         <div class="evento-card-action"><div class="fecha-protagonista"><span class="fecha-mes"><?= htmlspecialchars(strtoupper(date('M', strtotime($evento['fecha']))), ENT_QUOTES, 'UTF-8') ?></span><span class="fecha-dia"><?= htmlspecialchars(date('d', strtotime($evento['fecha'])), ENT_QUOTES, 'UTF-8') ?></span></div><a href="evento.php?id=<?= (int) $evento['id'] ?>" class="boton-amarillo">Ver más</a></div>
                     </article>
                 <?php endforeach; ?>
@@ -183,14 +207,14 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
             <button class="eventos-list-toggle" id="eventos-principales-toggle" type="button" data-event-list="principales" aria-expanded="false" aria-controls="eventos-principales-contenedor" hidden>Ver más</button>
         </section>
 
-        <?php if ($puedeGestionarEventos): ?><div class="form-evento-overlay" id="form-evento-overlay" aria-hidden="true">
+        <?php if ($puedeCrearEvento): ?><div class="form-evento-overlay" id="form-evento-overlay" aria-hidden="true">
             <div class="form-evento-modal" role="dialog" aria-modal="true" aria-labelledby="form-evento-title">
                 <button class="form-evento-close" id="form-evento-close" type="button" aria-label="Cerrar formulario">×</button>
                 <div class="form-evento-header">
                     <h3 id="form-evento-title">Crear nuevo evento</h3>
                     <p>Completa los datos para agregar un nuevo evento a la plataforma.</p>
                 </div>
-                <form id="form-nuevo-evento" class="form-evento" method="post" action="crear-evento.php" novalidate>
+                <form id="form-nuevo-evento" class="form-evento" method="post" action="crear-evento.php" enctype="multipart/form-data" novalidate>
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                     <div class="form-error" id="form-error" role="alert"></div>
 
@@ -204,7 +228,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                         </label>
 
                         <label class="field field-description" id="field-descripcion" hidden>
-                            <span>Descripción</span>
+                            <span>Descripción (opcional)</span>
                             <textarea id="evento-descripcion" name="descripcion" rows="4" placeholder="Describe la propuesta, el ambiente o los puntos destacados del evento."></textarea>
                         </label>
                     </div>
@@ -300,9 +324,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                         <label class="field upload-field">
                             <span>Imagen del evento</span>
                             <div class="upload-zone" id="upload-zone">
-                                <input type="file" id="evento-imagen" name="imagen" accept="image/*" hidden>
+                                <input type="file" id="evento-imagen" name="imagen" accept="image/jpeg,image/png,image/webp" hidden>
                                 <button type="button" class="upload-button" id="upload-button">Subir archivo</button>
                                 <p>Selecciona una imagen en formato JPG, PNG o WEBP.</p>
+                                <img class="upload-preview" id="upload-preview" alt="Vista previa de la portada del evento" hidden>
                                 <p class="upload-name" id="upload-name">Sin archivo seleccionado</p>
                             </div>
                         </label>
@@ -314,8 +339,8 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                                 <option value="De Pago">De Pago</option>
                             </select>
                             <label class="field field-price" id="precio-field" hidden>
-                                <span>Precio</span>
-                                <input type="text" id="evento-precio" name="precio" placeholder="$250">
+                                <span>Precio o valor de la entrada</span>
+                                <input type="text" id="evento-precio" name="precio" maxlength="120" placeholder="$250, a voluntad o consultar">
                             </label>
                         </div>
                     </div>
@@ -424,11 +449,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
             <div class="mapa-contenido">
                 <iframe src="https://www.google.com/maps?q=Salto%2C%20Uruguay&output=embed" loading="lazy" title="Mapa de eventos en Salto"></iframe>
                 <div class="mapa-lugares" id="mapa-eventos-lugares">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Costanera%20Norte%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Costanera Norte</a>
-                    <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20Artigas%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza Artigas</a>
-                    <a href="https://www.google.com/maps/search/?api=1&query=Plaza%20de%20Deportes%2C%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Plaza de Deportes</a>
-                    <a href="https://www.google.com/maps/search/?api=1&query=Playa%20Salto%2C%20Uruguay" target="_blank" rel="noopener">Playa Salto</a>
-                    <button class="mapa-lugares__toggle" id="mapa-eventos-toggle" type="button" aria-expanded="false" aria-controls="mapa-eventos-lugares" hidden>Ver más</button>
+                    <?php foreach ($ubicacionesEventosMapa as $index => $ubicacionMapa): ?>
+                        <a href="https://www.google.com/maps/search/?api=1&amp;query=<?= rawurlencode($ubicacionMapa . ', Salto, Uruguay') ?>" target="_blank" rel="noopener" <?= $index >= 5 ? 'hidden' : '' ?>><?= htmlspecialchars($ubicacionMapa, ENT_QUOTES, 'UTF-8') ?></a>
+                    <?php endforeach; ?>
+                    <button class="mapa-lugares__toggle" id="mapa-eventos-toggle" type="button" aria-expanded="false" aria-controls="mapa-eventos-lugares" <?= count($ubicacionesEventosMapa) <= 5 ? 'hidden' : '' ?>>Ver más</button>
                 </div>
             </div>
         </section>
@@ -463,9 +487,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     </div>
 
     <script src="../js/script.js" defer></script>
-    <script src="../js/interacciones-tarjetas.js" defer></script>
+    <script src="../js/interacciones-tarjetas.js?v=20261028-comment-options-2" defer></script>
     <script>window.sigturEventoIds = <?= json_encode($eventoIdsPorSlug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosDesdeBd = <?= json_encode($eventosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
+    <script>window.eventosDestacadosDesdeBd = <?= json_encode($eventosDestacadosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosAnterioresDesdeBd = <?= json_encode($eventosAnterioresDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.galeriaDesdeBd = <?= json_encode($fotosGaleriaEventos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;</script>
     <script>window.gestionGaleria = <?= json_encode([
@@ -474,7 +499,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         'rol' => (string) ($usuarioActual['rol'] ?? ''),
         'csrfToken' => $csrfToken,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script src="../js/eventos.js?v=20261027-1" defer></script>
+    <script src="../js/eventos.js?v=20261029-event-card-map-3" defer></script>
 </body>
 
 </html>

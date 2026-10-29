@@ -1,4 +1,10 @@
 (function () {
+    const nuevaClaveEnvio = () => {
+        const bytes = new Uint8Array(16);
+        window.crypto.getRandomValues(bytes);
+        return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('faq-form');
         const submit = document.getElementById('faq-submit');
@@ -41,6 +47,7 @@
                 if (!response.ok || !data.success) throw new Error(data.message || 'No se pudo enviar la pregunta.');
 
                 form.reset();
+                form.elements.namedItem('submission_key').value = nuevaClaveEnvio();
                 if (toast) {
                     toast.textContent = '¡Tu pregunta ha sido enviada! Un administrador la revisará pronto.';
                     toast.hidden = false;

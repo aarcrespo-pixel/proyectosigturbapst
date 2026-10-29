@@ -7,6 +7,7 @@ require_once __DIR__ . '/helpers/imagenes.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 require_once __DIR__ . '/helpers/notificaciones.php';
 require_once __DIR__ . '/helpers/consultas_eventos.php';
+require_once __DIR__ . '/helpers/censura.php';
 
 $eventos = [
     'bambola' => ['La Bambola', 'Discoteca', '+18', 'Costanera Sur 1535', 'Todos los fines de semana.', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRh8BnVQ1qdPDXqoHVHylKrGhwk3guImN0d1ZRYbBNmSXoKPhqmCE-pMsE&s', '2026-09-19', false, -31.3921, -57.9606],
@@ -53,6 +54,7 @@ if ($esEventoDinamico) {
     $descripcion = $eventoDb['descripcion'];
     $imagen = sigtur_url_imagen_subida((string) ($eventoDb['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif');
     $fecha = $eventoDb['fecha'];
+    $valorEvento = trim((string) ($eventoDb['precio_texto'] ?? $eventoDb['precio'] ?? ''));
     $aireLibre = false;
     $latitud = -31.383;
     $longitud = -57.962;
@@ -60,7 +62,9 @@ if ($esEventoDinamico) {
     $slug = basename($_SERVER['SCRIPT_FILENAME'] ?? 'detalle-evento.php', '.php');
     $evento = $eventos[$slug] ?? ['Evento recomendado', 'Experiencia', 'Todo público', 'Salto', 'Descubrí propuestas para disfrutar la ciudad.', '../../img/porco.avif', '2026-12-31', false, -31.383, -57.962];
     [$nombre, $categoria, $edad, $lugar, $descripcion, $imagen, $fecha, $aireLibre, $latitud, $longitud] = $evento;
+    $valorEvento = '';
 }
+$imagen = sigtur_url_imagen_evento($slug, (string) $imagen);
 $usuarioId = (int) ($_SESSION['usuario_id'] ?? 0);
 $usuarioRolEvento = 'turista';
 if ($usuarioId > 0) {
@@ -118,7 +122,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['accion']))
         exit;
     }
     if ($_POST['accion'] === 'pregunta') {
-        $pregunta = trim((string) ($_POST['pregunta'] ?? ''));
+        $pregunta = censurarComentario(trim((string) ($_POST['pregunta'] ?? '')));
         if ($pregunta === '' || mb_strlen($pregunta) > 500) {
             http_response_code(422);
             echo json_encode(['error' => 'La pregunta debe tener entre 1 y 500 caracteres']);
@@ -147,37 +151,49 @@ $asistentes = (int) $stmt->fetchColumn();
 $stmt = $pdo->prepare('SELECT u.nombre_completo, u.avatar FROM inscripciones_eventos i INNER JOIN usuarios u ON u.id = i.usuario_id WHERE i.evento_slug = :evento ORDER BY i.fecha_registro DESC LIMIT 4');
 $stmt->execute([':evento' => $slug]);
 $avatares = $stmt->fetchAll();
-$stmt = $pdo->prepare("SELECT p.id AS pregunta_id, p.usuario_id, p.pregunta, p.respuesta,
+$stmt = $pdo->prepare("SELECT p.id AS pregunta_id, p.usuario_id, p.pregunta,
         pregunta_msg.id AS pregunta_mensaje_id, pregunta_msg.eliminado AS pregunta_eliminada,
-        respuesta_msg.id AS respuesta_mensaje_id, respuesta_msg.autor_id AS respuesta_autor_id,
-        respuesta_msg.eliminado AS respuesta_eliminada,
-        EXISTS (SELECT 1 FROM mensajes_conversacion_ocultos oculto
-            WHERE oculto.tipo = 'evento' AND oculto.mensaje_id = pregunta_msg.id AND oculto.usuario_id = :usuario_pregunta) AS pregunta_oculta,
-        EXISTS (SELECT 1 FROM mensajes_conversacion_ocultos oculto
-            WHERE oculto.tipo = 'evento' AND oculto.mensaje_id = respuesta_msg.id AND oculto.usuario_id = :usuario_respuesta) AS respuesta_oculta
+        respuesta_msg.id AS respuesta_mensaje_id, respuesta_msg.mensaje AS respuesta,
+        respuesta_msg.autor_id AS respuesta_autor_id, respuesta_msg.eliminado AS respuesta_eliminada,
+        0 AS pregunta_oculta, 0 AS respuesta_oculta
     FROM preguntas_eventos p
-    LEFT JOIN preguntas_eventos_mensajes pregunta_msg
-        ON pregunta_msg.pregunta_id = p.id AND pregunta_msg.clave_migracion = 'pregunta_inicial'
-    LEFT JOIN preguntas_eventos_mensajes respuesta_msg
-        ON respuesta_msg.pregunta_id = p.id AND respuesta_msg.clave_migracion = 'respuesta_inicial'
-    WHERE p.evento_slug = :evento AND p.respuesta IS NOT NULL AND p.respuesta <> ''
+    INNER JOIN preguntas_eventos_mensajes pregunta_msg
+        ON pregunta_msg.pregunta_id = p.id
+        AND pregunta_msg.clave_migracion = 'pregunta_inicial'
+        AND pregunta_msg.eliminado = 0
+    INNER JOIN preguntas_eventos_mensajes respuesta_msg
+        ON respuesta_msg.id = (
+            SELECT respuesta.id
+            FROM preguntas_eventos_mensajes respuesta
+            WHERE respuesta.pregunta_id = p.id
+                AND respuesta.autor_rol IN ('organizador', 'administrador')
+                AND respuesta.eliminado = 0
+            ORDER BY respuesta.id DESC
+            LIMIT 1
+        )
+    WHERE p.evento_slug = :evento
     ORDER BY p.fecha_creacion DESC");
-$stmt->execute([':evento' => $slug, ':usuario_pregunta' => $usuarioId, ':usuario_respuesta' => $usuarioId]);
+$stmt->execute([':evento' => $slug]);
 $preguntasRespondidas = $stmt->fetchAll();
-$mapUrl = 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($latitud . ',' . $longitud);
+$preguntasRespondidas = array_map(static function (array $preguntaRespondida): array {
+    $preguntaRespondida['pregunta'] = censurarComentario((string) $preguntaRespondida['pregunta']);
+    $preguntaRespondida['respuesta'] = censurarComentario((string) $preguntaRespondida['respuesta']);
+    return $preguntaRespondida;
+}, $preguntasRespondidas);
+$destinoMapa = $esEventoDinamico ? $lugar . ', Salto, Uruguay' : $latitud . ',' . $longitud;
+$mapUrl = 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($destinoMapa);
 $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . rawurlencode('SIGTUR|' . $slug . '|' . $usuarioId);
 $fechaLegible = date('d/m/Y', strtotime($fecha));
 $fotosEvento = [$imagen];
 $itemKeyComentarios = 'evento-' . ($eventoId > 0 ? $eventoId : $slug);
-$faq = [['¿Hay estacionamiento?', 'Sí, revisá las indicaciones del lugar antes de asistir.'], ['¿Cuál es la política de cancelación?', 'Podés cancelar tu inscripción desde esta misma página.'], ['¿El lugar es accesible?', 'Consultá al organizador mediante el formulario de preguntas.']];
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?> | SIGTUR</title>
-<link rel="stylesheet" href="<?= $assetBase ?>css/estilos.css"><link rel="stylesheet" href="<?= $assetBase ?>css/detalle-evento.css"><link rel="stylesheet" href="<?= $assetBase ?>css/evento-form.css"><?php if ($esPasado): ?><link rel="stylesheet" href="<?= $assetBase ?>css/evento-finalizado.css"><?php endif; ?>
+<link rel="stylesheet" href="<?= $assetBase ?>css/estilos.css?v=20261028-comment-options-5"><link rel="stylesheet" href="<?= $assetBase ?>css/detalle-evento.css"><link rel="stylesheet" href="<?= $assetBase ?>css/evento-form.css"><?php if ($esPasado): ?><link rel="stylesheet" href="<?= $assetBase ?>css/evento-finalizado.css"><?php endif; ?>
 <style>
-:root{--event-accent:#ffb84d;--event-ink:#11151b;--event-muted:#66717d}body.event-detail{background:#f4f6f8;color:var(--event-ink)}.event-detail .menu-principal{position:absolute;top:1.25rem;left:50%;right:auto;transform:translateX(-50%);width:min(92%,var(--site-max-width));z-index:5;background:linear-gradient(180deg,rgba(0,0,0,.48),transparent)}.event-hero{position:relative;min-height:min(760px,88vh);display:flex;align-items:flex-end;padding:clamp(8rem,18vh,13rem) clamp(1.25rem,6vw,6rem) clamp(3rem,8vw,6rem);background-image:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.85)),url('<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>');background-size:cover;background-position:center}.event-hero__content{position:relative;z-index:1;max-width:850px;color:white}.event-back,.event-exit{position:absolute;top:6rem;color:rgba(255,255,255,.72);text-decoration:none;font-size:.85rem}.event-back{left:clamp(1.25rem,6vw,6rem)}.event-exit{right:clamp(1.25rem,6vw,6rem)}.event-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.1rem}.event-badge{display:inline-flex;gap:8px;align-items:center;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);font-size:.8rem;color:white;text-decoration:none}.event-hero h1{margin:0 0 1rem;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:800;line-height:1;text-shadow:0 2px 10px rgba(0,0,0,.4)}.event-hero p{max-width:680px;color:rgba(255,255,255,.86);font-size:1.08rem;line-height:1.65}.event-social{display:flex;align-items:center;gap:.8rem;margin:1.2rem 0;color:rgba(255,255,255,.85)}.event-avatars{display:flex;padding-left:10px}.event-avatar{width:32px;height:32px;border:2px solid white;border-radius:50%;object-fit:cover;margin-left:-10px;background:#dce2e8}.event-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem}.event-actions button,.event-actions a{border:0;border-radius:999px;padding:.78rem 1.15rem;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}.event-primary{background:var(--event-accent);color:#17110a;transition:transform .2s,background .2s}.event-primary:hover{transform:translateY(-2px)}.event-primary.is-registered{background:#b7e4c7;color:#143d24}.event-primary.pulse{animation:event-pulse .45s ease}@keyframes event-pulse{50%{transform:scale(.95)}100%{transform:scale(1)}}.event-secondary{background:rgba(255,255,255,.14);color:white;border:1px solid rgba(255,255,255,.35)!important}.event-main{max-width:1180px;margin:0 auto;padding:clamp(2rem,5vw,4.5rem) 1.25rem}.event-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.8fr);gap:2rem}.event-panel{background:white;border:1px solid #e6e9ed;border-radius:22px;padding:clamp(1.25rem,3vw,2rem);box-shadow:0 14px 38px rgba(22,32,44,.06)}.event-panel h2{margin:0 0 1rem;font-size:1.35rem}.event-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-top:1.2rem}.event-fact{padding:.9rem;background:#f6f8fa;border-radius:14px}.event-fact strong{display:block;font-size:.75rem;text-transform:uppercase;color:var(--event-muted);margin-bottom:.25rem}.event-forecast{margin-top:1rem;display:none}.event-forecast.visible{display:flex;justify-content:space-between;align-items:center}.event-faq{margin-top:2rem}.event-faq details{border-bottom:1px solid #e4e7eb;padding:1rem 0}.event-faq summary{cursor:pointer;font-weight:700}.event-question{display:flex;gap:.6rem;margin-top:1.5rem}.event-question input{flex:1;padding:.8rem;border:1px solid #d8dde3;border-radius:10px}.event-question button{border:0;border-radius:10px;background:var(--event-ink);color:white;padding:0 1rem;cursor:pointer}.event-rec{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1rem}.event-rec a{overflow:hidden;border-radius:16px;background:white;color:inherit;text-decoration:none;border:1px solid #e6e9ed}.event-rec img{width:100%;height:130px;object-fit:cover}.event-rec span{display:block;padding:.8rem;font-weight:700}.event-qr-backdrop{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(4,8,12,.78);backdrop-filter:blur(8px)}.event-qr-backdrop[hidden]{display:none}.event-ticket{width:min(92vw,420px);background:#121820;color:white;border:1px solid #34404c;border-radius:24px;padding:1.5rem;box-shadow:0 30px 80px #000}.event-ticket img{display:block;width:180px;height:180px;margin:1rem auto;background:white;padding:.5rem}.event-ticket header{display:flex;justify-content:space-between}.event-ticket-close{border:0;background:none;color:white;font-size:1.5rem;cursor:pointer}.event-ticket dl{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}.event-ticket dt{font-size:.7rem;color:#93a1ae;text-transform:uppercase}.event-ticket dd{margin:.2rem 0 0;font-weight:700}@media(max-width:760px){.event-grid{grid-template-columns:1fr}.event-hero{min-height:760px}.event-rec{grid-template-columns:1fr}.event-facts{grid-template-columns:1fr}.event-question{flex-direction:column}.event-question button{padding:.8rem}}
+:root{--event-accent:#ffb84d;--event-ink:#11151b;--event-muted:#66717d}body.event-detail{background:#f4f6f8;color:var(--event-ink)}.event-detail .menu-principal{position:absolute;top:1.25rem;left:50%;right:auto;transform:translateX(-50%);width:min(92%,var(--site-max-width));z-index:5;background:linear-gradient(180deg,rgba(0,0,0,.48),transparent)}.event-hero{position:relative;min-height:min(760px,88vh);display:flex;align-items:flex-end;padding:clamp(8rem,18vh,13rem) clamp(1.25rem,6vw,6rem) clamp(3rem,8vw,6rem);background-image:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.85)),url('<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>');background-size:cover;background-position:center}.event-hero__content{position:relative;z-index:1;max-width:850px;color:white}.event-back,.event-exit{position:absolute;top:6rem;color:rgba(255,255,255,.72);text-decoration:none;font-size:.85rem}.event-back{left:clamp(1.25rem,6vw,6rem)}.event-exit{right:clamp(1.25rem,6vw,6rem)}.event-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.1rem}.event-badge{display:inline-flex;gap:8px;align-items:center;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);font-size:.8rem;color:white;text-decoration:none}.event-hero h1{margin:0 0 1rem;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:800;line-height:1;text-shadow:0 2px 10px rgba(0,0,0,.4)}.event-hero p{max-width:680px;color:rgba(255,255,255,.86);font-size:1.08rem;line-height:1.65}.event-social{display:flex;align-items:center;gap:.8rem;margin:1.2rem 0;color:rgba(255,255,255,.85)}.event-avatars{display:flex;padding-left:10px}.event-avatar{width:32px;height:32px;border:2px solid white;border-radius:50%;object-fit:cover;margin-left:-10px;background:#dce2e8}.event-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem}.event-actions button,.event-actions a{border:0;border-radius:999px;padding:.78rem 1.15rem;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}.event-primary{background:var(--event-accent);color:#17110a;transition:transform .2s,background .2s}.event-primary:hover{transform:translateY(-2px)}.event-primary.is-registered{background:#b7e4c7;color:#143d24}.event-primary.pulse{animation:event-pulse .45s ease}@keyframes event-pulse{50%{transform:scale(.95)}100%{transform:scale(1)}}.event-secondary{background:rgba(255,255,255,.14);color:white;border:1px solid rgba(255,255,255,.35)!important}.event-main{max-width:1180px;margin:0 auto;padding:clamp(2rem,5vw,4.5rem) 1.25rem}.event-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.8fr);gap:2rem}.event-panel{background:white;border:1px solid #e6e9ed;border-radius:22px;padding:clamp(1.25rem,3vw,2rem);box-shadow:0 14px 38px rgba(22,32,44,.06)}.event-panel h2{margin:0 0 1rem;font-size:1.35rem}.event-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-top:1.2rem}.event-fact{padding:.9rem;background:#f6f8fa;border-radius:14px}.event-fact strong{display:block;font-size:.75rem;text-transform:uppercase;color:var(--event-muted);margin-bottom:.25rem}.event-forecast{margin-top:1rem;display:none}.event-forecast.visible{display:flex;justify-content:space-between;align-items:center}.event-faq{margin-top:2rem}.event-faq details{border-bottom:1px solid #e4e7eb;padding:1rem 0}.event-faq summary{cursor:pointer;font-weight:700}.event-question{display:flex;gap:.6rem;margin-top:1.5rem}.event-question input{flex:1;padding:.8rem;border:1px solid #d8dde3;border-radius:10px}.event-question button{border:0;border-radius:10px;background:var(--event-ink);color:white;padding:0 1rem;cursor:pointer}.event-qr-backdrop{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(4,8,12,.78);backdrop-filter:blur(8px)}.event-qr-backdrop[hidden]{display:none}.event-ticket{width:min(92vw,420px);background:#121820;color:white;border:1px solid #34404c;border-radius:24px;padding:1.5rem;box-shadow:0 30px 80px #000}.event-ticket img{display:block;width:180px;height:180px;margin:1rem auto;background:white;padding:.5rem}.event-ticket header{display:flex;justify-content:space-between}.event-ticket-close{border:0;background:none;color:white;font-size:1.5rem;cursor:pointer}.event-ticket dl{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}.event-ticket dt{font-size:.7rem;color:#93a1ae;text-transform:uppercase}.event-ticket dd{margin:.2rem 0 0;font-weight:700}@media(max-width:760px){.event-grid{grid-template-columns:1fr}.event-hero{min-height:760px}.event-facts{grid-template-columns:1fr}.event-question{flex-direction:column}.event-question button{padding:.8rem}}
 .event-hero{min-height:100svh;width:100vw;margin-left:calc(50% - 50vw);background-image:none}
 .event-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(180deg,rgba(0,0,0,.28) 0%,rgba(0,0,0,.48) 45%,rgba(0,0,0,.9) 100%),url('<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>');background-size:cover;background-position:center;z-index:0}
 .event-back{top:6rem;display:inline-flex;align-items:center;padding:.65rem 1rem;border:1px solid rgba(255,255,255,.38);border-radius:999px;background:rgba(15,20,24,.35);backdrop-filter:blur(10px);color:rgba(255,255,255,.9);transition:background .2s ease,transform .2s ease}
@@ -196,8 +212,30 @@ $faq = [['¿Hay estacionamiento?', 'Sí, revisá las indicaciones del lugar ante
 <main>
 <section class="event-hero"><a class="event-back" href="<?= $esEventoDinamico ? 'eventos.php' : '../eventos.php' ?>">← Volver a eventos</a><div class="event-hero__content"><div class="event-meta"><span class="event-badge"><?= htmlspecialchars($fechaLegible) ?></span><span class="event-badge"><?= htmlspecialchars($categoria) ?></span><span class="event-badge"><?= htmlspecialchars($edad) ?></span><a class="event-badge" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📍 <?= htmlspecialchars($lugar) ?></a></div><h1><?= htmlspecialchars($nombre) ?></h1><p><?= htmlspecialchars($descripcion) ?></p><div class="event-social"><div class="event-avatars"><?php foreach ($avatares as $avatar):$avatarFile = basename($avatar['avatar'] ?? '');
     $avatarSrc = ($avatarFile && $avatarFile !== 'default-avatar.png' && file_exists(__DIR__.'/../uploads/avatars/'.$avatarFile)) ? '../uploads/avatars/'.$avatarFile : '../img/user.png'; ?><img class="event-avatar" src="<?= htmlspecialchars($avatarSrc, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($avatar['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>"><?php endforeach; ?></div><span><?= $asistentes ?> <?= $asistentes === 1 ? 'persona asistirá' : 'personas asistirán' ?></span></div><div class="event-actions"><button id="favoriteEventButton" class="event-primary event-favorite<?= $esFavorito ? ' is-favorite' : '' ?>" type="button" aria-pressed="<?= $esFavorito ? 'true' : 'false' ?>" data-endpoint="<?= htmlspecialchars($apiBase . 'favoritos_eventos.php', ENT_QUOTES, 'UTF-8') ?>" data-slug="<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>" data-evento-id="<?= (int) $eventoId ?>" data-titulo="<?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>" data-descripcion="<?= htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8') ?>" data-fecha="<?= htmlspecialchars($fecha, ENT_QUOTES, 'UTF-8') ?>" data-ubicacion="<?= htmlspecialchars($lugar, ENT_QUOTES, 'UTF-8') ?>" data-categoria="<?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>" data-imagen="<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>"><?= $esFavorito ? '★ Guardado en favoritos' : '☆ Guardar en favoritos' ?></button><?php if ($inscripto): ?><button id="ticketButton" class="event-secondary" type="button">Ver mi Pase / QR</button><?php endif; ?><a class="event-secondary" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Cómo llegar</a></div></div></section>
-<section class="event-main"><div class="event-grid"><div><article class="event-panel"><h2>Sobre el evento</h2><p><?= htmlspecialchars($descripcion) ?> Fecha: <?= htmlspecialchars($fechaLegible) ?>. Encontrá todos los detalles y preparate para vivir la experiencia.</p><div class="event-facts"><div class="event-fact"><strong>Fecha</strong><?= htmlspecialchars($fechaLegible) ?></div><div class="event-fact"><strong>Ubicación</strong><?= htmlspecialchars($lugar) ?></div></div><div id="forecast" class="event-panel event-forecast"><span id="forecastIcon">☀️</span><strong id="forecastText">Clima estimado</strong></div></article><article class="event-panel event-faq"><h2>Preguntas frecuentes</h2><?php foreach ($faq as [$pregunta,$respuesta]): ?><details><summary><?= htmlspecialchars($pregunta) ?></summary><p><?= htmlspecialchars($respuesta) ?></p></details><?php endforeach; ?><form class="event-question" id="form-comentario-evento" data-endpoint="<?= htmlspecialchars($apiBase . 'agregar_comentario_evento.php', ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="evento_id" value="<?= (int) $eventoId ?>"><input name="comentario" maxlength="500" placeholder="¿Tenés otra pregunta?" <?= !$usuarioId ? 'disabled' : '' ?>><button type="submit" <?= !$usuarioId ? 'disabled' : '' ?>>Enviar</button></form><?php if (!$usuarioId): ?><small>Iniciá sesión para preguntar al organizador.</small><?php endif; ?><p class="event-question-feedback" id="event-question-feedback" role="status" aria-live="polite"></p></article><article class="event-panel event-comments"><h2>Comentarios del evento</h2><div class="gallery-engagement-card" data-item-key="<?= htmlspecialchars($itemKeyComentarios, ENT_QUOTES, 'UTF-8') ?>"></div></article><?php if ($preguntasRespondidas): ?><article class="event-panel event-faq"><h2>Preguntas respondidas</h2><?php foreach ($preguntasRespondidas as $q): ?><details><summary><?= htmlspecialchars($q['pregunta']) ?></summary><p><?= htmlspecialchars($q['respuesta']) ?></p></details><?php endforeach; ?></article><?php endif; ?></div><aside><article class="event-panel"><h2>Planificá tu visita</h2><p>Guardá el evento, consultá el mapa y revisá el pronóstico antes de salir.</p><a class="event-secondary" style="display:inline-block;background:var(--event-ink);color:white" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Abrir en Google Maps</a></article></aside></div><section style="margin-top:3rem"><h2>Eventos similares que te pueden interesar</h2><div class="event-rec"><?php $recs = array_values(array_filter($eventos, fn ($item) => $item[1] === $categoria || $item[3] === $lugar));
-foreach (array_slice($recs, 0, 3) as $rec):$recSlug = array_search($rec, $eventos, true); $recIdQuery = $pdo->prepare('SELECT id FROM eventos WHERE slug = :slug LIMIT 1'); $recIdQuery->execute([':slug' => $recSlug]); $recId = (int) $recIdQuery->fetchColumn(); ?><a href="<?= htmlspecialchars(($esEventoDinamico ? '' : '../') . 'evento.php?id=' . $recId, ENT_QUOTES, 'UTF-8') ?>"><img src="<?= htmlspecialchars($rec[5], ENT_QUOTES, 'UTF-8') ?>" alt=""><span><?= htmlspecialchars($rec[0], ENT_QUOTES, 'UTF-8') ?></span></a><?php endforeach; ?></div></section></section>
+<section class="event-main"><div class="event-grid"><div><article class="event-panel"><h2>Sobre el evento</h2><p><?= htmlspecialchars($descripcion) ?> Fecha: <?= htmlspecialchars($fechaLegible) ?>. Encontrá todos los detalles y preparate para vivir la experiencia.</p><div class="event-facts"><div class="event-fact"><strong>Fecha</strong><?= htmlspecialchars($fechaLegible) ?></div><div class="event-fact"><strong>Ubicación</strong><?= htmlspecialchars($lugar) ?></div><?php if ($valorEvento !== ''): ?><div class="event-fact"><strong>Valor de entrada</strong><?= htmlspecialchars($valorEvento, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?></div><div id="forecast" class="event-panel event-forecast"><span id="forecastIcon">☀️</span><strong id="forecastText">Clima estimado</strong></div></article><article class="event-panel event-faq"><h2>Consultas al organizador</h2><form class="event-question" id="form-comentario-evento" data-endpoint="<?= htmlspecialchars($apiBase . 'agregar_comentario_evento.php', ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="submission_key" value="<?= htmlspecialchars(bin2hex(random_bytes(16)), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="evento_id" value="<?= (int) $eventoId ?>"><input name="comentario" maxlength="500" placeholder="¿Qué querés preguntarle al organizador?" <?= !$usuarioId ? 'disabled' : '' ?>><button type="submit" <?= !$usuarioId ? 'disabled' : '' ?>>Enviar</button></form><?php if (!$usuarioId): ?><small>Iniciá sesión para consultar al organizador.</small><?php endif; ?><p class="event-question-feedback" id="event-question-feedback" role="status" aria-live="polite"></p></article><article class="event-panel event-comments"><h2>Comentarios del evento</h2><div class="gallery-engagement-card" data-item-key="<?= htmlspecialchars($itemKeyComentarios, ENT_QUOTES, 'UTF-8') ?>"></div></article><?php if ($preguntasRespondidas): ?>
+    <section class="event-panel event-faq event-public-qa" id="preguntas-respondidas" aria-labelledby="preguntas-respondidas-titulo">
+        <header class="event-public-qa__header">
+            <span class="event-public-qa__eyebrow">Información del evento</span>
+            <h2 id="preguntas-respondidas-titulo">Preguntas y respuestas</h2>
+            <p>Consultas de los visitantes respondidas por la organización de <?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>.</p>
+        </header>
+        <div class="event-public-qa__list">
+            <?php foreach ($preguntasRespondidas as $q): ?>
+                <details class="event-public-qa__item">
+                    <summary>
+                        <span class="event-public-qa__label">Pregunta</span>
+                        <span class="event-public-qa__question"><?= htmlspecialchars($q['pregunta'], ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="event-public-qa__chevron" aria-hidden="true"></span>
+                    </summary>
+                    <div class="event-public-qa__answer">
+                        <span class="event-public-qa__label">Respuesta de la organización</span>
+                        <p><?= nl2br(htmlspecialchars($q['respuesta'], ENT_QUOTES, 'UTF-8')) ?></p>
+                    </div>
+                </details>
+            <?php endforeach; ?>
+        </div>
+    </section>
+<?php endif; ?></div><aside><article class="event-panel"><h2>Planificá tu visita</h2><p>Guardá el evento, consultá el mapa y revisá el pronóstico antes de salir.</p><a class="event-secondary" style="display:inline-block;background:var(--event-ink);color:white" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Abrir en Google Maps</a></article></aside></div></section>
 <?php if ($esPasado): ?>
 <section class="event-main finished-archive" aria-labelledby="finished-gallery-title">
     <div class="finished-metrics">
@@ -211,7 +249,7 @@ foreach (array_slice($recs, 0, 3) as $rec):$recSlug = array_search($rec, $evento
 </main>
 <?php if ($inscripto): ?><div class="event-qr-backdrop" id="ticketModal" hidden><article class="event-ticket"><header><strong>Pase digital</strong><button class="event-ticket-close" type="button" id="ticketClose">×</button></header><img src="<?= htmlspecialchars($qrUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Código QR de acreditación"><h2><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?></h2><dl><div><dt>Fecha</dt><dd><?= htmlspecialchars($fechaLegible) ?></dd></div><div><dt>Lugar</dt><dd><?= htmlspecialchars($lugar) ?></dd></div><div><dt>Asistente</dt><dd><?= htmlspecialchars($_SESSION['usuario_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?></dd></div></dl></article></div><?php endif; ?>
 <script src="<?= $assetBase ?>js/tema.js" defer></script>
-<script src="<?= $assetBase ?>js/interacciones-tarjetas.js"></script>
+<script src="<?= $assetBase ?>js/interacciones-tarjetas.js?v=20261028-comment-options-2"></script>
 <script>
 (() => {
     const preguntas = <?= json_encode(array_map(static fn (array $pregunta): array => [
@@ -228,7 +266,7 @@ foreach (array_slice($recs, 0, 3) as $rec):$recSlug = array_search($rec, $evento
     const rol = <?= json_encode($usuarioRolEvento, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     const api = <?= json_encode($apiBase . 'gestionar_mensaje.php', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     const moderador = ['administrador', 'organizador'].includes(rol);
-    const seccion = [...document.querySelectorAll('.event-faq')].find(elemento => elemento.querySelector('h2')?.textContent.trim() === 'Preguntas respondidas');
+    const seccion = document.getElementById('preguntas-respondidas');
     const detalles = seccion ? [...seccion.querySelectorAll('details')] : [];
 
     function agregarAcciones(contenedor, objetivoTexto, id, autorId, propietarioId, eliminado, oculto, esPregunta) {

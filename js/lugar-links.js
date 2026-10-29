@@ -26,21 +26,49 @@
             const mapList = document.getElementById(listId);
             const mapPlaces = mapList ? [...mapList.querySelectorAll('a')] : [];
             const mapToggle = document.getElementById(toggleId);
+            if (!mapList) return;
+            const search = mapList.querySelector('[data-map-search]');
+            const emptyState = mapList.querySelector('[data-map-empty]');
+            const normalize = (value) => String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLocaleLowerCase()
+                .trim();
 
-            if (!mapToggle || mapPlaces.length <= initialMapPlaces) return;
+            const updatePlaces = () => {
+                const query = normalize(search?.value);
+                const matches = mapPlaces.filter((place) => normalize(place.textContent).includes(query));
+                const expanded = mapToggle?.getAttribute('aria-expanded') === 'true';
 
-            mapPlaces.forEach((place, index) => {
-                place.hidden = index >= initialMapPlaces;
-            });
-            mapToggle.hidden = false;
-
-            mapToggle.addEventListener('click', () => {
-                const expanded = mapToggle.getAttribute('aria-expanded') === 'true';
-                mapPlaces.forEach((place, index) => {
-                    place.hidden = expanded && index >= initialMapPlaces;
+                mapPlaces.forEach((place) => {
+                    const matchIndex = matches.indexOf(place);
+                    place.hidden = matchIndex < 0 || (!query && !expanded && matchIndex >= initialMapPlaces);
                 });
+                if (mapToggle) {
+                    mapToggle.hidden = Boolean(query) || matches.length <= initialMapPlaces;
+                    if (query && mapToggle.getAttribute('aria-expanded') === 'true') {
+                        mapToggle.setAttribute('aria-expanded', 'false');
+                        mapToggle.textContent = 'Ver más';
+                    }
+                }
+                if (emptyState) emptyState.hidden = !query || matches.length > 0;
+            };
+
+            mapToggle?.addEventListener('click', () => {
+                const expanded = mapToggle.getAttribute('aria-expanded') === 'true';
                 mapToggle.setAttribute('aria-expanded', String(!expanded));
                 mapToggle.textContent = expanded ? 'Ver más' : 'Ver menos';
+                updatePlaces();
+            });
+            search?.addEventListener('input', updatePlaces);
+            updatePlaces();
+
+            const mapFrame = mapList.closest('.mapa-contenido')?.querySelector('iframe');
+            mapList.addEventListener('click', (event) => {
+                const clickedElement = event.target instanceof Element ? event.target : null;
+                const link = clickedElement?.closest('a[data-map-query]');
+                if (!link || !mapFrame) return;
+                mapFrame.src = `https://www.google.com/maps?q=${encodeURIComponent(link.dataset.mapQuery)}&output=embed`;
             });
         };
 

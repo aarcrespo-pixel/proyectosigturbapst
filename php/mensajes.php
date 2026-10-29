@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
+require_once __DIR__ . '/helpers/idempotencia.php';
 $administrador = sigtur_requerir_rol($pdo, ['administrador'], 'login.php', '../index.php');
 $administradorId = (int) $administrador['id'];
 $csrfToken = sigtur_csrf_token();
@@ -20,6 +21,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     if (!$reporteId || $respuesta === '' || $longitudRespuesta > 500) {
         http_response_code(422);
         exit('La respuesta es obligatoria y no puede superar los 500 caracteres.');
+    }
+    $claveEnvio = $_POST['submission_key'] ?? null;
+    $ambitoEnvio = 'respuesta-reporte:' . (int) $reporteId . ':' . $administradorId;
+    if (sigtur_envio_ya_procesado($ambitoEnvio, $claveEnvio)) {
+        header('Location: mensajes.php?respondido=1#reporte-' . (int) $reporteId);
+        exit;
     }
 
     $reporteStmt = $pdo->prepare("SELECT remitente_id FROM mensajes WHERE id = :id AND destinatario_id = :administrador AND mensaje LIKE '[Consulta %' LIMIT 1");
@@ -42,6 +49,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $marcarLeido = $pdo->prepare('UPDATE mensajes SET leido = 1 WHERE id = :id AND destinatario_id = :administrador');
         $marcarLeido->execute([':id' => $reporteId, ':administrador' => $administradorId]);
         $pdo->commit();
+        sigtur_marcar_envio_procesado($ambitoEnvio, $claveEnvio);
     } catch (Throwable $error) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
@@ -141,6 +149,7 @@ if ($reportes) {
                     <?php endforeach; ?>
                     <form class="admin-form admin-mensajes-responder" method="post" action="mensajes.php#reporte-<?= (int) $reporte['id'] ?>">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="submission_key" value="<?= htmlspecialchars(bin2hex(random_bytes(16)), ENT_QUOTES, 'UTF-8') ?>">
                         <input type="hidden" name="reporte_id" value="<?= (int) $reporte['id'] ?>">
                         <label class="admin-form__wide">Responder
                             <textarea name="respuesta" maxlength="500" required placeholder="Escribe una respuesta (máximo 500 caracteres)…"></textarea>

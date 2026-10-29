@@ -10,7 +10,7 @@ function sigtur_ai_contexto_sigtur(PDO $pdo): string
 {
     $secciones = [];
 
-    $eventos = $pdo->query("SELECT e.titulo, e.descripcion, e.fecha, e.ubicacion, e.categoria, e.tipo_entrada, e.precio, u.nombre_completo AS organizador
+    $eventos = $pdo->query("SELECT e.titulo, e.descripcion, e.fecha, e.ubicacion, e.categoria, e.tipo_entrada, e.precio, e.precio_texto, u.nombre_completo AS organizador
         FROM eventos e
         LEFT JOIN usuarios u ON u.id = e.organizador_id
         WHERE e.es_pasado = 0 AND e.fecha >= CURDATE()
@@ -20,9 +20,13 @@ function sigtur_ai_contexto_sigtur(PDO $pdo): string
     if ($eventos) {
         $lineas = [];
         foreach ($eventos as $evento) {
-            $precio = $evento['tipo_entrada'] === 'De Pago' && $evento['precio'] !== null
-                ? 'Precio: $' . $evento['precio']
-                : 'Entrada: ' . ($evento['tipo_entrada'] ?: 'Consultar');
+            if ($evento['tipo_entrada'] === 'De Pago' && trim((string) ($evento['precio_texto'] ?? '')) !== '') {
+                $precio = 'Precio: ' . $evento['precio_texto'];
+            } elseif ($evento['tipo_entrada'] === 'De Pago' && $evento['precio'] !== null) {
+                $precio = 'Precio: $' . $evento['precio'];
+            } else {
+                $precio = 'Entrada: ' . ($evento['tipo_entrada'] ?: 'Consultar');
+            }
             $organizador = $evento['organizador'] ? 'Organizador: ' . $evento['organizador'] : '';
             $lineas[] = sprintf(
                 '- %s | fecha: %s | lugar: %s | categoría: %s | %s%s | descripción: %s',

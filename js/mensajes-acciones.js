@@ -158,4 +158,13 @@
             mostrarError(error.message);
         }
     });
+
+    document.addEventListener('submit', (event) => {
+        const form = event.target.closest('.admin-reply-form, .admin-mensajes-responder, .support-reply-form');
+        if (!form) return;
+        const submit = form.querySelector('button[type="submit"]');
+        if (!submit || submit.disabled) return;
+        submit.disabled = true;
+        submit.setAttribute('aria-busy', 'true');
+    });
 })();

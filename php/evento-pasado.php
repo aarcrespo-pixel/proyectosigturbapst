@@ -26,7 +26,7 @@ $itemKey = 'evento-' . $slug;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?> | Histórico | SIGTUR</title>
-    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="../css/estilos.css?v=20261028-comment-options-5">
     <link rel="stylesheet" href="../css/detalle-evento.css">
     <link rel="stylesheet" href="../css/eventos.css">
     <link rel="stylesheet" href="../css/evento-finalizado.css">
@@ -56,7 +56,7 @@ $itemKey = 'evento-' . $slug;
             </aside>
         </div>
     </div>
-    <script src="../js/interacciones-tarjetas.js"></script>
+    <script src="../js/interacciones-tarjetas.js?v=20261028-comment-options-2"></script>
     <script>
         /* El lightbox mantiene un índice circular y recrea el módulo de
            interacción al cambiar de foto para aislar los comentarios por imagen. */

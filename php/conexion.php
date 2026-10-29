@@ -22,7 +22,7 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS `sigtur_schema_version` (
         `version` VARCHAR(40) NOT NULL PRIMARY KEY
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-    $versionEsperada = '2026-10-27-msg-borrado-3';
+    $versionEsperada = '2026-10-28-event-price-text-1';
     $versionEsquema = $pdo->query("SELECT `version` FROM `sigtur_schema_version` LIMIT 1")->fetchColumn();
     $bloqueoEsquema = false;
     if ($versionEsquema !== $versionEsperada) {
@@ -201,6 +201,7 @@ try {
         'descripcion' => "ALTER TABLE `eventos` ADD COLUMN `descripcion` TEXT NOT NULL DEFAULT ''",
         'tipo_entrada' => "ALTER TABLE `eventos` ADD COLUMN `tipo_entrada` VARCHAR(30) NOT NULL DEFAULT 'Gratuito'",
         'precio' => "ALTER TABLE `eventos` ADD COLUMN `precio` DECIMAL(10,2) NULL DEFAULT NULL",
+        'precio_texto' => "ALTER TABLE `eventos` ADD COLUMN `precio_texto` VARCHAR(120) NULL DEFAULT NULL AFTER `precio`",
         'imagen_portada' => "ALTER TABLE `eventos` ADD COLUMN `imagen_portada` VARCHAR(255) DEFAULT 'default.jpg'",
         'es_pasado' => "ALTER TABLE `eventos` ADD COLUMN `es_pasado` TINYINT(1) DEFAULT 0",
         'organizador_id' => "ALTER TABLE `eventos` ADD COLUMN `organizador_id` INT NOT NULL DEFAULT 0",
@@ -210,6 +211,22 @@ try {
         if (!in_array($nombreCampo, $columnasEventos, true)) {
             $pdo->exec($sqlAlter);
         }
+    }
+    $tablaDestacadosExistia = (int) $pdo->query("SELECT COUNT(*) FROM information_schema.tables
+        WHERE table_schema = DATABASE() AND table_name = 'eventos_destacados'")->fetchColumn() > 0;
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `eventos_destacados` (
+        `evento_id` INT NOT NULL PRIMARY KEY,
+        `orden` INT NOT NULL DEFAULT 0,
+        `fecha_destacado` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        KEY `idx_eventos_destacados_orden` (`orden`, `fecha_destacado`),
+        CONSTRAINT `fk_eventos_destacados_evento` FOREIGN KEY (`evento_id`) REFERENCES `eventos` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    if (!$tablaDestacadosExistia) {
+        $pdo->exec("INSERT INTO `eventos_destacados` (`evento_id`, `orden`)
+            SELECT `id`, FIELD(`slug`, 'carrera-de-bicicleta', 'la-ferne', 'porco-negro', 'exposalto', 'lafosa-bike')
+            FROM `eventos`
+            WHERE `slug` IN ('carrera-de-bicicleta', 'la-ferne', 'porco-negro', 'exposalto', 'lafosa-bike')
+                AND `es_pasado` = 0 AND `fecha` >= CURDATE()");
     }
     if (in_array('imagen', $columnasEventos, true) && in_array('imagen_portada', array_merge($columnasEventos, ['imagen_portada']), true)) {
         $pdo->exec("UPDATE `eventos` SET `imagen_portada` = `imagen` WHERE (`imagen_portada` IS NULL OR `imagen_portada` = 'default.jpg') AND `imagen` IS NOT NULL AND `imagen` <> ''");

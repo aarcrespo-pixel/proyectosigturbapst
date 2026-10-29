@@ -5,6 +5,7 @@ require_once __DIR__ . '/helpers/autorizacion.php';
 
 $usuario = sigtur_requerir_rol($pdo, ['administrador', 'organizador'], 'login.php', '../index.php');
 $csrfToken = sigtur_csrf_token();
+$chatAbiertoId = filter_var($_GET['chat'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 $soporteStmt = $pdo->prepare('SELECT p.id, p.usuario_id, p.email, p.pregunta, p.pregunta_eliminada, p.respuesta, p.estado, p.fecha_creacion,
         u.nombre_completo,
         EXISTS (SELECT 1 FROM mensajes_conversacion_ocultos oculto
@@ -154,8 +155,8 @@ $cantidadPendiente = count(array_filter($soporte, static fn ($item) => $item['es
                                 </div>
                                 <p><strong><?= htmlspecialchars((string) $autor, ENT_QUOTES, 'UTF-8') ?></strong></p>
                                 <?php if ($tipo === 'soporte'): ?>
-                                    <details class="admin-support-chat">
-                                        <summary>Ver chat</summary>
+                                    <details class="admin-support-chat"<?= (int) $chatAbiertoId === $id ? ' open' : '' ?>>
+                                        <summary><span data-chat-label-open>Ocultar chat</span><span data-chat-label-closed>Ver chat</span></summary>
                                         <div class="admin-question-chat">
                                         <?php $puedeEditarPreguntaSoporte = (int) ($item['usuario_id'] ?? 0) === (int) $usuario['id'] && empty($item['pregunta_eliminada']);
                                         $esPreguntaPropiaSoporte = (int) ($item['usuario_id'] ?? 0) === (int) $usuario['id'];
@@ -205,6 +206,7 @@ $cantidadPendiente = count(array_filter($soporte, static fn ($item) => $item['es
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                     <input type="hidden" name="tipo" value="<?= $tipo ?>">
                                     <input type="hidden" name="id" value="<?= $id ?>">
+                                    <input type="hidden" name="submission_key" value="<?= htmlspecialchars(bin2hex(random_bytes(16)), ENT_QUOTES, 'UTF-8') ?>">
                                     <label>Responder al usuario<textarea name="respuesta" maxlength="2000" required></textarea></label>
                                     <button class="admin-button" type="submit">Enviar respuesta</button>
                                 </form>

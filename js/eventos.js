@@ -4,38 +4,49 @@
   coincide con un bloque HTML que tiene un contenedor llamado
   `${nombre}-contenedor` y un indicador `${nombre}-indicadores`.
 */
-const eventosDestacados = [
+const eventosDestacadosBase = [
     { nombre: "Carrera de Bicicleta", categoria: "Carreras", lugar: "Costanera Norte", imagen: "../img/moto_cross.jpg" },
-    { nombre: "La Ferne", categoria: "Discoteca", lugar: "Costanera Norte", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzXMkEsvlia-KLamghIoD7xL9Rpz72SnkxikCvS_uH0Q&s" },
+    { nombre: "La Ferne", categoria: "Discoteca", lugar: "Costanera Norte", imagen: "../img/porco.avif" },
     { nombre: "Porco Negro", categoria: "Discoteca", lugar: "Av. Apolón de Mirbek esquina Av. José Enrique Rodó.", imagen: "../img/porco.avif" },
     { nombre: "ExpoSalto", categoria: "Feria", lugar: "Hipódromo de Salto", imagen: "../img/exposalto.jpeg" },
     { nombre: "LaFosa Bike", categoria: "Deportivo", lugar: "La Fosa", imagen: "../img/fosa.webp" }
 ];
 
+const eventosDestacados = Array.isArray(window.eventosDestacadosDesdeBd)
+    ? window.eventosDestacadosDesdeBd.map((evento) => ({
+        id: Number(evento.id),
+        nombre: evento.titulo,
+        slug: evento.slug,
+        categoria: evento.categoria,
+        lugar: evento.ubicacion,
+        imagen: evento.imagen_portada || '../img/porco.avif'
+    }))
+    : eventosDestacadosBase;
+
 const listadoEventos = {
     deportivos: [
         { nombre: "Surf y Kayak", categoria: "Aventura", lugar: "Playa Salto", imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg" },
-        { nombre: "Torneo de Beach Volley", categoria: "Competencia", lugar: "Playa Salto", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTturliqhgPakucL8C4kedxXyT6XEhQKkcXrZRh-af6MZf5zDZvjFQPZmV2TLieDskgPNvK3PyipLTjJc6wCuBY4T-08gd08muSeZ8sHo8&s=10" },
-        { nombre: "Circuito en Bicicleta", categoria: "Deportivo", lugar: "Calle Artigas", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7b44_MpWq3Wzray5_wVaB-4meo0Tam3gwbPNK_1AJ74I1Xo5EhmUKhTIE&s=10" },
-        { nombre: "Rally", categoria: "Carrera", lugar: "Av. Horacio Quiroga 9382", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvOwKgEnUpg8aNJEn8g9CuGqAW1ofcfyKSsld8e55fDCk-2MzS0IOWpOI&s=10" },
-        { nombre: "Futbol X5", categoria: "Deportivo", lugar: "Plaza de Deportes Salto", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLGcgcjLaLtUFzXSfs5EzS0x3c23cfZtXgew3MzIyfJWBgxce4Bah7vhA&s=10" }
+        { nombre: "Torneo de Beach Volley", categoria: "Competencia", lugar: "Playa Salto", imagen: "../img/TER%202.jpg" },
+        { nombre: "Circuito en Bicicleta", categoria: "Deportivo", lugar: "Calle Artigas", imagen: "../img/evento2.jpg" },
+        { nombre: "Rally", categoria: "Carrera", lugar: "Av. Horacio Quiroga 9382", imagen: "../img/moto_cross.jpg" },
+        { nombre: "Futbol X5", categoria: "Deportivo", lugar: "Plaza de Deportes Salto", imagen: "../img/lsf.jpg" }
     ],
     discotecas: [
-        { nombre: "Halloween en Polo", categoria: "Disfraces", lugar: "Polo Club", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrj22POvl9MEEF961dr53OM-Hpxz75raAMOqjgqS_fNJ15QnNkQmBHkx_z&s=10" },
-        { nombre: "La Bambola", categoria: "Discoteca", lugar: "Costanera Sur 1535", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRh8BnVQ1qdPDXqoHVHylKrGhwk3guImN0d1ZRYbBNmSXoKPhqmCE-pMsE&s=10" },
+        { nombre: "Halloween en Polo", categoria: "Disfraces", lugar: "Polo Club", imagen: "../img/porco.avif" },
+        { nombre: "La Bambola", categoria: "Discoteca", lugar: "Costanera Sur 1535", imagen: "../img/bambi.jpg" },
     ],
     competencias: [
-        { nombre: "Streetball Salto", categoria: "Deportivo", lugar: "Polideportivo Círculo SP", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0pAIE9pTlfySurzoR4nHmaJctr45FdL9iY9xVQXMfhhcFj8Gn_pXJ5z99&s=10" },
+        { nombre: "Streetball Salto", categoria: "Deportivo", lugar: "Polideportivo Círculo SP", imagen: "../img/lsb.jpg" },
         { nombre: "Campeonato de Pesca", categoria: "Naturaleza", lugar: "Costanera Sur", imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg" },
         { nombre: "Torneo de Ajedrez", categoria: "Mental", lugar: "Plaza de Deportes", imagen: "https://www.clarin.com/2024/10/10/IUl8ywHqRO_2000x1500__1.jpg" },
-        { nombre: "Copa de Natación", categoria: "Acuatico", lugar: "Playa Salto", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTfYqzP-3hljVNvWo0X2mA8fxJY9EOZKFXquVDdbwRnvST-uFmxjLEum-d&s=10" }
+        { nombre: "Copa de Natación", categoria: "Acuatico", lugar: "Playa Salto", imagen: "../img/TER%202.jpg" }
     ],
     anteriores: [
         { nombre: "Festival de la Naranja", categoria: "Cultura", lugar: "Plaza Artigas", imagen: "../img/festival_naranja.jpg" },
         { nombre: "Carrera Nocturna", categoria: "Deportivo", lugar: "Costanera Norte", imagen: "../img/carrera_noche.webp" },
         { nombre: "Muestra de Danza", categoria: "Cultura", lugar: "Centro Cultural", imagen: "../img/danza.jpg" },
         { nombre: "Feria de Emprendedores", categoria: "Local", lugar: "Mercado Central", imagen: "../img/feria_emprendedores.jpg" },
-        { nombre: "La Fosa Bike", categoria: "Deportivo", lugar: "La Fosa", imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLYlimLpyzEAGbkjhkZr3cPP7pON89wJlOJPhKhGMLPM6xUx1nw3Pfj4s&s=10" }
+        { nombre: "La Fosa Bike", categoria: "Deportivo", lugar: "La Fosa", imagen: "../img/fosa.webp" }
     ]
 };
 
@@ -54,6 +65,7 @@ const eventosPersistidos = Array.isArray(window.eventosDesdeBd) ? window.eventos
     categoria: evento.categoria,
     tipoEntrada: evento.tipo_entrada || 'Gratuito',
     precio: evento.precio,
+    precioTexto: evento.precio_texto || (evento.precio !== null && evento.precio !== undefined ? `$${evento.precio}` : ''),
     lugar: evento.ubicacion,
     fecha: evento.fecha,
     imagen: evento.imagen_portada || '../img/porco.avif'
@@ -110,7 +122,7 @@ let eventosPrincipales = (() => {
     /* Unimos filas persistidas y catálogo legacy, eliminando duplicados por
        slug para que el listado no repita un evento ya migrado a MySQL. */
     const eventosEstaticos = [
-    ...datos.destacados,
+    ...eventosDestacadosBase,
     ...datos.deportivos,
     ...datos.discotecas,
     ...datos.competencias
@@ -136,6 +148,7 @@ let eventosPrincipales = (() => {
     { mes: 'MAR', dia: '08' },
     { mes: 'ABR', dia: '25' }
   ];
+  const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
   return list.map((e, index) => {
     const base = (e.nombre || '')
       .toString()
@@ -151,7 +164,16 @@ let eventosPrincipales = (() => {
     } else {
       slugCounts[slug] = 1;
     }
-    const fecha = fechasProtagonistas[index % fechasProtagonistas.length] || { mes: 'AGO', dia: '07' };
+    const coincidenciaFecha = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(e.fecha || ''));
+    const mesNumero = coincidenciaFecha ? Number(coincidenciaFecha[2]) : 0;
+    const diaNumero = coincidenciaFecha ? Number(coincidenciaFecha[3]) : 0;
+    const fechaValida = mesNumero >= 1
+      && mesNumero <= 12
+      && diaNumero >= 1
+      && diaNumero <= new Date(Date.UTC(Number(coincidenciaFecha[1]), mesNumero, 0)).getUTCDate();
+    const fecha = fechaValida
+      ? { mes: meses[mesNumero - 1], dia: String(diaNumero).padStart(2, '0') }
+      : (fechasProtagonistas[index % fechasProtagonistas.length] || { mes: 'AGO', dia: '07' });
     return Object.assign({}, e, { slug, fechaMes: fecha.mes, fechaDia: fecha.dia });
   });
 })();
@@ -176,14 +198,14 @@ const maxPorPagina = 3;
 */
 // // Plantilla compleja: template literal con condicional (evento.lugar) y atributo inline onerror
 const tarjeta = (evento, activa = false) => `
-    <a class="tarjeta${activa ? ' activa' : ''}" href="${obtenerRutaEvento(evento)}" data-engagement="none" aria-label="Evento ${evento.nombre}">
+    <a class="tarjeta${activa ? ' activa' : ''}" href="${escaparHTML(obtenerRutaEvento(evento))}" data-engagement="none" aria-label="Evento ${escaparHTML(evento.nombre)}">
     <div class="imagen-tarjeta">
-      <img src="${evento.imagen}" alt="${evento.nombre}" loading="lazy" onerror="this.onerror=null;this.src='/img/porco.avif';">
+      <img src="${escaparHTML(evento.imagen)}" alt="${escaparHTML(evento.nombre)}" loading="lazy" onerror="this.onerror=null;this.src='/img/porco.avif';">
     </div>
     <div class="detalles-tarjeta">
-      <span class="categoria">${evento.categoria}</span>
-      <h3>${evento.nombre}</h3>
-      ${evento.lugar ? `<span class="lugar">${evento.lugar}</span>` : ""}
+      <span class="categoria">${escaparHTML(evento.categoria)}</span>
+      <h3>${escaparHTML(evento.nombre)}</h3>
+      ${evento.lugar ? `<span class="lugar">${escaparHTML(evento.lugar)}</span>` : ""}
     </div>
     </a>
 `;
@@ -198,15 +220,22 @@ function renderSeccion(nombre) {
        solo el contenedor correspondiente, manteniendo los indicadores sincronizados. */
     const lista = datos[nombre];
     const actual = pos[nombre];
+    const contenedor = document.getElementById(`${nombre}-contenedor`);
+    if (!contenedor) return;
+    if (lista.length === 0) {
+        contenedor.innerHTML = '<p class="destacados-vacio">No hay eventos destacados por ahora.</p>';
+        document.querySelector(`.flecha.izquierda[data-carrusel="${nombre}"]`)?.classList.add("oculta");
+        document.querySelector(`.flecha.derecha[data-carrusel="${nombre}"]`)?.classList.add("oculta");
+        const indicadoresVacios = document.getElementById(`${nombre}-indicadores`);
+        if (indicadoresVacios) indicadoresVacios.innerHTML = "";
+        return;
+    }
   // // Cálculo de ventana visible con protección de límites (Math.max/Math.min)
   const inicio = Math.max(0, Math.min(actual, lista.length - maxPorPagina));
   // // Uso de slice + map + join para construir HTML de las tarjetas visibles
   const html = lista.slice(inicio, inicio + maxPorPagina)
     .map((evento, index) => tarjeta(evento, inicio + index === actual))
     .join("");
-
-    const contenedor = document.getElementById(`${nombre}-contenedor`);
-    if (!contenedor) return;
 
     contenedor.innerHTML = html;
 
@@ -454,6 +483,7 @@ function tarjetaPrincipal(evento) {
         <span class="categoria">${evento.categoria}${evento.tipoEntrada ? ` · ${evento.tipoEntrada}` : ''}</span>
         <h3>${evento.nombre}</h3>
         ${evento.lugar ? `<p class="lugar">${evento.lugar}</p>` : ""}
+        ${evento.tipoEntrada === 'De Pago' && evento.precioTexto ? `<p class="precio-evento">${escaparHTML(evento.precioTexto)}</p>` : ""}
       </div>
       <div class="evento-card-action">
         <div class="fecha-protagonista" aria-label="Fecha del evento">
@@ -597,11 +627,14 @@ function configurarFormularioEventos() {
     const fieldDescripcion = document.getElementById('field-descripcion');
     const descripcionInput = document.getElementById('evento-descripcion');
     const uploadInput = document.getElementById('evento-imagen');
+    const uploadButton = document.getElementById('upload-button');
     const uploadZone = document.getElementById('upload-zone');
+    const uploadPreview = document.getElementById('upload-preview');
     const uploadName = document.getElementById('upload-name');
     const errorBox = document.getElementById('form-error');
     const canalInput = document.getElementById('canal-notificacion');
     const canalButtons = document.querySelectorAll('.segmented-option');
+    let uploadPreviewUrl = '';
 
     const abrirFormulario = () => {
         overlay?.classList.add('open');
@@ -631,6 +664,12 @@ function configurarFormularioEventos() {
         form?.reset();
         if (fieldDescripcion) fieldDescripcion.hidden = true;
         if (descripcionInput) descripcionInput.value = '';
+        if (uploadPreviewUrl) URL.revokeObjectURL(uploadPreviewUrl);
+        uploadPreviewUrl = '';
+        if (uploadPreview) {
+            uploadPreview.removeAttribute('src');
+            uploadPreview.hidden = true;
+        }
         if (uploadName) uploadName.textContent = 'Sin archivo seleccionado';
         uploadZone?.classList.remove('has-file');
         canalInput && (canalInput.value = 'Email');
@@ -687,12 +726,25 @@ function configurarFormularioEventos() {
         }
     });
 
+    uploadButton?.addEventListener('click', () => uploadInput?.click());
     uploadInput?.addEventListener('change', () => {
         const file = uploadInput.files?.[0];
+        if (uploadPreviewUrl) URL.revokeObjectURL(uploadPreviewUrl);
+        uploadPreviewUrl = '';
         if (uploadName) {
             uploadName.textContent = file ? file.name : 'Sin archivo seleccionado';
         }
         uploadZone?.classList.toggle('has-file', Boolean(file));
+        if (uploadPreview) {
+            if (file) {
+                uploadPreviewUrl = URL.createObjectURL(file);
+                uploadPreview.src = uploadPreviewUrl;
+                uploadPreview.hidden = false;
+            } else {
+                uploadPreview.removeAttribute('src');
+                uploadPreview.hidden = true;
+            }
+        }
     });
 
     toggle?.addEventListener('click', (event) => {
@@ -747,12 +799,6 @@ function configurarFormularioEventos() {
             return;
         }
 
-        if (!descripcion) {
-            mostrarError('La descripción del evento es obligatoria.');
-            descripcionInput?.focus();
-            return;
-        }
-
         if (!ubicacion) {
             mostrarError('La ubicación del evento es obligatoria.');
             document.getElementById('evento-ubicacion')?.focus();
@@ -778,7 +824,7 @@ function configurarFormularioEventos() {
         }
 
         if (tipoEntrada === 'De Pago' && !precio) {
-            mostrarError('Escribe el precio del evento cuando eliges entrada de pago.');
+            mostrarError('Escribe el precio o valor de la entrada cuando eliges entrada de pago.');
             document.getElementById('evento-precio')?.focus();
             return;
         }
@@ -880,12 +926,7 @@ function renderEventosAnteriores() {
     const contenedor = document.getElementById('anteriores-contenedor');
     if (!contenedor) return;
 
-    const slugsAnterioresPersistidos = new Set(eventosAnterioresPersistidos.map((evento) => evento.slug));
-    const anteriores = [
-        ...eventosAnterioresPersistidos,
-        ...datos.anteriores.filter((evento) => !slugsAnterioresPersistidos.has(slugify(evento.nombre)))
-    ];
-    contenedor.innerHTML = anteriores.map((evento) => tarjetaAnterior(evento)).join('');
+    contenedor.innerHTML = eventosAnterioresPersistidos.map((evento) => tarjetaAnterior(evento)).join('');
     actualizarVisibilidadListaEventos(
         contenedor,
         document.getElementById('eventos-anteriores-toggle'),
@@ -941,6 +982,7 @@ function mapearEventoPersistido(evento) {
         categoria: evento.categoria,
         tipoEntrada: evento.tipo_entrada || 'Gratuito',
         precio: evento.precio,
+        precioTexto: evento.precio_texto || (evento.precio !== null && evento.precio !== undefined ? `$${evento.precio}` : ''),
         lugar: evento.ubicacion,
         fecha: evento.fecha,
         imagen: evento.imagen_portada || '../img/porco.avif'
@@ -1064,14 +1106,18 @@ function configurarMapaEventos() {
     const ubicaciones = new Map();
     const todosLosEventos = [
         ...eventosPersistidos,
-        ...eventosAnterioresPersistidos,
-        ...Object.values(datos).flat()
+        ...eventosAnterioresPersistidos
     ];
 
     todosLosEventos.forEach((evento) => {
         const lugar = String(evento.lugar || '').trim();
-        if (lugar && !ubicaciones.has(lugar.toLocaleLowerCase())) {
-            ubicaciones.set(lugar.toLocaleLowerCase(), lugar);
+        const clave = lugar
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .toLocaleLowerCase();
+        if (lugar && !ubicaciones.has(clave)) {
+            ubicaciones.set(clave, lugar);
         }
     });
 

@@ -6,6 +6,7 @@ require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 require_once __DIR__ . '/helpers/consultas_eventos.php';
 require_once __DIR__ . '/helpers/notificaciones.php';
+require_once __DIR__ . '/helpers/idempotencia.php';
 $soporteUsuario = sigtur_usuario_actual($pdo);
 $soporteCsrfToken = $soporteUsuario ? sigtur_csrf_token() : '';
 $soporteUrlVolver = $soporteUsuario
@@ -147,6 +148,12 @@ if ($soporteUsuario) {
             http_response_code(422);
             exit('La respuesta es obligatoria y no puede superar los 4000 caracteres.');
         }
+        $claveEnvio = $_POST['submission_key'] ?? null;
+        $ambitoEnvio = 'respuesta-soporte-usuario:' . $preguntaId . ':' . (int) $soporteUsuario['id'];
+        if (sigtur_envio_ya_procesado($ambitoEnvio, $claveEnvio)) {
+            header('Location: soporte.php?respuesta=1#respuestas-administradores');
+            exit;
+        }
 
         $pdo->beginTransaction();
         try {
@@ -182,6 +189,7 @@ if ($soporteUsuario) {
             $marcarPendiente = $pdo->prepare("UPDATE preguntas_frecuentes SET estado = 'pendiente' WHERE id = :id");
             $marcarPendiente->execute([':id' => $preguntaId]);
             $pdo->commit();
+            sigtur_marcar_envio_procesado($ambitoEnvio, $claveEnvio);
             sigtur_notificar_equipo_consulta(
                 $pdo,
                 (int) $soporteUsuario['id'],
@@ -347,6 +355,7 @@ if ($soporteUsuario) {
                     <?php if ($ultimoMensajeSoporte && in_array($ultimoMensajeSoporte['autor_rol'], ['administrador', 'organizador'], true)): ?>
                       <form class="support-reply-form" method="post">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($soporteCsrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="submission_key" value="<?= htmlspecialchars(bin2hex(random_bytes(16)), ENT_QUOTES, 'UTF-8') ?>">
                         <input type="hidden" name="pregunta_id" value="<?= (int) $preguntaSoporte['id'] ?>">
                         <label for="respuesta-soporte-<?= (int) $preguntaSoporte['id'] ?>">Responder al administrador</label>
                         <textarea id="respuesta-soporte-<?= (int) $preguntaSoporte['id'] ?>" name="respuesta" maxlength="4000" rows="3" required placeholder="Escribe tu respuesta..."></textarea>
@@ -412,6 +421,7 @@ if ($soporteUsuario) {
                     </div>
                     <form class="support-reply-form" method="post" action="api/responder_consulta_evento.php">
                       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($soporteCsrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                      <input type="hidden" name="submission_key" value="<?= htmlspecialchars(bin2hex(random_bytes(16)), ENT_QUOTES, 'UTF-8') ?>">
                       <input type="hidden" name="accion" value="mensaje">
                       <input type="hidden" name="pregunta_id" value="<?= (int) $consultaEvento['id'] ?>">
                       <label for="mensaje-consulta-<?= (int) $consultaEvento['id'] ?>">Tu mensaje</label>

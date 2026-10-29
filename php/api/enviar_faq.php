@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../conexion.php';
 require_once __DIR__ . '/../helpers/notificaciones.php';
+require_once __DIR__ . '/../helpers/idempotencia.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -15,6 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
    una futura pantalla administrativa interprete HTML enviado por el usuario. */
 $pregunta = trim((string) ($_POST['pregunta'] ?? ''));
 $pregunta = htmlspecialchars($pregunta, ENT_QUOTES, 'UTF-8');
+$claveEnvio = $_POST['submission_key'] ?? null;
+$ambitoEnvio = 'pregunta-soporte:' . (int) ($_SESSION['usuario_id'] ?? 0);
+if (sigtur_envio_ya_procesado($ambitoEnvio, $claveEnvio)) {
+    echo json_encode(['success' => true, 'message' => 'Pregunta enviada correctamente'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 $usuarioId = isset($_SESSION['usuario_id']) ? (int) $_SESSION['usuario_id'] : null;
 $email = trim((string) ($_POST['email'] ?? ($_SESSION['usuario_email'] ?? '')));
 
@@ -39,6 +46,7 @@ $insertar->execute([
     ':email' => $email !== '' ? $email : null,
     ':pregunta' => $pregunta,
 ]);
+sigtur_marcar_envio_procesado($ambitoEnvio, $claveEnvio);
 
 sigtur_notificar_equipo_consulta(
     $pdo,

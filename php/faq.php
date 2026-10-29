@@ -27,6 +27,7 @@ sigtur_iniciar_sesion_segura();
         <form id="faq-form" class="faq-form" novalidate>
             <label for="faq-pregunta">Pregunta</label>
             <textarea id="faq-pregunta" name="pregunta" rows="5" minlength="5" maxlength="1000" placeholder="Escribe aquí tu pregunta..." required></textarea>
+            <input type="hidden" name="submission_key" value="<?= htmlspecialchars(bin2hex(random_bytes(16)), ENT_QUOTES, 'UTF-8') ?>">
             <?php if (empty($_SESSION['usuario_id'])): ?>
                 <label for="faq-email">Email para recibir respuesta</label>
                 <input id="faq-email" type="email" name="email" placeholder="tu@email.com" required>

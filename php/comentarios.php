@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['error' => 'Solicitud no autorizada']);
             exit;
         }
-        $comentarioStmt = $pdo->prepare('SELECT usuario_id, item_key, eliminado_para_todos FROM comentarios WHERE id = :id LIMIT 1');
+        $comentarioStmt = $pdo->prepare('SELECT usuario_id, item_key, parent_id, eliminado_para_todos FROM comentarios WHERE id = :id LIMIT 1');
         $comentarioStmt->execute([':id' => $comentarioId]);
         $comentario = $comentarioStmt->fetch(PDO::FETCH_ASSOC);
         if (!$comentario || !hash_equals((string) $comentario['item_key'], $itemKey)) {
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo json_encode(['error' => 'Solo puedes editar tus propios comentarios activos']);
                 exit;
             }
-            $textoEditado = censurarTexto(trim((string) ($_POST['texto'] ?? '')));
+            $textoEditado = censurarComentario(trim((string) ($_POST['texto'] ?? '')));
             if ($textoEditado === '' || strlen($textoEditado) > 140) {
                 http_response_code(422);
                 echo json_encode(['error' => 'El comentario debe tener entre 1 y 140 caracteres']);
@@ -97,14 +97,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['error' => 'Solo quien escribió el comentario puede eliminarlo para todos']);
             exit;
         }
-        $pdo->prepare('UPDATE comentarios SET eliminado_para_todos = 1 WHERE id = :id')->execute([':id' => $comentarioId]);
+        $pdo->beginTransaction();
+        $pdo->prepare('DELETE FROM comentarios_ocultos_usuario WHERE comentario_id = :id')
+            ->execute([':id' => $comentarioId]);
+        $promoverRespuestas = $pdo->prepare(
+            'UPDATE comentarios SET parent_id = :parent_id WHERE parent_id = :id AND item_key = :item_key'
+        );
+        $promoverRespuestas->execute([
+            ':parent_id' => $comentario['parent_id'],
+            ':id' => $comentarioId,
+            ':item_key' => $itemKey,
+        ]);
+        $eliminarComentario = $pdo->prepare(
+            'DELETE FROM comentarios
+             WHERE id = :id AND usuario_id = :usuario_id AND item_key = :item_key AND eliminado_para_todos = 0'
+        );
+        $eliminarComentario->execute([
+            ':id' => $comentarioId,
+            ':usuario_id' => $usuarioId,
+            ':item_key' => $itemKey,
+        ]);
+        if ($eliminarComentario->rowCount() !== 1) {
+            $pdo->rollBack();
+            http_response_code(404);
+            echo json_encode(['error' => 'El comentario ya no está disponible']);
+            exit;
+        }
+        $pdo->commit();
         echo json_encode(['success' => true, 'id' => $comentarioId, 'accion' => $accionEliminar]);
         exit;
     }
 
     // CAMBIO APLICADO: parent_id identifica opcionalmente el comentario padre;
     // cero se convierte en NULL para conservar los comentarios raíz.
-    $texto = censurarTexto(trim($_POST['texto'] ?? ''));
+    $texto = censurarComentario(trim($_POST['texto'] ?? ''));
     $parentId = max(0, (int) ($_POST['parent_id'] ?? 0));
 
     if ($usuarioId <= 0) {
@@ -158,6 +184,7 @@ $consulta = $pdo->prepare(
      FROM comentarios
      INNER JOIN usuarios ON comentarios.usuario_id = usuarios.id
      WHERE comentarios.item_key = :item_key
+       AND comentarios.eliminado_para_todos = 0
        AND NOT EXISTS (SELECT 1 FROM comentarios_ocultos_usuario oculto
            WHERE oculto.comentario_id = comentarios.id AND oculto.usuario_id = :usuario_id)
     ORDER BY comentarios.fecha_creacion ASC, comentarios.id ASC
@@ -194,7 +221,7 @@ $comentarios = array_map(static function (array $comentario) use ($usuarioIdActu
         'parent_id' => $comentario['parent_id'] !== null ? (int) $comentario['parent_id'] : null,
         'name' => $comentario['nickname'] ?: $comentario['nombre_completo'],
         'avatar_url' => $avatarComentario,
-        'text' => (int) $comentario['eliminado_para_todos'] === 1 ? '' : $comentario['texto'],
+        'text' => (int) $comentario['eliminado_para_todos'] === 1 ? '' : censurarComentario((string) $comentario['texto']),
         'deleted' => (int) $comentario['eliminado_para_todos'] === 1,
         'can_edit' => (int) $comentario['usuario_id'] === $usuarioIdActual && (int) $comentario['eliminado_para_todos'] !== 1,
         'can_delete_everyone' => (int) $comentario['eliminado_para_todos'] !== 1

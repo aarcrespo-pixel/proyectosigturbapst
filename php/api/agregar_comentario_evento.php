@@ -5,10 +5,19 @@ require_once __DIR__ . '/../conexion.php';
 require_once __DIR__ . '/../helpers/autorizacion.php';
 require_once __DIR__ . '/../helpers/notificaciones.php';
 require_once __DIR__ . '/../helpers/consultas_eventos.php';
+require_once __DIR__ . '/../helpers/idempotencia.php';
+require_once __DIR__ . '/../helpers/censura.php';
+
+$claveEnvio = $_POST['submission_key'] ?? null;
+$ambitoEnvio = 'pregunta-evento:' . (int) ($_SESSION['usuario_id'] ?? 0);
+if (sigtur_envio_ya_procesado($ambitoEnvio, $claveEnvio)) {
+    echo json_encode(['success' => true, 'message' => '¡Pregunta/Comentario enviado con éxito!'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 $usuarioId = (int) ($_SESSION['usuario_id'] ?? 0);
 $eventoId = filter_input(INPUT_POST, 'evento_id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-$texto = trim((string) ($_POST['comentario'] ?? $_POST['pregunta'] ?? ''));
+$texto = censurarComentario(trim((string) ($_POST['comentario'] ?? $_POST['pregunta'] ?? '')));
 
 if (!sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
     http_response_code(403);
@@ -72,6 +81,7 @@ if ($ok) {
 $pdo->commit();
 
 if ($ok) {
+    sigtur_marcar_envio_procesado($ambitoEnvio, $claveEnvio);
     sigtur_notificar_consulta_evento(
         $pdo,
         $usuarioId,

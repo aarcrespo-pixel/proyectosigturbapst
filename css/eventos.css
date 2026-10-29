@@ -383,6 +383,16 @@ body[data-tema="oscuro"] .seccion-foco {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1.5rem;
+}
+
+.destacados-vacio {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 2rem;
+    border: 1px dashed rgba(18, 38, 48, .25);
+    border-radius: 16px;
+    color: #53636b;
+    text-align: center;
     transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease;
     will-change: transform, opacity;
 }
@@ -850,10 +860,13 @@ body[data-tema="oscuro"] .evento-card,
 
 body.dark-mode .evento-card-body .categoria,
 body.dark-mode .evento-card-body .lugar,
+body.dark-mode .evento-card-body .precio-evento,
 body[data-tema="oscuro"] .evento-card-body .categoria,
 body[data-tema="oscuro"] .evento-card-body .lugar,
+body[data-tema="oscuro"] .evento-card-body .precio-evento,
 [data-theme="dark"] .evento-card-body .categoria,
-[data-theme="dark"] .evento-card-body .lugar {
+[data-theme="dark"] .evento-card-body .lugar,
+[data-theme="dark"] .evento-card-body .precio-evento {
     color: #9ca3af;
 }
 
@@ -909,6 +922,12 @@ body[data-tema="oscuro"] .evento-card-body h3,
     color: rgba(26, 26, 36, 0.72);
     line-height: 1.4;
     font-size: 0.95rem;
+}
+
+.evento-card-body .precio-evento {
+    margin: 0;
+    color: #8d3c24;
+    font-weight: 700;
 }
 
 .evento-card-action {
@@ -2165,9 +2184,26 @@ body[data-tema="oscuro"] .drawer-field select { background: #24252a; border-colo
     text-align: center;
 }
 
+body[data-tema="oscuro"] .destacados-vacio {
+    border-color: rgba(255, 255, 255, .25);
+    color: #d3c8b7;
+}
+
 .upload-zone.has-file {
     border-color: #ff7f2a;
     background: #fff8f2;
+}
+
+.upload-preview {
+    display: block;
+    width: min(100%, 360px);
+    max-height: 220px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.upload-preview[hidden] {
+    display: none;
 }
 
 .upload-button {
