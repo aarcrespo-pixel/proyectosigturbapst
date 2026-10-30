@@ -57,7 +57,7 @@ $headerLinks = [
 ];
 ?>
 <script src="<?= htmlspecialchars(BASE_URL . 'js/tema.js', ENT_QUOTES, 'UTF-8') ?>" defer></script>
-<header class="menu-principal">
+<header class="menu-principal" id="menu-principal">
     <button class="hamburguesa" aria-label="Abrir menú" data-i18n-aria-label="navMenuOpen">
         ☰
     </button>
@@ -130,6 +130,13 @@ $headerLinks = [
         </div>
     </div>
 </header>
+<button class="nav-reveal-hint" type="button" aria-controls="menu-principal" aria-expanded="true" aria-label="Mostrar secciones, clima y buscador" data-i18n-aria-label="navRevealHintLabel" hidden>
+    <span class="nav-reveal-hint__arrow" aria-hidden="true">↑</span>
+</button>
+<button class="scroll-top-button" type="button" aria-label="Volver arriba" data-i18n-aria-label="scrollTopLabel" hidden>
+    <span aria-hidden="true">↑</span>
+</button>
+<script src="<?= BASE_URL ?>js/volver-posicion.js" defer></script>
 
 <?php if ($headerUserLoggedIn): ?>
 <button

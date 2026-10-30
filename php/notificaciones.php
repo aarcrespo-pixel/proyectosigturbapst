@@ -108,6 +108,7 @@ $sinLeer = sigtur_contar_notificaciones_no_leidas($pdo, $usuarioId, false, 'avis
         body[data-tema="oscuro"] .notificaciones-page__button--secondary { background: #303941; color: #edf2f5; }
         @media (max-width: 700px) { .notificaciones-page__header { flex-direction: column; align-items: flex-start; } }
     </style>
+    <script src="../js/volver-posicion.js" defer></script>
 </head>
 <body>
 <main class="notificaciones-page">

@@ -90,6 +90,7 @@ $cantidadPendiente = count(array_filter($soporte, static fn ($item) => $item['es
     <title>Mensajes de usuarios | SIGTUR</title>
     <link rel="stylesheet" href="../css/estilos.css">
     <link rel="stylesheet" href="../css/panel-admin.css">
+    <script src="../js/volver-posicion.js" defer></script>
 </head>
 <body class="admin-panel-page">
     <main class="admin-panel">

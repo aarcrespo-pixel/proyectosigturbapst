@@ -24,7 +24,9 @@ function sigtur_url_imagen_subida(string $valor, string $carpeta, string $fallba
         return '../uploads/' . trim($carpeta, '/') . '/' . rawurlencode($valor);
     }
     if (str_starts_with(str_replace('\\', '/', $valor), '../uploads/')) {
-        return '../uploads/' . rawurlencode(implode('/', array_map('rawurldecode', explode('/', substr(str_replace('\\', '/', $valor), strlen('../uploads/'))))));
+        $rutaSubida = substr(str_replace('\\', '/', $valor), strlen('../uploads/'));
+        $segmentosRuta = array_map('rawurlencode', array_map('rawurldecode', explode('/', $rutaSubida)));
+        return '../uploads/' . implode('/', $segmentosRuta);
     }
     return $valor;
 }

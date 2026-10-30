@@ -17,7 +17,7 @@ $navBase = $navBase ?? $phpBase;
 sigtur_iniciar_sesion_segura();
 $activePage = $activePage ?? '';
 ?>
-<header class="menu-principal" data-csrf="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
+<header class="menu-principal" id="menu-principal" data-csrf="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
     <button class="hamburguesa" aria-label="Abrir menú" data-i18n-aria-label="navMenuOpen">
         ☰
     </button>
@@ -92,10 +92,17 @@ $usuarioLogueadoActual = isset($_SESSION['usuario_id']);
         <span class="weather-ith ith-badge" id="weather-ith">ITH: --</span>
     </div>
 </header>
+<button class="nav-reveal-hint" type="button" aria-controls="menu-principal" aria-expanded="true" aria-label="Mostrar secciones, clima y buscador" data-i18n-aria-label="navRevealHintLabel" hidden>
+    <span class="nav-reveal-hint__arrow" aria-hidden="true">↑</span>
+</button>
+<button class="scroll-top-button" type="button" aria-label="Volver arriba" data-i18n-aria-label="scrollTopLabel" hidden>
+    <span aria-hidden="true">↑</span>
+</button>
 
 <script src="<?= $rootBase ?>js/weather.js" defer></script>
 <script src="<?= $rootBase ?>js/translator.js?v=20261019-i18n-4" defer></script>
 <script src="<?= $rootBase ?>js/search.js" defer></script>
+<script src="<?= $rootBase ?>js/volver-posicion.js" defer></script>
 <?php $mensajesWidgetRoot = $rootBase; include __DIR__ . '/mensajes-widget.php'; ?>
 
 <div class="perfil-modal-backdrop" id="perfilModal" aria-hidden="true">

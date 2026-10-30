@@ -102,6 +102,7 @@ $solicitudEnviada = ($_GET['enviada'] ?? '') === '1';
     <link rel="stylesheet" href="../css/estilos.css">
     <link rel="stylesheet" href="../css/panel-admin.css">
     <link rel="stylesheet" href="../css/solicitud-rango.css">
+    <script src="../js/volver-posicion.js" defer></script>
 </head>
 <body class="admin-panel-page">
     <main class="admin-panel solicitud-rango">

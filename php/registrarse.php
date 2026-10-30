@@ -101,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrarse | Sigtur Salto</title>
     <link rel="stylesheet" href="../css/login.css">
+    <script src="../js/volver-posicion.js" defer></script>
 </head>
 <body>
     <a class="logo-back" href="../index.php" aria-label="Volver al inicio">

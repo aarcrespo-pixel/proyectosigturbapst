@@ -261,6 +261,13 @@
             currentState.likes = currentState.likes > 0 ? 0 : 1;
             writeState(key, currentState);
             updateView();
+            window.dispatchEvent(new CustomEvent('sigtur:card-like-change', {
+                detail: {
+                    itemKey: key,
+                    likes: currentState.likes,
+                    list: card.classList.contains('evento-card') ? 'principales' : null
+                }
+            }));
         });
 
         commentButton?.addEventListener('click', (event) => {

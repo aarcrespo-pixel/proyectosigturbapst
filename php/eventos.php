@@ -113,7 +113,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Estilos CSS -->
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>"> <!-- Estilos generales -->
-    <link rel="stylesheet" href="../css/eventos.css?v=20261028-event-price-text-1"> <!-- Estilos específicos de eventos -->
+    <link rel="stylesheet" href="../css/eventos.css?v=20261029-gallery-autoplay-2"> <!-- Estilos específicos de eventos -->
 </head>
 
 <body class="page-eventos">
@@ -353,7 +353,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
             </div>
         </div><?php endif; ?>
 
-        <?php if ($puedeGestionarEventos): ?>
+        <?php if ($puedeCrearEvento): ?>
             <div class="form-evento-overlay" id="form-galeria-overlay" aria-hidden="true">
                 <div class="form-evento-modal" role="dialog" aria-modal="true" aria-labelledby="form-galeria-title">
                     <button class="form-evento-close" type="button" data-gallery-close aria-label="Cerrar formulario">×</button>
@@ -469,7 +469,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                 <img id="lightbox-image" src="" alt="Vista ampliada de galería">
                 <button class="lightbox-arrow right" id="lightbox-next" aria-label="Siguiente imagen">❯</button>
             </div>
-            <aside class="lightbox-comments" aria-label="Comentarios de la imagen">
+            <aside class="lightbox-comments" aria-label="Información de la imagen">
                 <!-- Estos nodos reciben item.titulo e item.descripcion desde
                      eventos.js cada vez que cambia la foto del lightbox. -->
                 <div class="lightbox-info">
@@ -481,25 +481,25 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                         <span class="lightbox-caption" id="lightbox-caption"></span>
                     </div>
                 </div>
-                <article class="gallery-engagement-card" id="lightbox-engagement-card"></article>
+                <article class="gallery-engagement-card" id="lightbox-engagement-card" data-engagement="like-only"></article>
             </aside>
         </div>
     </div>
 
-    <script src="../js/script.js" defer></script>
-    <script src="../js/interacciones-tarjetas.js?v=20261028-comment-options-2" defer></script>
+    <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
+    <script src="../js/interacciones-tarjetas.js?v=20261029-event-like-order-1" defer></script>
     <script>window.sigturEventoIds = <?= json_encode($eventoIdsPorSlug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosDesdeBd = <?= json_encode($eventosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosDestacadosDesdeBd = <?= json_encode($eventosDestacadosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosAnterioresDesdeBd = <?= json_encode($eventosAnterioresDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.galeriaDesdeBd = <?= json_encode($fotosGaleriaEventos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;</script>
     <script>window.gestionGaleria = <?= json_encode([
-        'puedeSubir' => (bool) $puedeGestionarEventos,
+        'puedeSubir' => (bool) $puedeCrearEvento,
         'usuarioId' => (int) ($usuarioActual['id'] ?? 0),
         'rol' => (string) ($usuarioActual['rol'] ?? ''),
         'csrfToken' => $csrfToken,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script src="../js/eventos.js?v=20261029-event-card-map-3" defer></script>
+    <script src="../js/eventos.js?v=20261029-gallery-autoplay-3" defer></script>
 </body>
 
 </html>

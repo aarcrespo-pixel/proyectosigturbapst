@@ -22,7 +22,8 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>">
-    <link rel="stylesheet" href="../css/lugares.css">
+    <link rel="stylesheet" href="../css/lugares.css?v=20261029-interactive-cards-2">
+    <link rel="stylesheet" href="../css/galeria-lugares.css">
 </head>
 
 <body>
@@ -69,21 +70,30 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
             <h2 data-i18n="placesSectionEmblematicTitle">Lugares emblemáticos</h2>
             <div class="destinos-grid">
                 <article class="tarjeta-lugar">
-                    <img src="../img/Plaza_33.webp" alt="Costanera Sur" data-i18n-alt="placesEmblematicAlt" data-i18n-index="0">
+                    <div class="tarjeta-lugar__imagen">
+                        <img src="../img/Plaza_33.webp" alt="Costanera Sur" data-i18n-alt="placesEmblematicAlt" data-i18n-index="0">
+                        <span class="tarjeta-lugar__indicacion" aria-hidden="true">Tocá para conocer</span>
+                    </div>
                     <div class="tarjeta-contenido">
                         <h3 data-i18n="placesEmblematicTitles" data-i18n-index="0">Plaza Treinta y Tres Orientales</h3>
                         <p data-i18n="placesEmblematicDescriptions" data-i18n-index="0">Paseo tranquilo junto al río con espacios verdes, miradores y zonas para descansar al aire libre.</p>
                     </div>
                 </article>
                 <article class="tarjeta-lugar">
-                    <img src="../img/Plaza_artigas.webp" alt="Plaza histórica" data-i18n-alt="placesEmblematicAlt" data-i18n-index="1">
+                    <div class="tarjeta-lugar__imagen">
+                        <img src="../img/Plaza_artigas.webp" alt="Plaza histórica" data-i18n-alt="placesEmblematicAlt" data-i18n-index="1">
+                        <span class="tarjeta-lugar__indicacion" aria-hidden="true">Tocá para conocer</span>
+                    </div>
                     <div class="tarjeta-contenido">
                         <h3 data-i18n="placesEmblematicTitles" data-i18n-index="1">Plaza Artigas</h3>
                         <p data-i18n="placesEmblematicDescriptions" data-i18n-index="1">Plaza emblemática del centro con arquitectura tradicional, cafeterías y actividad cultural permanente.</p>
                     </div>
                 </article>
                 <article class="tarjeta-lugar">
-                    <img src="../img/solari.jfif" alt="Parque Benito Solari" data-i18n-alt="placesEmblematicAlt" data-i18n-index="2">
+                    <div class="tarjeta-lugar__imagen">
+                        <img src="../img/solari.jfif" alt="Parque Benito Solari" data-i18n-alt="placesEmblematicAlt" data-i18n-index="2">
+                        <span class="tarjeta-lugar__indicacion" aria-hidden="true">Tocá para conocer</span>
+                    </div>
                     <div class="tarjeta-contenido">
                         <h3 data-i18n="placesEmblematicTitles" data-i18n-index="2">Parque Benito Solari</h3>
                         <p data-i18n="placesEmblematicDescriptions" data-i18n-index="2">Gran área verde perfecta para caminatas familiares, actividades deportivas y eventos al aire libre.</p>
@@ -92,7 +102,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
             </div>
         </section>
 
-        <section class="seccion-lugares">
+        <section class="seccion-lugares" id="categorias-lugares">
             <h2 data-i18n="placesSectionCategoriesTitle">Categorías de lugares</h2>
             <div class="intereses-grid">
                 <article class="tarjeta-interes">
@@ -126,25 +136,34 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
             </div>
         </section>
 
-        <section class="seccion-lugares">
+        <section class="seccion-lugares" id="lugares-distraccion">
             <h2 data-i18n="placesSectionLeisureTitle">Lugares para Distraerse</h2>
             <div class="destinos-grid">
                 <article class="tarjeta-lugar">
-                    <img src="https://www.salto.gub.uy/sites/default/files/styles/16_9_xl_scale/public/2024-08/0505190000.JPG.webp?itok=67uThcCX" alt="Plaza Roosvelt" data-i18n-alt="placesLeisureAlt" data-i18n-index="0">
+                    <div class="tarjeta-lugar__imagen">
+                        <img src="https://www.salto.gub.uy/sites/default/files/styles/16_9_xl_scale/public/2024-08/0505190000.JPG.webp?itok=67uThcCX" alt="Plaza Roosvelt" data-i18n-alt="placesLeisureAlt" data-i18n-index="0" onerror="this.onerror=null;this.src='../img/Plaza_33.webp';">
+                        <span class="tarjeta-lugar__indicacion" aria-hidden="true">Tocá para conocer</span>
+                    </div>
                     <div class="tarjeta-contenido">
                         <h3 data-i18n="placesLeisureTitles" data-i18n-index="0">Plaza Roosvelt</h3>
                         <p data-i18n="placesLeisureDescriptions" data-i18n-index="0">Plaza tranquila en la costa para tomar mates con amigos u familiares.</p>
                     </div>
                 </article>
                 <article class="tarjeta-lugar">
-                    <img src="../img/Costanera_Norte.jpeg" alt="Costanera Norte" data-i18n-alt="placesLeisureAlt" data-i18n-index="1">
+                    <div class="tarjeta-lugar__imagen">
+                        <img src="../img/Costanera_Norte.jpeg" alt="Costanera Norte" data-i18n-alt="placesLeisureAlt" data-i18n-index="1">
+                        <span class="tarjeta-lugar__indicacion" aria-hidden="true">Tocá para conocer</span>
+                    </div>
                     <div class="tarjeta-contenido">
                         <h3 data-i18n="placesLeisureTitles" data-i18n-index="1">Costanera Norte</h3>
                         <p data-i18n="placesLeisureDescriptions" data-i18n-index="1">Área costera con vistas al río, espacios verdes y zonas para actividades al aire libre.</p>
                     </div>
                 </article>
                 <article class="tarjeta-lugar">
-                    <img src="https://dzpqda01g2dxp.cloudfront.net/images/attractions/4069/photos/4069_0.jpg" alt="Muelle Negro" data-i18n-alt="placesLeisureAlt" data-i18n-index="2">
+                    <div class="tarjeta-lugar__imagen">
+                        <img src="https://dzpqda01g2dxp.cloudfront.net/images/attractions/4069/photos/4069_0.jpg" alt="Muelle Negro" data-i18n-alt="placesLeisureAlt" data-i18n-index="2" onerror="this.onerror=null;this.src='../img/Costanera_Norte.jpeg';">
+                        <span class="tarjeta-lugar__indicacion" aria-hidden="true">Tocá para conocer</span>
+                    </div>
                     <div class="tarjeta-contenido">
                         <h3 data-i18n="placesLeisureTitles" data-i18n-index="2">Muelle Negro</h3>
                         <p data-i18n="placesLeisureDescriptions" data-i18n-index="2">Zona con vista al río para relajarse y pasar el rato con amigos.</p>
@@ -229,8 +248,9 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
         </section>
     </main>
 
-    <script src="../js/script.js" defer></script>
+    <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
     <script src="../js/lugar-links.js?v=20261028-event-map-1" defer></script>
+    <script src="../js/galeria-lugares.js" defer></script>
     <?php if ($puedeAgregarFotosLugares): ?>
         <script>
             const botonAgregarFotosLugares = document.querySelector('.lugares-galeria-add__button');

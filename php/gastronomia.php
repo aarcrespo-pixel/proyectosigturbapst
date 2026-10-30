@@ -216,7 +216,7 @@ unset($propuesta);
 
     </main>
 
-    <script src="../js/script.js" defer></script>
+    <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
     <script src="../js/gastronomia.js?v=20261027-2" defer></script>
 </body>
 

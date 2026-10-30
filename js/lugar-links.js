@@ -76,6 +76,7 @@
         setupMapToggle('mapa-turismo-lista', 'mapa-turismo-toggle');
 
         document.querySelectorAll('.tarjeta-destino, .tarjeta-ruta, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria').forEach((card) => {
+            if (card.closest('.gallery-photo-grid')) return;
             const title = card.querySelector('h3')?.textContent.trim();
             const slug = placeSlugs[title];
             if (!slug) return;

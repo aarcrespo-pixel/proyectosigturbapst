@@ -70,7 +70,7 @@ function sigtur_requerir_rol(PDO $pdo, array $roles, string $loginUrl = 'login.p
     $rolesPermitidos = array_map('sigtur_normalizar_rol', $roles);
     if (!in_array($usuario['rol'], $rolesPermitidos, true)) {
         http_response_code(403);
-        ?><!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Acceso denegado | SIGTUR</title><link rel="stylesheet" href="../css/estilos.css"></head><body><main style="max-width:640px;margin:12vh auto;padding:2rem"><h1>Acceso denegado</h1><p>Tu cuenta no tiene permisos para acceder a esta sección.</p><a href="<?= htmlspecialchars($deniedUrl, ENT_QUOTES, 'UTF-8') ?>">Volver a eventos</a></main></body></html><?php
+        ?><!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Acceso denegado | SIGTUR</title><link rel="stylesheet" href="../css/estilos.css"><script src="../js/volver-posicion.js" defer></script></head><body><main style="max-width:640px;margin:12vh auto;padding:2rem"><h1>Acceso denegado</h1><p>Tu cuenta no tiene permisos para acceder a esta sección.</p><a href="<?= htmlspecialchars($deniedUrl, ENT_QUOTES, 'UTF-8') ?>">Volver a eventos</a></main></body></html><?php
         exit;
     }
 

@@ -24,7 +24,8 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>">
-    <link rel="stylesheet" href="../css/turismo.css">
+    <link rel="stylesheet" href="../css/turismo.css?v=20261029-waterparks-interactive-1">
+    <link rel="stylesheet" href="../css/galeria-lugares.css">
 </head>
 
 <body>
@@ -71,7 +72,10 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
             <h2 data-i18n="tourismSectionEscapadasTitle">Escapadas recomendadas</h2>
             <div class="destinos-grid">
                 <article class="tarjeta-destino">
-                    <img src="../img/Costanera_Norte.jpeg" alt="Costanera de Salto" data-i18n-alt="tourismEscapadasAlt" data-i18n-index="0">
+                    <div class="tarjeta-destino__imagen">
+                        <img src="../img/Costanera_Norte.jpeg" alt="Costanera de Salto" data-i18n-alt="tourismEscapadasAlt" data-i18n-index="0">
+                        <span class="tarjeta-destino__indicacion" aria-hidden="true">Tocá para conocer</span>
+                    </div>
                     <div class="contenido">
                         <h3 data-i18n="tourismEscapadasTitles" data-i18n-index="0">Costanera Norte</h3>
                         <p data-i18n="tourismEscapadasDescriptions" data-i18n-index="0">Un paseo al borde del río para disfrutar de arte urbano, música en vivo y atardeceres junto al agua.</p>
@@ -79,7 +83,10 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                     </div>
                 </article>
                 <article class="tarjeta-destino">
-                    <img src="../img/BaSalto.jpg" alt="Basalto" data-i18n-alt="tourismEscapadasAlt" data-i18n-index="1">
+                    <div class="tarjeta-destino__imagen">
+                        <img src="../img/BaSalto.jpg" alt="Basalto" data-i18n-alt="tourismEscapadasAlt" data-i18n-index="1">
+                        <span class="tarjeta-destino__indicacion" aria-hidden="true">Tocá para conocer</span>
+                    </div>
                     <div class="contenido">
                         <h3 data-i18n="tourismEscapadasTitles" data-i18n-index="1">BaSalto</h3>
                         <p data-i18n="tourismEscapadasDescriptions" data-i18n-index="1">Centro histórico con monumentos, cafés y espacios culturales que invitan a recorrer la identidad local.</p>
@@ -87,7 +94,10 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                     </div>
                 </article>
                 <article class="tarjeta-destino">
-                    <img src="../img/solari.jfif" alt="Parque Solari" data-i18n-alt="tourismEscapadasAlt" data-i18n-index="2">
+                    <div class="tarjeta-destino__imagen">
+                        <img src="../img/solari.jfif" alt="Parque Solari" data-i18n-alt="tourismEscapadasAlt" data-i18n-index="2">
+                        <span class="tarjeta-destino__indicacion" aria-hidden="true">Tocá para conocer</span>
+                    </div>
                     <div class="contenido">
                         <h3 data-i18n="tourismEscapadasTitles" data-i18n-index="2">Parque Benito Solari</h3>
                         <p data-i18n="tourismEscapadasDescriptions" data-i18n-index="2">Un lugar verde donde se mezclan senderos, picnic y actividades deportivas al aire libre.</p>
@@ -97,7 +107,7 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
             </div>
         </section>
 
-        <section class="seccion-turismo">
+        <section class="seccion-turismo" id="rutas-experiencias">
             <h2 data-i18n="tourismSectionRoutesTitle">Rutas y experiencias</h2>
             <div class="rutas-grid">
                 <article class="tarjeta-ruta">
@@ -135,11 +145,14 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
             </div>
         </section>
 
-        <section class="seccion-turismo">
+        <section class="seccion-turismo" id="parques-termas">
             <h2 data-i18n="tourismWaterparksTitle">Parques Acuáticos y Termas</h2>
             <div class="rutas-grid">
                 <article class="tarjeta-ruta">
-                    <img src="https://www.salto.gub.uy/sites/default/files/styles/16_9_lg/public/2025-07/termas-dayman.png.webp?itok=Y_zseTHZ" alt="Dayman" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="0">
+                    <div class="tarjeta-ruta__imagen">
+                        <img src="https://www.salto.gub.uy/sites/default/files/styles/16_9_lg/public/2025-07/termas-dayman.png.webp?itok=Y_zseTHZ" alt="Dayman" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="0">
+                        <span class="tarjeta-ruta__indicacion" aria-hidden="true">Tocá para ver más</span>
+                    </div>
                     <div class="contenido">
                         <h3 data-i18n="tourismWaterparkTitles" data-i18n-index="0">Termas del Dayman</h3>
                         <p data-i18n="tourismWaterparkDescriptions" data-i18n-index="0">Termas naturales con aguas termales.</p>
@@ -150,7 +163,10 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                     </div>
                 </article>
                 <article class="tarjeta-ruta">
-                    <img src="https://s3.amazonaws.com/pdugallery2/25801/big_nosotros_01.webp" alt="Aquamania" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="1">
+                    <div class="tarjeta-ruta__imagen">
+                        <img src="https://s3.amazonaws.com/pdugallery2/25801/big_nosotros_01.webp" alt="Aquamania" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="1">
+                        <span class="tarjeta-ruta__indicacion" aria-hidden="true">Tocá para ver más</span>
+                    </div>
                     <div class="contenido">
                         <h3 data-i18n="tourismWaterparkTitles" data-i18n-index="1">Acuamania</h3>
                         <p data-i18n="tourismWaterparkDescriptions" data-i18n-index="1">Parque acuático con diversas atracciones y áreas de descanso.</p>
@@ -161,7 +177,10 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                     </div>
                 </article>
                 <article class="tarjeta-ruta">
-                    <img src="https://images.trvl-media.com/lodging/2000000/1160000/1159500/1159497/e0a87b61.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill" alt="La Fosa" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="2">
+                    <div class="tarjeta-ruta__imagen">
+                        <img src="https://images.trvl-media.com/lodging/2000000/1160000/1159500/1159497/e0a87b61.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill" alt="La Fosa" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="2">
+                        <span class="tarjeta-ruta__indicacion" aria-hidden="true">Tocá para ver más</span>
+                    </div>
                     <div class="contenido">
                         <h3 data-i18n="tourismWaterparkTitles" data-i18n-index="2">Termas de la Arapey</h3>
                         <p data-i18n="tourismWaterparkDescriptions" data-i18n-index="2">Termas para relajarse en familia.</p>
@@ -172,7 +191,10 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                     </div>
                 </article>
                 <article class="tarjeta-ruta">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtxRTmV6EPSUjXRqh8S7b3vhCQMugTwAgSTY-maV-T8qUuaUmApX5-SYk&s=10" alt="Aguas Claras" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="3">
+                    <div class="tarjeta-ruta__imagen">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtxRTmV6EPSUjXRqh8S7b3vhCQMugTwAgSTY-maV-T8qUuaUmApX5-SYk&s=10" alt="Aguas Claras" data-i18n-alt="tourismWaterparkAlt" data-i18n-index="3">
+                        <span class="tarjeta-ruta__indicacion" aria-hidden="true">Tocá para ver más</span>
+                    </div>
                     <div class="contenido">
                         <h3 data-i18n="tourismWaterparkTitles" data-i18n-index="3">Agua Clara</h3>
                         <p data-i18n="tourismWaterparkDescriptions" data-i18n-index="3">Piscinas relajantes para disfrutar en las vacaciones.</p>
@@ -265,8 +287,9 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
         </section>
     </main>
 
-    <script src="../js/script.js" defer></script>
+    <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
     <script src="../js/lugar-links.js?v=20261028-event-map-1" defer></script>
+    <script src="../js/galeria-lugares.js" defer></script>
     <?php if ($puedeAgregarFotosTurismo): ?>
         <script>
             const botonAgregarFotosTurismo = document.querySelector('.turismo-galeria-add__button');

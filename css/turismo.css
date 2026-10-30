@@ -201,6 +201,82 @@ body[data-tema="oscuro"] .info-panel article {
     box-shadow: 0 32px 70px rgba(59, 88, 165, 0.14);
 }
 
+#destinos .tarjeta-destino {
+    position: relative;
+    cursor: pointer;
+    transition: transform .38s cubic-bezier(.2,.8,.2,1), box-shadow .38s ease, outline-color .25s ease;
+}
+
+#destinos .tarjeta-destino__imagen {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+}
+
+#destinos .tarjeta-destino__imagen::after {
+    position: absolute;
+    inset: 30% 0 0;
+    background: linear-gradient(180deg, transparent, rgba(7, 24, 55, .62));
+    content: '';
+    pointer-events: none;
+    transition: opacity .3s ease;
+}
+
+#destinos .tarjeta-destino__imagen img {
+    height: 100%;
+    transition: transform .5s cubic-bezier(.2,.8,.2,1), filter .4s ease;
+}
+
+#destinos .tarjeta-destino__indicacion {
+    position: absolute;
+    z-index: 1;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    width: max-content;
+    max-width: calc(100% - 2rem);
+    padding: .6rem .9rem;
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 999px;
+    background: rgba(13, 37, 83, .88);
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 800;
+    box-shadow: 0 6px 20px rgba(0,0,0,.24);
+    transition: transform .35s ease, background .3s ease, box-shadow .3s ease;
+}
+
+#destinos .tarjeta-destino:hover,
+#destinos .tarjeta-destino:focus-visible {
+    z-index: 1;
+    outline: 3px solid #f7b500;
+    outline-offset: 3px;
+    transform: translateY(-10px) scale(1.035);
+    box-shadow: 0 30px 65px rgba(24, 54, 118, .32);
+}
+
+#destinos .tarjeta-destino:hover .tarjeta-destino__imagen img,
+#destinos .tarjeta-destino:focus-visible .tarjeta-destino__imagen img {
+    transform: scale(1.12);
+    filter: saturate(1.18) brightness(.84);
+}
+
+#destinos .tarjeta-destino:hover .tarjeta-destino__indicacion,
+#destinos .tarjeta-destino:focus-visible .tarjeta-destino__indicacion {
+    transform: translateY(-5px) scale(1.06);
+    background: #f7b500;
+    color: #1c1c27;
+    box-shadow: 0 10px 28px rgba(0,0,0,.32);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #destinos .tarjeta-destino,
+    #destinos .tarjeta-destino__imagen img,
+    #destinos .tarjeta-destino__indicacion {
+        transition: none;
+    }
+}
+
 .tarjeta-destino img,
 .tarjeta-galeria img,
 .tarjeta-ruta img {
@@ -219,6 +295,103 @@ body[data-tema="oscuro"] .info-panel article {
 
 .tarjeta-ruta img {
     align-self: start;
+}
+
+#rutas-experiencias .tarjeta-ruta,
+#rutas-experiencias .tarjeta-ruta:hover,
+#rutas-experiencias .tarjeta-ruta:focus-visible {
+    transform: none;
+    box-shadow: 0 24px 60px rgba(59, 88, 165, 0.10);
+    transition: none;
+}
+
+#parques-termas .tarjeta-ruta {
+    position: relative;
+    cursor: pointer;
+    transition: transform .38s cubic-bezier(.2,.8,.2,1), box-shadow .38s ease, outline-color .25s ease;
+}
+
+#parques-termas .tarjeta-ruta__imagen {
+    position: relative;
+    min-height: 220px;
+    height: 100%;
+    overflow: hidden;
+}
+
+#parques-termas .tarjeta-ruta__imagen::after {
+    position: absolute;
+    inset: 30% 0 0;
+    background: linear-gradient(180deg, transparent, rgba(7, 24, 55, .66));
+    content: '';
+    pointer-events: none;
+}
+
+#parques-termas .tarjeta-ruta__imagen img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .5s cubic-bezier(.2,.8,.2,1), filter .4s ease;
+}
+
+#parques-termas .tarjeta-ruta__indicacion {
+    position: absolute;
+    z-index: 1;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    width: max-content;
+    max-width: calc(100% - 2rem);
+    padding: .6rem .9rem;
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 999px;
+    background: rgba(13, 37, 83, .9);
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 800;
+    box-shadow: 0 6px 20px rgba(0,0,0,.24);
+    pointer-events: none;
+    transition: transform .35s ease, background .3s ease, box-shadow .3s ease;
+}
+
+#parques-termas .tarjeta-ruta:hover,
+#parques-termas .tarjeta-ruta:focus-visible {
+    z-index: 1;
+    outline: 3px solid #f7b500;
+    outline-offset: 3px;
+    transform: translateY(-10px) scale(1.035);
+    box-shadow: 0 30px 65px rgba(24, 54, 118, .32);
+}
+
+#parques-termas .tarjeta-ruta:hover .tarjeta-ruta__imagen img,
+#parques-termas .tarjeta-ruta:focus-visible .tarjeta-ruta__imagen img {
+    transform: scale(1.12);
+    filter: saturate(1.18) brightness(.84);
+}
+
+#parques-termas .tarjeta-ruta:hover .tarjeta-ruta__indicacion,
+#parques-termas .tarjeta-ruta:focus-visible .tarjeta-ruta__indicacion {
+    transform: translateY(-5px) scale(1.06);
+    background: #f7b500;
+    color: #1c1c27;
+    box-shadow: 0 10px 28px rgba(0,0,0,.32);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #parques-termas .tarjeta-ruta,
+    #parques-termas .tarjeta-ruta__imagen img,
+    #parques-termas .tarjeta-ruta__indicacion {
+        transition: none;
+    }
+
+    #parques-termas .tarjeta-ruta:hover,
+    #parques-termas .tarjeta-ruta:focus-visible,
+    #parques-termas .tarjeta-ruta:hover .tarjeta-ruta__imagen img,
+    #parques-termas .tarjeta-ruta:focus-visible .tarjeta-ruta__imagen img,
+    #parques-termas .tarjeta-ruta:hover .tarjeta-ruta__indicacion,
+    #parques-termas .tarjeta-ruta:focus-visible .tarjeta-ruta__indicacion {
+        transform: none;
+    }
 }
 
 .contenido {

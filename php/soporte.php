@@ -256,6 +256,7 @@ if ($soporteUsuario) {
     rel="stylesheet"
   />
   <link rel="stylesheet" href="../css/soporte.css" />
+  <script src="../js/volver-posicion.js" defer></script>
 </head>
 <body>
   <main class="support-page">

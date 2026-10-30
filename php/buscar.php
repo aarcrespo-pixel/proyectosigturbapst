@@ -7,7 +7,7 @@ $q = trim((string) ($_GET['q'] ?? ''));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultados de búsqueda | SIGTUR</title>
-    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="../css/estilos.css?v=nav-reveal-hint-20261029-1">
     <style>
         .search-page { max-width: 1100px; margin: 0 auto; padding: 9rem 24px 5rem; }
         .search-page h1 { color: var(--texto-oscuro, #172033); margin-bottom: 28px; }
@@ -63,5 +63,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 </script>
+<script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
 </body>
 </html>

@@ -28,8 +28,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
 }
 
 $usuario = sigtur_usuario_actual($pdo);
-if (!$usuario || !in_array($usuario['rol'], ['administrador', 'organizador'], true)) {
-    responderSubidaGaleria(['success' => false, 'message' => 'No tienes permiso para subir fotos a la galería.'], 403, $esAjax);
+if (!$usuario || $usuario['rol'] !== 'organizador') {
+    responderSubidaGaleria(['success' => false, 'message' => 'Solo los organizadores pueden subir fotos a la galería.'], 403, $esAjax);
 }
 if (!sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_token'] : null)) {
     responderSubidaGaleria(['success' => false, 'message' => 'La solicitud expiró. Recarga la página e inténtalo de nuevo.'], 403, $esAjax);

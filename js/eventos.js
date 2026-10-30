@@ -190,7 +190,29 @@ const listasEventosExpandidas = {
 const pos = {}; // Crea un objeto vacío.
 // // Inicializa la posición actual para cada categoría (índice inicial = 0)
 for (const nombre in datos) pos[nombre] = 0; // Recorre todas las categorías que existen dentro de datos.
-const maxPorPagina = 3;
+
+let destacadosAutoPlayInterval;
+let destacadosResumeTimeout;
+let destacadosPausaManual = false;
+
+function iniciarAutoPlayDestacados() {
+    window.clearInterval(destacadosAutoPlayInterval);
+    if (destacadosPausaManual || datos.destacados.length <= 1 || document.visibilityState !== 'visible') return;
+
+    destacadosAutoPlayInterval = window.setInterval(() => {
+        setPos('destacados', pos.destacados + 1);
+    }, 2000);
+}
+
+function pausarAutoPlayDestacados() {
+    window.clearInterval(destacadosAutoPlayInterval);
+    window.clearTimeout(destacadosResumeTimeout);
+    destacadosPausaManual = true;
+    destacadosResumeTimeout = window.setTimeout(() => {
+        destacadosPausaManual = false;
+        iniciarAutoPlayDestacados();
+    }, 10000);
+}
 
 /*
   Crea el HTML de cada tarjeta de evento.
@@ -230,12 +252,10 @@ function renderSeccion(nombre) {
         if (indicadoresVacios) indicadoresVacios.innerHTML = "";
         return;
     }
-  // // Cálculo de ventana visible con protección de límites (Math.max/Math.min)
-  const inicio = Math.max(0, Math.min(actual, lista.length - maxPorPagina));
-  // // Uso de slice + map + join para construir HTML de las tarjetas visibles
-  const html = lista.slice(inicio, inicio + maxPorPagina)
-    .map((evento, index) => tarjeta(evento, inicio + index === actual))
-    .join("");
+    const html = [-1, 0, 1].map((desplazamiento) => {
+        const indiceEvento = (actual + desplazamiento + lista.length) % lista.length;
+        return tarjeta(lista[indiceEvento], desplazamiento === 0);
+    }).join("");
 
     contenedor.innerHTML = html;
 
@@ -243,9 +263,8 @@ function renderSeccion(nombre) {
       window.initInteractiveCards(contenedor);
     }
 
-    // // Optional chaining + toggle: ocultar flechas cuando estamos en los extremos
-    document.querySelector(`.flecha.izquierda[data-carrusel="${nombre}"]`)?.classList.toggle("oculta", actual === 0);
-    document.querySelector(`.flecha.derecha[data-carrusel="${nombre}"]`)?.classList.toggle("oculta", actual === lista.length - 1);
+    document.querySelector(`.flecha.izquierda[data-carrusel="${nombre}"]`)?.classList.toggle("oculta", lista.length <= 1);
+    document.querySelector(`.flecha.derecha[data-carrusel="${nombre}"]`)?.classList.toggle("oculta", lista.length <= 1);
 
     const indicadores = document.getElementById(`${nombre}-indicadores`);
     if (!indicadores) return;
@@ -267,8 +286,8 @@ function renderSeccion(nombre) {
 */
 function setPos(nombre, indice) {
     const lista = datos[nombre];
-  // // Clamp del índice para que no salga del rango válido
-  const siguiente = Math.max(0, Math.min(indice, lista.length - 1));
+    if (!lista?.length) return;
+    const siguiente = ((indice % lista.length) + lista.length) % lista.length;
     if (siguiente === pos[nombre]) return;
 
     pos[nombre] = siguiente;
@@ -856,12 +875,39 @@ function filtrarEventosPrincipales() {
     });
 }
 
+function ordenarEventosPorLikes(eventos) {
+    let interacciones = {};
+    try {
+        const guardado = JSON.parse(localStorage.getItem('sigtur-card-engagement') || '{}');
+        if (guardado && typeof guardado === 'object' && !Array.isArray(guardado)) {
+            interacciones = guardado;
+        }
+    } catch (error) {
+        interacciones = {};
+    }
+
+    return eventos
+        .map((evento, index) => {
+            const slug = evento.slug || slugify(evento.nombre);
+            const idCatalogado = evento.id || window.sigturEventoIds?.[slug];
+            const estado = interacciones[`evento-${idCatalogado || slug}`];
+            const likes = Number(estado?.likes);
+            return {
+                evento,
+                index,
+                likes: Number.isFinite(likes) && likes > 0 ? likes : 0
+            };
+        })
+        .sort((a, b) => b.likes - a.likes || a.index - b.index)
+        .map(({ evento }) => evento);
+}
+
 function renderEventosPrincipales() {
     // El grid se vuelve a pintar después de búsqueda, filtros rápidos o respuesta AJAX del drawer.
     const contenedor = document.getElementById('eventos-principales-contenedor');
     if (!contenedor) return;
 
-    const eventos = filtrarEventosPrincipales();
+    const eventos = ordenarEventosPorLikes(filtrarEventosPrincipales());
     if (!eventos.length) {
         contenedor.innerHTML = '<p class="sin-resultados">No se encontraron eventos con esa búsqueda.</p>';
         actualizarVisibilidadListaEventos(contenedor, document.getElementById('eventos-principales-toggle'), false);
@@ -1069,6 +1115,7 @@ function actualizarLightbox() {
 
     const engagementCard = document.getElementById('lightbox-engagement-card');
     if (engagementCard) {
+        engagementCard.dataset.engagement = 'like-only';
         engagementCard.dataset.itemKey = `galeria-${item.imagen}`;
         engagementCard.querySelector('.card-engagement')?.remove();
         window.initInteractiveCards?.(engagementCard);
@@ -1156,9 +1203,12 @@ function init() {
         boton.addEventListener("click", () => {
             const nombre = boton.dataset.carrusel;
             const direccion = boton.classList.contains("derecha") ? 1 : -1;
+            if (nombre === 'destacados') pausarAutoPlayDestacados();
             setPos(nombre, pos[nombre] + direccion);
         });
     });
+    iniciarAutoPlayDestacados();
+    document.addEventListener('visibilitychange', iniciarAutoPlayDestacados);
 
     configurarFiltrosEventos();
     document.querySelectorAll('[data-event-list]').forEach((boton) => {
@@ -1191,3 +1241,8 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
+window.addEventListener('sigtur:card-like-change', (event) => {
+    if (event.detail?.list !== 'principales') return;
+    renderEventosPrincipales();
+});

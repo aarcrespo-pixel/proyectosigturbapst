@@ -92,6 +92,7 @@ if (isset($_GET['registro']) && $_GET['registro'] === 'exito') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n-title="pageLoginTitle">Registro de Usuarios</title>
     <link rel="stylesheet" href="../css/login.css">
+    <script src="../js/volver-posicion.js" defer></script>
 </head>
 
 <body>

@@ -324,7 +324,7 @@ unset($propuestaGastronomica);
     </footer>
 
     <script src="js/translator.js?v=20261019-i18n-4" defer></script>
-    <script src="js/script.js?v=dark-features-20261019-i18n-4"></script>
+    <script src="js/script.js?v=nav-reveal-hint-20261029-1"></script>
 </body>
 
 </html>

@@ -58,6 +58,7 @@ if (!(bool) $usuario['perfil_publico'] && !$esPropio && !$seguido) {
         <title>Perfil privado | SIGTUR</title>
         <link rel="stylesheet" href="../css/estilos.css?v=20261028-comment-options-5">
         <link rel="stylesheet" href="../css/perfil.css?v=20261028-comment-avatar-1">
+        <script src="../js/volver-posicion.js" defer></script>
     </head>
     <body class="perfil-publico-page">
         <main class="perfil-publico" data-user-id="<?= $usuarioId ?>" data-own-profile="0" data-profile-public="0" data-following="0" data-pending-follow="<?= $solicitudPendiente ? '1' : '0' ?>" data-csrf="<?= !empty($_SESSION['usuario_id']) ? htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') : '' ?>">
@@ -159,6 +160,7 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
     <title><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?> | SIGTUR</title>
     <link rel="stylesheet" href="../css/estilos.css?v=20261028-comment-options-5">
     <link rel="stylesheet" href="../css/perfil.css?v=20261028-comment-avatar-1">
+    <script src="../js/volver-posicion.js" defer></script>
 </head>
 <body class="perfil-publico-page">
 <main class="perfil-publico" data-user-id="<?= $usuarioId ?>" data-following="<?= $seguido ? '1' : '0' ?>" data-pending-follow="<?= $solicitudPendiente ? '1' : '0' ?>" data-own-profile="<?= $esPropio ? '1' : '0' ?>" data-profile-public="<?= (bool) $usuario['perfil_publico'] ? '1' : '0' ?>" data-csrf="<?= !empty($_SESSION['usuario_id']) ? htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') : '' ?>">

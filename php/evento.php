@@ -43,7 +43,7 @@ if ($esEventoDinamico) {
     $eventoDb = $consultaEvento->fetch();
     if (!$eventoDb) {
         http_response_code(404);
-        ?><!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Evento no encontrado | SIGTUR</title><link rel="stylesheet" href="../css/estilos.css"><style>body{min-height:100vh;display:grid;place-items:center;background:#111827;color:#f8fafc;font-family:Arial,sans-serif;text-align:center}.error-box{max-width:520px;padding:3rem}.error-box a{color:#fbbf24}</style></head><body><main class="error-box"><h1>Evento no encontrado</h1><p>El evento solicitado no existe o ya no está disponible.</p><a href="eventos.php">Volver a eventos</a></main><script src="../js/translator.js" defer></script></body></html><?php
+        ?><!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Evento no encontrado | SIGTUR</title><link rel="stylesheet" href="../css/estilos.css"><style>body{min-height:100vh;display:grid;place-items:center;background:#111827;color:#f8fafc;font-family:Arial,sans-serif;text-align:center}.error-box{max-width:520px;padding:3rem}.error-box a{color:#fbbf24}</style><script src="../js/volver-posicion.js" defer></script></head><body><main class="error-box"><h1>Evento no encontrado</h1><p>El evento solicitado no existe o ya no está disponible.</p><a href="eventos.php">Volver a eventos</a></main><script src="../js/translator.js" defer></script></body></html><?php
         exit;
     }
     $slug = $eventoDb['slug'];
@@ -55,6 +55,7 @@ if ($esEventoDinamico) {
     $imagen = sigtur_url_imagen_subida((string) ($eventoDb['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif');
     $fecha = $eventoDb['fecha'];
     $valorEvento = trim((string) ($eventoDb['precio_texto'] ?? $eventoDb['precio'] ?? ''));
+    $tipoEntradaEvento = trim((string) ($eventoDb['tipo_entrada'] ?? 'Consultar'));
     $aireLibre = false;
     $latitud = -31.383;
     $longitud = -57.962;
@@ -63,7 +64,9 @@ if ($esEventoDinamico) {
     $evento = $eventos[$slug] ?? ['Evento recomendado', 'Experiencia', 'Todo público', 'Salto', 'Descubrí propuestas para disfrutar la ciudad.', '../../img/porco.avif', '2026-12-31', false, -31.383, -57.962];
     [$nombre, $categoria, $edad, $lugar, $descripcion, $imagen, $fecha, $aireLibre, $latitud, $longitud] = $evento;
     $valorEvento = '';
+    $tipoEntradaEvento = 'Consultar con la organización';
 }
+$descripcion = trim((string) $descripcion);
 $imagen = sigtur_url_imagen_evento($slug, (string) $imagen);
 $usuarioId = (int) ($_SESSION['usuario_id'] ?? 0);
 $usuarioRolEvento = 'turista';
@@ -184,14 +187,14 @@ $destinoMapa = $esEventoDinamico ? $lugar . ', Salto, Uruguay' : $latitud . ',' 
 $mapUrl = 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($destinoMapa);
 $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . rawurlencode('SIGTUR|' . $slug . '|' . $usuarioId);
 $fechaLegible = date('d/m/Y', strtotime($fecha));
-$fotosEvento = [$imagen];
 $itemKeyComentarios = 'evento-' . ($eventoId > 0 ? $eventoId : $slug);
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?> | SIGTUR</title>
-<link rel="stylesheet" href="<?= $assetBase ?>css/estilos.css?v=20261028-comment-options-5"><link rel="stylesheet" href="<?= $assetBase ?>css/detalle-evento.css"><link rel="stylesheet" href="<?= $assetBase ?>css/evento-form.css"><?php if ($esPasado): ?><link rel="stylesheet" href="<?= $assetBase ?>css/evento-finalizado.css"><?php endif; ?>
+<link rel="stylesheet" href="<?= $assetBase ?>css/estilos.css?v=20261028-comment-options-5"><link rel="stylesheet" href="<?= $assetBase ?>css/detalle-evento.css"><link rel="stylesheet" href="<?= $assetBase ?>css/evento-form.css"><link rel="stylesheet" href="<?= $assetBase ?>css/enlaces-texto.css"><?php if ($esPasado): ?><link rel="stylesheet" href="<?= $assetBase ?>css/evento-finalizado.css"><?php endif; ?>
+<script src="../js/volver-posicion.js" defer></script>
 <style>
 :root{--event-accent:#ffb84d;--event-ink:#11151b;--event-muted:#66717d}body.event-detail{background:#f4f6f8;color:var(--event-ink)}.event-detail .menu-principal{position:absolute;top:1.25rem;left:50%;right:auto;transform:translateX(-50%);width:min(92%,var(--site-max-width));z-index:5;background:linear-gradient(180deg,rgba(0,0,0,.48),transparent)}.event-hero{position:relative;min-height:min(760px,88vh);display:flex;align-items:flex-end;padding:clamp(8rem,18vh,13rem) clamp(1.25rem,6vw,6rem) clamp(3rem,8vw,6rem);background-image:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.85)),url('<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>');background-size:cover;background-position:center}.event-hero__content{position:relative;z-index:1;max-width:850px;color:white}.event-back,.event-exit{position:absolute;top:6rem;color:rgba(255,255,255,.72);text-decoration:none;font-size:.85rem}.event-back{left:clamp(1.25rem,6vw,6rem)}.event-exit{right:clamp(1.25rem,6vw,6rem)}.event-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.1rem}.event-badge{display:inline-flex;gap:8px;align-items:center;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);font-size:.8rem;color:white;text-decoration:none}.event-hero h1{margin:0 0 1rem;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:800;line-height:1;text-shadow:0 2px 10px rgba(0,0,0,.4)}.event-hero p{max-width:680px;color:rgba(255,255,255,.86);font-size:1.08rem;line-height:1.65}.event-social{display:flex;align-items:center;gap:.8rem;margin:1.2rem 0;color:rgba(255,255,255,.85)}.event-avatars{display:flex;padding-left:10px}.event-avatar{width:32px;height:32px;border:2px solid white;border-radius:50%;object-fit:cover;margin-left:-10px;background:#dce2e8}.event-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem}.event-actions button,.event-actions a{border:0;border-radius:999px;padding:.78rem 1.15rem;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}.event-primary{background:var(--event-accent);color:#17110a;transition:transform .2s,background .2s}.event-primary:hover{transform:translateY(-2px)}.event-primary.is-registered{background:#b7e4c7;color:#143d24}.event-primary.pulse{animation:event-pulse .45s ease}@keyframes event-pulse{50%{transform:scale(.95)}100%{transform:scale(1)}}.event-secondary{background:rgba(255,255,255,.14);color:white;border:1px solid rgba(255,255,255,.35)!important}.event-main{max-width:1180px;margin:0 auto;padding:clamp(2rem,5vw,4.5rem) 1.25rem}.event-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.8fr);gap:2rem}.event-panel{background:white;border:1px solid #e6e9ed;border-radius:22px;padding:clamp(1.25rem,3vw,2rem);box-shadow:0 14px 38px rgba(22,32,44,.06)}.event-panel h2{margin:0 0 1rem;font-size:1.35rem}.event-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-top:1.2rem}.event-fact{padding:.9rem;background:#f6f8fa;border-radius:14px}.event-fact strong{display:block;font-size:.75rem;text-transform:uppercase;color:var(--event-muted);margin-bottom:.25rem}.event-forecast{margin-top:1rem;display:none}.event-forecast.visible{display:flex;justify-content:space-between;align-items:center}.event-faq{margin-top:2rem}.event-faq details{border-bottom:1px solid #e4e7eb;padding:1rem 0}.event-faq summary{cursor:pointer;font-weight:700}.event-question{display:flex;gap:.6rem;margin-top:1.5rem}.event-question input{flex:1;padding:.8rem;border:1px solid #d8dde3;border-radius:10px}.event-question button{border:0;border-radius:10px;background:var(--event-ink);color:white;padding:0 1rem;cursor:pointer}.event-qr-backdrop{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(4,8,12,.78);backdrop-filter:blur(8px)}.event-qr-backdrop[hidden]{display:none}.event-ticket{width:min(92vw,420px);background:#121820;color:white;border:1px solid #34404c;border-radius:24px;padding:1.5rem;box-shadow:0 30px 80px #000}.event-ticket img{display:block;width:180px;height:180px;margin:1rem auto;background:white;padding:.5rem}.event-ticket header{display:flex;justify-content:space-between}.event-ticket-close{border:0;background:none;color:white;font-size:1.5rem;cursor:pointer}.event-ticket dl{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}.event-ticket dt{font-size:.7rem;color:#93a1ae;text-transform:uppercase}.event-ticket dd{margin:.2rem 0 0;font-weight:700}@media(max-width:760px){.event-grid{grid-template-columns:1fr}.event-hero{min-height:760px}.event-facts{grid-template-columns:1fr}.event-question{flex-direction:column}.event-question button{padding:.8rem}}
 .event-hero{min-height:100svh;width:100vw;margin-left:calc(50% - 50vw);background-image:none}
@@ -207,43 +210,40 @@ $itemKeyComentarios = 'evento-' . ($eventoId > 0 ? $eventoId : $slug);
 .event-actions{position:relative;z-index:2}
 .event-favorite{background:#fff;color:#17110a!important}.event-favorite.is-favorite{background:#ffe4dc;color:#8f3024!important}.event-social{display:none!important}
 </style>
+<style>
+.event-hero{width:min(1180px,94%);min-height:0;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(1.5rem,4vw,4rem);padding:clamp(7rem,15vh,9rem) 1.5rem 3rem;background:#f4f6f8!important;color:#11151b}
+.event-hero::before{display:none}
+.event-hero__image{position:relative;z-index:1;display:block;width:100%;height:clamp(360px,55vh,520px);margin:0;object-fit:contain;object-position:center;border-radius:20px;background:#e5e7eb}
+body.event-detail .event-hero__content{width:100%;max-width:850px;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;color:#11151b}
+body.event-detail .event-hero h1,body.event-detail .event-hero p,body.event-detail .event-badge,body.event-detail .event-back{color:#11151b;text-shadow:none}
+body.event-detail .event-badge{background:#fff;border-color:#d1d5db}
+body.event-detail .event-back{background:#fff;border-color:#d1d5db}
+body.event-detail .event-hero .event-actions .event-secondary{background:#176b87;color:#fff;border:1px solid #176b87!important;box-shadow:0 4px 12px rgba(23,107,135,.2)}
+body.event-detail .event-hero .event-actions .event-secondary:hover{background:#0f526a;border-color:#0f526a!important}
+body.event-detail .event-about{margin-top:.5rem;padding:clamp(1.1rem,2.5vw,1.5rem);border:1px solid #dfe3e8;border-radius:20px;background:#fff;color:#11151b;box-shadow:0 10px 28px rgba(17,21,27,.06)}
+body.event-detail .event-about h2{margin:0 0 .75rem;color:#11151b}
+body.event-detail .event-about p{margin:0;color:#374151}
+body.event-detail .event-about__tickets{margin-top:1rem;padding-top:1rem;border-top:1px solid #e5e7eb}
+body.event-detail .event-about__tickets strong{display:block;margin-bottom:.35rem;color:#11151b}
+<?php if ($esPasado): ?>
+body.event-finished,body.event-finished main,body.event-finished .event-hero,body.event-finished .event-main,body.event-finished .event-about{background:#f4f6f8!important;color:#11151b!important}
+body.event-finished .event-meta::before,body.event-finished .event-actions::before{display:none!important;content:none!important}
+body.event-finished .event-actions,body.event-finished .event-comments,body.event-finished .event-about__tickets{display:none!important}
+<?php endif; ?>
+@media(max-width:760px){.event-hero{grid-template-columns:minmax(0,1fr);gap:1.25rem;padding:6.5rem 0 2rem}.event-hero__image{height:clamp(250px,38vh,340px)}body.event-detail .event-hero__content{max-width:none}}
+@media(max-width:760px){body.event-detail .event-hero__content{grid-row:1}.event-hero__image{grid-row:2}}
+</style>
 </head>
 <body class="event-detail <?= $esPasado ? 'event-finished' : '' ?>" data-csrf="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
 <main>
-<section class="event-hero"><a class="event-back" href="<?= $esEventoDinamico ? 'eventos.php' : '../eventos.php' ?>">← Volver a eventos</a><div class="event-hero__content"><div class="event-meta"><span class="event-badge"><?= htmlspecialchars($fechaLegible) ?></span><span class="event-badge"><?= htmlspecialchars($categoria) ?></span><span class="event-badge"><?= htmlspecialchars($edad) ?></span><a class="event-badge" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📍 <?= htmlspecialchars($lugar) ?></a></div><h1><?= htmlspecialchars($nombre) ?></h1><p><?= htmlspecialchars($descripcion) ?></p><div class="event-social"><div class="event-avatars"><?php foreach ($avatares as $avatar):$avatarFile = basename($avatar['avatar'] ?? '');
-    $avatarSrc = ($avatarFile && $avatarFile !== 'default-avatar.png' && file_exists(__DIR__.'/../uploads/avatars/'.$avatarFile)) ? '../uploads/avatars/'.$avatarFile : '../img/user.png'; ?><img class="event-avatar" src="<?= htmlspecialchars($avatarSrc, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($avatar['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>"><?php endforeach; ?></div><span><?= $asistentes ?> <?= $asistentes === 1 ? 'persona asistirá' : 'personas asistirán' ?></span></div><div class="event-actions"><button id="favoriteEventButton" class="event-primary event-favorite<?= $esFavorito ? ' is-favorite' : '' ?>" type="button" aria-pressed="<?= $esFavorito ? 'true' : 'false' ?>" data-endpoint="<?= htmlspecialchars($apiBase . 'favoritos_eventos.php', ENT_QUOTES, 'UTF-8') ?>" data-slug="<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>" data-evento-id="<?= (int) $eventoId ?>" data-titulo="<?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>" data-descripcion="<?= htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8') ?>" data-fecha="<?= htmlspecialchars($fecha, ENT_QUOTES, 'UTF-8') ?>" data-ubicacion="<?= htmlspecialchars($lugar, ENT_QUOTES, 'UTF-8') ?>" data-categoria="<?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>" data-imagen="<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>"><?= $esFavorito ? '★ Guardado en favoritos' : '☆ Guardar en favoritos' ?></button><?php if ($inscripto): ?><button id="ticketButton" class="event-secondary" type="button">Ver mi Pase / QR</button><?php endif; ?><a class="event-secondary" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Cómo llegar</a></div></div></section>
-<section class="event-main"><div class="event-grid"><div><article class="event-panel"><h2>Sobre el evento</h2><p><?= htmlspecialchars($descripcion) ?> Fecha: <?= htmlspecialchars($fechaLegible) ?>. Encontrá todos los detalles y preparate para vivir la experiencia.</p><div class="event-facts"><div class="event-fact"><strong>Fecha</strong><?= htmlspecialchars($fechaLegible) ?></div><div class="event-fact"><strong>Ubicación</strong><?= htmlspecialchars($lugar) ?></div><?php if ($valorEvento !== ''): ?><div class="event-fact"><strong>Valor de entrada</strong><?= htmlspecialchars($valorEvento, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?></div><div id="forecast" class="event-panel event-forecast"><span id="forecastIcon">☀️</span><strong id="forecastText">Clima estimado</strong></div></article><article class="event-panel event-faq"><h2>Consultas al organizador</h2><form class="event-question" id="form-comentario-evento" data-endpoint="<?= htmlspecialchars($apiBase . 'agregar_comentario_evento.php', ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="submission_key" value="<?= htmlspecialchars(bin2hex(random_bytes(16)), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="evento_id" value="<?= (int) $eventoId ?>"><input name="comentario" maxlength="500" placeholder="¿Qué querés preguntarle al organizador?" <?= !$usuarioId ? 'disabled' : '' ?>><button type="submit" <?= !$usuarioId ? 'disabled' : '' ?>>Enviar</button></form><?php if (!$usuarioId): ?><small>Iniciá sesión para consultar al organizador.</small><?php endif; ?><p class="event-question-feedback" id="event-question-feedback" role="status" aria-live="polite"></p></article><article class="event-panel event-comments"><h2>Comentarios del evento</h2><div class="gallery-engagement-card" data-item-key="<?= htmlspecialchars($itemKeyComentarios, ENT_QUOTES, 'UTF-8') ?>"></div></article><?php if ($preguntasRespondidas): ?>
-    <section class="event-panel event-faq event-public-qa" id="preguntas-respondidas" aria-labelledby="preguntas-respondidas-titulo">
-        <header class="event-public-qa__header">
-            <span class="event-public-qa__eyebrow">Información del evento</span>
-            <h2 id="preguntas-respondidas-titulo">Preguntas y respuestas</h2>
-            <p>Consultas de los visitantes respondidas por la organización de <?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>.</p>
-        </header>
-        <div class="event-public-qa__list">
-            <?php foreach ($preguntasRespondidas as $q): ?>
-                <details class="event-public-qa__item">
-                    <summary>
-                        <span class="event-public-qa__label">Pregunta</span>
-                        <span class="event-public-qa__question"><?= htmlspecialchars($q['pregunta'], ENT_QUOTES, 'UTF-8') ?></span>
-                        <span class="event-public-qa__chevron" aria-hidden="true"></span>
-                    </summary>
-                    <div class="event-public-qa__answer">
-                        <span class="event-public-qa__label">Respuesta de la organización</span>
-                        <p><?= nl2br(htmlspecialchars($q['respuesta'], ENT_QUOTES, 'UTF-8')) ?></p>
-                    </div>
-                </details>
-            <?php endforeach; ?>
-        </div>
-    </section>
-<?php endif; ?></div><aside><article class="event-panel"><h2>Planificá tu visita</h2><p>Guardá el evento, consultá el mapa y revisá el pronóstico antes de salir.</p><a class="event-secondary" style="display:inline-block;background:var(--event-ink);color:white" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Abrir en Google Maps</a></article></aside></div></section>
-<?php if ($esPasado): ?>
-<section class="event-main finished-archive" aria-labelledby="finished-gallery-title">
-    <div class="finished-metrics">
-        <article class="finished-metric"><strong><?= $asistentes ?></strong><span>Total asistentes</span></article>
-        <article class="finished-metric"><strong>4.8/5</strong><span>Calificación media</span></article>
-        <article class="finished-metric"><strong><?= count($fotosEvento) ?></strong><span>Fotos subidas</span></article>
-    </div>
-    <section class="finished-gallery"><h2 id="finished-gallery-title">Galería de fotos</h2><div class="finished-gallery-grid"><?php foreach ($fotosEvento as $foto): ?><a href="<?= htmlspecialchars($foto, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener"><img src="<?= htmlspecialchars($foto, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>"></a><?php endforeach; ?></div></section>
+<section class="event-hero"><a class="event-back" href="<?= $esEventoDinamico ? 'eventos.php' : '../eventos.php' ?>">← Volver a eventos</a><img class="event-hero__image" src="<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>"><div class="event-hero__content"><div class="event-meta"><?php if ($esPasado): ?><span class="event-badge event-badge--finished">EVENTO FINALIZADO</span><?php endif; ?><span class="event-badge"><?= htmlspecialchars($fechaLegible) ?></span><span class="event-badge"><?= htmlspecialchars($categoria) ?></span><span class="event-badge"><?= htmlspecialchars($edad) ?></span><?php if (!$esPasado): ?><a class="event-badge" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📍 <?= htmlspecialchars($lugar) ?></a><?php endif; ?></div><h1><?= htmlspecialchars($nombre) ?></h1><div class="event-social"><div class="event-avatars"><?php foreach ($avatares as $avatar):$avatarFile = basename($avatar['avatar'] ?? '');
+    $avatarSrc = ($avatarFile && $avatarFile !== 'default-avatar.png' && file_exists(__DIR__.'/../uploads/avatars/'.$avatarFile)) ? '../uploads/avatars/'.$avatarFile : '../img/user.png'; ?><img class="event-avatar" src="<?= htmlspecialchars($avatarSrc, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($avatar['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>"><?php endforeach; ?></div><span><?= $asistentes ?> <?= $asistentes === 1 ? 'persona asistirá' : 'personas asistirán' ?></span></div><div class="event-actions"><button id="favoriteEventButton" class="event-primary event-favorite<?= $esFavorito ? ' is-favorite' : '' ?>" type="button" aria-pressed="<?= $esFavorito ? 'true' : 'false' ?>" data-endpoint="<?= htmlspecialchars($apiBase . 'favoritos_eventos.php', ENT_QUOTES, 'UTF-8') ?>" data-slug="<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>" data-evento-id="<?= (int) $eventoId ?>" data-titulo="<?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?>" data-descripcion="<?= htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8') ?>" data-fecha="<?= htmlspecialchars($fecha, ENT_QUOTES, 'UTF-8') ?>" data-ubicacion="<?= htmlspecialchars($lugar, ENT_QUOTES, 'UTF-8') ?>" data-categoria="<?= htmlspecialchars($categoria, ENT_QUOTES, 'UTF-8') ?>" data-imagen="<?= htmlspecialchars($imagen, ENT_QUOTES, 'UTF-8') ?>"><?= $esFavorito ? '★ Guardado en favoritos' : '☆ Guardar en favoritos' ?></button><?php if ($inscripto): ?><button id="ticketButton" class="event-secondary" type="button">Ver mi Pase / QR</button><?php endif; ?><a class="event-secondary" href="<?= htmlspecialchars($mapUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Cómo llegar</a></div><article class="event-about"><h2>Sobre el evento</h2><?php if ($descripcion !== ''): ?><p><?= htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8') ?></p><?php else: ?><p>El organizador no agregó una descripción para este evento.</p><?php endif; ?><div class="event-about__tickets"><strong>Entradas</strong><p><?php if ($tipoEntradaEvento === 'Gratuito'): ?>Entrada gratuita.<?php elseif ($valorEvento !== ''): ?><?= htmlspecialchars($valorEvento, ENT_QUOTES, 'UTF-8') ?>. Consultá disponibilidad y compra con la organización del evento.<?php else: ?>Consultá el precio y la disponibilidad de entradas con la organización del evento.<?php endif; ?></p></div></article></div></section>
+<?php if (!$esPasado): ?>
+<section class="event-main">
+    <article class="event-panel event-comments">
+        <h2>Comentarios del evento</h2>
+        <div class="gallery-engagement-card" data-item-key="<?= htmlspecialchars($itemKeyComentarios, ENT_QUOTES, 'UTF-8') ?>"></div>
+    </article>
 </section>
 <?php endif; ?>
 </main>
@@ -386,4 +386,5 @@ favoriteEventButton?.addEventListener('click', async () => {
 });
 </script>
 <script src="<?= $assetBase ?>js/translator.js" defer></script>
+<script src="<?= $assetBase ?>js/enlaces-texto.js" defer></script>
 </body></html>

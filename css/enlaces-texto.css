@@ -1,0 +1,16 @@
+.texto-auto-enlace {
+    color: #176b87;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+}
+
+.texto-auto-enlace:hover {
+    color: #0f526a;
+}
+
+.texto-auto-enlace:focus-visible {
+    border-radius: 2px;
+    outline: 2px solid #f59e0b;
+    outline-offset: 2px;
+}

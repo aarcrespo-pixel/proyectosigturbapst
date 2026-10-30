@@ -10,6 +10,7 @@ sigtur_iniciar_sesion_segura();
     <title>Preguntas frecuentes | SIGTUR</title>
     <link rel="stylesheet" href="../css/estilos.css">
     <link rel="stylesheet" href="../css/faq.css?v=20261027-3">
+    <script src="../js/volver-posicion.js" defer></script>
 </head>
 <body class="faq-page">
 <main class="faq-container">

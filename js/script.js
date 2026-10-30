@@ -4,6 +4,8 @@ const perfilMenu = document.querySelector(".perfil-menu"); // menu desplegable d
 const hamburguesa = document.querySelector(".hamburguesa"); // boton menu movil
 const menu = document.querySelector(".menu"); // barra principal del menu
 const menuPrincipal = document.querySelector(".menu-principal");
+const navRevealHint = document.querySelector('.nav-reveal-hint');
+const scrollTopButton = document.querySelector('.scroll-top-button');
 const body = document.body; // cuerpo del html
 
 const isIndex = !document.querySelector('main'); // la portada es la única vista sin un elemento main
@@ -65,6 +67,7 @@ const traducciones = {
         navLogout: 'Cerrar Sesión',
         searchPlaceholder: 'Buscar eventos',
         homeScroll: 'Desliza para ver más',
+        navRevealHintLabel: 'Mostrar secciones, clima y buscador',
         homeInfoButton: 'Información',
         homeInfoTitle: '¿Qué es SIGTUR?',
         homeInfoText1: 'SIGTUR es una guía local de Salto pensada para ayudarte a descubrir eventos, lugares y experiencias únicas de la ciudad.',
@@ -377,6 +380,8 @@ const traduccionesExtra = {
     es: {
         navProfile: 'Perfil',
         navMenuOpen: 'Abrir menú',
+        navRevealHintLabel: 'Mostrar secciones, clima y buscador',
+        scrollTopLabel: 'Volver arriba',
         navSearch: 'Buscar',
         searchResultsTitle: 'Resultados para:',
         placeAboutKicker: 'Descubrí Salto',
@@ -566,6 +571,8 @@ const traduccionesExtra = {
     en: {
         navProfile: 'Profile',
         navMenuOpen: 'Open menu',
+        navRevealHintLabel: 'Show sections, weather, and search',
+        scrollTopLabel: 'Back to top',
         navSearch: 'Search',
         searchResultsTitle: 'Search results for:',
         placeAboutKicker: 'Discover Salto',
@@ -751,6 +758,8 @@ const traduccionesExtra = {
     pt: {
         navProfile: 'Perfil',
         navMenuOpen: 'Abrir menu',
+        navRevealHintLabel: 'Mostrar seções, clima e busca',
+        scrollTopLabel: 'Voltar ao topo',
         navSearch: 'Pesquisar',
         searchResultsTitle: 'Resultados para:',
         placeAboutKicker: 'Descubra Salto',
@@ -1233,18 +1242,39 @@ const activarNavAutoHide = () => {
     const mostrarNav = () => {
         if (!navOculto) return;
         menuPrincipal.classList.remove('nav-hidden');
+        navRevealHint.hidden = true;
+        navRevealHint.setAttribute('aria-expanded', 'true');
         navOculto = false;
     };
 
     const ocultarNav = () => {
         if (navOculto) return;
         menuPrincipal.classList.add('nav-hidden');
+        navRevealHint.hidden = false;
+        navRevealHint.setAttribute('aria-expanded', 'false');
         navOculto = true;
     };
+
+    const actualizarBotonSubir = () => {
+        if (scrollTopButton) {
+            scrollTopButton.hidden = window.pageYOffset <= 150;
+        }
+    };
+
+    navRevealHint?.addEventListener('pointerenter', (event) => {
+        if (event.pointerType === 'mouse') mostrarNav();
+    });
+    navRevealHint?.addEventListener('click', mostrarNav);
+    scrollTopButton?.addEventListener('click', () => {
+        mostrarNav();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    actualizarBotonSubir();
 
     // Ocultamos la navegación al bajar y la devolvemos al subir para maximizar espacio útil.
     window.addEventListener('scroll', () => {
         const actual = window.pageYOffset;
+        actualizarBotonSubir();
         if (actual > 150 && actual > ultimoScroll + 10) {
             ocultarNav();
         }
@@ -1252,7 +1282,10 @@ const activarNavAutoHide = () => {
     }, { passive: true });
 
     window.addEventListener('mousemove', (event) => {
-        if (window.pageYOffset <= 10 || (window.pageYOffset > 150 && event.clientY <= 10)) {
+        const zonaRevelado = navRevealHint && !navRevealHint.hidden
+            ? navRevealHint.getBoundingClientRect().bottom + 12
+            : 10;
+        if (window.pageYOffset <= 10 || (window.pageYOffset > 150 && event.clientY <= zonaRevelado)) {
             mostrarNav();
         }
     });

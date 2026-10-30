@@ -228,6 +228,119 @@ body[data-tema="oscuro"] .lugares-galeria-add {
     box-shadow: 0 28px 60px rgba(195, 106, 80, 0.18);
 }
 
+#categorias-lugares .tarjeta-interes,
+#categorias-lugares .tarjeta-interes:hover {
+    transform: none;
+    box-shadow: 0 20px 48px rgba(195, 106, 80, 0.12);
+    transition: none;
+}
+
+#lugares-emblematicos .tarjeta-lugar {
+    position: relative;
+    cursor: pointer;
+    transition: transform .38s cubic-bezier(.2,.8,.2,1), box-shadow .38s ease, outline-color .25s ease;
+}
+
+#lugares-emblematicos .tarjeta-lugar__imagen,
+#lugares-distraccion .tarjeta-lugar__imagen {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+}
+
+#lugares-emblematicos .tarjeta-lugar__imagen::after,
+#lugares-distraccion .tarjeta-lugar__imagen::after {
+    position: absolute;
+    inset: 30% 0 0;
+    background: linear-gradient(180deg, transparent, rgba(43, 19, 13, .66));
+    content: '';
+    pointer-events: none;
+    transition: opacity .3s ease;
+}
+
+#lugares-emblematicos .tarjeta-lugar__imagen img,
+#lugares-distraccion .tarjeta-lugar__imagen img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform .5s cubic-bezier(.2,.8,.2,1), filter .4s ease;
+}
+
+#lugares-emblematicos .tarjeta-lugar__indicacion,
+#lugares-distraccion .tarjeta-lugar__indicacion {
+    position: absolute;
+    z-index: 1;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    width: max-content;
+    max-width: calc(100% - 2rem);
+    padding: .6rem .9rem;
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 999px;
+    background: rgba(111, 44, 31, .9);
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 800;
+    box-shadow: 0 6px 20px rgba(0,0,0,.24);
+    transition: transform .35s ease, background .3s ease, box-shadow .3s ease;
+}
+
+#lugares-emblematicos .tarjeta-lugar:hover,
+#lugares-emblematicos .tarjeta-lugar:focus-visible {
+    z-index: 1;
+    outline: 3px solid #f7b500;
+    outline-offset: 3px;
+    transform: translateY(-10px) scale(1.035);
+    box-shadow: 0 30px 65px rgba(102, 43, 30, .32);
+}
+
+#lugares-distraccion .tarjeta-lugar {
+    position: relative;
+    cursor: pointer;
+    transition: transform .38s cubic-bezier(.2,.8,.2,1), box-shadow .38s ease, outline-color .25s ease;
+}
+
+#lugares-distraccion .tarjeta-lugar:hover,
+#lugares-distraccion .tarjeta-lugar:focus-visible {
+    z-index: 1;
+    outline: 3px solid #f7b500;
+    outline-offset: 3px;
+    transform: translateY(-10px) scale(1.035);
+    box-shadow: 0 30px 65px rgba(102, 43, 30, .32);
+}
+
+#lugares-emblematicos .tarjeta-lugar:hover .tarjeta-lugar__imagen img,
+#lugares-emblematicos .tarjeta-lugar:focus-visible .tarjeta-lugar__imagen img,
+#lugares-distraccion .tarjeta-lugar:hover .tarjeta-lugar__imagen img,
+#lugares-distraccion .tarjeta-lugar:focus-visible .tarjeta-lugar__imagen img {
+    transform: scale(1.12);
+    filter: saturate(1.18) brightness(.84);
+}
+
+#lugares-emblematicos .tarjeta-lugar:hover .tarjeta-lugar__indicacion,
+#lugares-emblematicos .tarjeta-lugar:focus-visible .tarjeta-lugar__indicacion,
+#lugares-distraccion .tarjeta-lugar:hover .tarjeta-lugar__indicacion,
+#lugares-distraccion .tarjeta-lugar:focus-visible .tarjeta-lugar__indicacion {
+    transform: translateY(-5px) scale(1.06);
+    background: #f7b500;
+    color: #24201d;
+    box-shadow: 0 10px 28px rgba(0,0,0,.32);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #lugares-emblematicos .tarjeta-lugar,
+    #lugares-emblematicos .tarjeta-lugar__imagen img,
+    #lugares-emblematicos .tarjeta-lugar__indicacion,
+    #lugares-distraccion .tarjeta-lugar,
+    #lugares-distraccion .tarjeta-lugar__imagen img,
+    #lugares-distraccion .tarjeta-lugar__indicacion {
+        transition: none;
+    }
+}
+
 .tarjeta-lugar img,
 .tarjeta-galeria img,
 .tarjeta-interes img {
