@@ -90,11 +90,6 @@ if ($longitudPrecioTexto > 120) {
     http_response_code(422);
     exit('El valor de la entrada no puede superar los 120 caracteres.');
 }
-if ($tipoEntrada === 'De Pago' && $precioTexto === '') {
-    http_response_code(422);
-    exit('Escribe el precio o valor de la entrada.');
-}
-
 $archivoImagen = $_FILES['imagen'] ?? null;
 $rutaImagenSubida = null;
 if (is_array($archivoImagen) && ($archivoImagen['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {

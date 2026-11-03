@@ -23,9 +23,7 @@ $avatarCropY = 50.0;
 $avatarCropZoom = max(1, min(2.5, (float) ($usuario['avatar_crop_zoom'] ?? 1)));
 
 $esPropio = !empty($_SESSION['usuario_id']) && (int) $_SESSION['usuario_id'] === $usuarioId;
-$perfilVolverUrl = !$esPropio && !empty($_SESSION['usuario_id'])
-    ? 'perfil.php?id=' . (int) $_SESSION['usuario_id']
-    : '../index.php';
+$perfilVolverUrl = '../index.php';
 $perfilPuedeGestionar = $esPropio && in_array(strtolower((string) ($_SESSION['rol'] ?? '')), ['turista', 'administrador', 'organizador'], true);
 $seguido = false;
 $solicitudPendiente = false;
@@ -79,7 +77,7 @@ if (!(bool) $usuario['perfil_publico'] && !$esPropio && !$seguido) {
                 <?php else: ?>
                     <a class="perfil-action perfil-action--primary" href="login.php">Iniciar sesión para seguir</a>
                 <?php endif; ?>
-                <a class="perfil-private-card__back" href="<?= htmlspecialchars($perfilVolverUrl, ENT_QUOTES, 'UTF-8') ?>"><?= !$esPropio && !empty($_SESSION['usuario_id']) ? 'Volver a mi perfil' : 'Volver al inicio' ?></a>
+                <a class="perfil-private-card__back" href="<?= htmlspecialchars($perfilVolverUrl, ENT_QUOTES, 'UTF-8') ?>">Volver al inicio</a>
             </section>
         </main>
         <script src="../js/tema.js" defer></script>
@@ -167,7 +165,7 @@ $handle = $usuario['nickname'] ?: strtolower(str_replace(' ', '', $nombre));
     <div class="profile-header-actions">
         <a href="<?= htmlspecialchars($perfilVolverUrl, ENT_QUOTES, 'UTF-8') ?>" class="btn-volver-glass">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            <span><?= !$esPropio && !empty($_SESSION['usuario_id']) ? 'Volver a mi perfil' : 'Volver' ?></span>
+            <span>Volver al inicio</span>
         </a>
     </div>
     <div class="profile-header-tools">

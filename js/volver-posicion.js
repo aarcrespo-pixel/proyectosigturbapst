@@ -4,8 +4,9 @@
     if (window.sigturBackPositionEnabled) return;
     window.sigturBackPositionEnabled = true;
 
-    const scrollKey = `sigtur-scroll-position:${window.location.href}`;
-    const previousPageKey = 'sigtur-previous-page-url';
+    const scrollKeyForPath = (pathname) => `sigtur-scroll-position:${window.location.origin}${pathname}`;
+    const scrollKey = scrollKeyForPath(window.location.pathname);
+    const pendingReturnKey = 'sigtur-pending-category-return';
     let saveTimer;
 
     const guardarPosicion = () => {
@@ -21,20 +22,35 @@
         window.clearTimeout(saveTimer);
         saveTimer = window.setTimeout(guardarPosicion, 100);
     }, { passive: true });
-    window.addEventListener('pagehide', () => {
-        guardarPosicion();
-        sessionStorage.setItem(previousPageKey, window.location.href);
-    });
+    window.addEventListener('pagehide', guardarPosicion);
 
     const restaurarPosicion = (evento) => {
+        const retornoPendiente = sessionStorage.getItem(pendingReturnKey);
+        if (retornoPendiente !== null) {
+            sessionStorage.removeItem(pendingReturnKey);
+            try {
+                const retorno = JSON.parse(retornoPendiente);
+                const posicion = Number(retorno.posicion);
+                if (retorno.pathname === window.location.pathname && Number.isFinite(posicion) && posicion >= 0) {
+                    window.requestAnimationFrame(() => {
+                        window.scrollTo({ top: posicion, behavior: 'instant' });
+                    });
+                    return;
+                }
+            } catch (error) {
+                console.error('No se pudo restaurar la posición anterior', error);
+            }
+        }
+
         const navegacion = performance.getEntriesByType('navigation')[0];
         if (!evento.persisted && navegacion?.type !== 'back_forward') return;
 
         const posicionGuardada = sessionStorage.getItem(scrollKey);
-        if (posicionGuardada === null) return;
+        const posicion = Number(posicionGuardada);
+        if (posicionGuardada === null || !Number.isFinite(posicion)) return;
 
         window.requestAnimationFrame(() => {
-            window.scrollTo({ top: Number(posicionGuardada), behavior: 'instant' });
+            window.scrollTo({ top: posicion, behavior: 'instant' });
         });
     };
 
@@ -44,23 +60,21 @@
         if (evento.defaultPrevented || evento.button !== 0 || evento.metaKey || evento.ctrlKey || evento.shiftKey || evento.altKey) return;
 
         const enlace = evento.target instanceof Element ? evento.target.closest('a[href]') : null;
-        if (!enlace || enlace.target && enlace.target !== '_self' || enlace.hasAttribute('download')) return;
+        if (!enlace || (enlace.target && enlace.target !== '_self') || enlace.hasAttribute('download')) return;
 
-        const etiqueta = `${enlace.getAttribute('aria-label') || ''} ${enlace.textContent || ''}`.trim();
-        if (!/\b(volver|regresar|retroceder)\b|salir del evento/i.test(etiqueta)) return;
+        const etiqueta = `${enlace.getAttribute('aria-label') || ''} ${enlace.textContent || ''}`;
+        if (!/\bvolver\b/i.test(etiqueta)) return;
 
         const destino = new URL(enlace.href, window.location.href);
-        if (destino.origin !== window.location.origin || window.history.length < 2) return;
+        const paginasCategoria = ['eventos.php', 'turismo.php', 'lugares.php', 'gastronomia.php'];
+        const paginaDestino = destino.pathname.split('/').pop();
+        if (destino.origin !== window.location.origin || !paginasCategoria.includes(paginaDestino)) return;
 
-        const origen = document.referrer ? new URL(document.referrer) : null;
-        const paginaAnterior = sessionStorage.getItem(previousPageKey);
-        const origenMismoSitio = document.referrer
-            ? origen?.origin === window.location.origin
-            : paginaAnterior !== null && new URL(paginaAnterior).origin === window.location.origin;
-        if (!origenMismoSitio) return;
-
-        evento.preventDefault();
-        guardarPosicion();
-        window.history.back();
+        const posicion = sessionStorage.getItem(scrollKeyForPath(destino.pathname));
+        if (posicion === null) return;
+        sessionStorage.setItem(pendingReturnKey, JSON.stringify({
+            pathname: destino.pathname,
+            posicion
+        }));
     });
 })();

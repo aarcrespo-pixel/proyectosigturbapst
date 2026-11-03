@@ -952,6 +952,48 @@ body[data-tema="oscuro"] .evento-card-body h3,
     font-size: 0.9rem;
 }
 
+.evento-card-action {
+    flex-wrap: wrap;
+}
+
+.evento-card-extra-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.evento-card-extra-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #176b87;
+    border-radius: 999px;
+    background: #fff;
+    color: #14566d;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.evento-card-extra-actions .evento-card-extra-action {
+    flex: 1 1 140px;
+}
+
+.evento-card-extra-action:hover {
+    background: #eaf6fa;
+}
+
+.evento-card-extra-action:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
 /* El grid fluido crea dos o tres columnas según el ancho disponible y evita
    que una tarjeta horizontal deje una franja vacía junto a su contenido. */
 .eventos-anteriores-grid {

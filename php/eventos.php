@@ -61,7 +61,6 @@ $eventoIdsPorSlug = [];
 foreach ($pdo->query('SELECT id, slug FROM eventos')->fetchAll() as $eventoCatalogo) {
     $eventoIdsPorSlug[(string) $eventoCatalogo['slug']] = (int) $eventoCatalogo['id'];
 }
-
 if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     /* Los parámetros del drawer llegan por query string; se normalizan antes
        de formar las condiciones SQL para evitar comparar valores ambiguos. */
@@ -113,7 +112,8 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Estilos CSS -->
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>"> <!-- Estilos generales -->
-    <link rel="stylesheet" href="../css/eventos.css?v=20261029-gallery-autoplay-2"> <!-- Estilos específicos de eventos -->
+    <link rel="stylesheet" href="../css/eventos.css?v=20261102-event-list-cleanup-1"> <!-- Estilos específicos de eventos -->
+    <link rel="stylesheet" href="../css/enlaces-texto.css?v=20261102-event-links-1">
 </head>
 
 <body class="page-eventos">
@@ -199,7 +199,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                 <?php foreach ($eventosDesdeBd as $evento): ?>
                     <article class="evento-card" data-item-key="evento-<?= (int) $evento['id'] ?>" data-engagement="like-only">
                         <div class="evento-card-media"><img src="<?= htmlspecialchars($evento['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy"></div>
-                        <div class="evento-card-body"><span class="categoria"><?= htmlspecialchars($evento['categoria'] . ' · ' . ($evento['tipo_entrada'] ?? 'Gratuito'), ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><p class="lugar"><?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></p><?php $valorEntrada = trim((string) ($evento['precio_texto'] ?? $evento['precio'] ?? '')); ?><?php if (($evento['tipo_entrada'] ?? '') === 'De Pago' && $valorEntrada !== ''): ?><p class="precio-evento"><?= htmlspecialchars($valorEntrada, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?></div>
+                        <div class="evento-card-body"><span class="categoria"><?= htmlspecialchars($evento['categoria'] . ' · ' . ($evento['tipo_entrada'] ?? 'Gratuito'), ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><p class="lugar"><?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></p><?php $valorEntrada = trim((string) ($evento['precio_texto'] ?? $evento['precio'] ?? '')); ?><?php if (($evento['tipo_entrada'] ?? '') === 'De Pago'): ?><p class="precio-evento"><?= htmlspecialchars($valorEntrada !== '' ? $valorEntrada : 'Consultar con la organización', ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?></div>
                         <div class="evento-card-action"><div class="fecha-protagonista"><span class="fecha-mes"><?= htmlspecialchars(strtoupper(date('M', strtotime($evento['fecha']))), ENT_QUOTES, 'UTF-8') ?></span><span class="fecha-dia"><?= htmlspecialchars(date('d', strtotime($evento['fecha'])), ENT_QUOTES, 'UTF-8') ?></span></div><a href="evento.php?id=<?= (int) $evento['id'] ?>" class="boton-amarillo">Ver más</a></div>
                     </article>
                 <?php endforeach; ?>
@@ -339,8 +339,9 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                                 <option value="De Pago">De Pago</option>
                             </select>
                             <label class="field field-price" id="precio-field" hidden>
-                                <span>Precio o valor de la entrada</span>
-                                <input type="text" id="evento-precio" name="precio" maxlength="120" placeholder="$250, a voluntad o consultar">
+                                <span>Precio o dónde consultar</span>
+                                <input type="text" id="evento-precio" name="precio" maxlength="120" placeholder="$250, a voluntad o WhatsApp 091 123 456">
+                                <small>Indica el precio o un contacto para consultar. Si no lo sabes aún, se mostrará que consulten con la organización.</small>
                             </label>
                         </div>
                     </div>
@@ -487,6 +488,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     </div>
 
     <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
+    <script src="../js/enlaces-texto.js?v=20261102-event-links-1" defer></script>
     <script src="../js/interacciones-tarjetas.js?v=20261029-event-like-order-1" defer></script>
     <script>window.sigturEventoIds = <?= json_encode($eventoIdsPorSlug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosDesdeBd = <?= json_encode($eventosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
@@ -499,7 +501,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         'rol' => (string) ($usuarioActual['rol'] ?? ''),
         'csrfToken' => $csrfToken,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script src="../js/eventos.js?v=20261029-gallery-autoplay-3" defer></script>
+    <script src="../js/eventos.js?v=20261102-event-list-cleanup-1" defer></script>
 </body>
 
 </html>

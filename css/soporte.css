@@ -644,6 +644,18 @@ body[data-tema="oscuro"] .config-label strong {
   letter-spacing: 0;
 }
 
+body[data-tema="oscuro"] .faq-item,
+body[data-tema="oscuro"] .help-item {
+  border-color: rgba(255, 216, 165, 0.2);
+  background: rgba(19, 16, 12, 0.72);
+  color: var(--text);
+}
+
+body[data-tema="oscuro"] .faq-item strong,
+body[data-tema="oscuro"] .help-item strong {
+  color: var(--accent);
+}
+
 .report-box {
   display: grid;
   gap: 10px;
@@ -836,6 +848,20 @@ body[data-tema="oscuro"] .config-label strong {
   background: rgba(255, 255, 255, 0.88);
   color: var(--text);
   letter-spacing: 0;
+}
+
+body[data-tema="oscuro"] .contact-item {
+  border-color: rgba(255, 216, 165, 0.2);
+  background: rgba(19, 16, 12, 0.72);
+  color: var(--text);
+}
+
+body[data-tema="oscuro"] .contact-item a {
+  color: var(--accent);
+}
+
+body[data-tema="oscuro"] .contact-item a:hover {
+  color: #fff;
 }
 
 @keyframes hoverGradientShift {

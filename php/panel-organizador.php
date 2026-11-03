@@ -143,7 +143,7 @@ $consultasPendientes = (int) $consultasPendientesStmt->fetchColumn();
                                             <option value="De Pago" <?= $evento['tipo_entrada'] === 'De Pago' ? 'selected' : '' ?>>De Pago</option>
                                         </select>
                                     </label>
-                                    <label>Precio o valor<input type="text" maxlength="120" name="precio" value="<?= htmlspecialchars((string) ($evento['precio_texto'] ?? $evento['precio'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"></label>
+                                    <label>Precio o dónde consultar<input type="text" maxlength="120" name="precio" placeholder="$250, a voluntad o WhatsApp 091 123 456" value="<?= htmlspecialchars((string) ($evento['precio_texto'] ?? $evento['precio'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><span class="admin-field-hint">Si no se indica, se mostrará que consulten con la organización.</span></label>
                                     <label class="admin-form__wide admin-event__image-field">Foto del evento
                                         <img class="admin-event__image-preview" src="<?= htmlspecialchars(sigtur_url_imagen_subida((string) ($evento['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif'), ENT_QUOTES, 'UTF-8') ?>" alt="Foto actual de <?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
                                         <input class="admin-event__image-input" type="file" name="imagen" accept="image/jpeg,image/png,image/webp">
@@ -171,7 +171,7 @@ $consultasPendientes = (int) $consultasPendientesStmt->fetchColumn();
         </section>
     </main>
     <script src="../js/tema.js" defer></script>
-    <script src="../js/panel-admin.js" defer></script>
+    <script src="../js/panel-admin.js?v=organizer-scroll-20261102-1" defer></script>
     <?php $mensajesWidgetRoot = '../'; include __DIR__ . '/mensajes-widget.php'; ?>
 </body>
 </html>

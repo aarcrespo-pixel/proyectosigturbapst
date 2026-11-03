@@ -440,10 +440,11 @@ if ($soporteUsuario) {
           <h2 data-i18n="supportContactTitle">Contacto</h2>
           <p data-i18n="supportContactText">Opciones para comunicarte con soporte.</p>
           <div class="contact-list">
-            <div class="contact-item" data-i18n="supportContactEmail">Correo: soporte@sigtur.com</div>
             <div class="contact-item"><a href="https://wa.me/59891661335" target="_blank" rel="noopener noreferrer" data-i18n="supportContactWhatsapp">WhatsApp: 091 661 335</a></div>
             <div class="contact-item"><a href="https://instagram.com/bapstuy" target="_blank" rel="noopener noreferrer" data-i18n="supportContactInstagram">Instagram: @bapstuy</a></div>
-            <div class="contact-item" data-i18n="supportContactHours">Horario: Lunes a Viernes, 9:00 a 18:00</div>
+            <div class="contact-item" data-i18n="supportContactHoursWeekdays">Lunes a viernes: 8:00 a 22:00</div>
+            <div class="contact-item" data-i18n="supportContactHoursSaturday">Sábados: 9:00 a 22:00</div>
+            <div class="contact-item" data-i18n="supportContactHoursSunday">Domingos: 10:00 a 21:00</div>
           </div>
         </article>
 

@@ -4,6 +4,15 @@ require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 
 $configUsuario = sigtur_usuario_actual($pdo);
+$configEsNavegante = ($_GET['navegante'] ?? '') === '1';
+if ($configEsNavegante && $configUsuario) {
+    header('Location: perfil.php?id=' . (int) $configUsuario['id']);
+    exit;
+}
+if (!$configUsuario && !$configEsNavegante) {
+    header('Location: configuracion.php?navegante=1');
+    exit;
+}
 $configBaseUrl = rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/'))), '/') . '/';
 $configCsrfToken = sigtur_csrf_token();
 $configUrlVolver = $configUsuario
@@ -30,7 +39,7 @@ $configUrlVolver = $configUsuario
     <section class="support-container">
       <header class="hero">
         <div class="hero-top">
-          <a class="back-pill" href="<?= htmlspecialchars($configUrlVolver, ENT_QUOTES, 'UTF-8') ?>" aria-label="Volver al perfil" data-config-exit data-i18n-aria-label="configBack" data-i18n="configBack">← Volver</a>
+          <a class="back-pill" href="<?= htmlspecialchars($configUrlVolver, ENT_QUOTES, 'UTF-8') ?>" aria-label="<?= $configUsuario ? 'Volver al perfil' : 'Volver al inicio' ?>" data-config-exit data-i18n-aria-label="<?= $configUsuario ? 'configBack' : 'configGuestBack' ?>" data-i18n="configBack">← Volver</a>
           <span class="eyebrow" data-i18n="configEyebrow">⚙️ Configuración</span>
         </div> 
         <h1 data-i18n="configTitle">Personaliza tu experiencia en la página</h1>
@@ -56,16 +65,17 @@ $configUrlVolver = $configUsuario
             <option value="pt" data-i18n="languageOptionPt">Português</option>
           </select>
 
-          <label for="tamano-letra">Tamaño de letra</label>
+          <label for="tamano-letra" data-i18n="configLabelFontSize">Tamaño de letra</label>
           <select id="tamano-letra" class="config-select">
-            <option value="pequeno">Pequeña</option>
-            <option value="normal">Normal</option>
-            <option value="grande">Grande</option>
-            <option value="muyGrande">Muy grande</option>
+            <option value="pequeno" data-i18n="fontSizeSmall">Pequeña</option>
+            <option value="normal" data-i18n="fontSizeNormal">Normal</option>
+            <option value="grande" data-i18n="fontSizeLarge">Grande</option>
+            <option value="muyGrande" data-i18n="fontSizeVeryLarge">Muy grande</option>
           </select>
 
         </article>
 
+        <?php if ($configUsuario): ?>
         <article class="card">
           <h2 data-i18n="configNotificationsTitle">Notificaciones</h2>
           <p data-i18n="configNotificationsText">Activá los avisos del navegador y enterate cuando se publique un evento nuevo en SIGTUR.</p>
@@ -123,6 +133,7 @@ $configUrlVolver = $configUsuario
             <span class="config-chip">Protegido</span>
           </div>
         </article>
+        <?php endif; ?>
       </section>
 
       <div class="config-actions">
@@ -144,7 +155,7 @@ $configUrlVolver = $configUsuario
     </section>
   </div>
   <script src="../js/translator.js?v=20261019-i18n-4"></script>
-  <script src="../js/script.js?v=20261019-i18n-4"></script>
+  <script src="../js/script.js?v=guest-preferences-20261102-1"></script>
   <script src="../js/notificaciones.js?v=<?= time() ?>"></script>
   <script>
     /* Estos selectores conectan preferencias visuales, idioma y tamaño de
@@ -152,6 +163,7 @@ $configUrlVolver = $configUsuario
     const selectorTema = document.getElementById('tema');
     const selectorIdioma = document.getElementById('idioma');
     const selectorTamanoLetra = document.getElementById('tamano-letra');
+    const urlVolverConfiguracion = document.querySelector('.back-pill').href;
     const botonGuardar = document.querySelector('.config-actions .btn-primary');
     const botonRestablecer = document.querySelector('[data-config-reset]');
     const enlacesSalida = document.querySelectorAll('[data-config-exit]');
@@ -200,7 +212,7 @@ $configUrlVolver = $configUsuario
           if (selectorTamanoLetra) {
             guardarTamanoLetra(selectorTamanoLetra.value);
           }
-          window.location.assign('../index.php');
+          window.location.assign(urlVolverConfiguracion);
         } catch (error) {
           console.error('No se pudieron guardar las preferencias de configuración', error);
           botonGuardar.disabled = false;

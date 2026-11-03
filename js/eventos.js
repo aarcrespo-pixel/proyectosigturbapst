@@ -502,7 +502,7 @@ function tarjetaPrincipal(evento) {
         <span class="categoria">${evento.categoria}${evento.tipoEntrada ? ` · ${evento.tipoEntrada}` : ''}</span>
         <h3>${evento.nombre}</h3>
         ${evento.lugar ? `<p class="lugar">${evento.lugar}</p>` : ""}
-        ${evento.tipoEntrada === 'De Pago' && evento.precioTexto ? `<p class="precio-evento">${escaparHTML(evento.precioTexto)}</p>` : ""}
+        ${evento.tipoEntrada === 'De Pago' ? `<p class="precio-evento">${escaparHTML(evento.precioTexto || 'Consultar con la organización')}</p>` : ""}
       </div>
       <div class="evento-card-action">
         <div class="fecha-protagonista" aria-label="Fecha del evento">
@@ -806,7 +806,6 @@ function configurarFormularioEventos() {
         const edadMaxima = Number(document.getElementById('edad-maxima')?.value || 99);
         const categoria = document.getElementById('categoria-evento')?.value || 'General';
         const tipoEntrada = document.getElementById('tipo-entrada')?.value || 'Gratuito';
-        const precio = document.getElementById('evento-precio')?.value.trim() || '';
         const canal = document.getElementById('canal-notificacion')?.value || 'Email';
         const recordatorio = document.getElementById('recordatorio')?.value || '1 hora antes';
         const cuerpoCorreo = document.getElementById('correo-cuerpo')?.value.trim() || '';
@@ -839,12 +838,6 @@ function configurarFormularioEventos() {
         if (edadMinima > edadMaxima) {
             mostrarError('La edad mínima no puede ser mayor que la máxima.');
             document.getElementById('edad-minima')?.focus();
-            return;
-        }
-
-        if (tipoEntrada === 'De Pago' && !precio) {
-            mostrarError('Escribe el precio o valor de la entrada cuando eliges entrada de pago.');
-            document.getElementById('evento-precio')?.focus();
             return;
         }
 

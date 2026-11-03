@@ -126,6 +126,7 @@ $headerLinks = [
                     </div>
                 </div>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/login.php" data-i18n="navLogin">Ingresar Usuario</a>
+                <a class="perfil-item" href="<?= BASE_URL ?>php/configuracion.php?navegante=1" data-i18n="navGuestSettings">Configuraciones</a>
             <?php endif; ?>
         </div>
     </div>
@@ -136,7 +137,7 @@ $headerLinks = [
 <button class="scroll-top-button" type="button" aria-label="Volver arriba" data-i18n-aria-label="scrollTopLabel" hidden>
     <span aria-hidden="true">↑</span>
 </button>
-<script src="<?= BASE_URL ?>js/volver-posicion.js" defer></script>
+<script src="<?= BASE_URL ?>js/volver-posicion.js?v=category-scroll-return-20261102-1" defer></script>
 
 <?php if ($headerUserLoggedIn): ?>
 <button
@@ -156,47 +157,7 @@ $headerLinks = [
 <script src="<?= BASE_URL ?>js/search.js" defer></script>
 <script src="<?= BASE_URL ?>js/notificaciones.js" defer></script>
 <?php if ($headerCurrentPage === 'index'): ?>
-<?php if ($headerUserLoggedIn && $headerUserRole === 'turista'): ?>
-<script src="<?= BASE_URL ?>js/copilot_ai.js?v=20261019-history-delete-1" defer></script>
-<?php endif; ?>
 <?php $mensajesWidgetRoot = BASE_URL; include __DIR__ . '/mensajes-widget.php'; ?>
-<?php endif; ?>
-
-<?php if ($headerCurrentPage === 'index' && $headerUserLoggedIn && $headerUserRole === 'turista'): ?>
-<div class="copilot-assistant" id="copilot-assistant" data-api="<?= BASE_URL ?>php/api/copilot_ai.php" data-csrf="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
-    <button type="button" class="copilot-assistant__toggle" id="copilot-assistant-toggle" aria-label="Abrir asistente de IA" aria-expanded="false" aria-controls="copilot-assistant-panel" title="Abrir asistente Sigtur">
-        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
-            <path d="M12 3a2 2 0 0 1 2 2h2.2A3.8 3.8 0 0 1 20 8.8v6.4a3.8 3.8 0 0 1-3.8 3.8h-.7l-3.5 2.6-3.5-2.6h-.7A3.8 3.8 0 0 1 4 15.2V8.8A3.8 3.8 0 0 1 7.8 5H10a2 2 0 0 1 2-2Zm-4.2 5A.8.8 0 0 0 7 8.8v6.4a.8.8 0 0 0 .8.8h1.7l2.5 1.9 2.5-1.9h1.7a.8.8 0 0 0 .8-.8V8.8a.8.8 0 0 0-.8-.8H7.8ZM9 10a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm6 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm-6 4h6v1.5H9V14Z"/>
-        </svg>
-    </button>
-
-    <div class="copilot-assistant__panel" id="copilot-assistant-panel" hidden>
-        <div class="copilot-assistant__header">
-            <div>
-                <strong>Asistente IA</strong>
-                <small>Tu guía de Salto</small>
-            </div>
-            <div class="copilot-assistant__header-actions">
-                <button type="button" id="copilot-assistant-history" title="Ver chat anterior">Historial</button>
-                <button type="button" id="copilot-assistant-clear" title="Limpiar chat actual">Limpiar chat</button>
-            </div>
-            <button type="button" class="copilot-assistant__close" id="copilot-assistant-close" aria-label="Cerrar asistente">×</button>
-        </div>
-
-        <div class="copilot-assistant__history" id="copilot-assistant-history-panel" hidden></div>
-
-        <div class="copilot-assistant__messages" id="copilot-assistant-messages">
-            <div class="copilot-assistant__message copilot-assistant__message--bot">
-                Hola 👋 Soy el asistente virtual de Sigtur Salto. ¿En qué puedo ayudarte?
-            </div>
-        </div>
-
-        <form class="copilot-assistant__form" id="copilot-assistant-form">
-            <textarea id="copilot-assistant-input" rows="3" maxlength="800" placeholder="Escribí tu pregunta..." required></textarea>
-            <button type="submit" id="copilot-assistant-submit">Enviar</button>
-        </form>
-    </div>
-</div>
 <?php endif; ?>
 
 <?php /* El modal solo se monta para usuarios autenticados; así no se exponen

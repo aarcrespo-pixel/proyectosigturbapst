@@ -1,4 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const featureScrollKey = 'sigtur-organizer-feature-scroll';
+    const savedScrollPosition = sessionStorage.getItem(featureScrollKey);
+    if (savedScrollPosition !== null) {
+        sessionStorage.removeItem(featureScrollKey);
+        const scrollPosition = Number(savedScrollPosition);
+        if (Number.isFinite(scrollPosition) && scrollPosition >= 0) {
+            window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(() => {
+                    window.scrollTo({ top: scrollPosition, behavior: 'instant' });
+                });
+            });
+        }
+    }
+
+    document.querySelectorAll('.admin-event__feature-form').forEach((form) => {
+        form.addEventListener('submit', () => {
+            sessionStorage.setItem(featureScrollKey, String(window.scrollY));
+        });
+    });
+
     document.querySelectorAll('.admin-event__image-input').forEach((input) => {
         input.addEventListener('change', () => {
             const file = input.files?.[0];

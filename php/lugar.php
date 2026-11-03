@@ -99,7 +99,7 @@ $nombreLugar = htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8');
         <?php endif; ?>
     </section>
 </main>
-<script src="../js/volver-posicion.js" defer></script>
+<script src="../js/volver-posicion.js?v=category-scroll-return-20261102-1" defer></script>
 <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
 </body>
 </html>

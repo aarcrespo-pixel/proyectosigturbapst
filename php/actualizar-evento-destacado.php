@@ -44,5 +44,5 @@ if ($accion === 'agregar') {
     $quitar->execute([':evento_id' => $eventoId]);
 }
 
-header('Location: panel-organizador.php?destacado_actualizado=' . $eventoId . '&accion_destacado=' . $accion . '#evento-' . $eventoId);
+header('Location: panel-organizador.php?destacado_actualizado=' . $eventoId . '&accion_destacado=' . $accion);
 exit;
