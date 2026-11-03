@@ -1516,8 +1516,8 @@ body[data-tema="oscuro"] .perfil-form-grid textarea {
 .imagen-inicio {
     width: 100%;
     height: 100%;
+    border: none;
     object-fit: cover;
-    object-position: center;
     display: block;
 }
 
@@ -3290,9 +3290,7 @@ select {
    the event and tourism link groups. */
 .footer {
     background:
-        radial-gradient(ellipse at 18% 0%, rgba(211, 98, 72, .12), transparent 38%),
-        linear-gradient(145deg, #171717, #101214 68%, #171411);
-    border-top: 1px solid rgba(245, 232, 216, .12);
+        linear-gradient(145deg, #0f0f0f);
 }
 
 .footer-grid {

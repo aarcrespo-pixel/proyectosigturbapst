@@ -63,7 +63,7 @@ input {
     display: grid;
     place-items: center;
     padding: clamp(7rem, 10vw, 9rem) 2rem 4rem;
-    background: linear-gradient(180deg, rgba(23, 18, 15, 0.15), rgba(23, 18, 15, 0.7)), url('../img/gastronomia.jpg') center / cover;
+    background: linear-gradient(180deg, rgba(23, 18, 15, 0.15), rgba(23, 18, 15, 0.7)), url('../img/gastro.jpg') center / cover;
     overflow: hidden;
 }
 

@@ -112,7 +112,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Estilos CSS -->
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>"> <!-- Estilos generales -->
-    <link rel="stylesheet" href="../css/eventos.css?v=20261102-event-list-cleanup-1"> <!-- Estilos específicos de eventos -->
+    <link rel="stylesheet" href="../css/eventos.css?v=20261103-gallery-lightbox-size-1"> <!-- Estilos específicos de eventos -->
     <link rel="stylesheet" href="../css/enlaces-texto.css?v=20261102-event-links-1">
 </head>
 
@@ -464,26 +464,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         <div class="lightbox-content">
             <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar imagen">×</button>
             <div class="lightbox-media">
-                <!-- CAMBIO APLICADO: las flechas viven dentro del área visual de
-                     la foto para que nunca puedan invadir el panel de comentarios. -->
                 <button class="lightbox-arrow left" id="lightbox-prev" aria-label="Imagen anterior">❮</button>
                 <img id="lightbox-image" src="" alt="Vista ampliada de galería">
                 <button class="lightbox-arrow right" id="lightbox-next" aria-label="Siguiente imagen">❯</button>
             </div>
-            <aside class="lightbox-comments" aria-label="Información de la imagen">
-                <!-- Estos nodos reciben item.titulo e item.descripcion desde
-                     eventos.js cada vez que cambia la foto del lightbox. -->
-                <div class="lightbox-info">
-                    <span class="lightbox-kicker">Galería de Salto</span>
-                    <h2 id="lightbox-title">Imagen de galería</h2>
-                    <p id="lightbox-description">Imágenes de lugares y actividades de la ciudad.</p>
-                    <div class="lightbox-meta">
-                        <span id="lightbox-date">Publicado recientemente</span>
-                        <span class="lightbox-caption" id="lightbox-caption"></span>
-                    </div>
-                </div>
-                <article class="gallery-engagement-card" id="lightbox-engagement-card" data-engagement="like-only"></article>
-            </aside>
         </div>
     </div>
 
@@ -501,7 +485,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         'rol' => (string) ($usuarioActual['rol'] ?? ''),
         'csrfToken' => $csrfToken,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script src="../js/eventos.js?v=20261102-event-list-cleanup-1" defer></script>
+    <script src="../js/eventos.js?v=20261103-gallery-photo-only-1" defer></script>
 </body>
 
 </html>

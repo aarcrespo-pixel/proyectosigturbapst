@@ -19,7 +19,15 @@
     const tituloAmpliado = dialog.querySelector('.place-gallery-lightbox__caption');
 
     galerias.forEach((galeria) => {
-        galeria.querySelectorAll('.tarjeta-galeria').forEach((tarjeta) => {
+        const tarjetas = [...galeria.querySelectorAll('.tarjeta-galeria')];
+        const botonToggle = galeria.nextElementSibling?.matches('[data-gallery-toggle]')
+            ? galeria.nextElementSibling
+            : null;
+        const cantidadInicial = 4;
+        let expandida = false;
+
+        tarjetas.forEach((tarjeta, indice) => {
+            tarjeta.hidden = indice >= cantidadInicial;
             const imagen = tarjeta.querySelector('img');
             if (!imagen || imagen.parentElement.matches('button')) return;
 
@@ -38,6 +46,18 @@
                 dialog.showModal();
             });
         });
+
+        if (botonToggle) {
+            botonToggle.hidden = tarjetas.length <= cantidadInicial;
+            botonToggle.addEventListener('click', () => {
+                expandida = !expandida;
+                tarjetas.forEach((tarjeta, indice) => {
+                    tarjeta.hidden = !expandida && indice >= cantidadInicial;
+                });
+                botonToggle.setAttribute('aria-expanded', String(expandida));
+                botonToggle.textContent = expandida ? 'Ver menos' : 'Ver más';
+            });
+        }
     });
 
     dialog.querySelector('.place-gallery-lightbox__close').addEventListener('click', () => dialog.close());

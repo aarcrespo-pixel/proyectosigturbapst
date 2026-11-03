@@ -1092,34 +1092,12 @@ let lightboxIndex = 0;
 function actualizarLightbox() {
     const item = galeria[lightboxIndex];
     const imagen = document.getElementById("lightbox-image");
-    const caption = document.getElementById("lightbox-caption");
-    const title = document.getElementById('lightbox-title');
-    const description = document.getElementById('lightbox-description');
-    const date = document.getElementById('lightbox-date');
-    if (!item || !imagen || !caption) return;
+    if (!item || !imagen) return;
     imagen.src = item.imagen;
-    // Los datos viajan desde el objeto de galería hasta los nodos visibles del
-    // modal en cada cambio de foto, evitando títulos y descripciones obsoletos.
     imagen.alt = item.titulo || `Imagen de galería ${lightboxIndex + 1}`;
-    caption.textContent = `Imagen ${lightboxIndex + 1} de ${galeria.length}`;
-    if (title) title.textContent = item.titulo || 'Cobertura de Salto';
-    if (description) description.textContent = item.descripcion || 'Imágenes de lugares y actividades de la ciudad.';
-    if (date) date.textContent = item.fecha || 'Publicado recientemente';
-
-    const engagementCard = document.getElementById('lightbox-engagement-card');
-    if (engagementCard) {
-        engagementCard.dataset.engagement = 'like-only';
-        engagementCard.dataset.itemKey = `galeria-${item.imagen}`;
-        engagementCard.querySelector('.card-engagement')?.remove();
-        window.initInteractiveCards?.(engagementCard);
-    }
 }
 
-/*
-  El lightbox abre la imagen seleccionada en un overlay oscuro.
-  El CSS controla la altura máxima de la imagen, dejando espacio
-  vertical arriba y abajo para que no ocupe todo el alto de la pantalla.
-*/
+/* El lightbox muestra la foto seleccionada en una superposición oscura. */
 function abrirLightbox(indice) {
     lightboxIndex = indice;
     actualizarLightbox();

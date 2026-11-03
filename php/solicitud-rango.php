@@ -21,18 +21,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $rolSolicitado = $_POST['rol_solicitado'] ?? '';
     $domicilio = $_POST['domicilio'] ?? '';
+    $localidad = $_POST['localidad'] ?? '';
+    $actividad = $_POST['actividad'] ?? '';
     $motivo = $_POST['motivo'] ?? '';
     $aceptaPrivacidad = $_POST['acepta_privacidad'] ?? '';
     $rolSolicitado = is_string($rolSolicitado) ? $rolSolicitado : '';
     $domicilio = is_string($domicilio) ? trim($domicilio) : '';
+    $localidad = is_string($localidad) ? trim($localidad) : '';
+    $actividad = is_string($actividad) ? trim($actividad) : '';
     $motivo = is_string($motivo) ? trim($motivo) : '';
     $longitudDomicilio = sigtur_longitud_utf8($domicilio);
+    $longitudLocalidad = sigtur_longitud_utf8($localidad);
+    $longitudActividad = sigtur_longitud_utf8($actividad);
     $longitudMotivo = sigtur_longitud_utf8($motivo);
 
     if (!in_array($rolSolicitado, $rolesSolicitables, true)) {
         $error = 'Selecciona un rango válido.';
     } elseif ($domicilio === '' || $longitudDomicilio === null || $longitudDomicilio > 255) {
         $error = 'Ingresa tu domicilio en hasta 255 caracteres.';
+    } elseif ($longitudLocalidad === null || $longitudLocalidad > 120 || $longitudActividad === null || $longitudActividad > 160) {
+        $error = 'La localidad admite hasta 120 caracteres y la actividad hasta 160.';
     } elseif ($longitudMotivo === null || $longitudMotivo < 20 || $longitudMotivo > 500) {
         $error = 'Explica tu solicitud en entre 20 y 500 caracteres.';
     } elseif (!is_string($aceptaPrivacidad) || $aceptaPrivacidad !== 'on') {
@@ -55,12 +63,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->rollBack();
                 $error = 'Ya tienes una solicitud pendiente de revisión.';
             } else {
-                $insertar = $pdo->prepare("INSERT INTO solicitudes_rango (usuario_id, rol_solicitado, domicilio, motivo)
-                    VALUES (:usuario_id, :rol_solicitado, :domicilio, :motivo)");
+                $insertar = $pdo->prepare("INSERT INTO solicitudes_rango (usuario_id, rol_solicitado, domicilio, localidad, actividad, motivo)
+                    VALUES (:usuario_id, :rol_solicitado, :domicilio, :localidad, :actividad, :motivo)");
                 $insertar->execute([
                     ':usuario_id' => (int) $usuario['id'],
                     ':rol_solicitado' => $rolSolicitado,
                     ':domicilio' => $domicilio,
+                    ':localidad' => $localidad,
+                    ':actividad' => $actividad,
                     ':motivo' => $motivo,
                 ]);
                 $pdo->commit();
@@ -151,7 +161,7 @@ $solicitudEnviada = ($_GET['enviada'] ?? '') === '1';
             <section class="solicitud-card">
                 <div class="solicitud-privacidad">
                     <strong>Datos personales y privacidad</strong>
-                    <p>El nombre, correo y documento ya registrados en tu cuenta se compartirán con los administradores junto con tu domicilio y explicación, solo para evaluar este cambio de rango. No incluyas información privada de otras personas. El domicilio y la explicación se borrarán al resolverla.</p>
+                    <p>El nombre, correo, documento y teléfono de tu cuenta se compartirán con los administradores junto con los datos que brindes aquí, solo para evaluar este cambio de rango. No incluyas información privada de otras personas. Los datos de esta solicitud se borrarán al resolverla.</p>
                 </div>
 
                 <form method="post" class="solicitud-form">
@@ -186,6 +196,12 @@ $solicitudEnviada = ($_GET['enviada'] ?? '') === '1';
                     <label>Domicilio
                         <input name="domicilio" maxlength="255" autocomplete="street-address" required value="<?= htmlspecialchars(is_string($_POST['domicilio'] ?? null) ? $_POST['domicilio'] : '', ENT_QUOTES, 'UTF-8') ?>" placeholder="Calle, número, ciudad y departamento">
                         <small>Se solicita para verificar tu identidad. No agregues referencias privadas innecesarias.</small>
+                    </label>
+                    <label>Localidad
+                        <input name="localidad" maxlength="120" autocomplete="address-level2" value="<?= htmlspecialchars(is_string($_POST['localidad'] ?? null) ? $_POST['localidad'] : '', ENT_QUOTES, 'UTF-8') ?>" placeholder="Ciudad o localidad">
+                    </label>
+                    <label>Actividad u organización relacionada
+                        <input name="actividad" maxlength="160" value="<?= htmlspecialchars(is_string($_POST['actividad'] ?? null) ? $_POST['actividad'] : '', ENT_QUOTES, 'UTF-8') ?>" placeholder="Organización, proyecto o actividad turística">
                     </label>
                     <label>¿Por qué solicitas este cambio de rango?
                         <textarea name="motivo" minlength="20" maxlength="500" rows="5" required><?= htmlspecialchars(is_string($_POST['motivo'] ?? null) ? $_POST['motivo'] : '', ENT_QUOTES, 'UTF-8') ?></textarea>

@@ -84,6 +84,10 @@ if (isset($_GET['registro']) && $_GET['registro'] === 'exito') {
     $message = '¡Cuenta creada con éxito! Por favor, iniciá sesión.';
     $messageType = 'success';
 }
+if (isset($_GET['recuperacion']) && $_GET['recuperacion'] === 'exito') {
+    $message = 'La contraseña se actualizó. Ya podés iniciar sesión.';
+    $messageType = 'success';
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -91,7 +95,8 @@ if (isset($_GET['registro']) && $_GET['registro'] === 'exito') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n-title="pageLoginTitle">Registro de Usuarios</title>
-    <link rel="stylesheet" href="../css/login.css">
+    <link rel="stylesheet" href="../css/login.css?v=20261103-password-recovery-1">
+    <link rel="stylesheet" href="../css/legal.css">
     <script src="../js/volver-posicion.js" defer></script>
 </head>
 
@@ -111,7 +116,7 @@ if (isset($_GET['registro']) && $_GET['registro'] === 'exito') {
                 </div>
             <?php endif; ?>
 
-            <form id="loginForm" class="login-form" method="post" action="login.php" novalidate>
+            <form id="loginForm" class="login-form" method="post" action="login.php" novalidate data-clear-password="<?= $emailIncorrecto || $passwordIncorrecta ? 'true' : 'false' ?>">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(sigtur_csrf_token(), ENT_QUOTES, 'UTF-8') ?>">
                 <label for="login" data-i18n="loginUsername">Email o Cédula</label>
                 <input type="text" id="login" name="login" autocomplete="username" maxlength="100" required placeholder="usuario@email.com o 12345678" value="<?= htmlspecialchars($loginInputValue, ENT_QUOTES, 'UTF-8') ?>" <?= $emailIncorrecto ? 'aria-invalid="true"' : '' ?> data-i18n-placeholder="loginUsernamePlaceholder" />
@@ -130,8 +135,6 @@ if (isset($_GET['registro']) && $_GET['registro'] === 'exito') {
                     <p class="login-field-error" role="alert">Contraseña incorrecta.</p>
                 <?php endif; ?>
 
-                <button type="button" class="forgot-password" onclick="event.preventDefault()" data-i18n="loginForgot">Olvidé mi contraseña</button>
-
                 <button type="submit" id="btnIniciar" class="action-btn login-submit" data-i18n="loginSubmit">Iniciar Sesión</button>
 
                 <p class="register-prompt">
@@ -139,7 +142,14 @@ if (isset($_GET['registro']) && $_GET['registro'] === 'exito') {
                     <a href="registrarse.php" class="register-link" data-i18n="loginRegister">Registrate acá</a>
                 </p>
 
-                <p class="legal-notice" data-i18n="loginLegal">Al iniciar sesión aceptas los términos y condiciones de la empresa, las reglas de uso y la política de privacidad.</p>
+                <p class="legal-notice">
+                    <span data-i18n="loginLegalPrefix">Al iniciar sesión aceptas los </span>
+                    <a href="terminos-privacidad.php#terminos" data-i18n="legalTermsLink">términos y condiciones</a>
+                    <span data-i18n="loginLegalMiddle"> de SIGTUR y las </span>
+                    <a href="terminos-privacidad.php#reglas" data-i18n="legalRulesLink">reglas de uso</a>
+                    <span data-i18n="loginLegalAnd"> y la </span>
+                    <a href="terminos-privacidad.php#privacidad" data-i18n="loginPrivacyLink">política de privacidad</a>.
+                </p>
             </form>
         </section>
     </main>

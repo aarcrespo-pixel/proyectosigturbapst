@@ -1,0 +1,82 @@
+.recovery-card {
+    max-width: 620px;
+}
+
+.recovery-back {
+    display: inline-block;
+    margin-bottom: 1.25rem;
+    color: var(--text);
+    font-weight: 700;
+    text-underline-offset: .18em;
+}
+
+.recovery-card h1 {
+    margin-bottom: .65rem;
+}
+
+.recovery-card h2 {
+    margin: .25rem 0;
+    color: var(--primary-dark);
+    font-size: 1.25rem;
+}
+
+.recovery-form {
+    display: grid;
+    width: 100%;
+    gap: .75rem;
+}
+
+.recovery-form label {
+    margin-top: .25rem;
+}
+
+.recovery-form .action-btn {
+    width: 100%;
+    margin-top: .5rem;
+}
+
+.recovery-card hr {
+    width: 100%;
+    margin: 1.5rem 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+}
+
+.recovery-help {
+    margin: 0 0 .75rem;
+    color: var(--muted);
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+.recovery-message {
+    padding: .8rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: .92rem;
+    line-height: 1.5;
+}
+
+.recovery-message--status {
+    border-color: rgba(37, 99, 235, .2);
+    background: rgba(37, 99, 235, .08);
+    color: #23476a;
+}
+
+.recovery-message--error {
+    border-color: rgba(180, 35, 24, .22);
+    background: rgba(180, 35, 24, .08);
+    color: #8c2119;
+}
+
+body[data-tema="oscuro"] .recovery-card h2 {
+    color: #f8c67c;
+}
+
+body[data-tema="oscuro"] .recovery-message--status {
+    color: #d7eaff;
+}
+
+body[data-tema="oscuro"] .recovery-message--error {
+    color: #ffc2bd;
+}

@@ -46,8 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($password !== $confirmarPassword) {
         $message = 'Las contraseñas no coinciden.';
         $messageType = 'error';
-    } elseif (strlen($password) < 8 || strlen($password) > 72) {
-        $message = 'La contraseña debe tener entre 8 y 72 caracteres.';
+    } elseif (strlen($password) > 72) {
+        $message = 'La contraseña no puede superar los 72 caracteres.';
         $messageType = 'error';
     } elseif ($telefono !== '' && !preg_match('/^[0-9+\-\s()]{6,15}$/', $telefono)) {
         $message = 'El número telefónico no es válido.';
@@ -101,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrarse | Sigtur Salto</title>
     <link rel="stylesheet" href="../css/login.css">
+    <link rel="stylesheet" href="../css/legal.css">
     <script src="../js/volver-posicion.js" defer></script>
 </head>
 <body>
@@ -149,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="field-group">
                         <label for="Contraseña">Contraseña</label>
                         <div class="password-field">
-                            <input type="password" id="Contraseña" name="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Contraseña" required />
+                            <input type="password" id="Contraseña" name="password" maxlength="72" autocomplete="new-password" placeholder="Contraseña" required />
                             <button type="button" class="toggle-password" data-target="Contraseña" aria-label="Mostrar contraseña">
                                 <span class="toggle-icon">👁</span>
                             </button>
@@ -159,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="field-group">
                         <label for="ConfirmarContraseña">Confirmar contraseña</label>
                         <div class="password-field">
-                            <input type="password" id="ConfirmarContraseña" name="confirmar_password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="Confirmar contraseña" required />
+                            <input type="password" id="ConfirmarContraseña" name="confirmar_password" maxlength="72" autocomplete="new-password" placeholder="Confirmar contraseña" required />
                             <button type="button" class="toggle-password" data-target="ConfirmarContraseña" aria-label="Mostrar contraseña">
                                 <span class="toggle-icon">👁</span>
                             </button>
@@ -169,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <label class="checkbox-row" for="AceptarTerminos">
                     <input type="checkbox" id="AceptarTerminos" name="aceptar_terminos" value="on" <?php echo (isset($_POST['aceptar_terminos']) && $_POST['aceptar_terminos'] === 'on') ? 'checked' : ''; ?> required>
-                    <span>Acepto los <a href="#">términos y condiciones</a> y la <a href="#">política de privacidad</a>.</span>
+                    <span>Acepto los <a href="terminos-privacidad.php#terminos">términos y condiciones</a> y la <a href="terminos-privacidad.php#privacidad">política de privacidad</a>.</span>
                 </label>
 
                 <div class="botones">

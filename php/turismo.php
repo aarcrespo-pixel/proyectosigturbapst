@@ -24,8 +24,9 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>">
-    <link rel="stylesheet" href="../css/turismo.css?v=20261029-waterparks-interactive-1">
+    <link rel="stylesheet" href="../css/turismo.css?v=20261103-routes-more-hint-1">
     <link rel="stylesheet" href="../css/galeria-lugares.css">
+    <link rel="stylesheet" href="../css/legal.css">
 </head>
 
 <body>
@@ -64,7 +65,6 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                 <span data-i18n="tourismHeroLabel">Descubrí el turismo en Salto</span>
                 <h1 data-i18n="tourismHeroTitle">TURISMO</h1>
                 <p data-i18n="tourismHeroText">Explorá propuestas de turismo local, recorridos gastronómicos y experiencias al aire libre diseñadas para cada tipo de visitante.</p>
-                <a class="hero-gallery-link" href="#galeria-turistica" data-i18n="tourismGallerySeeAll">Ver todas las galerías</a>
             </div>
         </section>
 
@@ -111,7 +111,10 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
             <h2 data-i18n="tourismSectionRoutesTitle">Rutas y experiencias</h2>
             <div class="rutas-grid">
                 <article class="tarjeta-ruta">
-                    <img src="../img/Trouville.jpg" alt="Trouville" data-i18n-alt="tourismRoutesAlt" data-i18n-index="0">
+                    <div class="tarjeta-ruta__imagen">
+                        <img src="../img/Trouville.jpg" alt="Trouville" data-i18n-alt="tourismRoutesAlt" data-i18n-index="0">
+                        <span class="tarjeta-ruta__indicacion" aria-hidden="true">Tocá para ver más</span>
+                    </div>
                     <div class="contenido">
                         <h3 data-i18n="tourismRoutesTitles" data-i18n-index="0">La Trouville</h3>
                         <p data-i18n="tourismRoutesDescriptions" data-i18n-index="0">Probá platos típicos y descubrí sabores locales en mercados, parrillas y cafeterías con encanto.</p>
@@ -119,7 +122,10 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                     </div>
                 </article>
                 <article class="tarjeta-ruta">
-                    <img src="../img/Cine_Sarandi.jpg" alt="Cine Sarandi" data-i18n-alt="tourismRoutesAlt" data-i18n-index="1">
+                    <div class="tarjeta-ruta__imagen">
+                        <img src="../img/Cine_Sarandi.jpg" alt="Cine Sarandi" data-i18n-alt="tourismRoutesAlt" data-i18n-index="1">
+                        <span class="tarjeta-ruta__indicacion" aria-hidden="true">Tocá para ver más</span>
+                    </div>
                     <div class="contenido">
                         <h3 data-i18n="tourismRoutesTitles" data-i18n-index="1">Cine Sarandi</h3>
                         <p data-i18n="tourismRoutesDescriptions" data-i18n-index="1">Itinerarios para vivir la ciudad de noche con espectáculos, bares y rincones de música en vivo.</p>
@@ -127,7 +133,10 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                     </div>
                 </article>
                 <article class="tarjeta-ruta">
-                    <img src="../img/fosa.webp" alt="La Fosa" data-i18n-alt="tourismRoutesAlt" data-i18n-index="2">
+                    <div class="tarjeta-ruta__imagen">
+                        <img src="../img/fosa.webp" alt="La Fosa" data-i18n-alt="tourismRoutesAlt" data-i18n-index="2">
+                        <span class="tarjeta-ruta__indicacion" aria-hidden="true">Tocá para ver más</span>
+                    </div>
                     <div class="contenido">
                         <h3 data-i18n="tourismRoutesTitles" data-i18n-index="2">La Fosa</h3>
                         <p data-i18n="tourismRoutesDescriptions" data-i18n-index="2">Circuito de skate, bicicleta y barras calistenicas.</p>
@@ -135,7 +144,10 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                     </div>
                 </article>
                 <article class="tarjeta-ruta">
-                    <img src="../img/Shopping_Salto.jpg" alt="Shopping Salto" data-i18n-alt="tourismRoutesAlt" data-i18n-index="3">
+                    <div class="tarjeta-ruta__imagen">
+                        <img src="../img/Shopping_Salto.jpg" alt="Shopping Salto" data-i18n-alt="tourismRoutesAlt" data-i18n-index="3">
+                        <span class="tarjeta-ruta__indicacion" aria-hidden="true">Tocá para ver más</span>
+                    </div>
                     <div class="contenido">
                         <h3 data-i18n="tourismRoutesTitles" data-i18n-index="3">Salto Shopping</h3>
                         <p data-i18n="tourismRoutesDescriptions" data-i18n-index="3">Shopping con variedad de tiendas y zonas para comer.</p>
@@ -222,7 +234,7 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                     <?php if (isset($_GET['algunas_fotos_fallaron'])): ?>Algunas fotos no se pudieron subir.<?php endif; ?>
                 </p>
             <?php endif; ?>
-            <div class="galeria-grid gallery-photo-grid">
+            <div class="galeria-grid gallery-photo-grid" id="galeria-turistica-grid">
                 <article class="tarjeta-galeria"><img src="../img/solari.jfif" alt="Parque Benito Solari" loading="lazy" decoding="async" data-i18n-alt="tourismGalleryAlt" data-i18n-index="0"><div class="contenido"><span class="gallery-photo-tag">Naturaleza</span><h3 data-i18n="tourismGalleryTitles" data-i18n-index="0">Parque Benito Solari</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/Termas_Dayman.webp" alt="Piscinas de las Termas del Dayman" loading="lazy" decoding="async" data-i18n-alt="tourismGalleryAlt" data-i18n-index="1"><div class="contenido"><span class="gallery-photo-tag">Bienestar</span><h3 data-i18n="tourismGalleryTitles" data-i18n-index="1">Termas del Dayman</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/Costanera_Norte.jpeg" alt="Paseo por la Costanera Norte" loading="lazy" decoding="async" data-i18n-alt="tourismGalleryAlt" data-i18n-index="2"><div class="contenido"><span class="gallery-photo-tag">Aire libre</span><h3 data-i18n="tourismGalleryTitles" data-i18n-index="2">Costanera Norte</h3></div></article>
@@ -247,6 +259,7 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
                     </form>
                 <?php endif; ?>
             </div>
+            <button class="place-gallery-toggle" type="button" data-gallery-toggle aria-expanded="false" aria-controls="galeria-turistica-grid" hidden>Ver más</button>
         </section>
 
         <section class="seccion-turismo mapa-seccion" aria-labelledby="mapa-turismo-titulo">
@@ -286,10 +299,11 @@ $fotosTurismo = $fotosTurismoStmt->fetchAll();
             </div>
         </section>
     </main>
+    <footer class="legal-page-link"><a href="terminos-privacidad.php" data-i18n="legalPageLink">Términos, privacidad y seguridad</a></footer>
 
     <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
     <script src="../js/lugar-links.js?v=20261028-event-map-1" defer></script>
-    <script src="../js/galeria-lugares.js" defer></script>
+    <script src="../js/galeria-lugares.js?v=20261103-gallery-more-1" defer></script>
     <?php if ($puedeAgregarFotosTurismo): ?>
         <script>
             const botonAgregarFotosTurismo = document.querySelector('.turismo-galeria-add__button');

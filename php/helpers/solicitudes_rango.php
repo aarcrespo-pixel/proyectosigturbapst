@@ -13,6 +13,8 @@ function sigtur_asegurar_tabla_solicitudes_rango(PDO $pdo): void
         `usuario_id` INT NOT NULL,
         `rol_solicitado` VARCHAR(30) NOT NULL,
         `domicilio` VARCHAR(255) NOT NULL,
+        `localidad` VARCHAR(120) NOT NULL DEFAULT '',
+        `actividad` VARCHAR(160) NOT NULL DEFAULT '',
         `motivo` VARCHAR(500) NOT NULL,
         `estado` VARCHAR(20) NOT NULL DEFAULT 'pendiente',
         `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -23,4 +25,14 @@ function sigtur_asegurar_tabla_solicitudes_rango(PDO $pdo): void
         CONSTRAINT `fk_solicitudes_rango_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
         CONSTRAINT `fk_solicitudes_rango_revisor` FOREIGN KEY (`revisado_por`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    foreach ([
+        'localidad' => "VARCHAR(120) NOT NULL DEFAULT ''",
+        'actividad' => "VARCHAR(160) NOT NULL DEFAULT ''",
+    ] as $columna => $definicion) {
+        $columnaExistente = $pdo->query("SHOW COLUMNS FROM `solicitudes_rango` LIKE " . $pdo->quote($columna))->fetch();
+        if (!$columnaExistente) {
+            $pdo->exec("ALTER TABLE `solicitudes_rango` ADD COLUMN `{$columna}` {$definicion}");
+        }
+    }
 }

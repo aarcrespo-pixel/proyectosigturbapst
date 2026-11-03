@@ -96,7 +96,9 @@ unset($propuestaGastronomica);
     </nav>
 
     <section class="pantalla-inicio">
-        <img class="imagen-inicio" src="https://www.gomezplatero.com/uploads/gallery/202405/20240522160708_1067064313.jpg" alt="Salto">
+        <video class="imagen-inicio" autoplay muted loop playsinline>
+            <source src="img/salto.mp4" type="video/mp4">
+        </video>
         <div class="degradado-inferior"></div> <!-- Degradado oscuro inferior -->
         <div class="texto-inicio">
 

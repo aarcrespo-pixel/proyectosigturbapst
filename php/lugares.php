@@ -24,6 +24,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="../css/lugares.css?v=20261029-interactive-cards-2">
     <link rel="stylesheet" href="../css/galeria-lugares.css">
+    <link rel="stylesheet" href="../css/legal.css">
 </head>
 
 <body>
@@ -62,7 +63,6 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                 <span data-i18n="placesHeroLabel">Lugares históricos</span>
                 <h1 data-i18n="placesHeroTitle">LUGARES</h1>
                 <p data-i18n="placesHeroText">Descubre los lugares más emblemáticos de Salto, llenos de historia y cultura.</p>
-                <a class="hero-gallery-link" href="#galeria-historica" data-i18n="placesGalleryButton">Ver todas las galerías</a>
             </div>
         </section>
 
@@ -188,7 +188,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                     <?php if (isset($_GET['algunas_fotos_fallaron'])): ?>Algunas fotos no se pudieron subir.<?php endif; ?>
                 </p>
             <?php endif; ?>
-            <div class="galeria-lugares gallery-photo-grid">
+            <div class="galeria-lugares gallery-photo-grid" id="galeria-lugares-grid">
                 <article class="tarjeta-galeria"><img src="../img/Plaza_33.webp" alt="Plaza Treinta y Tres y su entorno histórico" loading="lazy" decoding="async" data-i18n-alt="placesGalleryAlt" data-i18n-index="0"><div class="tarjeta-contenido"><span class="gallery-photo-tag">Patrimonio</span><h3 data-i18n="placesGalleryTitles" data-i18n-index="0">Plaza Treinta y Tres</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/Plaza_artigas.webp" alt="Monumentos de la Plaza Artigas" loading="lazy" decoding="async" data-i18n-alt="placesGalleryAlt" data-i18n-index="1"><div class="tarjeta-contenido"><span class="gallery-photo-tag">Historia</span><h3 data-i18n="placesGalleryTitles" data-i18n-index="1">Plaza Artigas</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/Cine_Sarandi.jpg" alt="Calle céntrica junto al Cine Sarandí" loading="lazy" decoding="async" data-i18n-alt="placesGalleryAlt" data-i18n-index="2"><div class="tarjeta-contenido"><span class="gallery-photo-tag">Centro</span><h3 data-i18n="placesGalleryTitles" data-i18n-index="2">Centro histórico</h3></div></article>
@@ -210,6 +210,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                     </form>
                 <?php endif; ?>
             </div>
+            <button class="place-gallery-toggle" type="button" data-gallery-toggle aria-expanded="false" aria-controls="galeria-lugares-grid" hidden>Ver más</button>
         </section>
 
 
@@ -247,10 +248,11 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
             </div>
         </section>
     </main>
+    <footer class="legal-page-link"><a href="terminos-privacidad.php" data-i18n="legalPageLink">Términos, privacidad y seguridad</a></footer>
 
     <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
     <script src="../js/lugar-links.js?v=20261028-event-map-1" defer></script>
-    <script src="../js/galeria-lugares.js" defer></script>
+    <script src="../js/galeria-lugares.js?v=20261103-gallery-more-1" defer></script>
     <?php if ($puedeAgregarFotosLugares): ?>
         <script>
             const botonAgregarFotosLugares = document.querySelector('.lugares-galeria-add__button');

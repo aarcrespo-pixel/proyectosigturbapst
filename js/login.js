@@ -33,6 +33,11 @@ document.querySelectorAll('.toggle-password').forEach((button) => {
 });
 
 const loginForm = document.getElementById('loginForm');
+if (loginForm?.dataset.clearPassword === 'true') {
+    const passwordInput = document.getElementById('password');
+    if (passwordInput) passwordInput.value = '';
+}
+
 loginForm?.addEventListener('submit', function (event) {
     event.preventDefault();
 

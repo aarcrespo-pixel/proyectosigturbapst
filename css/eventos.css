@@ -40,7 +40,7 @@ body {
 .fondo-encabezado {
     position: absolute;
     inset: 0;
-    background-image: url('../img/TER 2.jpg');
+    background-image: url('../img/salto-grande-tot.jpg');
     background-size: cover;
     background-position: center;
     filter: saturate(1.1) brightness(1);
@@ -1179,8 +1179,8 @@ body[data-tema="oscuro"] .evento-card-pasado .evento-status,
 
 .galeria-eventos .grilla-galeria {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.25rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.15rem;
 }
 
 .imagen-galeria {
@@ -1356,27 +1356,22 @@ body[data-tema="oscuro"] .evento-card-pasado .evento-status,
 
 .lightbox-content {
     position: relative;
-    width: min(96vw, 1200px);
-    height: 85vh;
-    max-height: 85vh;
-    padding: 2rem 1rem;
+    box-sizing: border-box;
+    width: min(94vw, 1100px);
+    height: auto;
+    max-height: 92vh;
+    max-height: 92dvh;
+    padding: clamp(1rem, 3vw, 2rem);
     z-index: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(380px, 420px);
-    align-items: stretch;
-     /* CAMBIO APLICADO: separamos foto y comentarios entre 24 y 32 px para
-         evitar que los controles o el texto parezcan pegados entre columnas. */
-     gap: clamp(24px, 3vw, 32px);
-    background: var(--bg-card, #1e1e22);
-    border-radius: 18px;
-    overflow: hidden;
+    background: transparent;
+    overflow: visible;
 }
 
 .lightbox-media {
-    /* CAMBIO APLICADO: este contenedor es la referencia de las flechas; así
-       right: 15px se mide contra la foto y no contra todo el modal. */
     position: relative;
     display: grid;
+    width: 100%;
+    height: auto;
     place-items: center;
     min-width: 0;
     min-height: 0;
@@ -1384,10 +1379,9 @@ body[data-tema="oscuro"] .evento-card-pasado .evento-status,
 
 #lightbox-image {
     width: 100%;
-    height: 100%;
-    max-height: none;
-    object-fit: cover;
-    border-radius: 24px;
+    height: min(76vh, 760px);
+    object-fit: contain;
+    border-radius: 12px;
     box-shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
 }
 
@@ -1660,21 +1654,16 @@ body[data-tema="oscuro"] .lightbox-meta { color: #c8bfb5; }
         right: 12px;
     }
 
+}
+
+@media (max-width: 600px) {
     .lightbox-content {
-        width: 94vw;
-        max-height: calc(100vh - 2rem);
-        grid-template-columns: 1fr;
-        grid-template-rows: minmax(220px, 48vh) minmax(0, 1fr);
-        padding: 1rem;
+        width: 96vw;
+        padding: 2.75rem .75rem 1rem;
     }
 
     #lightbox-image {
-        height: 100%;
-        max-height: none;
-    }
-
-    .lightbox-comments {
-        max-height: 38vh;
+        height: 68vh;
     }
 }
 
@@ -2447,7 +2436,7 @@ body[data-tema="oscuro"] .destacados-vacio {
     }
 
     .galeria-eventos .grilla-galeria {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
     }
 }
 
@@ -2583,7 +2572,7 @@ body[data-tema="oscuro"] .destacados-vacio {
     }
 
     .galeria-eventos .grilla-galeria {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .imagen-galeria,

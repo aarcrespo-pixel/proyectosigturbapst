@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $estado = $decision === 'aprobar' ? 'aprobada' : 'rechazada';
         $resolver = $pdo->prepare('UPDATE solicitudes_rango
             SET estado = :estado, revisado_por = :revisado_por, fecha_revision = CURRENT_TIMESTAMP,
-                domicilio = \'\', motivo = \'\'
+                domicilio = \'\', localidad = \'\', actividad = \'\', motivo = \'\'
             WHERE id = :id');
         $resolver->execute([
             ':estado' => $estado,
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$solicitudes = $pdo->query("SELECT s.id, s.usuario_id, s.rol_solicitado, s.domicilio, s.motivo, s.fecha_creacion,
+$solicitudes = $pdo->query("SELECT s.id, s.usuario_id, s.rol_solicitado, s.domicilio, s.localidad, s.actividad, s.motivo, s.fecha_creacion,
         u.nombre_completo, u.email, u.cedula, u.telefono
     FROM solicitudes_rango s
     INNER JOIN usuarios u ON u.id = s.usuario_id
@@ -163,6 +163,8 @@ $solicitudes = $pdo->query("SELECT s.id, s.usuario_id, s.rol_solicitado, s.domic
                         <div><dt>Documento</dt><dd><?= htmlspecialchars($solicitud['cedula'], ENT_QUOTES, 'UTF-8') ?></dd></div>
                         <div><dt>Teléfono</dt><dd><?= htmlspecialchars($solicitud['telefono'] ?: 'No registrado', ENT_QUOTES, 'UTF-8') ?></dd></div>
                         <div><dt>Domicilio</dt><dd><?= htmlspecialchars($solicitud['domicilio'], ENT_QUOTES, 'UTF-8') ?></dd></div>
+                        <?php if ($solicitud['localidad'] !== ''): ?><div><dt>Localidad</dt><dd><?= htmlspecialchars($solicitud['localidad'], ENT_QUOTES, 'UTF-8') ?></dd></div><?php endif; ?>
+                        <?php if ($solicitud['actividad'] !== ''): ?><div><dt>Actividad u organización</dt><dd><?= htmlspecialchars($solicitud['actividad'], ENT_QUOTES, 'UTF-8') ?></dd></div><?php endif; ?>
                     </dl>
                     <div class="solicitud-motivo">
                         <strong>Motivo de la solicitud</strong>

@@ -1,0 +1,209 @@
+.legal-document-page {
+    display: block;
+    min-height: 100vh;
+    padding: clamp(1rem, 4vw, 3rem);
+    background: #f3f6fa;
+    color: #1d2935;
+    font-family: 'Instrument Sans', Arial, sans-serif;
+}
+
+.legal-page-link {
+    padding: 1.25rem 1rem 2rem;
+    text-align: center;
+}
+
+.legal-page-link a {
+    color: #175f89;
+    font-weight: 700;
+    text-underline-offset: .18em;
+}
+
+.legal-document {
+    width: min(100%, 900px);
+    margin: 0 auto;
+    padding: clamp(1.25rem, 4vw, 3.5rem);
+    border: 1px solid #e0e7ef;
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 20px 60px rgba(28, 48, 69, .1);
+}
+
+.legal-document a {
+    color: #175f89;
+    text-underline-offset: .18em;
+}
+
+.legal-document a:focus-visible {
+    outline: 3px solid #f7b35c;
+    outline-offset: 3px;
+    border-radius: 3px;
+}
+
+.legal-back {
+    display: inline-flex;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+
+.legal-header {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e4eaf0;
+}
+
+.legal-eyebrow {
+    margin: 0 0 .5rem;
+    color: #41647f;
+    font-size: .8rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.legal-header h1 {
+    margin: 0;
+    color: #18324a;
+    font-size: clamp(2rem, 5vw, 3.1rem);
+    line-height: 1.12;
+    text-align: left;
+    text-shadow: none;
+}
+
+.legal-header > p:not(.legal-eyebrow, .legal-updated) {
+    max-width: 62ch;
+    color: #536475;
+    line-height: 1.7;
+}
+
+.legal-updated {
+    margin-bottom: 0;
+    color: #687889;
+    font-size: .88rem;
+}
+
+.legal-toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    padding: 1.25rem 0;
+}
+
+.legal-toc a {
+    padding: .5rem .75rem;
+    border: 1px solid #dce5ed;
+    border-radius: 999px;
+    background: #f8fafc;
+    font-size: .9rem;
+    font-weight: 700;
+}
+
+.legal-notice {
+    margin: .25rem 0 2rem;
+    padding: 1rem 1.1rem;
+    border-left: 4px solid #c77924;
+    border-radius: 8px;
+    background: #fff7e9;
+    color: #49351e;
+    line-height: 1.65;
+}
+
+.legal-section {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #e8edf2;
+    scroll-margin-top: 1rem;
+}
+
+.legal-section h2,
+.legal-contact h2 {
+    margin: 0 0 .8rem;
+    color: #18324a;
+    font-size: clamp(1.3rem, 3vw, 1.7rem);
+}
+
+.legal-section h3 {
+    margin: 1.2rem 0 .4rem;
+    color: #294d68;
+    font-size: 1.08rem;
+}
+
+.legal-section p,
+.legal-section li,
+.legal-contact p {
+    color: #394b5b;
+    font-size: 1rem;
+    line-height: 1.75;
+}
+
+.legal-section ul {
+    padding-left: 1.35rem;
+}
+
+.legal-section li + li {
+    margin-top: .45rem;
+}
+
+.legal-sources {
+    display: grid;
+    gap: .4rem;
+}
+
+.legal-contact {
+    padding-top: 1.7rem;
+}
+
+.legal-contact p:last-of-type {
+    font-size: .9rem;
+}
+
+@media (max-width: 600px) {
+    .legal-document-page {
+        padding: .5rem;
+    }
+
+    .legal-document {
+        padding: 1.15rem;
+        border-radius: 16px;
+    }
+
+    .legal-toc {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    body[data-tema="oscuro"].legal-document-page {
+        background: #17191c;
+        color: #e8edf2;
+    }
+
+    body[data-tema="oscuro"] .legal-document {
+        border-color: #373d44;
+        background: #22262b;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+    }
+
+    body[data-tema="oscuro"] .legal-header h1,
+    body[data-tema="oscuro"] .legal-section h2,
+    body[data-tema="oscuro"] .legal-contact h2 {
+        color: #f2f6fa;
+    }
+
+    body[data-tema="oscuro"] .legal-section p,
+    body[data-tema="oscuro"] .legal-section li,
+    body[data-tema="oscuro"] .legal-contact p,
+    body[data-tema="oscuro"] .legal-header > p:not(.legal-eyebrow, .legal-updated) {
+        color: #d0d8e0;
+    }
+
+    body[data-tema="oscuro"] .legal-notice {
+        border-color: #d59a50;
+        background: #382d20;
+        color: #f8e6cb;
+    }
+
+    body[data-tema="oscuro"] .legal-toc a {
+        border-color: #48515a;
+        background: #2b3036;
+        color: #d6eafa;
+    }
+}
