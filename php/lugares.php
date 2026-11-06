@@ -3,9 +3,22 @@ require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 require_once __DIR__ . '/helpers/imagenes.php';
 require_once __DIR__ . '/helpers/eventos_mapa.php';
+require_once __DIR__ . '/helpers/contenido_publico.php';
+
+sigtur_inicializar_contenido_publico($pdo);
 
 $usuarioActual = sigtur_usuario_actual($pdo);
 $eventosMapa = sigtur_eventos_visibles_en_mapa($pdo);
+$lugaresCatalogoStmt = $pdo->query("SELECT slug, nombre, categoria, direccion, imagen, descripcion
+    FROM lugares
+    WHERE seccion_publica <> 'oculto'
+        AND slug NOT IN ('plaza-treinta-y-tres-orientales', 'plaza-artigas', 'parque-benito-solari', 'plaza-roosvelt', 'costanera-norte', 'muelle-negro')
+    ORDER BY nombre");
+$lugaresCatalogo = $lugaresCatalogoStmt->fetchAll();
+foreach ($lugaresCatalogo as &$lugarCatalogo) {
+    $lugarCatalogo['imagen'] = sigtur_url_imagen_subida((string) $lugarCatalogo['imagen'], 'contenido-publico', '../img/Plaza_artigas.webp');
+}
+unset($lugarCatalogo);
 $puedeAgregarFotosLugares = $usuarioActual && $usuarioActual['rol'] === 'organizador';
 $fotosLugaresStmt = $pdo->prepare("SELECT imagen, titulo FROM galeria_eventos WHERE tipo_evento = 'Lugares' ORDER BY fecha_creacion DESC, id DESC");
 $fotosLugaresStmt->execute();
@@ -24,6 +37,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="../css/lugares.css?v=20261029-interactive-cards-2">
     <link rel="stylesheet" href="../css/galeria-lugares.css">
+    <link rel="stylesheet" href="../css/legal.css">
 </head>
 
 <body>
@@ -38,7 +52,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
             <img src="../img/logoazul.png" class="bottom-nav-icon" alt="Inicio" data-i18n-alt="navHome">
             <span class="bottom-nav-label" data-i18n="navHome">Inicio</span>
         </a>
-        <a href="eventos.php" class="bottom-nav-item active">
+        <a href="eventos.php" class="bottom-nav-item">
             <img src="../img/nav-eventos.png" class="bottom-nav-icon" alt="Eventos" data-i18n-alt="navEvents">
             <span class="bottom-nav-label" data-i18n="navEvents">Eventos</span>
         </a>
@@ -46,7 +60,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
             <img src="../img/turismo.png" class="bottom-nav-icon" alt="Turismo" data-i18n-alt="navTourism">
             <span class="bottom-nav-label" data-i18n="navTourism">Turismo</span>
         </a>
-        <a href="lugares.php" class="bottom-nav-item">
+        <a href="lugares.php" class="bottom-nav-item active" aria-current="page">
             <img src="../img/lugares.png" class="bottom-nav-icon" alt="Lugares" data-i18n-alt="navPlaces">
             <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
         </a>
@@ -62,14 +76,13 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                 <span data-i18n="placesHeroLabel">Lugares históricos</span>
                 <h1 data-i18n="placesHeroTitle">LUGARES</h1>
                 <p data-i18n="placesHeroText">Descubre los lugares más emblemáticos de Salto, llenos de historia y cultura.</p>
-                <a class="hero-gallery-link" href="#galeria-historica" data-i18n="placesGalleryButton">Ver todas las galerías</a>
             </div>
         </section>
 
         <section class="seccion-lugares" id="lugares-emblematicos">
             <h2 data-i18n="placesSectionEmblematicTitle">Lugares emblemáticos</h2>
             <div class="destinos-grid">
-                <article class="tarjeta-lugar">
+                <article class="tarjeta-lugar" id="plaza-treinta-y-tres">
                     <div class="tarjeta-lugar__imagen">
                         <img src="../img/Plaza_33.webp" alt="Costanera Sur" data-i18n-alt="placesEmblematicAlt" data-i18n-index="0">
                         <span class="tarjeta-lugar__indicacion" aria-hidden="true">Tocá para conocer</span>
@@ -79,7 +92,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                         <p data-i18n="placesEmblematicDescriptions" data-i18n-index="0">Paseo tranquilo junto al río con espacios verdes, miradores y zonas para descansar al aire libre.</p>
                     </div>
                 </article>
-                <article class="tarjeta-lugar">
+                <article class="tarjeta-lugar" id="plaza-artigas">
                     <div class="tarjeta-lugar__imagen">
                         <img src="../img/Plaza_artigas.webp" alt="Plaza histórica" data-i18n-alt="placesEmblematicAlt" data-i18n-index="1">
                         <span class="tarjeta-lugar__indicacion" aria-hidden="true">Tocá para conocer</span>
@@ -89,7 +102,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                         <p data-i18n="placesEmblematicDescriptions" data-i18n-index="1">Plaza emblemática del centro con arquitectura tradicional, cafeterías y actividad cultural permanente.</p>
                     </div>
                 </article>
-                <article class="tarjeta-lugar">
+                <article class="tarjeta-lugar" id="parque-benito-solari">
                     <div class="tarjeta-lugar__imagen">
                         <img src="../img/solari.jfif" alt="Parque Benito Solari" data-i18n-alt="placesEmblematicAlt" data-i18n-index="2">
                         <span class="tarjeta-lugar__indicacion" aria-hidden="true">Tocá para conocer</span>
@@ -149,7 +162,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                         <p data-i18n="placesLeisureDescriptions" data-i18n-index="0">Plaza tranquila en la costa para tomar mates con amigos u familiares.</p>
                     </div>
                 </article>
-                <article class="tarjeta-lugar">
+                <article class="tarjeta-lugar" id="costanera-norte">
                     <div class="tarjeta-lugar__imagen">
                         <img src="../img/Costanera_Norte.jpeg" alt="Costanera Norte" data-i18n-alt="placesLeisureAlt" data-i18n-index="1">
                         <span class="tarjeta-lugar__indicacion" aria-hidden="true">Tocá para conocer</span>
@@ -172,6 +185,27 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
             </div>
         </section>
 
+        <?php if ($lugaresCatalogo): ?>
+            <section class="seccion-lugares" id="catalogo-lugares">
+                <h2>Más lugares para descubrir</h2>
+                <div class="destinos-grid">
+                    <?php foreach ($lugaresCatalogo as $lugarCatalogo): ?>
+                        <article class="tarjeta-lugar">
+                            <div class="tarjeta-lugar__imagen">
+                                <img src="<?= htmlspecialchars((string) $lugarCatalogo['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string) $lugarCatalogo['nombre'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
+                            </div>
+                            <div class="tarjeta-contenido">
+                                <p><?= htmlspecialchars((string) $lugarCatalogo['categoria'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <h3><?= htmlspecialchars((string) $lugarCatalogo['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
+                                <p><?= htmlspecialchars((string) $lugarCatalogo['descripcion'], ENT_QUOTES, 'UTF-8') ?></p>
+                                <a class="boton-amarillo" href="lugar.php?slug=<?= rawurlencode((string) $lugarCatalogo['slug']) ?>&amp;origen=lugares">Ver ficha</a>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+                <p>Algunos datos de ubicación se basan en OpenStreetMap. <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Contribuidores de OpenStreetMap</a>.</p>
+            </section>
+        <?php endif; ?>
 
         <section class="seccion-lugares" id="galeria-historica">
             <div class="gallery-section-heading">
@@ -188,7 +222,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                     <?php if (isset($_GET['algunas_fotos_fallaron'])): ?>Algunas fotos no se pudieron subir.<?php endif; ?>
                 </p>
             <?php endif; ?>
-            <div class="galeria-lugares gallery-photo-grid">
+            <div class="galeria-lugares gallery-photo-grid" id="galeria-lugares-grid">
                 <article class="tarjeta-galeria"><img src="../img/Plaza_33.webp" alt="Plaza Treinta y Tres y su entorno histórico" loading="lazy" decoding="async" data-i18n-alt="placesGalleryAlt" data-i18n-index="0"><div class="tarjeta-contenido"><span class="gallery-photo-tag">Patrimonio</span><h3 data-i18n="placesGalleryTitles" data-i18n-index="0">Plaza Treinta y Tres</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/Plaza_artigas.webp" alt="Monumentos de la Plaza Artigas" loading="lazy" decoding="async" data-i18n-alt="placesGalleryAlt" data-i18n-index="1"><div class="tarjeta-contenido"><span class="gallery-photo-tag">Historia</span><h3 data-i18n="placesGalleryTitles" data-i18n-index="1">Plaza Artigas</h3></div></article>
                 <article class="tarjeta-galeria"><img src="../img/Cine_Sarandi.jpg" alt="Calle céntrica junto al Cine Sarandí" loading="lazy" decoding="async" data-i18n-alt="placesGalleryAlt" data-i18n-index="2"><div class="tarjeta-contenido"><span class="gallery-photo-tag">Centro</span><h3 data-i18n="placesGalleryTitles" data-i18n-index="2">Centro histórico</h3></div></article>
@@ -210,6 +244,7 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                     </form>
                 <?php endif; ?>
             </div>
+            <button class="place-gallery-toggle" type="button" data-gallery-toggle aria-expanded="false" aria-controls="galeria-lugares-grid" hidden>Ver más</button>
         </section>
 
 
@@ -247,10 +282,11 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
             </div>
         </section>
     </main>
+    <footer class="legal-page-link"><a href="terminos-privacidad.php" data-i18n="legalPageLink">Términos, privacidad y seguridad</a></footer>
 
     <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
     <script src="../js/lugar-links.js?v=20261028-event-map-1" defer></script>
-    <script src="../js/galeria-lugares.js" defer></script>
+    <script src="../js/galeria-lugares.js?v=20261103-gallery-more-1" defer></script>
     <?php if ($puedeAgregarFotosLugares): ?>
         <script>
             const botonAgregarFotosLugares = document.querySelector('.lugares-galeria-add__button');

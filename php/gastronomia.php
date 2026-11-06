@@ -58,7 +58,7 @@ unset($propuesta);
             <img src="../img/lugares.png" class="bottom-nav-icon" alt="Lugares" data-i18n-alt="navPlaces">
             <span class="bottom-nav-label" data-i18n="navPlaces">Lugares</span>
         </a>
-        <a href="gastronomia.php" class="bottom-nav-item active">
+        <a href="gastronomia.php" class="bottom-nav-item active" aria-current="page">
             <img src="../img/gastronomia.png" class="bottom-nav-icon" alt="Gastronomía">
             <span class="bottom-nav-label">Gastronomía</span>
         </a>

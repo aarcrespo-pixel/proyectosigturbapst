@@ -113,9 +113,17 @@ $headerLinks = [
                 </div>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/perfil.php?id=<?= (int) ($_SESSION['usuario_id'] ?? 0) ?>">Ver mi perfil</a>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/mis-eventos.php">Mis Eventos / Favoritos</a>
+                <a class="perfil-item" href="<?= BASE_URL ?>php/configuracion.php">Configuraciones</a>
+                <?php if ($headerUserRole === 'organizador'): ?>
+                    <a class="perfil-item" href="#manual-organizador" data-open-manual="manual-organizador">Manual de organizador</a>
+                <?php elseif ($headerUserRole === 'administrador'): ?>
+                    <a class="perfil-item" href="#manual-administrador" data-open-manual="manual-administrador">Manual de administrador</a>
+                <?php else: ?>
+                    <a class="perfil-item" href="#manual-usuario" data-open-manual>Manual de usuario</a>
+                <?php endif; ?>
                 <?php if ($headerUserRole === 'turista'): ?><a class="perfil-item" href="<?= BASE_URL ?>php/notificaciones.php">Avisos de administradores</a><?php endif; ?>
                 <?php if (in_array($headerUserRole, ['turista', 'organizador'], true)): ?><a class="perfil-item" href="<?= BASE_URL ?>php/solicitud-rango.php"><?= $headerUserRole === 'organizador' ? 'Solicitud de cambio de rango' : 'Solicitud de rango' ?></a><?php endif; ?>
-                <?php if (($_SESSION['rol'] ?? '') === 'administrador'): ?><a class="perfil-item" href="<?= BASE_URL ?>php/panel-admin.php">Panel de administración</a><?php elseif (($_SESSION['rol'] ?? '') === 'organizador'): ?><a class="perfil-item" href="<?= BASE_URL ?>php/panel-organizador.php">Panel de organizador</a><?php endif; ?>
+                <?php if ($headerUserRole === 'administrador'): ?><a class="perfil-item" href="<?= BASE_URL ?>php/panel-admin.php">Panel de administración</a><?php elseif ($headerUserRole === 'organizador'): ?><a class="perfil-item" href="<?= BASE_URL ?>php/panel-organizador.php">Panel de organizador</a><?php endif; ?>
             <?php else: ?>
                 <div class="perfil-user-header">
                     <img class="perfil-user-avatar" src="<?php echo htmlspecialchars($headerAssetPrefix . 'img/user.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar invitado">
@@ -127,10 +135,18 @@ $headerLinks = [
                 </div>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/login.php" data-i18n="navLogin">Ingresar Usuario</a>
                 <a class="perfil-item" href="<?= BASE_URL ?>php/configuracion.php?navegante=1" data-i18n="navGuestSettings">Configuraciones</a>
+                <a class="perfil-item" href="#manual-usuario" data-open-manual>Manual de usuario</a>
             <?php endif; ?>
         </div>
     </div>
 </header>
+<?php require_once __DIR__ . DIRECTORY_SEPARATOR . 'partials' . DIRECTORY_SEPARATOR . 'manual-usuario.php'; ?>
+<?php if ($headerUserLoggedIn && $headerUserRole === 'organizador'): ?>
+    <?php require_once __DIR__ . DIRECTORY_SEPARATOR . 'partials' . DIRECTORY_SEPARATOR . 'manual-organizador.php'; ?>
+<?php elseif ($headerUserLoggedIn && $headerUserRole === 'administrador'): ?>
+    <?php require_once __DIR__ . DIRECTORY_SEPARATOR . 'partials' . DIRECTORY_SEPARATOR . 'manual-administrador.php'; ?>
+<?php endif; ?>
+<script src="<?= htmlspecialchars(BASE_URL . 'js/manual-usuario.js', ENT_QUOTES, 'UTF-8') ?>" defer></script>
 <button class="nav-reveal-hint" type="button" aria-controls="menu-principal" aria-expanded="true" aria-label="Mostrar secciones, clima y buscador" data-i18n-aria-label="navRevealHintLabel" hidden>
     <span class="nav-reveal-hint__arrow" aria-hidden="true">↑</span>
 </button>

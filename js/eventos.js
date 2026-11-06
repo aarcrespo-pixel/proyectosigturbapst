@@ -4,16 +4,11 @@
   coincide con un bloque HTML que tiene un contenedor llamado
   `${nombre}-contenedor` y un indicador `${nombre}-indicadores`.
 */
-const eventosDestacadosBase = [
-    { nombre: "Carrera de Bicicleta", categoria: "Carreras", lugar: "Costanera Norte", imagen: "../img/moto_cross.jpg" },
-    { nombre: "La Ferne", categoria: "Discoteca", lugar: "Costanera Norte", imagen: "../img/porco.avif" },
-    { nombre: "Porco Negro", categoria: "Discoteca", lugar: "Av. Apolón de Mirbek esquina Av. José Enrique Rodó.", imagen: "../img/porco.avif" },
-    { nombre: "ExpoSalto", categoria: "Feria", lugar: "Hipódromo de Salto", imagen: "../img/exposalto.jpeg" },
-    { nombre: "LaFosa Bike", categoria: "Deportivo", lugar: "La Fosa", imagen: "../img/fosa.webp" }
-];
-
-const eventosDestacados = Array.isArray(window.eventosDestacadosDesdeBd)
-    ? window.eventosDestacadosDesdeBd.map((evento) => ({
+const eventosDestacadosFuente = Array.isArray(window.eventosDestacadosDesdeBd) && window.eventosDestacadosDesdeBd.length
+    ? window.eventosDestacadosDesdeBd
+    : window.eventosDesdeBd;
+const eventosDestacados = Array.isArray(eventosDestacadosFuente)
+    ? eventosDestacadosFuente.map((evento) => ({
         id: Number(evento.id),
         nombre: evento.titulo,
         slug: evento.slug,
@@ -21,33 +16,13 @@ const eventosDestacados = Array.isArray(window.eventosDestacadosDesdeBd)
         lugar: evento.ubicacion,
         imagen: evento.imagen_portada || '../img/porco.avif'
     }))
-    : eventosDestacadosBase;
+    : [];
 
 const listadoEventos = {
-    deportivos: [
-        { nombre: "Surf y Kayak", categoria: "Aventura", lugar: "Playa Salto", imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg" },
-        { nombre: "Torneo de Beach Volley", categoria: "Competencia", lugar: "Playa Salto", imagen: "../img/TER%202.jpg" },
-        { nombre: "Circuito en Bicicleta", categoria: "Deportivo", lugar: "Calle Artigas", imagen: "../img/evento2.jpg" },
-        { nombre: "Rally", categoria: "Carrera", lugar: "Av. Horacio Quiroga 9382", imagen: "../img/moto_cross.jpg" },
-        { nombre: "Futbol X5", categoria: "Deportivo", lugar: "Plaza de Deportes Salto", imagen: "../img/lsf.jpg" }
-    ],
-    discotecas: [
-        { nombre: "Halloween en Polo", categoria: "Disfraces", lugar: "Polo Club", imagen: "../img/porco.avif" },
-        { nombre: "La Bambola", categoria: "Discoteca", lugar: "Costanera Sur 1535", imagen: "../img/bambi.jpg" },
-    ],
-    competencias: [
-        { nombre: "Streetball Salto", categoria: "Deportivo", lugar: "Polideportivo Círculo SP", imagen: "../img/lsb.jpg" },
-        { nombre: "Campeonato de Pesca", categoria: "Naturaleza", lugar: "Costanera Sur", imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg" },
-        { nombre: "Torneo de Ajedrez", categoria: "Mental", lugar: "Plaza de Deportes", imagen: "https://www.clarin.com/2024/10/10/IUl8ywHqRO_2000x1500__1.jpg" },
-        { nombre: "Copa de Natación", categoria: "Acuatico", lugar: "Playa Salto", imagen: "../img/TER%202.jpg" }
-    ],
-    anteriores: [
-        { nombre: "Festival de la Naranja", categoria: "Cultura", lugar: "Plaza Artigas", imagen: "../img/festival_naranja.jpg" },
-        { nombre: "Carrera Nocturna", categoria: "Deportivo", lugar: "Costanera Norte", imagen: "../img/carrera_noche.webp" },
-        { nombre: "Muestra de Danza", categoria: "Cultura", lugar: "Centro Cultural", imagen: "../img/danza.jpg" },
-        { nombre: "Feria de Emprendedores", categoria: "Local", lugar: "Mercado Central", imagen: "../img/feria_emprendedores.jpg" },
-        { nombre: "La Fosa Bike", categoria: "Deportivo", lugar: "La Fosa", imagen: "../img/fosa.webp" }
-    ]
+    deportivos: [],
+    discotecas: [],
+    competencias: [],
+    anteriores: []
 };
 
 const datos = {
@@ -117,65 +92,18 @@ function escaparHTML(valor) {
     })[caracter]);
 }
 
-// Construir lista principal con slugs únicos para cada evento
+// Construimos la lista principal únicamente con eventos registrados en SIGTUR.
 let eventosPrincipales = (() => {
-    /* Unimos filas persistidas y catálogo legacy, eliminando duplicados por
-       slug para que el listado no repita un evento ya migrado a MySQL. */
-    const eventosEstaticos = [
-    ...eventosDestacadosBase,
-    ...datos.deportivos,
-    ...datos.discotecas,
-    ...datos.competencias
-    ];
-    const slugsPersistidos = new Set([...eventosPersistidos, ...eventosAnterioresPersistidos].map((evento) => evento.slug));
-    const list = [...eventosPersistidos, ...eventosEstaticos.filter((evento) => !slugsPersistidos.has(slugify(evento.nombre)))];
-  const slugCounts = {};
-  const fechasProtagonistas = [
-    { mes: 'ENE', dia: '05' },
-    { mes: 'FEB', dia: '14' },
-    { mes: 'MAR', dia: '21' },
-    { mes: 'ABR', dia: '03' },
-    { mes: 'MAY', dia: '09' },
-    { mes: 'JUN', dia: '18' },
-    { mes: 'JUL', dia: '27' },
-    { mes: 'AGO', dia: '11' },
-    { mes: 'SEP', dia: '04' },
-    { mes: 'OCT', dia: '16' },
-    { mes: 'NOV', dia: '22' },
-    { mes: 'DIC', dia: '30' },
-    { mes: 'ENE', dia: '12' },
-    { mes: 'FEB', dia: '28' },
-    { mes: 'MAR', dia: '08' },
-    { mes: 'ABR', dia: '25' }
-  ];
-  const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
-  return list.map((e, index) => {
-    const base = (e.nombre || '')
-      .toString()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-    let slug = base || 'evento';
-    if (slugCounts[slug]) {
-      slugCounts[slug] += 1;
-      slug = `${slug}-${slugCounts[slug]}`;
-    } else {
-      slugCounts[slug] = 1;
-    }
-    const coincidenciaFecha = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(e.fecha || ''));
-    const mesNumero = coincidenciaFecha ? Number(coincidenciaFecha[2]) : 0;
-    const diaNumero = coincidenciaFecha ? Number(coincidenciaFecha[3]) : 0;
-    const fechaValida = mesNumero >= 1
-      && mesNumero <= 12
-      && diaNumero >= 1
-      && diaNumero <= new Date(Date.UTC(Number(coincidenciaFecha[1]), mesNumero, 0)).getUTCDate();
-    const fecha = fechaValida
-      ? { mes: meses[mesNumero - 1], dia: String(diaNumero).padStart(2, '0') }
-      : (fechasProtagonistas[index % fechasProtagonistas.length] || { mes: 'AGO', dia: '07' });
-    return Object.assign({}, e, { slug, fechaMes: fecha.mes, fechaDia: fecha.dia });
-  });
+    const eventos = eventosPersistidos;
+    return eventos.map((evento) => {
+        const fecha = new Date(`${evento.fecha}T00:00:00`);
+        return {
+            ...evento,
+            slug: evento.slug || slugify(evento.nombre),
+            fechaMes: Number.isNaN(fecha.getTime()) ? '' : fecha.toLocaleDateString('es-UY', { month: 'short' }).replace('.', '').toUpperCase(),
+            fechaDia: Number.isNaN(fecha.getTime()) ? '' : String(fecha.getDate()).padStart(2, '0')
+        };
+    });
 })();
 
 let eventoFiltro = 'todos';
@@ -494,7 +422,7 @@ function tarjetaPrincipal(evento) {
     const idCatalogado = evento.id || window.sigturEventoIds?.[slug];
     const itemKey = `evento-${idCatalogado || slug}`;
     return `
-    <article class="evento-card" data-item-key="${itemKey}" data-engagement="like-only">
+    <article class="evento-card" data-item-key="${itemKey}" data-engagement="like-only" tabindex="0" role="link">
       <div class="evento-card-media">
         <img src="${evento.imagen}" alt="${evento.nombre}" loading="lazy" onerror="this.onerror=null;this.src='../img/porco.avif';">
       </div>
@@ -902,7 +830,8 @@ function renderEventosPrincipales() {
 
     const eventos = ordenarEventosPorLikes(filtrarEventosPrincipales());
     if (!eventos.length) {
-        contenedor.innerHTML = '<p class="sin-resultados">No se encontraron eventos con esa búsqueda.</p>';
+        const hayEventosRegistrados = eventosPersistidos.length > 0;
+        contenedor.innerHTML = `<p class="sin-resultados">${hayEventosRegistrados ? 'No se encontraron eventos con esa búsqueda.' : 'No hay eventos registrados para los próximos seis meses.'}</p>`;
         actualizarVisibilidadListaEventos(contenedor, document.getElementById('eventos-principales-toggle'), false);
         return;
     }
@@ -917,6 +846,31 @@ function renderEventosPrincipales() {
     if (typeof window.initInteractiveCards === 'function') {
         window.initInteractiveCards(contenedor);
     }
+}
+
+function configurarNavegacionTarjetasEventos() {
+    const contenedor = document.getElementById('eventos-principales-contenedor');
+    if (!contenedor || contenedor.dataset.cardNavigationReady === 'true') return;
+
+    contenedor.dataset.cardNavigationReady = 'true';
+    contenedor.addEventListener('click', (event) => {
+        if (!(event.target instanceof Element)) return;
+        if (event.target.closest('a, button, input, select, textarea, [contenteditable="true"]')) return;
+
+        const tarjeta = event.target.closest('.evento-card');
+        const enlace = tarjeta?.querySelector('.evento-card-action a[href]');
+        if (enlace instanceof HTMLAnchorElement) window.location.href = enlace.href;
+    });
+    contenedor.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' || !(event.target instanceof Element)) return;
+        if (event.target.closest('a, button, input, select, textarea, [contenteditable="true"]')) return;
+
+        const tarjeta = event.target.closest('.evento-card');
+        const enlace = tarjeta?.querySelector('.evento-card-action a[href]');
+        if (tarjeta === event.target && enlace instanceof HTMLAnchorElement) {
+            window.location.href = enlace.href;
+        }
+    });
 }
 
 function actualizarVisibilidadListaEventos(contenedor, boton, expandida, lista = null) {
@@ -1092,34 +1046,12 @@ let lightboxIndex = 0;
 function actualizarLightbox() {
     const item = galeria[lightboxIndex];
     const imagen = document.getElementById("lightbox-image");
-    const caption = document.getElementById("lightbox-caption");
-    const title = document.getElementById('lightbox-title');
-    const description = document.getElementById('lightbox-description');
-    const date = document.getElementById('lightbox-date');
-    if (!item || !imagen || !caption) return;
+    if (!item || !imagen) return;
     imagen.src = item.imagen;
-    // Los datos viajan desde el objeto de galería hasta los nodos visibles del
-    // modal en cada cambio de foto, evitando títulos y descripciones obsoletos.
     imagen.alt = item.titulo || `Imagen de galería ${lightboxIndex + 1}`;
-    caption.textContent = `Imagen ${lightboxIndex + 1} de ${galeria.length}`;
-    if (title) title.textContent = item.titulo || 'Cobertura de Salto';
-    if (description) description.textContent = item.descripcion || 'Imágenes de lugares y actividades de la ciudad.';
-    if (date) date.textContent = item.fecha || 'Publicado recientemente';
-
-    const engagementCard = document.getElementById('lightbox-engagement-card');
-    if (engagementCard) {
-        engagementCard.dataset.engagement = 'like-only';
-        engagementCard.dataset.itemKey = `galeria-${item.imagen}`;
-        engagementCard.querySelector('.card-engagement')?.remove();
-        window.initInteractiveCards?.(engagementCard);
-    }
 }
 
-/*
-  El lightbox abre la imagen seleccionada en un overlay oscuro.
-  El CSS controla la altura máxima de la imagen, dejando espacio
-  vertical arriba y abajo para que no ocupe todo el alto de la pantalla.
-*/
+/* El lightbox muestra la foto seleccionada en una superposición oscura. */
 function abrirLightbox(indice) {
     lightboxIndex = indice;
     actualizarLightbox();
@@ -1189,6 +1121,7 @@ function configurarMapaEventos() {
 }
 
 function init() {
+    configurarNavegacionTarjetasEventos();
     for (const nombre in datos) renderSeccion(nombre);
 
     configurarMapaEventos();

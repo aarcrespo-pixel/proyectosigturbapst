@@ -96,7 +96,9 @@ unset($propuestaGastronomica);
     </nav>
 
     <section class="pantalla-inicio">
-        <img class="imagen-inicio" src="https://www.gomezplatero.com/uploads/gallery/202405/20240522160708_1067064313.jpg" alt="Salto">
+        <video class="imagen-inicio" autoplay muted loop playsinline>
+            <source src="img/salto.mp4" type="video/mp4">
+        </video>
         <div class="degradado-inferior"></div> <!-- Degradado oscuro inferior -->
         <div class="texto-inicio">
 
@@ -270,11 +272,11 @@ unset($propuestaGastronomica);
                     <span class="footer-toggle-icon">▾</span>
                 </button>
                 <div class="footer-links">
-                    <a href="php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="0">Plaza Artigas</a>
-                    <a href="php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="1">Plaza Treinta y Tres Orientales</a>
-                    <a href="php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="2">Costanera Norte</a>
-                    <a href="php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="3">Costanera Sur</a>
-                    <a href="php/lugares.php" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="4">Parque Benito Solari</a>
+                    <a href="php/lugares.php#plaza-artigas" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="0">Plaza Artigas</a>
+                    <a href="php/lugares.php#plaza-treinta-y-tres" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="1">Plaza Treinta y Tres Orientales</a>
+                    <a href="php/lugares.php#costanera-norte" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="2">Costanera Norte</a>
+                    <a href="php/lugares.php#lugares-distraccion" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="3">Costanera Sur</a>
+                    <a href="php/lugares.php#parque-benito-solari" class="footer-link" data-i18n="footerPlaceLinks" data-i18n-index="4">Parque Benito Solari</a>
                 </div>
             </div>
 
@@ -297,9 +299,6 @@ unset($propuestaGastronomica);
                 </button>
                 <a href="https://instagram.com/bapstuy" target="_blank" rel="noopener noreferrer" class="footer-link footer-link--icon">
                     <span class="social-icon">IG</span>Instagram
-                </a>
-                <a href="https://facebook.com/sigtur" target="_blank" rel="noopener noreferrer" class="footer-link footer-link--icon">
-                    <span class="social-icon">FB</span>Facebook
                 </a>
                 <div class="footer-info-actions">
                     <button class="footer-info-button" type="button">Información</button>

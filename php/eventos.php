@@ -2,6 +2,10 @@
 require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/helpers/autorizacion.php';
 require_once __DIR__ . '/helpers/imagenes.php';
+require_once __DIR__ . '/helpers/contenido_publico.php';
+
+sigtur_inicializar_contenido_publico($pdo);
+
 $usuarioActual = sigtur_usuario_actual($pdo);
 $puedeGestionarEventos = $usuarioActual && in_array($usuarioActual['rol'], ['organizador', 'administrador'], true);
 $puedeCrearEvento = $usuarioActual && $usuarioActual['rol'] === 'organizador';
@@ -22,17 +26,16 @@ unset($fotoGaleriaEvento);
 
 /* Esta página tiene dos salidas: HTML para la vista normal y JSON cuando
     ajax=1. Mantener ambas en el mismo controlador evita duplicar filtros. */
-/* La consulta base excluye eventos finalizados y ordena por fecha para que el
-   listado principal sea una agenda real, no una copia del catálogo JS. */
-$eventosDesdeBd = $pdo->query('SELECT * FROM eventos WHERE es_pasado = 0 AND fecha >= CURDATE() ORDER BY fecha ASC, id DESC')->fetchAll();
+/* La agenda muestra el semestre próximo; el historial conserva seis meses. */
+$eventosDesdeBd = $pdo->query('SELECT * FROM eventos WHERE es_pasado = 0 AND fecha >= CURDATE() AND fecha <= DATE_ADD(CURDATE(), INTERVAL 6 MONTH) ORDER BY fecha ASC, id DESC')->fetchAll();
 $eventosDestacadosDesdeBd = $pdo->query('SELECT e.id, e.titulo, e.slug, e.categoria, e.ubicacion, e.imagen_portada
     FROM eventos_destacados d
     INNER JOIN eventos e ON e.id = d.evento_id
-    WHERE e.es_pasado = 0 AND e.fecha >= CURDATE()
+    WHERE e.es_pasado = 0 AND e.fecha >= CURDATE() AND e.fecha <= DATE_ADD(CURDATE(), INTERVAL 6 MONTH)
     ORDER BY d.orden ASC, d.fecha_destacado ASC, e.id DESC')->fetchAll();
 $eventosAnterioresDesdeBd = $pdo->query('SELECT * FROM eventos
     WHERE fecha < CURDATE()
-        AND fecha >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+        AND fecha >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
     ORDER BY fecha DESC, id DESC')->fetchAll();
 foreach ($eventosDesdeBd as &$evento) {
     $evento['imagen_portada'] = sigtur_url_imagen_evento((string) $evento['slug'], (string) ($evento['imagen_portada'] ?? ''));
@@ -75,7 +78,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
 
     /* Cada filtro se agrega con parámetros nombrados para mantener la consulta
        segura y permitir que el drawer reutilice este mismo controlador. */
-    $condiciones = ['es_pasado = 0', 'fecha >= CURDATE()'];
+    $condiciones = ['es_pasado = 0', 'fecha >= CURDATE()', 'fecha <= DATE_ADD(CURDATE(), INTERVAL 6 MONTH)'];
     $parametros = [];
      /* Cada condición es opcional: el array solo recibe filtros que el usuario
          completó, y luego se unen con AND para obtener el resultado final. */
@@ -112,7 +115,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Estilos CSS -->
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>"> <!-- Estilos generales -->
-    <link rel="stylesheet" href="../css/eventos.css?v=20261102-event-list-cleanup-1"> <!-- Estilos específicos de eventos -->
+    <link rel="stylesheet" href="../css/eventos.css?v=20261103-gallery-lightbox-size-1"> <!-- Estilos específicos de eventos -->
     <link rel="stylesheet" href="../css/enlaces-texto.css?v=20261102-event-links-1">
 </head>
 
@@ -192,12 +195,15 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         <!-- El grid recibe un render PHP inicial y luego puede ser actualizado por JS. -->
         <section class="seccion eventos-principales">
             <div class="titulo-seccion eventos-header">
-                <h2>Listado de Eventos</h2>
+                <div class="eventos-header-copy">
+                    <h2>Listado de Eventos</h2>
+                    <p class="eventos-header-description">Eventos próximos registrados en SIGTUR, hasta los siguientes seis meses.</p>
+                </div>
                 <div class="eventos-header-actions"><button type="button" class="btn-filtros" id="btn-filtros" aria-expanded="false">Filtros ⚙️</button><?php if ($puedeCrearEvento): ?><button type="button" class="btn-crear-evento" id="btn-crear-evento">Crear Evento +</button><?php endif; ?></div>
             </div>
             <div class="eventos-lista" id="eventos-principales-contenedor">
                 <?php foreach ($eventosDesdeBd as $evento): ?>
-                    <article class="evento-card" data-item-key="evento-<?= (int) $evento['id'] ?>" data-engagement="like-only">
+                    <article class="evento-card" data-item-key="evento-<?= (int) $evento['id'] ?>" data-engagement="like-only" tabindex="0" role="link">
                         <div class="evento-card-media"><img src="<?= htmlspecialchars($evento['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy"></div>
                         <div class="evento-card-body"><span class="categoria"><?= htmlspecialchars($evento['categoria'] . ' · ' . ($evento['tipo_entrada'] ?? 'Gratuito'), ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><p class="lugar"><?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></p><?php $valorEntrada = trim((string) ($evento['precio_texto'] ?? $evento['precio'] ?? '')); ?><?php if (($evento['tipo_entrada'] ?? '') === 'De Pago'): ?><p class="precio-evento"><?= htmlspecialchars($valorEntrada !== '' ? $valorEntrada : 'Consultar con la organización', ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?></div>
                         <div class="evento-card-action"><div class="fecha-protagonista"><span class="fecha-mes"><?= htmlspecialchars(strtoupper(date('M', strtotime($evento['fecha']))), ENT_QUOTES, 'UTF-8') ?></span><span class="fecha-dia"><?= htmlspecialchars(date('d', strtotime($evento['fecha'])), ENT_QUOTES, 'UTF-8') ?></span></div><a href="evento.php?id=<?= (int) $evento['id'] ?>" class="boton-amarillo">Ver más</a></div>
@@ -414,6 +420,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         <section class="seccion anteriores-eventos">
             <div class="titulo-seccion">
                 <h2>Eventos Anteriores</h2>
+                <p>Eventos registrados en SIGTUR durante los últimos seis meses.</p>
             </div>
             <div class="eventos-anteriores-grid" id="anteriores-contenedor"></div>
             <button class="eventos-list-toggle" id="eventos-anteriores-toggle" type="button" data-event-list="anteriores" aria-expanded="false" aria-controls="anteriores-contenedor" hidden>Ver más</button>
@@ -464,26 +471,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         <div class="lightbox-content">
             <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar imagen">×</button>
             <div class="lightbox-media">
-                <!-- CAMBIO APLICADO: las flechas viven dentro del área visual de
-                     la foto para que nunca puedan invadir el panel de comentarios. -->
                 <button class="lightbox-arrow left" id="lightbox-prev" aria-label="Imagen anterior">❮</button>
                 <img id="lightbox-image" src="" alt="Vista ampliada de galería">
                 <button class="lightbox-arrow right" id="lightbox-next" aria-label="Siguiente imagen">❯</button>
             </div>
-            <aside class="lightbox-comments" aria-label="Información de la imagen">
-                <!-- Estos nodos reciben item.titulo e item.descripcion desde
-                     eventos.js cada vez que cambia la foto del lightbox. -->
-                <div class="lightbox-info">
-                    <span class="lightbox-kicker">Galería de Salto</span>
-                    <h2 id="lightbox-title">Imagen de galería</h2>
-                    <p id="lightbox-description">Imágenes de lugares y actividades de la ciudad.</p>
-                    <div class="lightbox-meta">
-                        <span id="lightbox-date">Publicado recientemente</span>
-                        <span class="lightbox-caption" id="lightbox-caption"></span>
-                    </div>
-                </div>
-                <article class="gallery-engagement-card" id="lightbox-engagement-card" data-engagement="like-only"></article>
-            </aside>
         </div>
     </div>
 
@@ -501,7 +492,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         'rol' => (string) ($usuarioActual['rol'] ?? ''),
         'csrfToken' => $csrfToken,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script src="../js/eventos.js?v=20261102-event-list-cleanup-1" defer></script>
+    <script src="../js/eventos.js?v=20261103-gallery-photo-only-1" defer></script>
 </body>
 
 </html>
