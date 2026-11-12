@@ -43,6 +43,34 @@ function sigtur_inicializar_contenido_publico(PDO $pdo): void
     $pdo->exec("UPDATE `lugares` SET `seccion_publica` = 'complementario' WHERE `seccion_publica` = 'oculto' AND `slug` IN ('basalto', 'costanera-sur', 'la-fosa', 'cine-sarandi', 'salto-shopping', 'la-trouville', 'plaza-general-flores', 'plaza-de-deportes-salto', 'museo-del-hombre-y-la-tecnologia', 'museo-horacio-quiroga', 'usina-cultural-salto', 'biblioteca-municipal-salto', 'termas-del-dayman', 'acuamania', 'termas-de-la-arapey', 'agua-clara')");
     $pdo->exec("UPDATE `lugares` SET `nombre` = 'Termas Agua Clara', `direccion` = 'Termas Agua Clara, Salto, Uruguay' WHERE `slug` = 'agua-clara' AND `nombre` = 'Agua Clara'");
 
+    $marcadorLugaresOsm = $pdo->prepare('SELECT 1 FROM contenido_catalogo_meta WHERE clave = ?');
+    $marcadorLugaresOsm->execute(['lugares_openstreetmap_referencias_v1']);
+    if (!$marcadorLugaresOsm->fetchColumn()) {
+        $lugaresOpenStreetMap = [
+            ['acuamania', 'way', '180603817', -31.4565808, -57.9112481],
+            ['costanera-norte', 'way', '836228745', -31.3563630, -57.9759917],
+            ['costanera-sur', 'way', '177870127', -31.4103858, -57.9995006],
+            ['la-fosa', 'way', '428549866', -31.3845820, -57.9737650],
+            ['muelle-negro', 'node', '4531926891', -31.3841657, -57.9744017],
+            ['parque-benito-solari', 'way', '206468371', -31.3792326, -57.9488497],
+            ['plaza-treinta-y-tres-orientales', 'way', '546444654', -31.3876512, -57.9702276],
+            ['salto-shopping', 'node', '1910509259', -31.3843784, -57.9442561],
+            ['termas-de-la-arapey', 'relation', '3414623', -30.9474241, -57.5232084],
+            ['termas-del-dayman', 'relation', '3423903', -31.4525017, -57.9083609],
+        ];
+        $guardarReferenciaOsm = $pdo->prepare('UPDATE lugares SET latitud = :latitud, longitud = :longitud, osm_type = :osm_type, osm_id = :osm_id WHERE slug = :slug AND osm_type IS NULL AND osm_id IS NULL');
+        foreach ($lugaresOpenStreetMap as [$slugOsm, $tipoOsm, $idOsm, $latitudOsm, $longitudOsm]) {
+            $guardarReferenciaOsm->execute([
+                ':slug' => $slugOsm,
+                ':osm_type' => $tipoOsm,
+                ':osm_id' => $idOsm,
+                ':latitud' => $latitudOsm,
+                ':longitud' => $longitudOsm,
+            ]);
+        }
+        $pdo->prepare('INSERT IGNORE INTO contenido_catalogo_meta (clave) VALUES (?)')->execute(['lugares_openstreetmap_referencias_v1']);
+    }
+
     $marcadorCatalogoSalto = $pdo->prepare('SELECT 1 FROM contenido_catalogo_meta WHERE clave = ?');
     $marcadorCatalogoSalto->execute(['turismo_salto_ampliado_v1']);
     if (!$marcadorCatalogoSalto->fetchColumn()) {

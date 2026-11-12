@@ -22,7 +22,7 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS `sigtur_schema_version` (
         `version` VARCHAR(40) NOT NULL PRIMARY KEY
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-    $versionEsperada = '2026-10-28-event-price-text-1';
+    $versionEsperada = '2026-11-12-lugares-openstreetmap-1';
     $versionEsquema = $pdo->query("SELECT `version` FROM `sigtur_schema_version` LIMIT 1")->fetchColumn();
     $bloqueoEsquema = false;
     if ($versionEsquema !== $versionEsperada) {
@@ -475,8 +475,17 @@ try {
         `recomendaciones` TEXT NOT NULL,
         `latitud` DECIMAL(10,7) DEFAULT NULL,
         `longitud` DECIMAL(10,7) DEFAULT NULL,
+        `osm_type` VARCHAR(8) DEFAULT NULL,
+        `osm_id` VARCHAR(32) DEFAULT NULL,
         `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $columnasLugares = $pdo->query("SHOW COLUMNS FROM `lugares`")->fetchAll(PDO::FETCH_COLUMN, 0);
+    if (!in_array('osm_type', $columnasLugares, true)) {
+        $pdo->exec("ALTER TABLE `lugares` ADD COLUMN `osm_type` VARCHAR(8) DEFAULT NULL AFTER `longitud`");
+    }
+    if (!in_array('osm_id', $columnasLugares, true)) {
+        $pdo->exec("ALTER TABLE `lugares` ADD COLUMN `osm_id` VARCHAR(32) DEFAULT NULL AFTER `osm_type`");
+    }
 
     $columnasEventosActualizadas = $pdo->query("SHOW COLUMNS FROM `eventos`")->fetchAll(PDO::FETCH_COLUMN, 0);
     if (!in_array('lugar_id', $columnasEventosActualizadas, true)) {

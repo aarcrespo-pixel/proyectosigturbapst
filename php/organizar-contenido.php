@@ -128,6 +128,29 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             $eliminar->execute([':id' => $id]);
             $pdo->commit();
         } elseif (in_array($accion, ['crear', 'editar'], true)) {
+            $latitudInput = trim((string) ($_POST['latitud'] ?? ''));
+            $longitudInput = trim((string) ($_POST['longitud'] ?? ''));
+            $tipoOsmInput = trim((string) ($_POST['osm_type'] ?? ''));
+            $idOsmInput = trim((string) ($_POST['osm_id'] ?? ''));
+            $latitudValida = $latitudInput === '' || is_numeric($latitudInput);
+            $longitudValida = $longitudInput === '' || is_numeric($longitudInput);
+            $latitud = $latitudInput !== '' && $latitudValida ? (float) $latitudInput : null;
+            $longitud = $longitudInput !== '' && $longitudValida ? (float) $longitudInput : null;
+            $tieneCoordenadas = $latitudInput !== '' || $longitudInput !== '';
+            $tieneReferenciaOsm = $tipoOsmInput !== '' || $idOsmInput !== '';
+            if (!$latitudValida || !$longitudValida
+                || (($latitudInput === '') !== ($longitudInput === ''))
+                || ($latitud !== null && ($latitud < -90 || $latitud > 90))
+                || ($longitud !== null && ($longitud < -180 || $longitud > 180))) {
+                sigtur_contenido_error('Ingresá una latitud y una longitud numéricas y válidas, o dejá ambos campos vacíos.');
+            }
+            if ($tieneReferenciaOsm && (
+                !in_array($tipoOsmInput, ['node', 'way', 'relation'], true)
+                || !preg_match('/^[0-9]{1,32}$/', $idOsmInput)
+                || !$tieneCoordenadas
+            )) {
+                sigtur_contenido_error('Para usar una referencia OSM, ingresá el tipo, el ID y ambas coordenadas del objeto.');
+            }
             $datos = [
                 ':slug' => strtolower(trim((string) ($_POST['slug'] ?? ''))),
                 ':nombre' => trim((string) ($_POST['nombre'] ?? '')),
@@ -140,8 +163,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 ':atractivos' => trim((string) ($_POST['atractivos'] ?? '')),
                 ':horarios' => trim((string) ($_POST['horarios'] ?? '')),
                 ':recomendaciones' => trim((string) ($_POST['recomendaciones'] ?? '')),
-                ':latitud' => is_numeric($_POST['latitud'] ?? null) ? (float) $_POST['latitud'] : null,
-                ':longitud' => is_numeric($_POST['longitud'] ?? null) ? (float) $_POST['longitud'] : null,
+                ':latitud' => $latitud,
+                ':longitud' => $longitud,
+                ':osm_type' => $tipoOsmInput !== '' ? $tipoOsmInput : null,
+                ':osm_id' => $idOsmInput !== '' ? $idOsmInput : null,
             ];
             if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $datos[':slug'])
                 || !in_array($datos[':seccion_publica'], ['emblematico', 'recreacion', 'oculto'], true)
@@ -156,9 +181,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             }
             [$datos[':imagen'], $rutaImagenNueva] = sigtur_contenido_resolver_imagen($datos[':imagen']);
             if ($accion === 'crear') {
-                $guardar = $pdo->prepare('INSERT INTO lugares (slug, nombre, categoria, seccion_publica, direccion, imagen, descripcion, historia, atractivos, horarios, recomendaciones, latitud, longitud) VALUES (:slug, :nombre, :categoria, :seccion_publica, :direccion, :imagen, :descripcion, :historia, :atractivos, :horarios, :recomendaciones, :latitud, :longitud)');
+                $guardar = $pdo->prepare('INSERT INTO lugares (slug, nombre, categoria, seccion_publica, direccion, imagen, descripcion, historia, atractivos, horarios, recomendaciones, latitud, longitud, osm_type, osm_id) VALUES (:slug, :nombre, :categoria, :seccion_publica, :direccion, :imagen, :descripcion, :historia, :atractivos, :horarios, :recomendaciones, :latitud, :longitud, :osm_type, :osm_id)');
             } else {
-                $guardar = $pdo->prepare('UPDATE lugares SET slug = :slug, nombre = :nombre, categoria = :categoria, seccion_publica = :seccion_publica, direccion = :direccion, imagen = :imagen, descripcion = :descripcion, historia = :historia, atractivos = :atractivos, horarios = :horarios, recomendaciones = :recomendaciones, latitud = :latitud, longitud = :longitud WHERE id = :id');
+                $guardar = $pdo->prepare('UPDATE lugares SET slug = :slug, nombre = :nombre, categoria = :categoria, seccion_publica = :seccion_publica, direccion = :direccion, imagen = :imagen, descripcion = :descripcion, historia = :historia, atractivos = :atractivos, horarios = :horarios, recomendaciones = :recomendaciones, latitud = :latitud, longitud = :longitud, osm_type = :osm_type, osm_id = :osm_id WHERE id = :id');
                 $datos[':id'] = $id;
             }
             sigtur_contenido_ejecutar_guardado($guardar, $datos, $rutaImagenNueva);

@@ -1,0 +1,259 @@
+.distancias-lugares {
+    position: relative;
+    margin: 4rem 0 1rem;
+    padding-top: 3rem;
+    border-top: 1px solid rgba(146, 77, 54, .2);
+}
+
+.distancias-lugares__encabezado {
+    max-width: 760px;
+    margin: 0 auto 2rem;
+    text-align: center;
+}
+
+.distancias-lugares__eyebrow {
+    display: inline-block;
+    margin-bottom: .65rem;
+    color: #a7513f;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+}
+
+.distancias-lugares__encabezado h2 {
+    margin: 0 0 .75rem;
+    color: #2b2624;
+    font-size: clamp(1.7rem, 3.5vw, 2.5rem);
+    line-height: 1.15;
+}
+
+.distancias-lugares__encabezado p {
+    margin: 0;
+    color: #625954;
+    line-height: 1.7;
+}
+
+.distancias-lugares__panel {
+    padding: clamp(1rem, 3vw, 2rem);
+    border: 1px solid rgba(195, 106, 80, .2);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, .9);
+    box-shadow: 0 20px 55px rgba(75, 46, 35, .1);
+}
+
+.distancias-lugares__controles {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 1rem;
+}
+
+.distancias-lugares__controles label {
+    display: grid;
+    gap: .55rem;
+    color: #4a332a;
+    font-weight: 700;
+}
+
+.distancias-lugares__controles select {
+    width: 100%;
+    min-height: 3.25rem;
+    padding: .75rem 2.5rem .75rem .9rem;
+    border: 1px solid rgba(146, 77, 54, .28);
+    border-radius: 13px;
+    background: #fffaf6;
+    color: #302722;
+    font: inherit;
+}
+
+.distancias-lugares__controles select:focus-visible,
+.distancias-lugares__boton:focus-visible {
+    outline: 3px solid rgba(211, 98, 72, .35);
+    outline-offset: 3px;
+}
+
+.distancias-lugares__intercambio {
+    padding-bottom: .8rem;
+    color: #a7513f;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.distancias-lugares__boton {
+    min-height: 3.25rem;
+    padding: .8rem 1.2rem;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #d36248, #ff8e6d);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    box-shadow: 0 12px 28px rgba(211, 98, 72, .2);
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.distancias-lugares__boton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(211, 98, 72, .28);
+}
+
+.distancias-lugares__aviso,
+.distancias-lugares__pie p {
+    color: #625954;
+    font-size: .9rem;
+    line-height: 1.6;
+}
+
+.distancias-lugares__aviso {
+    margin: 1rem 0 1.25rem;
+}
+
+.distancias-lugares__resultados {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.distancias-lugares__resultado {
+    display: grid;
+    gap: .3rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid rgba(195, 106, 80, .16);
+    border-radius: 16px;
+    background: #fff6ef;
+}
+
+.distancias-lugares__resultado > span {
+    color: #704b3c;
+    font-size: .9rem;
+    font-weight: 700;
+}
+
+.distancias-lugares__resultado strong {
+    color: #9c4937;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    line-height: 1.2;
+}
+
+.distancias-lugares__resultado small {
+    color: #625954;
+    line-height: 1.5;
+}
+
+.distancias-lugares__mapa {
+    z-index: 0;
+    width: 100%;
+    min-height: 400px;
+    overflow: hidden;
+    border: 1px solid rgba(146, 77, 54, .18);
+    border-radius: 18px;
+    background: #eee8e3;
+}
+
+.distancias-lugares__pie {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: .9rem;
+}
+
+.distancias-lugares__pie p {
+    margin: 0;
+}
+
+.distancias-lugares__atribucion {
+    flex: 0 0 auto;
+    display: grid;
+    gap: .3rem;
+    text-align: right;
+}
+
+.distancias-lugares__pie a {
+    color: #a7513f;
+    font-size: .85rem;
+    font-weight: 700;
+}
+
+body[data-tema="oscuro"] .distancias-lugares__encabezado h2,
+body[data-tema="oscuro"] .distancias-lugares__encabezado p,
+body[data-tema="oscuro"] .distancias-lugares__controles label,
+body[data-tema="oscuro"] .distancias-lugares__aviso,
+body[data-tema="oscuro"] .distancias-lugares__pie p {
+    color: #f6ead8;
+}
+
+body[data-tema="oscuro"] .distancias-lugares__panel {
+    border-color: rgba(255, 223, 177, .2);
+    background: rgba(35, 29, 24, .96);
+}
+
+body[data-tema="oscuro"] .distancias-lugares__controles select {
+    border-color: rgba(255, 223, 177, .28);
+    background: #2a211b;
+    color: #fff2e8;
+}
+
+body[data-tema="oscuro"] .distancias-lugares__resultado {
+    border-color: rgba(255, 223, 177, .18);
+    background: #30251e;
+}
+
+body[data-tema="oscuro"] .distancias-lugares__resultado > span,
+body[data-tema="oscuro"] .distancias-lugares__resultado small {
+    color: #f6ead8;
+}
+
+@media (max-width: 760px) {
+    .distancias-lugares {
+        margin-top: 3rem;
+        padding-top: 2rem;
+    }
+
+    .distancias-lugares__controles {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .distancias-lugares__intercambio {
+        display: none;
+    }
+
+    .distancias-lugares__controles label {
+        grid-column: span 2;
+    }
+
+    .distancias-lugares__boton {
+        grid-column: span 2;
+    }
+
+    .distancias-lugares__mapa {
+        min-height: 340px;
+    }
+
+    .distancias-lugares__pie {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .distancias-lugares__atribucion {
+        text-align: left;
+    }
+}
+
+@media (max-width: 480px) {
+    .distancias-lugares__resultados {
+        grid-template-columns: 1fr;
+    }
+
+    .distancias-lugares__mapa {
+        min-height: 300px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .distancias-lugares__boton {
+        transition: none;
+    }
+}

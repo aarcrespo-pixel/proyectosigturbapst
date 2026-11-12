@@ -9,6 +9,25 @@ sigtur_inicializar_contenido_publico($pdo);
 
 $usuarioActual = sigtur_usuario_actual($pdo);
 $eventosMapa = sigtur_eventos_visibles_en_mapa($pdo);
+$lugaresDistancias = $pdo->query('SELECT id, slug, nombre, categoria, latitud, longitud, osm_type, osm_id FROM lugares ORDER BY nombre')->fetchAll(PDO::FETCH_ASSOC);
+$lugaresDistanciasJson = array_map(static function (array $lugar): array {
+    $tipoOsm = in_array($lugar['osm_type'] ?? null, ['node', 'way', 'relation'], true) ? $lugar['osm_type'] : null;
+    $idOsm = is_string($lugar['osm_id'] ?? null) && preg_match('/^[0-9]{1,32}$/', $lugar['osm_id']) ? $lugar['osm_id'] : null;
+    $coordenadasValidas = $tipoOsm !== null
+        && $idOsm !== null
+        && is_numeric($lugar['latitud'] ?? null)
+        && is_numeric($lugar['longitud'] ?? null);
+
+    return [
+        'id' => (int) $lugar['id'],
+        'slug' => (string) $lugar['slug'],
+        'name' => (string) $lugar['nombre'],
+        'category' => (string) $lugar['categoria'],
+        'latitude' => $coordenadasValidas ? (float) $lugar['latitud'] : null,
+        'longitude' => $coordenadasValidas ? (float) $lugar['longitud'] : null,
+        'osmUrl' => $coordenadasValidas ? 'https://www.openstreetmap.org/' . $tipoOsm . '/' . $idOsm : null,
+    ];
+}, $lugaresDistancias);
 $lugaresCatalogoStmt = $pdo->query("SELECT slug, nombre, categoria, direccion, imagen, descripcion
     FROM lugares
     WHERE seccion_publica <> 'oculto'
@@ -43,6 +62,8 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="../css/lugares.css?v=20261112-tourism-catalog-1">
+    <link rel="stylesheet" href="../css/lugares-distancias.css?v=1">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="../css/galeria-lugares.css">
     <link rel="stylesheet" href="../css/legal.css">
 </head>
@@ -289,12 +310,72 @@ $fotosLugares = $fotosLugaresStmt->fetchAll();
                 </div>
             </div>
         </section>
+
+        <section class="distancias-lugares" id="distancias-atractivos" aria-labelledby="distancias-lugares-titulo">
+            <div class="distancias-lugares__encabezado">
+                <span class="distancias-lugares__eyebrow">Explorá Salto</span>
+                <h2 id="distancias-lugares-titulo">Distancias entre atractivos turísticos de Salto</h2>
+                <p>Elegí dos lugares para comparar la distancia en línea recta y, cuando haya una ruta disponible, el recorrido caminando.</p>
+            </div>
+            <div class="distancias-lugares__panel">
+                <form class="distancias-lugares__controles" data-distancias-form>
+                    <label>
+                        <span>Origen</span>
+                        <select name="origen" data-distancias-origen required>
+                            <option value="">Elegí un lugar</option>
+                            <?php foreach ($lugaresDistanciasJson as $lugarDistancia): ?>
+                                <option value="<?= (int) $lugarDistancia['id'] ?>" <?= $lugarDistancia['latitude'] === null ? 'disabled' : '' ?>>
+                                    <?= htmlspecialchars($lugarDistancia['name'], ENT_QUOTES, 'UTF-8') ?><?= $lugarDistancia['latitude'] === null ? ' — ubicación pendiente en OpenStreetMap' : '' ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <span class="distancias-lugares__intercambio" aria-hidden="true">↔</span>
+                    <label>
+                        <span>Destino</span>
+                        <select name="destino" data-distancias-destino required>
+                            <option value="">Elegí un lugar</option>
+                            <?php foreach ($lugaresDistanciasJson as $lugarDistancia): ?>
+                                <option value="<?= (int) $lugarDistancia['id'] ?>" <?= $lugarDistancia['latitude'] === null ? 'disabled' : '' ?>>
+                                    <?= htmlspecialchars($lugarDistancia['name'], ENT_QUOTES, 'UTF-8') ?><?= $lugarDistancia['latitude'] === null ? ' — ubicación pendiente en OpenStreetMap' : '' ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <button class="distancias-lugares__boton" type="submit">Calcular distancia</button>
+                </form>
+                <p class="distancias-lugares__aviso" data-distancias-aviso role="status">Las ubicaciones se toman de objetos nombrados en OpenStreetMap. Los lugares sin una coincidencia identificable quedan deshabilitados hasta agregar su referencia OSM.</p>
+                <div class="distancias-lugares__resultados" data-distancias-resultados aria-live="polite">
+                    <article class="distancias-lugares__resultado">
+                        <span>En línea recta</span>
+                        <strong data-distancia-linea>—</strong>
+                        <small>Estimación geográfica entre puntos de referencia.</small>
+                    </article>
+                    <article class="distancias-lugares__resultado">
+                        <span>Caminando</span>
+                        <strong data-distancia-caminando>—</strong>
+                        <small data-tiempo-caminando>Se mostrará solo si el servicio devuelve una ruta peatonal.</small>
+                    </article>
+                </div>
+                <div class="distancias-lugares__mapa" data-distancias-mapa role="region" aria-label="Mapa de los lugares seleccionados"></div>
+                <div class="distancias-lugares__pie">
+                    <p data-distancias-fuente>Seleccioná dos ubicaciones disponibles para verlas en el mapa.</p>
+                    <div class="distancias-lugares__atribucion">
+                        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Datos del mapa © contribuidores de OpenStreetMap</a>
+                        <a href="https://routing.openstreetmap.de/" target="_blank" rel="noopener noreferrer">Rutas peatonales sobre datos de OpenStreetMap</a>
+                    </div>
+                </div>
+            </div>
+            <script type="application/json" data-distancias-lugares><?= json_encode($lugaresDistanciasJson, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE) ?></script>
+        </section>
     </main>
     <footer class="legal-page-link"><a href="terminos-privacidad.php" data-i18n="legalPageLink">Términos, privacidad y seguridad</a></footer>
 
     <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
     <script src="../js/lugar-links.js?v=20261028-event-map-1" defer></script>
     <script src="../js/galeria-lugares.js?v=20261103-gallery-more-1" defer></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+    <script src="../js/lugares-distancias.js?v=1" defer></script>
     <?php if ($puedeAgregarFotosLugares): ?>
         <script>
             const botonAgregarFotosLugares = document.querySelector('.lugares-galeria-add__button');

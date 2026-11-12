@@ -19,8 +19,11 @@
         <span class="admin-field-hint">Si no seleccionas una imagen, se conserva la ruta o URL actual.</span>
     </label>
     <label>Horarios<input name="horarios" maxlength="255" required value="<?= $escape((string) $lugar['horarios']) ?>"></label>
-    <label>Latitud<input name="latitud" type="number" step="any" value="<?= $escape((string) ($lugar['latitud'] ?? '')) ?>"></label>
-    <label>Longitud<input name="longitud" type="number" step="any" value="<?= $escape((string) ($lugar['longitud'] ?? '')) ?>"></label>
+    <label>Latitud de OpenStreetMap<input name="latitud" type="number" min="-90" max="90" step="any" value="<?= $escape((string) ($lugar['latitud'] ?? '')) ?>"></label>
+    <label>Longitud de OpenStreetMap<input name="longitud" type="number" min="-180" max="180" step="any" value="<?= $escape((string) ($lugar['longitud'] ?? '')) ?>"></label>
+    <label>Tipo de objeto OSM<select name="osm_type"><option value="">Sin referencia OSM</option><?php foreach (['node' => 'Punto (node)', 'way' => 'Línea o área (way)', 'relation' => 'Relación (relation)'] as $tipoOsm => $etiquetaOsm): ?><option value="<?= $escape($tipoOsm) ?>" <?= ($lugar['osm_type'] ?? '') === $tipoOsm ? 'selected' : '' ?>><?= $escape($etiquetaOsm) ?></option><?php endforeach; ?></select></label>
+    <label>ID del objeto OSM<input name="osm_id" inputmode="numeric" pattern="[0-9]+" maxlength="32" value="<?= $escape((string) ($lugar['osm_id'] ?? '')) ?>"></label>
+    <p class="admin-field-hint admin-form__wide">Las coordenadas se usan en el comparador solo cuando incluyen una referencia de objeto OpenStreetMap válida. Encontrá el tipo y el ID en el enlace del objeto del mapa.</p>
     <label class="admin-form__wide">Descripción<textarea name="descripcion" required><?= $escape((string) $lugar['descripcion']) ?></textarea></label>
     <label class="admin-form__wide">Historia<textarea name="historia" required><?= $escape((string) $lugar['historia']) ?></textarea></label>
     <label class="admin-form__wide">Atractivos<textarea name="atractivos" required><?= $escape((string) $lugar['atractivos']) ?></textarea></label>
