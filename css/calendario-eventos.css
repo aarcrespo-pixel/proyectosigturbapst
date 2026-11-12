@@ -1,0 +1,360 @@
+.agenda-mensual {
+    --agenda-acento: var(--amarillo-fuerte, #ff6a3d);
+    --agenda-crema: var(--gris-suave, #faf7f0);
+    --agenda-texto: var(--texto-oscuro, #1a1a24);
+    --agenda-muted: #746b63;
+    --agenda-borde: rgba(67, 45, 31, 0.14);
+    --agenda-panel: #fff;
+    --agenda-sombra: 0 16px 38px rgba(75, 39, 20, 0.1);
+    --calendario-color-0: #ff6a3d;
+    --calendario-texto-0: #fff;
+    --calendario-color-1: #f2be5c;
+    --calendario-texto-1: #362311;
+    --calendario-color-2: #f6d5bd;
+    --calendario-texto-2: #4a2d1d;
+    --calendario-color-3: #9f3f1e;
+    --calendario-texto-3: #fff;
+    --calendario-color-4: #d98b59;
+    --calendario-texto-4: #2f1b11;
+    --calendario-color-5: #b65f43;
+    --calendario-texto-5: #fff;
+    --calendario-color-6: #8d5b3e;
+    --calendario-texto-6: #fff;
+    --calendario-color-7: #f7bf68;
+    --calendario-texto-7: #362311;
+}
+
+body[data-tema="oscuro"] .agenda-mensual {
+    --agenda-crema: #1b150f;
+    --agenda-texto: #f6ead8;
+    --agenda-muted: #c1afa0;
+    --agenda-borde: rgba(255, 223, 177, 0.16);
+    --agenda-panel: #261d15;
+    --agenda-sombra: 0 16px 38px rgba(0, 0, 0, 0.28);
+}
+
+.agenda-mensual__encabezado {
+    margin-bottom: 1.25rem;
+}
+
+.agenda-mensual__kicker {
+    display: inline-block;
+    margin-bottom: 0.45rem;
+    color: var(--agenda-acento);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.agenda-mensual__encabezado h2 {
+    margin: 0;
+}
+
+.agenda-mensual__encabezado p {
+    margin: 0.5rem 0 0;
+    color: var(--agenda-muted);
+}
+
+.agenda-mensual__panel,
+.agenda-mensual__detalle {
+    padding: clamp(0.75rem, 2vw, 1.35rem);
+    border: 1px solid var(--agenda-borde);
+    border-radius: 18px;
+    background: var(--agenda-panel);
+    box-shadow: var(--agenda-sombra);
+}
+
+.agenda-mensual__navegacion {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.agenda-mensual__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.agenda-mensual__mes {
+    margin: 0;
+    color: var(--agenda-texto);
+    font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+    text-align: center;
+}
+
+.agenda-mensual__boton {
+    min-height: 40px;
+    padding: 0.5rem 0.8rem;
+    border: 1px solid var(--agenda-borde);
+    border-radius: 10px;
+    background: var(--agenda-crema);
+    color: var(--agenda-texto);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.agenda-mensual__boton:hover {
+    transform: translateY(-1px);
+    border-color: var(--agenda-acento);
+}
+
+.agenda-mensual__dias-semana,
+.agenda-mensual__grilla {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.35rem;
+}
+
+.agenda-mensual__dias-semana {
+    margin-bottom: 0.35rem;
+    color: var(--agenda-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.agenda-mensual__grilla {
+    grid-auto-rows: minmax(112px, 1fr);
+}
+
+.agenda-mensual__dia {
+    min-width: 0;
+    overflow: hidden;
+    padding: 0.45rem;
+    border: 1px solid var(--agenda-borde);
+    border-radius: 11px;
+    background: var(--agenda-crema);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.agenda-mensual__dia.es-otro-mes {
+    opacity: 0.48;
+}
+
+.agenda-mensual__dia.es-hoy {
+    border-color: var(--agenda-acento);
+    box-shadow: inset 0 0 0 1px var(--agenda-acento);
+}
+
+.agenda-mensual__dia.es-seleccionado {
+    outline: 2px solid var(--agenda-acento);
+    outline-offset: -2px;
+}
+
+.agenda-mensual__numero {
+    display: inline-grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--agenda-texto);
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.agenda-mensual__dia.es-hoy .agenda-mensual__numero {
+    background: var(--agenda-acento);
+    color: #fff;
+}
+
+.agenda-mensual__eventos {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 0.2rem;
+}
+
+.agenda-mensual__evento {
+    display: block;
+    overflow: hidden;
+    padding: 0.22rem 0.35rem;
+    border-radius: 5px;
+    background: var(--evento-fondo, var(--calendario-color-0));
+    color: var(--evento-texto, var(--calendario-texto-0));
+    font-size: 0.7rem;
+    line-height: 1.25;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agenda-mensual__evento:hover {
+    filter: brightness(0.94);
+    text-decoration: underline;
+}
+
+.agenda-mensual__mas-eventos {
+    color: var(--agenda-muted);
+    font-size: 0.67rem;
+}
+
+.agenda-mensual__leyenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-top: 1rem;
+}
+
+.agenda-mensual__leyenda-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--agenda-muted);
+    font-size: 0.78rem;
+}
+
+.agenda-mensual__leyenda-item i {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--evento-fondo, var(--agenda-acento));
+}
+
+.agenda-mensual__detalle {
+    margin-top: 1rem;
+}
+
+.agenda-mensual__detalle h3 {
+    margin: 0 0 0.85rem;
+    color: var(--agenda-texto);
+    font-size: 1.1rem;
+}
+
+.agenda-mensual__lista-detalle {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.agenda-mensual__evento-detalle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--agenda-borde);
+    border-radius: 12px;
+    background: var(--agenda-crema);
+}
+
+.agenda-mensual__evento-detalle h4 {
+    margin: 0.2rem 0;
+    color: var(--agenda-texto);
+}
+
+.agenda-mensual__evento-detalle p,
+.agenda-mensual__categoria,
+.agenda-mensual__vacio {
+    margin: 0;
+    color: var(--agenda-muted);
+    font-size: 0.88rem;
+}
+
+.agenda-mensual__categoria {
+    font-size: 0.76rem;
+}
+
+.agenda-mensual__evento-detalle .boton-amarillo {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 700px) {
+    .agenda-mensual__navegacion {
+        grid-template-columns: 1fr auto;
+    }
+
+    .agenda-mensual__mes {
+        grid-column: 1 / -1;
+        grid-row: 1;
+    }
+
+    .agenda-mensual__acciones {
+        grid-row: 2;
+    }
+
+    .agenda-mensual__navegacion > .agenda-mensual__boton {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .agenda-mensual__grilla {
+        grid-auto-rows: minmax(92px, 1fr);
+        gap: 0.22rem;
+    }
+
+    .agenda-mensual__dia {
+        padding: 0.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .agenda-mensual__panel,
+    .agenda-mensual__detalle {
+        padding: 0.65rem;
+        border-radius: 14px;
+    }
+
+    .agenda-mensual__dias-semana {
+        font-size: 0.63rem;
+    }
+
+    .agenda-mensual__grilla {
+        grid-auto-rows: minmax(72px, 1fr);
+        gap: 0.14rem;
+    }
+
+    .agenda-mensual__dia {
+        padding: 0.2rem;
+        border-radius: 8px;
+    }
+
+    .agenda-mensual__numero {
+        width: 23px;
+        height: 23px;
+        font-size: 0.75rem;
+    }
+
+    .agenda-mensual__eventos {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3px;
+        margin-top: 0.1rem;
+    }
+
+    .agenda-mensual__evento {
+        width: 7px;
+        height: 7px;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 0;
+    }
+
+    .agenda-mensual__mas-eventos {
+        width: 100%;
+        font-size: 0.58rem;
+        line-height: 1;
+    }
+
+    .agenda-mensual__leyenda {
+        gap: 0.45rem 0.7rem;
+    }
+
+    .agenda-mensual__leyenda-item {
+        font-size: 0.7rem;
+    }
+
+    .agenda-mensual__evento-detalle {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+}

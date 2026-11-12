@@ -13,7 +13,7 @@
         || document.querySelector('.perfil-publico')?.dataset.csrf
         || document.body?.dataset.csrf
         || '';
-    const cardSelectors = '.tarjeta, .evento-card, .evento-card-pasado, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria, .tarjeta-destino, .tarjeta-ruta, .gallery-engagement-card';
+    const cardSelectors = '.tarjeta, .evento-card, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria, .tarjeta-destino, .tarjeta-ruta, .gallery-engagement-card';
 
     function slugifyText(value) {
         return (value || '')
@@ -100,9 +100,7 @@
                             ? 'ruta'
                             : card.classList.contains('evento-card')
                                 ? 'evento'
-                                : card.classList.contains('evento-card-pasado')
-                                    ? 'anterior'
-                                    : 'tarjeta';
+                                : 'tarjeta';
 
         return `${prefix}-${slugifyText(text)}`;
     }

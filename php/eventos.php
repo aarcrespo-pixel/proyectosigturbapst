@@ -8,6 +8,7 @@ sigtur_inicializar_contenido_publico($pdo);
 
 $usuarioActual = sigtur_usuario_actual($pdo);
 $puedeGestionarEventos = $usuarioActual && in_array($usuarioActual['rol'], ['organizador', 'administrador'], true);
+$puedeVerEstadisticas = $puedeGestionarEventos;
 $puedeCrearEvento = $usuarioActual && $usuarioActual['rol'] === 'organizador';
 $csrfToken = $puedeGestionarEventos ? sigtur_csrf_token() : '';
 $fotosGaleriaEventos = $pdo->query("SELECT g.id, g.imagen, g.titulo, g.descripcion, g.tipo_evento, g.usuario_id,
@@ -26,17 +27,25 @@ unset($fotoGaleriaEvento);
 
 /* Esta página tiene dos salidas: HTML para la vista normal y JSON cuando
     ajax=1. Mantener ambas en el mismo controlador evita duplicar filtros. */
-/* La agenda muestra el semestre próximo; el historial conserva seis meses. */
+/* El listado muestra próximos eventos; el calendario conserva todo el historial. */
 $eventosDesdeBd = $pdo->query('SELECT * FROM eventos WHERE es_pasado = 0 AND fecha >= CURDATE() AND fecha <= DATE_ADD(CURDATE(), INTERVAL 6 MONTH) ORDER BY fecha ASC, id DESC')->fetchAll();
+/* El calendario es el acceso histórico completo: no filtra por estado ni por
+   antigüedad para que los eventos pasados sigan disponibles por fecha. */
+$eventosCalendarioDesdeBd = $pdo->query('SELECT id, titulo, slug, descripcion, fecha, ubicacion, categoria, imagen_portada
+    FROM eventos ORDER BY fecha ASC, id ASC')->fetchAll();
+/* Deduplicamos destacados y completamos con los próximos eventos para conservar
+   tres tarjetas distintas aun cuando haya menos de tres marcados. */
 $eventosDestacadosDesdeBd = $pdo->query('SELECT e.id, e.titulo, e.slug, e.categoria, e.ubicacion, e.imagen_portada
-    FROM eventos_destacados d
-    INNER JOIN eventos e ON e.id = d.evento_id
+    FROM eventos e
+    LEFT JOIN (
+        SELECT evento_id, MIN(orden) AS orden, MIN(fecha_destacado) AS fecha_destacado
+        FROM eventos_destacados
+        GROUP BY evento_id
+    ) d ON d.evento_id = e.id
     WHERE e.es_pasado = 0 AND e.fecha >= CURDATE() AND e.fecha <= DATE_ADD(CURDATE(), INTERVAL 6 MONTH)
-    ORDER BY d.orden ASC, d.fecha_destacado ASC, e.id DESC')->fetchAll();
-$eventosAnterioresDesdeBd = $pdo->query('SELECT * FROM eventos
-    WHERE fecha < CURDATE()
-        AND fecha >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
-    ORDER BY fecha DESC, id DESC')->fetchAll();
+    ORDER BY CASE WHEN d.evento_id IS NULL THEN 1 ELSE 0 END ASC,
+        d.orden ASC, d.fecha_destacado ASC, e.fecha ASC, e.id DESC
+    LIMIT 3')->fetchAll();
 foreach ($eventosDesdeBd as &$evento) {
     $evento['imagen_portada'] = sigtur_url_imagen_evento((string) $evento['slug'], (string) ($evento['imagen_portada'] ?? ''));
 }
@@ -45,14 +54,14 @@ foreach ($eventosDestacadosDesdeBd as &$eventoDestacado) {
     $eventoDestacado['imagen_portada'] = sigtur_url_imagen_evento((string) $eventoDestacado['slug'], (string) ($eventoDestacado['imagen_portada'] ?? ''));
 }
 unset($eventoDestacado);
-foreach ($eventosAnterioresDesdeBd as &$eventoAnterior) {
-    $eventoAnterior['imagen_portada'] = sigtur_url_imagen_evento((string) $eventoAnterior['slug'], (string) ($eventoAnterior['imagen_portada'] ?? ''));
+foreach ($eventosCalendarioDesdeBd as &$eventoCalendario) {
+    $eventoCalendario['imagen_portada'] = sigtur_url_imagen_evento((string) $eventoCalendario['slug'], (string) ($eventoCalendario['imagen_portada'] ?? ''));
 }
-unset($eventoAnterior);
+unset($eventoCalendario);
 $ubicacionesEventosMapa = [];
-foreach (array_merge($eventosDesdeBd, $eventosAnterioresDesdeBd) as $eventoMapa) {
+foreach ($eventosCalendarioDesdeBd as $eventoMapa) {
     $ubicacionMapa = trim((string) ($eventoMapa['ubicacion'] ?? ''));
-    if ($ubicacionMapa === '') {
+    if ($ubicacionMapa === '' || stripos($ubicacionMapa, 'a completar') !== false) {
         continue;
     }
     $ubicacionNormalizada = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $ubicacionMapa) ?: $ubicacionMapa;
@@ -115,8 +124,10 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Estilos CSS -->
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>"> <!-- Estilos generales -->
-    <link rel="stylesheet" href="../css/eventos.css?v=20261103-gallery-lightbox-size-1"> <!-- Estilos específicos de eventos -->
+    <link rel="stylesheet" href="../css/eventos.css?v=20261112-calendar-removal-1"> <!-- Estilos específicos de eventos -->
+    <link rel="stylesheet" href="../css/calendario-eventos.css?v=20261112-1">
     <link rel="stylesheet" href="../css/enlaces-texto.css?v=20261102-event-links-1">
+    <?php if ($puedeVerEstadisticas): ?><link rel="stylesheet" href="../css/estadisticas-eventos.css?v=20261112-1"><?php endif; ?>
 </head>
 
 <body class="page-eventos">
@@ -155,7 +166,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
             <div class="fondo-encabezado"></div>
             <div class="texto-encabezado">
                 <span class="subtitulo-encabezado">Eventos en Salto</span>
-                <h1 data-i18n="eventsHeroTitle">EVENTOS</h1>
+                <h1 data-i18n="eventsHeroTitle">Eventos</h1>
                 <p data-i18n="eventsHeroText">Este apartado reúne los diferentes eventos turísticos, deportivos y culturales de Salto para que puedas informarte y participar en actividades divertidas.</p>
             </div>
         </section>
@@ -163,7 +174,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         <!-- El destacado permanece separado del listado dinámico general. -->
         <section class="seccion seccion-foco destacados-section" id="eventos-destacados">
             <div class="titulo-seccion">
-                <h2>Eventos Destacados</h2>
+                <h2>Eventos destacados</h2>
             </div>
             <div class="carrusel-eventos">
                 <button class="flecha izquierda" data-carrusel="destacados" aria-label="Anterior evento destacado"></button>
@@ -186,7 +197,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                     <button type="button" class="filtro-pill" data-filtro="competencia">Competencias</button>
                     <button type="button" class="filtro-pill" data-filtro="carrera">Carreras</button>
                     <button type="button" class="filtro-pill" data-filtro="gratuito">Gratuito</button>
-                    <button type="button" class="filtro-pill" data-filtro="de-pago">De Pago</button>
+                    <button type="button" class="filtro-pill" data-filtro="de-pago">De pago</button>
                     <button type="button" class="filtro-pill" data-filtro="discoteca">Discotecas</button>
                 </div>
             </div>
@@ -196,17 +207,22 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         <section class="seccion eventos-principales">
             <div class="titulo-seccion eventos-header">
                 <div class="eventos-header-copy">
-                    <h2>Listado de Eventos</h2>
+                    <h2>Listado de eventos</h2>
                     <p class="eventos-header-description">Eventos próximos registrados en SIGTUR, hasta los siguientes seis meses.</p>
                 </div>
-                <div class="eventos-header-actions"><button type="button" class="btn-filtros" id="btn-filtros" aria-expanded="false">Filtros ⚙️</button><?php if ($puedeCrearEvento): ?><button type="button" class="btn-crear-evento" id="btn-crear-evento">Crear Evento +</button><?php endif; ?></div>
+                <div class="eventos-header-actions"><button type="button" class="btn-filtros" id="btn-filtros" aria-expanded="false">Filtros ⚙️</button><?php if ($puedeCrearEvento): ?><button type="button" class="btn-crear-evento" id="btn-crear-evento">Crear evento +</button><?php endif; ?></div>
             </div>
             <div class="eventos-lista" id="eventos-principales-contenedor">
-                <?php foreach ($eventosDesdeBd as $evento): ?>
+                <?php foreach ($eventosDesdeBd as $evento):
+                    $tipoEntradaEtiqueta = (string) ($evento['tipo_entrada'] ?? 'Gratuito');
+                    if (strcasecmp($tipoEntradaEtiqueta, 'De Pago') === 0) {
+                        $tipoEntradaEtiqueta = 'De pago';
+                    }
+                ?>
                     <article class="evento-card" data-item-key="evento-<?= (int) $evento['id'] ?>" data-engagement="like-only" tabindex="0" role="link">
                         <div class="evento-card-media"><img src="<?= htmlspecialchars($evento['imagen_portada'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy"></div>
-                        <div class="evento-card-body"><span class="categoria"><?= htmlspecialchars($evento['categoria'] . ' · ' . ($evento['tipo_entrada'] ?? 'Gratuito'), ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><p class="lugar"><?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></p><?php $valorEntrada = trim((string) ($evento['precio_texto'] ?? $evento['precio'] ?? '')); ?><?php if (($evento['tipo_entrada'] ?? '') === 'De Pago'): ?><p class="precio-evento"><?= htmlspecialchars($valorEntrada !== '' ? $valorEntrada : 'Consultar con la organización', ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?></div>
-                        <div class="evento-card-action"><div class="fecha-protagonista"><span class="fecha-mes"><?= htmlspecialchars(strtoupper(date('M', strtotime($evento['fecha']))), ENT_QUOTES, 'UTF-8') ?></span><span class="fecha-dia"><?= htmlspecialchars(date('d', strtotime($evento['fecha'])), ENT_QUOTES, 'UTF-8') ?></span></div><a href="evento.php?id=<?= (int) $evento['id'] ?>" class="boton-amarillo">Ver más</a></div>
+                        <div class="evento-card-body"><span class="categoria"><?= htmlspecialchars($evento['categoria'] . ' · ' . $tipoEntradaEtiqueta, ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><p class="lugar"><?= htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8') ?></p><?php $valorEntrada = trim((string) ($evento['precio_texto'] ?? $evento['precio'] ?? '')); ?><?php if (($evento['tipo_entrada'] ?? '') === 'De Pago'): ?><p class="precio-evento"><?= htmlspecialchars($valorEntrada !== '' ? $valorEntrada : 'Consultar con la organización', ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?></div>
+                        <div class="evento-card-action"><div class="fecha-protagonista"><span class="fecha-mes"><?= htmlspecialchars(strtolower(date('M', strtotime($evento['fecha']))), ENT_QUOTES, 'UTF-8') ?></span><span class="fecha-dia"><?= htmlspecialchars(date('d', strtotime($evento['fecha'])), ENT_QUOTES, 'UTF-8') ?></span></div><a href="evento.php?id=<?= (int) $evento['id'] ?>" class="boton-amarillo">Ver más</a></div>
                     </article>
                 <?php endforeach; ?>
             </div>
@@ -289,7 +305,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                                 <option value="Competencias">Competencias</option>
                                 <option value="Carreras">Carreras</option>
                                 <option value="Gratuito">Gratuito</option>
-                                <option value="De Pago">De Pago</option>
+                                <option value="De Pago">De pago</option>
                                 <option value="Discotecas">Discotecas</option>
                                 <option value="Cultural">Cultural</option>
                                 <option value="Feria">Feria</option>
@@ -342,7 +358,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                             <span>Tipo de entrada</span>
                             <select id="tipo-entrada" name="tipoEntrada">
                                 <option value="Gratuito">Gratuito</option>
-                                <option value="De Pago">De Pago</option>
+                                <option value="De Pago">De pago</option>
                             </select>
                             <label class="field field-price" id="precio-field" hidden>
                                 <span>Precio o dónde consultar</span>
@@ -410,26 +426,44 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                 <header class="filtros-drawer__header"><h2 id="filtros-title">Filtrar eventos</h2><button type="button" data-cerrar-filtros aria-label="Cerrar filtros">×</button></header>
                 <label class="drawer-field">Buscar<input id="filtro-texto" type="search" placeholder="Título o ubicación"></label>
                 <label class="drawer-field">Categoría<select id="filtro-categoria"><option value="">Todas</option><option value="Competencias">Competencias</option><option value="Carreras">Carreras</option><option value="Discotecas">Discotecas</option><option value="Cultural">Cultural</option><option value="Feria">Feria</option></select></label>
-                <label class="drawer-field">Tipo de entrada<select id="filtro-tipo"><option value="">Todos</option><option value="Gratuito">Gratuito</option><option value="De Pago">De Pago</option></select></label>
+                <label class="drawer-field">Tipo de entrada<select id="filtro-tipo"><option value="">Todos</option><option value="Gratuito">Gratuito</option><option value="De Pago">De pago</option></select></label>
                 <div class="drawer-fields"><label class="drawer-field">Precio mínimo<input id="filtro-min-precio" type="number" min="0" placeholder="0"></label><label class="drawer-field">Precio máximo<input id="filtro-max-precio" type="number" min="0" placeholder="Sin límite"></label></div>
                 <div class="drawer-fields"><label class="drawer-field">Desde<input id="filtro-desde" type="date"></label><label class="drawer-field">Hasta<input id="filtro-hasta" type="date"></label></div>
                 <div class="filtros-drawer__actions"><button type="button" class="btn-crear-form" id="aplicar-filtros">Aplicar filtros</button><button type="button" class="btn-cancelar" id="limpiar-filtros">Limpiar</button></div>
             </section>
         </aside>
 
-        <section class="seccion anteriores-eventos">
-            <div class="titulo-seccion">
-                <h2>Eventos Anteriores</h2>
-                <p>Eventos registrados en SIGTUR durante los últimos seis meses.</p>
+        <section class="seccion agenda-mensual" id="calendario-eventos" aria-labelledby="calendario-eventos-titulo">
+            <div class="titulo-seccion agenda-mensual__encabezado">
+                <span class="agenda-mensual__kicker">Calendario</span>
+                <h2 id="calendario-eventos-titulo">Mes por mes</h2>
+                <p>Tocá un día para ver qué hay.</p>
             </div>
-            <div class="eventos-anteriores-grid" id="anteriores-contenedor"></div>
-            <button class="eventos-list-toggle" id="eventos-anteriores-toggle" type="button" data-event-list="anteriores" aria-expanded="false" aria-controls="anteriores-contenedor" hidden>Ver más</button>
+            <div class="agenda-mensual__panel">
+                <div class="agenda-mensual__navegacion">
+                    <div class="agenda-mensual__acciones">
+                        <button class="agenda-mensual__boton" id="calendario-anterior" type="button">&lt; Anterior</button>
+                        <button class="agenda-mensual__boton" id="calendario-hoy" type="button">Hoy</button>
+                    </div>
+                    <h3 class="agenda-mensual__mes" id="calendario-mes" aria-live="polite"></h3>
+                    <button class="agenda-mensual__boton" id="calendario-siguiente" type="button">Siguiente &gt;</button>
+                </div>
+                <div class="agenda-mensual__dias-semana" aria-hidden="true">
+                    <span>lun</span><span>mar</span><span>mié</span><span>jue</span><span>vie</span><span>sáb</span><span>dom</span>
+                </div>
+                <div class="agenda-mensual__grilla" id="calendario-grilla" role="grid" aria-label="Calendario mensual de eventos"></div>
+                <div class="agenda-mensual__leyenda" id="calendario-leyenda" aria-label="Categorías de eventos"></div>
+            </div>
+            <section class="agenda-mensual__detalle" id="calendario-detalle" aria-live="polite" aria-labelledby="calendario-detalle-titulo">
+                <h3 id="calendario-detalle-titulo">Elegí un día</h3>
+                <div id="calendario-eventos-dia"></div>
+            </section>
         </section>
 
         <section class="seccion galeria-eventos">
             <div class="galeria-header">
                 <div class="titulo-seccion">
-                    <h2>Galería General</h2>
+                    <h2>Galería general</h2>
                 </div>
                 <div class="galeria-controls">
                     <div class="buscador-eventos buscador-galeria">
@@ -464,6 +498,141 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
                 </div>
             </div>
         </section>
+
+        <?php if ($puedeVerEstadisticas): ?>
+            <section class="seccion estadisticas-eventos" id="estadisticas-eventos"
+                data-endpoint="api/estadisticas_eventos.php"
+                aria-labelledby="estadisticas-eventos-titulo">
+                <header class="estadisticas-eventos__encabezado">
+                    <div>
+                        <span class="estadisticas-eventos__kicker">Análisis de actividad</span>
+                        <h2 id="estadisticas-eventos-titulo">Estadísticas y rendimiento</h2>
+                        <p><?= $usuarioActual['rol'] === 'administrador'
+                            ? 'Un análisis general de la actividad y el rendimiento de los eventos en SIGTUR.'
+                            : 'Un análisis de la actividad y el rendimiento de tus eventos.' ?></p>
+                    </div>
+                    <label class="estadisticas-eventos__filtro">
+                        <span>Período de análisis</span>
+                        <select id="estadisticas-periodo" aria-label="Período de análisis">
+                            <option value="7">Últimos 7 días</option>
+                            <option value="30" selected>Últimos 30 días</option>
+                            <option value="6m">Últimos 6 meses</option>
+                            <option value="todo">Todo el tiempo</option>
+                        </select>
+                    </label>
+                </header>
+
+                <p class="estadisticas-eventos__estado" id="estadisticas-estado" role="status" aria-live="polite">
+                    Cargando estadísticas...
+                </p>
+
+                <div class="estadisticas-eventos__indicadores" aria-label="Indicadores principales">
+                    <article class="estadistica-card" data-indicador="totalEventos">
+                        <span class="estadistica-card__etiqueta">Eventos creados</span>
+                        <strong class="estadistica-card__valor">—</strong>
+                        <span class="estadistica-card__nota">En total</span>
+                    </article>
+                    <article class="estadistica-card" data-indicador="eventosActivos">
+                        <span class="estadistica-card__etiqueta">Eventos publicados y activos</span>
+                        <strong class="estadistica-card__valor">—</strong>
+                        <span class="estadistica-card__nota">Hoy o próximos, no finalizados</span>
+                    </article>
+                    <article class="estadistica-card" data-indicador="visitas">
+                        <span class="estadistica-card__etiqueta">Visitas a eventos</span>
+                        <strong class="estadistica-card__valor">—</strong>
+                        <span class="estadistica-card__comparacion"></span>
+                        <span class="estadistica-card__nota">En el período seleccionado</span>
+                    </article>
+                    <article class="estadistica-card" data-indicador="usuariosGuardaron">
+                        <span class="estadistica-card__etiqueta"><?= $usuarioActual['rol'] === 'administrador' ? 'Usuarios que guardaron eventos' : 'Usuarios que guardaron tus eventos' ?></span>
+                        <strong class="estadistica-card__valor">—</strong>
+                        <span class="estadistica-card__comparacion"></span>
+                        <span class="estadistica-card__nota">Usuarios distintos en el período</span>
+                    </article>
+                    <?php if ($usuarioActual['rol'] === 'administrador'): ?>
+                        <article class="estadistica-card" data-indicador="registrados">
+                            <span class="estadistica-card__etiqueta">Usuarios registrados</span>
+                            <strong class="estadistica-card__valor">—</strong>
+                            <span class="estadistica-card__comparacion"></span>
+                            <span class="estadistica-card__nota">Cuentas en SIGTUR</span>
+                        </article>
+                    <?php endif; ?>
+                    <article class="estadistica-card" data-indicador="promedioVisitas">
+                        <span class="estadistica-card__etiqueta">Promedio de visitas por evento</span>
+                        <strong class="estadistica-card__valor">—</strong>
+                        <span class="estadistica-card__nota">Según el período seleccionado</span>
+                    </article>
+                    <article class="estadistica-card" data-indicador="conversion">
+                        <span class="estadistica-card__etiqueta">Conversión a guardados</span>
+                        <strong class="estadistica-card__valor">—</strong>
+                        <span class="estadistica-card__nota">Visitas identificables seguidas de un guardado</span>
+                    </article>
+                    <article class="estadistica-card" data-indicador="crecimiento">
+                        <span class="estadistica-card__etiqueta">Eventos creados en el período</span>
+                        <strong class="estadistica-card__valor">—</strong>
+                        <span class="estadistica-card__comparacion"></span>
+                        <span class="estadistica-card__nota">Comparado con el período anterior</span>
+                    </article>
+                </div>
+
+                <div class="estadisticas-eventos__graficas">
+                    <article class="estadistica-panel estadistica-panel--amplio">
+                        <header class="estadistica-panel__encabezado">
+                            <div>
+                                <span class="estadistica-panel__numero">01</span>
+                                <h3>Evolución de visitas</h3>
+                            </div>
+                            <span class="estadistica-panel__detalle" id="estadisticas-tasa-visitas">Tendencia en preparación</span>
+                        </header>
+                        <div class="estadistica-grafica" id="estadisticas-visitas-grafica" role="img" aria-label="Gráfico de evolución de visitas a eventos"></div>
+                        <p class="estadistica-panel__nota">La línea principal muestra registros reales. Tendencia lineal, tangente y ajuste cuadrático (si los datos lo justifican) son estimaciones, no visitas observadas.</p>
+                    </article>
+                    <article class="estadistica-panel">
+                        <header class="estadistica-panel__encabezado">
+                            <div>
+                                <span class="estadistica-panel__numero">02</span>
+                                <h3>Eventos creados</h3>
+                            </div>
+                            <span class="estadistica-panel__detalle">Por mes</span>
+                        </header>
+                        <div class="estadistica-grafica" id="estadisticas-creacion-grafica" role="img" aria-label="Gráfico de eventos creados por mes"></div>
+                    </article>
+                    <article class="estadistica-panel estadistica-panel--amplio">
+                        <header class="estadistica-panel__encabezado">
+                            <div>
+                                <span class="estadistica-panel__numero">03</span>
+                                <h3>Eventos más populares</h3>
+                            </div>
+                            <span class="estadistica-panel__detalle">Visitas y guardados</span>
+                        </header>
+                        <div class="estadistica-grafica" id="estadisticas-populares-grafica" role="img" aria-label="Comparación de visitas y guardados por evento"></div>
+                    </article>
+                    <article class="estadistica-panel">
+                        <header class="estadistica-panel__encabezado">
+                            <div>
+                                <span class="estadistica-panel__numero">04</span>
+                                <h3>Interacción de usuarios</h3>
+                            </div>
+                            <span class="estadistica-panel__detalle" id="estadisticas-conversion-detalle">Conversión no disponible</span>
+                        </header>
+                        <div class="estadistica-grafica" id="estadisticas-interaccion-grafica" role="img" aria-label="Comparación de visitas y guardados de eventos"></div>
+                    </article>
+                    <article class="estadistica-panel estadistica-panel--amplio">
+                        <header class="estadistica-panel__encabezado">
+                            <div>
+                                <span class="estadistica-panel__numero">05</span>
+                                <h3><?= $usuarioActual['rol'] === 'administrador' ? 'Actividad de la plataforma' : 'Actividad de tus eventos' ?></h3>
+                            </div>
+                            <span class="estadistica-panel__detalle">Eventos creados y visitas</span>
+                        </header>
+                        <div class="estadistica-grafica" id="estadisticas-actividad-grafica" role="img" aria-label="Gráfico de actividad de eventos y visitas en SIGTUR"></div>
+                    </article>
+                </div>
+                <p class="estadisticas-eventos__privacidad">
+                    El esquema no tiene un campo de publicación independiente: se consideran activos los eventos no marcados como pasados cuya fecha es hoy o futura. Las visitas se cuentan una vez por evento y sesión desde la activación de este registro; no se reconstruye ni inventa historial anterior. La conversión solo considera sesiones identificadas que visitaron un evento y luego lo guardaron. No se muestran datos personales.
+                </p>
+            </section>
+        <?php endif; ?>
     </main>
 
     <div class="lightbox" id="lightbox">
@@ -478,13 +647,14 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         </div>
     </div>
 
-    <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>
+    <script src="../js/script.js?v=20261112-calendar-labels-1" defer></script>
     <script src="../js/enlaces-texto.js?v=20261102-event-links-1" defer></script>
-    <script src="../js/interacciones-tarjetas.js?v=20261029-event-like-order-1" defer></script>
+    <script src="../js/interacciones-tarjetas.js?v=20261112-calendar-removal-1" defer></script>
+    <?php if ($puedeVerEstadisticas): ?><script src="../js/estadisticas-eventos.js?v=20261112-1" defer></script><?php endif; ?>
     <script>window.sigturEventoIds = <?= json_encode($eventoIdsPorSlug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosDesdeBd = <?= json_encode($eventosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
     <script>window.eventosDestacadosDesdeBd = <?= json_encode($eventosDestacadosDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script>window.eventosAnterioresDesdeBd = <?= json_encode($eventosAnterioresDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
+    <script>window.eventosCalendarioDesdeBd = <?= json_encode($eventosCalendarioDesdeBd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;</script>
     <script>window.galeriaDesdeBd = <?= json_encode($fotosGaleriaEventos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;</script>
     <script>window.gestionGaleria = <?= json_encode([
         'puedeSubir' => (bool) $puedeCrearEvento,
@@ -492,7 +662,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === '1') {
         'rol' => (string) ($usuarioActual['rol'] ?? ''),
         'csrfToken' => $csrfToken,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
-    <script src="../js/eventos.js?v=20261103-gallery-photo-only-1" defer></script>
+    <script src="../js/eventos.js?v=20261112-empty-gallery-1" defer></script>
 </body>
 
 </html>

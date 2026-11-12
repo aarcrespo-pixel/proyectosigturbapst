@@ -24,8 +24,8 @@ if (!sigtur_validar_csrf(is_string($_POST['csrf_token'] ?? null) ? $_POST['csrf_
 
 $tipoGaleria = (string) ($_POST['tipo_galeria'] ?? '');
 $paginasGaleria = [
-    'Turismo' => ['archivo' => 'turismo.php', 'ancla' => 'galeria-turistica'],
-    'Lugares' => ['archivo' => 'lugares.php', 'ancla' => 'galeria-historica'],
+    'Turismo' => 'turismo.php',
+    'Lugares' => 'lugares.php',
 ];
 if (!isset($paginasGaleria[$tipoGaleria])) {
     http_response_code(422);
@@ -126,6 +126,5 @@ if ($guardadas === 0) {
     exit(htmlspecialchars(implode(' ', $errores) ?: 'No se pudo agregar ninguna foto.', ENT_QUOTES, 'UTF-8'));
 }
 
-$paginaGaleria = $paginasGaleria[$tipoGaleria];
-header('Location: ../' . $paginaGaleria['archivo'] . '?fotos_agregadas=' . $guardadas . ($errores ? '&algunas_fotos_fallaron=1' : '') . '#' . $paginaGaleria['ancla']);
+header('Location: ../' . $paginasGaleria[$tipoGaleria]);
 exit;

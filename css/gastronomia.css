@@ -1,10 +1,17 @@
 :root {
-    --gastronomia-bg: linear-gradient(180deg, #fff8ee 0%, #f5efe8 100%);
-    --gastronomia-accent: #d65d2f;
+    --naranja-principal: #d65d2f;
+    --naranja-claro: #f7bf68;
+    --naranja-oscuro: #9f3f1e;
+    --durazno: #f6d5bd;
+    --ambar: #f2be5c;
+    --crema: #fff8ee;
+    --marron-calido: #5d463d;
+    --gastronomia-bg: linear-gradient(180deg, var(--crema) 0%, #f5efe8 100%);
+    --gastronomia-accent: var(--naranja-principal);
     --gastronomia-accent-soft: rgba(214, 93, 47, 0.12);
-    --gastronomia-gold: #f2be5c;
+    --gastronomia-gold: var(--ambar);
     --gastronomia-ink: #1f1a1a;
-    --gastronomia-muted: #5d463d;
+    --gastronomia-muted: var(--marron-calido);
     --gastronomia-card: rgba(255, 255, 255, 0.96);
     --gastronomia-line: rgba(31, 26, 26, 0.08);
     --gastronomia-shadow: 0 24px 60px rgba(75, 39, 20, 0.12);
@@ -63,7 +70,7 @@ input {
     display: grid;
     place-items: center;
     padding: clamp(7rem, 10vw, 9rem) 2rem 4rem;
-    background: linear-gradient(180deg, rgba(23, 18, 15, 0.15), rgba(23, 18, 15, 0.7)), url('../img/gastronomia.jpg') center / cover;
+    background: linear-gradient(180deg, rgba(23, 18, 15, 0.15), rgba(23, 18, 15, 0.7)), url('../img/gastronomy.jpg') center / cover;
     overflow: hidden;
 }
 
@@ -91,7 +98,6 @@ input {
     background: rgba(255, 255, 255, 0.08);
     font-weight: 700;
     letter-spacing: 0.14em;
-    text-transform: uppercase;
     backdrop-filter: blur(6px);
 }
 
@@ -100,7 +106,6 @@ input {
     font-size: clamp(3.2rem, 7vw, 6rem);
     line-height: 0.95;
     letter-spacing: -0.04em;
-    text-transform: uppercase;
     text-shadow: 0 10px 35px rgba(0, 0, 0, 0.28);
 }
 
@@ -159,7 +164,6 @@ input {
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.14em;
-    text-transform: uppercase;
 }
 
 .seccion-gastronomia__encabezado h2,
@@ -315,7 +319,6 @@ input {
     font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.08em;
-    text-transform: uppercase;
 }
 
 .tarjeta-gastronomia h3 {
@@ -353,6 +356,47 @@ input {
 
 .tarjeta-gastronomia a:hover {
     transform: translateY(-2px);
+}
+
+.tarjeta-gastronomia__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.tarjeta-gastronomia .tarjeta-gastronomia__acciones a {
+    justify-content: center;
+    width: fit-content;
+    min-height: 44px;
+    margin: 0;
+    padding: 0.72rem 1rem;
+    border: 1px solid transparent;
+    font-size: 0.92rem;
+    text-align: center;
+}
+
+.tarjeta-gastronomia .tarjeta-gastronomia__acciones .gastronomia-boton-principal {
+    background: linear-gradient(90deg, var(--naranja-oscuro), var(--naranja-principal));
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    box-shadow: 0 12px 24px rgba(159, 63, 30, 0.2);
+}
+
+.tarjeta-gastronomia .tarjeta-gastronomia__acciones .gastronomia-boton-principal:hover {
+    box-shadow: 0 16px 30px rgba(159, 63, 30, 0.28);
+}
+
+.tarjeta-gastronomia .tarjeta-gastronomia__acciones .gastronomia-boton-secundario {
+    border-color: var(--gastronomia-accent);
+    background: transparent;
+    color: var(--gastronomia-accent);
+}
+
+.tarjeta-gastronomia .tarjeta-gastronomia__acciones .gastronomia-boton-secundario:hover {
+    background: var(--gastronomia-accent-soft);
 }
 
 .gastronomia-ver-todos {
@@ -404,12 +448,12 @@ input {
     background: linear-gradient(135deg, #f7d176, #ef9a52);
 }
 
-.recorrido-gastronomia--green {
-    background: linear-gradient(135deg, #dfeec8, #a4c881);
+.recorrido-gastronomia--amber {
+    background: linear-gradient(135deg, #ffe2a8, #f3b85e);
 }
 
-.recorrido-gastronomia--blue {
-    background: linear-gradient(135deg, #d8ecf3, #8bc2d8);
+.recorrido-gastronomia--peach {
+    background: linear-gradient(135deg, var(--durazno), #efaa7b);
 }
 
 .recorrido-gastronomia > * {
@@ -423,7 +467,6 @@ input {
     font-size: 0.8rem;
     font-weight: 800;
     letter-spacing: 0.16em;
-    text-transform: uppercase;
     color: rgba(31, 26, 26, 0.75);
 }
 
@@ -467,7 +510,6 @@ input {
 .datos-gastronomia__lista strong {
     font-size: 0.8rem;
     letter-spacing: 0.1em;
-    text-transform: uppercase;
     color: var(--gastronomia-accent);
 }
 
@@ -497,7 +539,6 @@ input {
     font-size: 0.77rem;
     font-weight: 800;
     letter-spacing: 0.12em;
-    text-transform: uppercase;
     color: var(--gastronomia-accent);
 }
 
@@ -586,7 +627,6 @@ input {
     font-size: 0.8rem;
     font-weight: 800;
     letter-spacing: 0.14em;
-    text-transform: uppercase;
 }
 
 .historia-gastronomia__grid h3 {
@@ -802,6 +842,15 @@ body[data-tema="oscuro"] .historia-gastronomia__numero {
     .hero-gastronomia {
         min-height: min(72svh, 590px);
         padding-top: 6rem;
+    }
+
+    .tarjeta-gastronomia__acciones {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tarjeta-gastronomia .tarjeta-gastronomia__acciones a {
+        width: 100%;
     }
 
     .gastronomia-grid,

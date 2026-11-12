@@ -171,7 +171,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $datos[':slug'])
                 || !in_array($datos[':seccion_publica'], ['emblematico', 'recreacion', 'oculto'], true)
                 || $datos[':nombre'] === '' || $datos[':categoria'] === '' || $datos[':direccion'] === ''
-                || (!sigtur_contenido_imagen_valida($datos[':imagen']) && !sigtur_contenido_imagen_subida_presente()) || $datos[':descripcion'] === ''
+                || (!sigtur_contenido_imagen_valida($datos[':imagen']) && !sigtur_contenido_imagen_subida_presente())                 || $datos[':descripcion'] === ''
                 || $datos[':historia'] === '' || $datos[':atractivos'] === '' || $datos[':horarios'] === ''
                 || $datos[':recomendaciones'] === '') {
                 sigtur_contenido_error('Completa los campos obligatorios e ingresa un slug e imagen válidos.');
@@ -303,7 +303,7 @@ unset($contenido);
         <div class="admin-section__heading"><div><p class="admin-eyebrow">Contenido publicado</p><h2><?= htmlspecialchars(ucfirst($seccion), ENT_QUOTES, 'UTF-8') ?></h2></div></div>
         <?php if ($seccion === 'lugares'): ?>
             <details class="admin-content-item" open><summary>Agregar lugar</summary>
-                <?php $lugar = ['id' => 0, 'slug' => '', 'nombre' => '', 'categoria' => '', 'seccion_publica' => 'emblematico', 'direccion' => '', 'imagen' => '', 'descripcion' => '', 'historia' => '', 'atractivos' => '', 'horarios' => '', 'recomendaciones' => '', 'latitud' => '', 'longitud' => '']; include __DIR__ . '/partials/formulario-lugar.php'; ?>
+                <?php $lugar = ['id' => 0, 'slug' => '', 'nombre' => '', 'categoria' => '', 'seccion_publica' => 'emblematico', 'direccion' => '', 'imagen' => '', 'descripcion' => '', 'historia' => '', 'atractivos' => '', 'horarios' => '', 'recomendaciones' => '', 'latitud' => '', 'longitud' => '', 'osm_type' => '', 'osm_id' => '']; include __DIR__ . '/partials/formulario-lugar.php'; ?>
             </details>
             <?php foreach ($lugares as $lugar): ?><details class="admin-content-item"><summary><span><?= $escape($lugar['nombre']) ?></span><span class="admin-button">Editar</span></summary><?php include __DIR__ . '/partials/formulario-lugar.php'; ?>
                 <form method="post" onsubmit="return confirm('¿Eliminar este lugar?');"><input type="hidden" name="csrf_token" value="<?= $escape($csrfToken) ?>"><input type="hidden" name="seccion" value="lugares"><input type="hidden" name="accion" value="eliminar"><input type="hidden" name="id" value="<?= (int) $lugar['id'] ?>"><button class="admin-button admin-button--danger" type="submit">Eliminar lugar</button></form>

@@ -128,7 +128,6 @@ body[data-tema="oscuro"] .config-page::after {
   color: #8b6b3f;
   font-size: 0.85rem;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
   font-weight: 700;
   margin-left: auto;
 }

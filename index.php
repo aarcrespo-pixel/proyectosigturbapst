@@ -5,9 +5,9 @@ require_once __DIR__ . '/php/helpers/imagenes.php';
 require_once __DIR__ . '/php/helpers/contenido_publico.php';
 
 sigtur_inicializar_contenido_publico($pdo);
-$eventosDestacados = $pdo->query('SELECT id, titulo, descripcion, fecha, ubicacion, imagen_portada FROM eventos WHERE es_pasado = 0 AND fecha >= CURDATE() ORDER BY fecha ASC, id DESC LIMIT 20')->fetchAll(PDO::FETCH_ASSOC);
-$lugaresDestacados = $pdo->query("SELECT id, slug, nombre, descripcion, imagen FROM lugares WHERE seccion_publica <> 'oculto' ORDER BY nombre ASC")->fetchAll(PDO::FETCH_ASSOC);
-$gastronomiaDestacada = $pdo->query('SELECT nombre, descripcion, imagen FROM gastronomia_catalogo ORDER BY orden ASC, nombre ASC')->fetchAll(PDO::FETCH_ASSOC);
+$eventosDestacados = $pdo->query('SELECT id, titulo, descripcion, fecha, ubicacion, imagen_portada FROM eventos WHERE es_pasado = 0 AND fecha >= CURDATE() ORDER BY fecha ASC, id DESC LIMIT 3')->fetchAll(PDO::FETCH_ASSOC);
+$lugaresDestacados = $pdo->query("SELECT id, slug, nombre, descripcion, imagen FROM lugares WHERE seccion_publica <> 'oculto' ORDER BY nombre ASC LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
+$gastronomiaDestacada = $pdo->query('SELECT slug, nombre, descripcion, imagen FROM gastronomia_catalogo ORDER BY orden ASC, nombre ASC LIMIT 3')->fetchAll(PDO::FETCH_ASSOC);
 $resolverImagenIndex = static function (string $imagen, string $carpeta, string $fallback): string {
     $ruta = sigtur_url_imagen_subida($imagen, $carpeta, $fallback);
     return str_starts_with($ruta, '../') ? substr($ruta, 3) : $ruta;
@@ -57,6 +57,7 @@ unset($propuestaGastronomica);
         rel="stylesheet">
     <!-- Archivos CSS -->
     <link rel="stylesheet" href="css/estilos.css?v=<?= time(); ?>"> <!-- Estilos principales -->
+    <link rel="stylesheet" href="css/gastronomia-index.css">
     <link rel="stylesheet" href="css/intro.css"> <!-- Animación de intro -->
 </head>
 
@@ -158,8 +159,8 @@ unset($propuestaGastronomica);
 
     </section>
 
-    <section class="seccion-eventos" data-carrusel-seccion="eventos">
-        <h2 data-i18n="homeEventsTitle">Eventos Destacados</h2>
+    <section class="seccion-eventos" data-carrusel-seccion="eventos" data-carrusel-autoplay>
+        <h2 data-i18n="homeEventsTitle">Eventos destacados</h2>
         <div class="carrusel" data-carrusel="eventos">
             <button class="flecha izquierda" type="button" aria-label="Evento anterior"></button>
             <div class="contenedor-slides">
@@ -200,7 +201,7 @@ unset($propuestaGastronomica);
 
     </section>
 
-    <section class="seccion-eventos" data-carrusel-seccion="lugares-destacados">
+    <section class="seccion-eventos" data-carrusel-seccion="lugares-destacados" data-carrusel-autoplay>
         <h2 data-i18n="homePlacesTitle">Lugares destacados</h2>
         <div class="carrusel" data-carrusel="lugares-destacados">
             <button class="flecha izquierda" aria-label="Lugar anterior" data-i18n-aria-label="homePlacesPrev"></button>
@@ -211,7 +212,7 @@ unset($propuestaGastronomica);
                             <div class="info-evento">
                                 <h3><?= htmlspecialchars((string) $lugarDestacado['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
                                 <p><?= htmlspecialchars($resumirTextoIndex((string) $lugarDestacado['descripcion']), ENT_QUOTES, 'UTF-8') ?></p>
-                                <div class="accion-boton"><a href="php/lugar.php?slug=<?= rawurlencode((string) $lugarDestacado['slug']) ?>&amp;origen=lugares" class="boton-amarillo" data-i18n="homePlacesButton">Ver lugares</a></div>
+                                <div class="accion-boton"><a href="php/lugar.php?slug=<?= rawurlencode((string) $lugarDestacado['slug']) ?>&amp;origen=turismo" class="boton-amarillo" data-i18n="homePlacesButton">Ver lugar</a></div>
                             </div>
                             <img src="<?= htmlspecialchars((string) $lugarDestacado['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string) $lugarDestacado['nombre'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
                         </div>
@@ -232,7 +233,7 @@ unset($propuestaGastronomica);
         </div>
     </section>
 
-    <section class="seccion-eventos" data-carrusel-seccion="gastronomia-destacada">
+    <section class="seccion-eventos" data-carrusel-seccion="gastronomia-destacada" data-carrusel-autoplay>
         <h2 data-i18n="homeGastronomyTitle">Gastronomía destacada</h2>
         <div class="carrusel" data-carrusel="gastronomia-destacada">
             <button class="flecha izquierda" aria-label="Lugar gastronómico anterior" data-i18n-aria-label="homeGastronomyPrev"></button>
@@ -243,7 +244,7 @@ unset($propuestaGastronomica);
                             <div class="info-evento">
                                 <h3><?= htmlspecialchars((string) $propuestaGastronomica['nombre'], ENT_QUOTES, 'UTF-8') ?></h3>
                                 <p><?= htmlspecialchars($resumirTextoIndex((string) $propuestaGastronomica['descripcion']), ENT_QUOTES, 'UTF-8') ?></p>
-                                <div class="accion-boton"><a href="php/gastronomia.php#propuestas-gastronomicas" class="boton-amarillo" data-i18n="homeGastronomyButton">Ver gastronomía</a></div>
+                                <div class="accion-boton"><a href="php/restaurante.php?slug=<?= rawurlencode((string) $propuestaGastronomica['slug']) ?>" class="boton-amarillo" data-i18n="homeGastronomyButton">Ver restaurante</a></div>
                             </div>
                             <img src="<?= htmlspecialchars((string) $propuestaGastronomica['imagen'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string) $propuestaGastronomica['nombre'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
                         </div>
@@ -268,7 +269,7 @@ unset($propuestaGastronomica);
         <div class="footer-grid">
             <div class="footer-col">
                 <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerPlaces">LUGARES</h4>
+                    <h4 data-i18n="footerPlaces">Lugares</h4>
                     <span class="footer-toggle-icon">▾</span>
                 </button>
                 <div class="footer-links">
@@ -282,7 +283,7 @@ unset($propuestaGastronomica);
 
             <div class="footer-col">
                 <button class="footer-toggle" type="button" aria-expanded="false">
-                    <h4 data-i18n="footerGastronomy">GASTRONOMÍA</h4>
+                    <h4 data-i18n="footerGastronomy">Gastronomía</h4>
                     <span class="footer-toggle-icon">▾</span>
                 </button>
                 <div class="footer-links">
@@ -302,7 +303,7 @@ unset($propuestaGastronomica);
                 </a>
                 <div class="footer-info-actions">
                     <button class="footer-info-button" type="button">Información</button>
-                    <button class="footer-bapst-button" type="button">Sobre BAPST</button>
+                    <button class="footer-bapst-button" type="button">Sobre Bapst</button>
                 </div>
             </div>
         </div>

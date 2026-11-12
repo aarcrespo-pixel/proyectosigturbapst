@@ -6,7 +6,7 @@ body[data-tema="oscuro"].faq-page { --faq-bg: #101114; --faq-card: rgba(30,30,34
 .faq-back { display: inline-flex; align-items: center; gap: .45rem; padding: .7rem 1rem; border: 1px solid rgba(127,127,127,.24); border-radius: 999px; background: var(--faq-card); color: var(--faq-text); font-weight: 700; text-decoration: none; transition: transform .18s ease, background .18s ease; }
 .faq-back:hover { transform: translateX(-2px); background: rgba(127,127,127,.12); }
 .faq-hero { margin-bottom: 24px; }
-.faq-kicker { margin: 0 0 8px; color: var(--faq-accent); font-size: .78rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.faq-kicker { margin: 0 0 8px; color: var(--faq-accent); font-size: .78rem; font-weight: 800; letter-spacing: .12em;  }
 .faq-hero h1 { margin: 0 0 10px; color: var(--faq-text); }
 .faq-hero p:not(.faq-kicker) { margin: 0; color: var(--faq-muted); line-height: 1.6; }
 .faq-card { padding: 28px; border: 1px solid rgba(127,127,127,.18); border-radius: 20px; background: var(--faq-card); backdrop-filter: blur(16px); box-shadow: 0 18px 40px rgba(0,0,0,.12); }

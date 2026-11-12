@@ -49,7 +49,6 @@ body.admin-panel-page {
     font-size: .72rem;
     font-weight: 800;
     letter-spacing: .14em;
-    text-transform: uppercase;
 }
 
 .admin-hero .admin-eyebrow {
@@ -535,7 +534,6 @@ body.admin-panel-page {
     color: #885815;
     font-size: .72rem;
     font-weight: 800;
-    text-transform: capitalize;
 }
 
 .admin-status--upcoming {
@@ -580,7 +578,6 @@ body.admin-panel-page {
 .admin-event__date small {
     font-size: .66rem;
     font-weight: 700;
-    text-transform: uppercase;
 }
 
 .admin-event__info {

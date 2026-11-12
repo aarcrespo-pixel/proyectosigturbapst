@@ -21,8 +21,7 @@ const eventosDestacados = Array.isArray(eventosDestacadosFuente)
 const listadoEventos = {
     deportivos: [],
     discotecas: [],
-    competencias: [],
-    anteriores: []
+    competencias: []
 };
 
 const datos = {
@@ -46,26 +45,16 @@ const eventosPersistidos = Array.isArray(window.eventosDesdeBd) ? window.eventos
     imagen: evento.imagen_portada || '../img/porco.avif'
 })) : [];
 
-const eventosAnterioresPersistidos = Array.isArray(window.eventosAnterioresDesdeBd) ? window.eventosAnterioresDesdeBd.map((evento) => ({
+const eventosCalendarioPersistidos = Array.isArray(window.eventosCalendarioDesdeBd) ? window.eventosCalendarioDesdeBd.map((evento) => ({
     id: Number(evento.id),
     nombre: evento.titulo,
     slug: evento.slug,
+    descripcion: evento.descripcion,
     categoria: evento.categoria,
     lugar: evento.ubicacion,
     fecha: evento.fecha,
     imagen: evento.imagen_portada || '../img/porco.avif'
 })) : [];
-
-const galeria = [
-    // Cada foto lleva metadatos propios para que el lightbox pueda renderizar
-    // el título y la descripción en lugar de mostrar un panel vacío.
-    { imagen: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Parque_Solari_Estatua.JPG", titulo: "Parque Benito Solari", descripcion: "Un espacio verde de Salto para caminar, descansar y disfrutar al aire libre." },
-    { imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwYxQbLi8Q2nRVZPDP9CwDkcYwQsKZ1R2EBF2XXy8nGdPUTnexH4SCTce8&s=10", titulo: "Costanera Norte", descripcion: "Un recorrido junto al río para disfrutar el paisaje y los atardeceres de la ciudad." },
-    { imagen: "https://www.infoturismo19.com.uy/wp-content/uploads/2023/07/SHOPPING-4-2.jpg", titulo: "Salto Shopping", descripcion: "Un punto de encuentro urbano con propuestas para pasear, comprar y compartir." },
-    { imagen: "https://alba-uy-sarandi.cdn.mediatiquepress.com/wp-content/uploads/2024/08/Life_Cinemas_2.webp", titulo: "Cine Sarandí", descripcion: "Una sala histórica para disfrutar cine, espectáculos y actividades culturales." },
-    { imagen: "https://www.opp.gub.uy/sites/default/files/noticias/2025-03/whatsapp-image-2025-03-17-92805-am-2.jpeg", titulo: "Actividades en Salto", descripcion: "Propuestas y encuentros para vivir la ciudad y compartir con la comunidad." },
-    { imagen: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/84/ae/39/trouville-pizzeria-y.jpg?w=1200&h=1200&s=1", titulo: "La Trouville", descripcion: "Una propuesta gastronómica para descubrir sabores locales y disfrutar una buena salida." }
-];
 
 const fotosPersistidasGaleria = Array.isArray(window.galeriaDesdeBd)
     ? window.galeriaDesdeBd.map((foto) => ({
@@ -80,7 +69,7 @@ const fotosPersistidasGaleria = Array.isArray(window.galeriaDesdeBd)
         puedeEliminar: Boolean(foto.puede_eliminar)
     }))
     : [];
-galeria.push(...fotosPersistidasGaleria);
+const galeria = fotosPersistidasGaleria;
 
 function escaparHTML(valor) {
     return String(valor ?? '').replace(/[&<>"']/g, (caracter) => ({
@@ -100,7 +89,9 @@ let eventosPrincipales = (() => {
         return {
             ...evento,
             slug: evento.slug || slugify(evento.nombre),
-            fechaMes: Number.isNaN(fecha.getTime()) ? '' : fecha.toLocaleDateString('es-UY', { month: 'short' }).replace('.', '').toUpperCase(),
+            fechaMes: Number.isNaN(fecha.getTime())
+                ? ''
+                : fecha.toLocaleDateString('es-UY', { month: 'short' }).replace('.', '').toLocaleLowerCase('es-UY'),
             fechaDia: Number.isNaN(fecha.getTime()) ? '' : String(fecha.getDate()).padStart(2, '0')
         };
     });
@@ -111,8 +102,7 @@ let galeriaFiltro = 'todos';
 let galeriaBusqueda = '';
 const maxEventosVisibles = 4;
 const listasEventosExpandidas = {
-    principales: false,
-    anteriores: false
+    principales: false
 };
 
 const pos = {}; // Crea un objeto vacío.
@@ -250,7 +240,9 @@ function renderGaleria() {
                 ${item.puedeEliminar ? `<button class="galeria-foto-eliminar" type="button" data-gallery-delete="${Number(item.id)}" aria-label="Eliminar ${escaparHTML(item.titulo)}">Eliminar</button>` : ''}
             </article>
     `)
-        .join("") + (window.gestionGaleria?.puedeSubir
+        .join("") + (fotosFiltradas.length === 0
+            ? `<p class="galeria-vacia">${galeria.length === 0 ? 'Todavía no hay fotos en la galería.' : 'No se encontraron fotos con esos criterios.'}</p>`
+            : '') + (window.gestionGaleria?.puedeSubir
             ? '<button class="imagen-galeria galeria-agregar-foto" type="button" data-gallery-open aria-label="Agregar fotos a la galería"><span aria-hidden="true">+</span><small>Agregar fotos</small></button>'
             : '');
 
@@ -421,23 +413,24 @@ function tarjetaPrincipal(evento) {
     const slug = evento.slug || slugify(evento.nombre);
     const idCatalogado = evento.id || window.sigturEventoIds?.[slug];
     const itemKey = `evento-${idCatalogado || slug}`;
+    const tipoEntradaEtiqueta = evento.tipoEntrada === 'De Pago' ? 'De pago' : evento.tipoEntrada;
     return `
     <article class="evento-card" data-item-key="${itemKey}" data-engagement="like-only" tabindex="0" role="link">
       <div class="evento-card-media">
         <img src="${evento.imagen}" alt="${evento.nombre}" loading="lazy" onerror="this.onerror=null;this.src='../img/porco.avif';">
       </div>
       <div class="evento-card-body">
-        <span class="categoria">${evento.categoria}${evento.tipoEntrada ? ` · ${evento.tipoEntrada}` : ''}</span>
+        <span class="categoria">${evento.categoria}${tipoEntradaEtiqueta ? ` · ${tipoEntradaEtiqueta}` : ''}</span>
         <h3>${evento.nombre}</h3>
         ${evento.lugar ? `<p class="lugar">${evento.lugar}</p>` : ""}
         ${evento.tipoEntrada === 'De Pago' ? `<p class="precio-evento">${escaparHTML(evento.precioTexto || 'Consultar con la organización')}</p>` : ""}
       </div>
       <div class="evento-card-action">
         <div class="fecha-protagonista" aria-label="Fecha del evento">
-          <span class="fecha-mes">${evento.fechaMes || 'AGO'}</span>
+          <span class="fecha-mes">${evento.fechaMes || 'Ago'}</span>
           <span class="fecha-dia">${evento.fechaDia || '07'}</span>
         </div>
-        <a href="${obtenerRutaEvento(evento)}" class="boton-amarillo">Ver mas</a>
+        <a href="${obtenerRutaEvento(evento)}" class="boton-amarillo">Ver más</a>
       </div>
     </article>
   `;
@@ -491,7 +484,7 @@ function renderCalendario() {
     label.textContent = primerDia.toLocaleDateString('es-ES', {
         month: 'long',
         year: 'numeric'
-    }).replace(/^./, (char) => char.toUpperCase());
+    });
 
     const fragment = document.createDocumentFragment();
 
@@ -875,7 +868,7 @@ function configurarNavegacionTarjetasEventos() {
 
 function actualizarVisibilidadListaEventos(contenedor, boton, expandida, lista = null) {
     if (!contenedor || !boton) return;
-    const tarjetas = [...contenedor.querySelectorAll('.evento-card, .evento-card-pasado')];
+    const tarjetas = [...contenedor.querySelectorAll('.evento-card')];
     const mostrarBoton = tarjetas.length > maxEventosVisibles;
     boton.hidden = !mostrarBoton;
     if (!mostrarBoton) return;
@@ -887,47 +880,6 @@ function actualizarVisibilidadListaEventos(contenedor, boton, expandida, lista =
     boton.setAttribute('aria-expanded', String(expandida));
     if (lista) {
         boton.dataset.eventList = lista;
-    }
-}
-
-function tarjetaAnterior(evento) {
-    const ruta = evento.id
-        ? `evento.php?id=${encodeURIComponent(evento.id)}`
-        : `evento-pasado.php?id=${encodeURIComponent(evento.slug || slugify(evento.nombre))}`;
-    const itemKey = `evento-${evento.id || evento.slug || slugify(evento.nombre)}`;
-    return `
-        <article class="evento-card-pasado" data-item-key="${itemKey}" data-engagement="like-only">
-            <a href="${ruta}" class="evento-card-pasado__link">
-            <div class="card-img-container">
-        <img src="${evento.imagen}" alt="${evento.nombre}" loading="lazy" onerror="this.onerror=null;this.src='../img/porco.avif';">
-      </div>
-      <div class="anteriores-texto">
-        <span class="categoria">${evento.categoria}</span>
-        <h3>${evento.nombre}</h3>
-        ${evento.lugar ? `<p class="lugar">${evento.lugar}</p>` : ""}
-      </div>
-            <div class="anteriores-action">
-                <span class="evento-status">FINALIZADO</span>
-                <span class="boton-amarillo">Ver más</span>
-            </div>
-            </a>
-        </article>
-  `;
-}
-
-function renderEventosAnteriores() {
-    const contenedor = document.getElementById('anteriores-contenedor');
-    if (!contenedor) return;
-
-    contenedor.innerHTML = eventosAnterioresPersistidos.map((evento) => tarjetaAnterior(evento)).join('');
-    actualizarVisibilidadListaEventos(
-        contenedor,
-        document.getElementById('eventos-anteriores-toggle'),
-        listasEventosExpandidas.anteriores,
-        'anteriores'
-    );
-    if (typeof window.initInteractiveCards === 'function') {
-        window.initInteractiveCards(contenedor);
     }
 }
 
@@ -1018,10 +970,7 @@ function configurarDrawerFiltros() {
     });
     limpiar?.addEventListener('click', () => {
         drawer.querySelectorAll('input, select').forEach((campo) => { campo.value = ''; });
-        eventosPrincipales = (() => {
-            const slugsPersistidos = new Set([...eventosPersistidos, ...eventosAnterioresPersistidos].map((evento) => evento.slug));
-            return [...eventosPersistidos, ...[...datos.destacados, ...datos.deportivos, ...datos.discotecas, ...datos.competencias].filter((evento) => !slugsPersistidos.has(slugify(evento.nombre)))];
-        })();
+        eventosPrincipales = eventosPersistidos;
         renderEventosPrincipales();
     });
 }
@@ -1039,6 +988,143 @@ function configurarFiltrosGaleria() {
         galeriaBusqueda = event.target.value;
         renderGaleria();
     });
+}
+
+function configurarCalendarioMensual() {
+    const grilla = document.getElementById('calendario-grilla');
+    const etiquetaMes = document.getElementById('calendario-mes');
+    const detalleTitulo = document.getElementById('calendario-detalle-titulo');
+    const detalleEventos = document.getElementById('calendario-eventos-dia');
+    const leyenda = document.getElementById('calendario-leyenda');
+    if (!grilla || !etiquetaMes || !detalleTitulo || !detalleEventos || !leyenda) return;
+
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    const colores = 8;
+    const categorias = [...new Set(eventosCalendarioPersistidos.map((evento) => String(evento.categoria || '').trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'es'));
+    const indiceCategoria = new Map(categorias.map((categoria, indice) => [categoria, indice % colores]));
+    const eventosPorFecha = new Map();
+    const hoy = new Date();
+    let anio = hoy.getFullYear();
+    let mes = hoy.getMonth() + 1;
+    let fechaSeleccionada = crearClaveFecha(anio, mes, hoy.getDate());
+
+    eventosCalendarioPersistidos.forEach((evento) => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(evento.fecha || '')) || !evento.id) return;
+        const lista = eventosPorFecha.get(evento.fecha) || [];
+        lista.push(evento);
+        eventosPorFecha.set(evento.fecha, lista);
+    });
+
+    const formatoFecha = (clave) => {
+        const [year, month, day] = clave.split('-').map(Number);
+        const fecha = new Date(year, month - 1, day);
+        const nombreDia = dias[fecha.getDay()];
+        return `${nombreDia.charAt(0).toLocaleUpperCase('es-UY')}${nombreDia.slice(1)}, ${day} de ${meses[month - 1]} de ${year}`;
+    };
+
+    const renderDetalle = () => {
+        const eventos = eventosPorFecha.get(fechaSeleccionada) || [];
+        detalleTitulo.textContent = formatoFecha(fechaSeleccionada);
+        if (!eventos.length) {
+            detalleEventos.innerHTML = '<p class="agenda-mensual__vacio">No hay eventos este día.</p>';
+            return;
+        }
+
+        detalleEventos.innerHTML = `<div class="agenda-mensual__lista-detalle">${eventos.map((evento) => `
+            <article class="agenda-mensual__evento-detalle">
+                <div>
+                    <span class="agenda-mensual__categoria">${escaparHTML(evento.categoria || '')}</span>
+                    <h4>${escaparHTML(evento.nombre)}</h4>
+                    ${evento.lugar ? `<p>${escaparHTML(evento.lugar)}</p>` : ''}
+                </div>
+                <a class="boton-amarillo" href="evento.php?id=${encodeURIComponent(evento.id)}">Ver evento</a>
+            </article>
+        `).join('')}</div>`;
+    };
+
+    const seleccionarFecha = (clave) => {
+        fechaSeleccionada = clave;
+        render();
+        renderDetalle();
+    };
+
+    const render = () => {
+        etiquetaMes.textContent = `${meses[mes - 1].charAt(0).toLocaleUpperCase('es-UY')}${meses[mes - 1].slice(1)} ${anio}`;
+        const primerDia = new Date(anio, mes - 1, 1);
+        const desplazamiento = (primerDia.getDay() + 6) % 7;
+        const totalDias = new Date(anio, mes, 0).getDate();
+        const cantidadCeldas = Math.max(35, Math.ceil((desplazamiento + totalDias) / 7) * 7);
+        const claveHoy = crearClaveFecha(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
+
+        grilla.innerHTML = Array.from({ length: cantidadCeldas }, (_, indice) => {
+            const fecha = new Date(anio, mes - 1, indice - desplazamiento + 1);
+            const clave = crearClaveFecha(fecha.getFullYear(), fecha.getMonth() + 1, fecha.getDate());
+            const eventos = eventosPorFecha.get(clave) || [];
+            const esOtroMes = fecha.getMonth() !== mes - 1;
+            const clases = [
+                'agenda-mensual__dia',
+                esOtroMes ? 'es-otro-mes' : '',
+                clave === claveHoy ? 'es-hoy' : '',
+                clave === fechaSeleccionada ? 'es-seleccionado' : ''
+            ].filter(Boolean).join(' ');
+            const etiquetas = eventos.slice(0, 3).map((evento) => {
+                const color = indiceCategoria.get(String(evento.categoria || '').trim()) ?? 0;
+                const hora = evento.hora ? `${escaparHTML(evento.hora)} · ` : '';
+                return `<a class="agenda-mensual__evento" style="--evento-fondo:var(--calendario-color-${color});--evento-texto:var(--calendario-texto-${color})" href="evento.php?id=${encodeURIComponent(evento.id)}" title="${escaparHTML(evento.nombre)}" aria-label="Ver evento ${escaparHTML(evento.nombre)}">${hora}${escaparHTML(evento.nombre)}</a>`;
+            }).join('');
+            const masEventos = eventos.length > 3 ? `<span class="agenda-mensual__mas-eventos">+${eventos.length - 3} más</span>` : '';
+
+            return `<div class="${clases}" role="gridcell" data-fecha="${clave}">
+                <button class="agenda-mensual__numero" type="button" data-seleccionar-fecha="${clave}" aria-label="Ver eventos del ${formatoFecha(clave)}" aria-pressed="${clave === fechaSeleccionada}">${fecha.getDate()}</button>
+                <div class="agenda-mensual__eventos">${etiquetas}${masEventos}</div>
+            </div>`;
+        }).join('');
+
+        const indiceColores = categorias.map((categoria, indice) => `
+            <span class="agenda-mensual__leyenda-item" style="--evento-fondo:var(--calendario-color-${indice % colores})">
+                <i aria-hidden="true"></i>${escaparHTML(categoria)}
+            </span>
+        `).join('');
+        leyenda.innerHTML = indiceColores;
+    };
+
+    const cambiarMes = (delta) => {
+        mes += delta;
+        if (mes < 1) {
+            mes = 12;
+            anio -= 1;
+        } else if (mes > 12) {
+            mes = 1;
+            anio += 1;
+        }
+        fechaSeleccionada = crearClaveFecha(anio, mes, 1);
+        render();
+        renderDetalle();
+    };
+
+    document.getElementById('calendario-anterior')?.addEventListener('click', () => cambiarMes(-1));
+    document.getElementById('calendario-siguiente')?.addEventListener('click', () => cambiarMes(1));
+    document.getElementById('calendario-hoy')?.addEventListener('click', () => {
+        anio = hoy.getFullYear();
+        mes = hoy.getMonth() + 1;
+        fechaSeleccionada = crearClaveFecha(anio, mes, hoy.getDate());
+        render();
+        renderDetalle();
+    });
+    grilla.addEventListener('click', (event) => {
+        if (!(event.target instanceof Element)) return;
+        const botonFecha = event.target.closest('[data-seleccionar-fecha]');
+        if (botonFecha) seleccionarFecha(botonFecha.dataset.seleccionarFecha);
+    });
+
+    render();
+    renderDetalle();
+}
+
+function crearClaveFecha(anio, mes, dia) {
+    return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
 }
 
 let lightboxIndex = 0;
@@ -1065,8 +1151,8 @@ function cerrarLightbox() {
 }
 
 function cambiarImagen(delta) {
-  // // Uso de modulo para envolver índices (wrap-around circular)
-  lightboxIndex = (lightboxIndex + galeria.length + delta) % galeria.length;
+    if (!galeria.length) return;
+    lightboxIndex = (lightboxIndex + galeria.length + delta) % galeria.length;
     actualizarLightbox();
 }
 
@@ -1076,19 +1162,14 @@ function configurarMapaEventos() {
     if (!mapList || !mapToggle) return;
 
     const ubicaciones = new Map();
-    const todosLosEventos = [
-        ...eventosPersistidos,
-        ...eventosAnterioresPersistidos
-    ];
-
-    todosLosEventos.forEach((evento) => {
+    eventosCalendarioPersistidos.forEach((evento) => {
         const lugar = String(evento.lugar || '').trim();
         const clave = lugar
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
             .replace(/\s+/g, ' ')
             .toLocaleLowerCase();
-        if (lugar && !ubicaciones.has(clave)) {
+        if (lugar && !/a completar/i.test(lugar) && !ubicaciones.has(clave)) {
             ubicaciones.set(clave, lugar);
         }
     });
@@ -1141,9 +1222,8 @@ function init() {
         boton.addEventListener('click', () => {
             const lista = boton.dataset.eventList;
             listasEventosExpandidas[lista] = !listasEventosExpandidas[lista];
-            const esAnteriores = lista === 'anteriores';
             actualizarVisibilidadListaEventos(
-                document.getElementById(esAnteriores ? 'anteriores-contenedor' : 'eventos-principales-contenedor'),
+                document.getElementById('eventos-principales-contenedor'),
                 boton,
                 listasEventosExpandidas[lista],
                 lista
@@ -1153,7 +1233,7 @@ function init() {
     configurarDrawerFiltros();
     configurarFiltrosGaleria();
     renderEventosPrincipales();
-    renderEventosAnteriores();
+    configurarCalendarioMensual();
     renderGaleria();
     configurarSubidaGaleria();
 

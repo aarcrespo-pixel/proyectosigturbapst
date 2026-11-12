@@ -1,4 +1,4 @@
-﻿* {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -865,7 +865,7 @@ body:has(main.detalle-hero) .menu a:not(.logo-link):not(.pagina-activa):hover {
 }
 
 .weather-icon { font-size: 1.15rem; line-height: 1; }
-.weather-condition { text-transform: capitalize; }
+.weather-condition {  }
 .weather-temperature { font-weight: 700; }
 .weather-humidity,
 .weather-ith { color: rgba(255, 255, 255, 0.82); }
@@ -1332,7 +1332,6 @@ body[data-tema="oscuro"] .perfil-btn:hover {
 
 .modal-kicker {
     margin: 0 0 0.2rem;
-    text-transform: uppercase;
     letter-spacing: 0.12em;
     font-size: 0.7rem;
     color: rgba(255, 255, 255, 0.65);
@@ -1781,7 +1780,6 @@ body[data-tema="oscuro"] .perfil-form-grid textarea {
     background: linear-gradient(90deg, var(--amarillo-fuerte), var(--amarillo-claro));
     color: #111;
     font-weight: 700;
-    text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
@@ -1985,7 +1983,6 @@ body[data-tema="oscuro"] .perfil-form-grid textarea {
 .footer-toggle h4 {
     font-size: clamp(1rem, 1vw, 1.1rem);
     letter-spacing: .18em;
-    text-transform: uppercase;
     margin: 0;
     color: #f5e8d7;
 }
@@ -2044,7 +2041,6 @@ body[data-tema="oscuro"] .perfil-form-grid textarea {
     border: 1px solid rgba(245, 232, 216, .16);
     color: #f5e8d7;
     font-size: clamp(0.8rem, 0.95vw, 0.9rem);
-    text-transform: uppercase;
     letter-spacing: .18em;
 }
 
@@ -2097,7 +2093,6 @@ body[data-tema="oscuro"] .perfil-form-grid textarea {
     font-size: .78rem;
     font-weight: 800;
     letter-spacing: .14em;
-    text-transform: uppercase;
 }
 
 .mapa-encabezado h2 {
@@ -2304,7 +2299,6 @@ body[data-tema="oscuro"] .mapa-lugares__toggle {
     font-size: .78rem;
     font-weight: 700;
     letter-spacing: .16em;
-    text-transform: uppercase;
 }
 
 .bapst-modal__dialog h2 {
@@ -3784,7 +3778,6 @@ select {
         font-size: .76rem;
         font-weight: 800;
         letter-spacing: .12em;
-        text-transform: uppercase;
     }
 
     .manual-usuario__close {

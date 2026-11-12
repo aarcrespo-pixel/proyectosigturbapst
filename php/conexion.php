@@ -523,7 +523,6 @@ try {
     foreach ($lugares as [$slug, $nombre, $categoria, $direccion, $imagen, $descripcion, $historia, $atractivos, $horarios, $recomendaciones, $latitud, $longitud]) {
         $guardarLugar->execute(compact('slug', 'nombre', 'categoria', 'direccion', 'imagen', 'descripcion', 'historia', 'atractivos', 'horarios', 'recomendaciones', 'latitud', 'longitud'));
     }
-
     /* Vinculamos registros antiguos por texto para que la relación nueva sea
        útil desde la primera carga, incluso antes de editar cada evento a mano. */
     $pdo->exec("UPDATE eventos e INNER JOIN lugares l ON e.ubicacion LIKE CONCAT('%', l.nombre, '%') SET e.lugar_id = l.id WHERE e.lugar_id IS NULL");
@@ -550,6 +549,39 @@ try {
     $versionStmt = $pdo->prepare("INSERT INTO `sigtur_schema_version` (`version`) VALUES (:version)");
     $versionStmt->execute([':version' => $versionEsperada]);
     }
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `evento_visitas` (
+        `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        `evento_id` INT NOT NULL,
+        `usuario_id` INT NULL,
+        `sesion_hash` CHAR(64) NOT NULL,
+        `ocurrido_en` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY `uniq_visita_evento_sesion` (`evento_id`, `sesion_hash`),
+        KEY `idx_visitas_evento_fecha` (`evento_id`, `ocurrido_en`),
+        KEY `idx_visitas_usuario_fecha` (`usuario_id`, `ocurrido_en`),
+        CONSTRAINT `fk_visitas_evento` FOREIGN KEY (`evento_id`) REFERENCES `eventos` (`id`) ON DELETE CASCADE,
+        CONSTRAINT `fk_visitas_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $indicesVisitas = $pdo->query("SHOW INDEX FROM `evento_visitas`")->fetchAll(PDO::FETCH_COLUMN, 2);
+    $indicesFavoritosEventos = $pdo->query("SHOW INDEX FROM `favoritos_eventos`")->fetchAll(PDO::FETCH_COLUMN, 2);
+    if (!in_array('idx_visitas_fecha_evento', $indicesVisitas, true)
+        || !in_array('idx_favoritos_fecha_evento_usuario', $indicesFavoritosEventos, true)) {
+        $bloqueoIndices = (string) $pdo->query("SELECT GET_LOCK('sigtur_event_stats_indexes', 10)")->fetchColumn() === '1';
+        if (!$bloqueoIndices) {
+            throw new PDOException('No se pudo obtener el bloqueo para actualizar los índices de estadísticas.');
+        }
+        try {
+            $indicesVisitas = $pdo->query("SHOW INDEX FROM `evento_visitas`")->fetchAll(PDO::FETCH_COLUMN, 2);
+            if (!in_array('idx_visitas_fecha_evento', $indicesVisitas, true)) {
+                $pdo->exec("ALTER TABLE `evento_visitas` ADD INDEX `idx_visitas_fecha_evento` (`ocurrido_en`, `evento_id`)");
+            }
+            $indicesFavoritosEventos = $pdo->query("SHOW INDEX FROM `favoritos_eventos`")->fetchAll(PDO::FETCH_COLUMN, 2);
+            if (!in_array('idx_favoritos_fecha_evento_usuario', $indicesFavoritosEventos, true)) {
+                $pdo->exec("ALTER TABLE `favoritos_eventos` ADD INDEX `idx_favoritos_fecha_evento_usuario` (`fecha_registro`, `evento_slug`, `usuario_id`)");
+            }
+        } finally {
+            $pdo->query("SELECT RELEASE_LOCK('sigtur_event_stats_indexes')");
+        }
+    }
     if ($bloqueoEsquema) {
         $pdo->query("SELECT RELEASE_LOCK('sigtur_schema_migrations')");
     }
@@ -561,7 +593,10 @@ try {
     $rutaSolicitud = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
     if (str_contains($rutaSolicitud, '/api/')) {
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['success' => false, 'error' => 'Servicio de mensajería no disponible.'], JSON_UNESCAPED_UNICODE);
+        $mensajeError = str_contains($rutaSolicitud, '/api/estadisticas_eventos.php')
+            ? 'No se pudieron cargar las estadísticas.'
+            : 'Servicio de mensajería no disponible.';
+        echo json_encode(['success' => false, 'error' => $mensajeError], JSON_UNESCAPED_UNICODE);
         exit;
     }
     exit('No se pudo conectar a la base de datos.');

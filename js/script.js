@@ -73,7 +73,7 @@ const traducciones = {
         homeInfoTitle: '¿Qué es SIGTUR?',
         homeInfoText1: 'SIGTUR es una guía local de Salto pensada para ayudarte a descubrir eventos, lugares y experiencias únicas de la ciudad.',
         homeInfoText2: 'La plataforma reúne recomendaciones culturales, turísticas y de ocio para que cada visita sea más simple, informada y memorable.',
-        homeFeaturesTitle: 'Eventos Destacados',
+        homeFeaturesTitle: 'Eventos destacados',
         homeFeatureEvents: 'Eventos',
         homeFeatureTourism: 'Turismo',
         homeFeaturePlaces: 'Lugares',
@@ -86,12 +86,12 @@ const traducciones = {
         homeFeatureGastronomy: 'Gastronomía',
         homeFeatureGastronomyText1: 'Descubre sabores locales, cafeterías y propuestas para disfrutar cada momento.',
         homeFeatureGastronomyText2: 'Encuentra opciones para compartir, conocer la identidad de Salto y volver por más.',
-        homeEventsTitle: 'Eventos Destacados',
+        homeEventsTitle: 'Eventos destacados',
         homeEventButton: 'Ver más',
         homePlacesTitle: 'Lugares destacados',
         homeGastronomyTitle: 'Gastronomía destacada',
-        homePlacesButton: 'Ver lugares',
-        homeGastronomyButton: 'Ver gastronomía',
+        homePlacesButton: 'Ver lugar',
+        homeGastronomyButton: 'Ver restaurante',
         homePlacesPrev: 'Lugar anterior',
         homePlacesNext: 'Siguiente lugar',
         homeGastronomyPrev: 'Lugar gastronómico anterior',
@@ -102,12 +102,12 @@ const traducciones = {
         homeGastronomyTrouvilleText: 'Una propuesta cálida para disfrutar café, algo rico y una buena charla en el centro.',
         homeGastronomyShoppingText: 'Un punto de encuentro para pasear, hacer una pausa y elegir entre distintas propuestas.',
         homeGastronomyCuisineText: 'Propuestas de cocina casera, minutas y platos locales para un almuerzo completo.',
-        footerEvents: 'EVENTOS',
-        footerPlaces: 'LUGARES',
-        footerTourism: 'TURISMO',
-        footerGastronomy: 'GASTRONOMÍA',
+        footerEvents: 'Eventos',
+        footerPlaces: 'Lugares',
+        footerTourism: 'Turismo',
+        footerGastronomy: 'Gastronomía',
         footerSigtur: 'SIGTUR',
-        footerEventLinks: ['Eventos destacados', 'Próximos eventos', 'Eventos anteriores', 'Todos los eventos'],
+        footerEventLinks: ['Eventos destacados', 'Próximos eventos', 'Calendario', 'Todos los eventos'],
         footerPlaceLinks: ['Plaza Artigas', 'Plaza Treinta y Tres Orientales', 'Costanera Norte', 'Costanera Sur', 'Parque Benito Solari'],
         footerGastronomyLinks: ['Restaurantes', 'Cafés y propuestas locales', 'Explorar gastronomía'],
         footerTourismLinks: ['Actividades', 'Lugares turísticos', 'Experiencias'],
@@ -158,15 +158,15 @@ const traducciones = {
         languageOptionZh: '中文',
         languageOptionAr: 'العربية',
         languageOptionRu: 'Русский',
-        eventsHeroLabel: 'EVENTOS',
-        eventsHeroTitle: 'EVENTOS',
+        eventsHeroLabel: 'Eventos',
+        eventsHeroTitle: 'Eventos',
         eventsHeroText: 'Este apartado reúne los diferentes eventos turísticos, deportivos y culturales de Salto para que puedas informarte y participar en actividades divertidas.',
         eventsFeaturedLabel: 'Destacados',
         tourismHeroLabel: 'Descubrí el turismo en Salto',
-        tourismHeroTitle: 'TURISMO',
+        tourismHeroTitle: 'Turismo',
         tourismHeroText: 'Explorá propuestas de turismo local, recorridos gastronómicos y experiencias al aire libre diseñadas para cada tipo de visitante.',
         placesHeroLabel: 'Lugares históricos',
-        placesHeroTitle: 'LUGARES',
+        placesHeroTitle: 'Lugares',
         placesHeroText: 'Descubre los lugares más emblemáticos de Salto, llenos de historia y cultura.'
     },
     en: {
@@ -186,7 +186,7 @@ const traducciones = {
         homeInfoTitle: 'What is SIGTUR?',
         homeInfoText1: 'SIGTUR is a local guide for Salto designed to help you discover the city’s unique events, places and experiences.',
         homeInfoText2: 'The platform brings together cultural, tourism and leisure recommendations so each visit is simpler, better informed and more memorable.',
-        homeFeaturesTitle: 'Featured Events',
+        homeFeaturesTitle: 'Featured events',
         homeFeatureEvents: 'Events',
         homeFeatureTourism: 'Tourism',
         homeFeaturePlaces: 'Places',
@@ -199,12 +199,12 @@ const traducciones = {
         homeFeatureGastronomy: 'Cuisine',
         homeFeatureGastronomyText1: 'Discover local flavours, cafés and proposals to enjoy every moment.',
         homeFeatureGastronomyText2: 'Find options to share, learn about Salto’s identity and come back for more.',
-        homeEventsTitle: 'Featured Events',
+        homeEventsTitle: 'Featured events',
         homeEventButton: 'See more',
         homePlacesTitle: 'Featured Places',
         homeGastronomyTitle: 'Featured Cuisine',
-        homePlacesButton: 'View places',
-        homeGastronomyButton: 'View cuisine',
+        homePlacesButton: 'View place',
+        homeGastronomyButton: 'View restaurant',
         homePlacesPrev: 'Previous place',
         homePlacesNext: 'Next place',
         homeGastronomyPrev: 'Previous cuisine spot',
@@ -215,12 +215,12 @@ const traducciones = {
         homeGastronomyTrouvilleText: 'A welcoming spot to enjoy coffee, a treat and a good conversation downtown.',
         homeGastronomyShoppingText: 'A meeting point to stroll, take a break and choose from different options.',
         homeGastronomyCuisineText: 'Home-style cooking, quick meals and local dishes for a complete lunch.',
-        footerEvents: 'EVENTS',
-        footerPlaces: 'PLACES',
-        footerTourism: 'TOURISM',
-        footerGastronomy: 'GASTRONOMY',
+        footerEvents: 'Events',
+        footerPlaces: 'Places',
+        footerTourism: 'Tourism',
+        footerGastronomy: 'Gastronomy',
         footerSigtur: 'SIGTUR',
-        footerEventLinks: ['Featured events', 'Upcoming events', 'Past events', 'All events'],
+        footerEventLinks: ['Featured events', 'Upcoming events', 'Calendar', 'All events'],
         footerPlaceLinks: ['Plaza Artigas', 'Plaza Treinta y Tres Orientales', 'North waterfront', 'South waterfront', 'Parque Benito Solari'],
         footerGastronomyLinks: ['Restaurants', 'Cafés and local spots', 'Explore gastronomy'],
         footerTourismLinks: ['Activities', 'Tourist spots', 'Experiences'],
@@ -271,15 +271,15 @@ const traducciones = {
         languageOptionZh: '中文',
         languageOptionAr: 'العربية',
         languageOptionRu: 'Русский',
-        eventsHeroLabel: 'EVENTS',
-        eventsHeroTitle: 'EVENTS',
+        eventsHeroLabel: 'Events',
+        eventsHeroTitle: 'Events',
         eventsHeroText: 'This section brings together the different tourist, sports and cultural events of Salto so you can stay informed and take part in fun activities.',
         eventsFeaturedLabel: 'Featured',
         tourismHeroLabel: 'Discover tourism in Salto',
-        tourismHeroTitle: 'TOURISM',
+        tourismHeroTitle: 'Tourism',
         tourismHeroText: 'Explore local tourism proposals, gastronomic routes and outdoor experiences designed for every type of visitor.',
         placesHeroLabel: 'Historic places',
-        placesHeroTitle: 'PLACES',
+        placesHeroTitle: 'Places',
         placesHeroText: 'Discover the most emblematic places in Salto, full of history and culture.'
     },
     pt: {
@@ -316,8 +316,8 @@ const traducciones = {
         homeEventButton: 'Ver mais',
         homePlacesTitle: 'Lugares em destaque',
         homeGastronomyTitle: 'Gastronomia em destaque',
-        homePlacesButton: 'Ver lugares',
-        homeGastronomyButton: 'Ver gastronomia',
+        homePlacesButton: 'Ver lugar',
+        homeGastronomyButton: 'Ver restaurante',
         homePlacesPrev: 'Lugar anterior',
         homePlacesNext: 'Próximo lugar',
         homeGastronomyPrev: 'Lugar gastronômico anterior',
@@ -328,12 +328,12 @@ const traducciones = {
         homeGastronomyTrouvilleText: 'Um lugar acolhedor para tomar café, comer algo gostoso e conversar no centro.',
         homeGastronomyShoppingText: 'Um ponto de encontro para passear, fazer uma pausa e escolher entre várias opções.',
         homeGastronomyCuisineText: 'Comida caseira, pratos rápidos e receitas locais para um almoço completo.',
-        footerEvents: 'EVENTOS',
-        footerPlaces: 'LOCAIS',
-        footerTourism: 'TURISMO',
-        footerGastronomy: 'GASTRONOMIA',
+        footerEvents: 'Eventos',
+        footerPlaces: 'Locais',
+        footerTourism: 'Turismo',
+        footerGastronomy: 'Gastronomia',
         footerSigtur: 'SIGTUR',
-        footerEventLinks: ['Eventos em destaque', 'Próximos eventos', 'Eventos anteriores', 'Todos os eventos'],
+        footerEventLinks: ['Eventos em destaque', 'Próximos eventos', 'Calendário', 'Todos os eventos'],
         footerPlaceLinks: ['Praça Artigas', 'Praça Treinta y Tres Orientales', 'Costanera Norte', 'Costanera Sul', 'Parque Benito Solari'],
         footerGastronomyLinks: ['Restaurantes', 'Cafés e propostas locais', 'Explorar gastronomia'],
         footerTourismLinks: ['Atividades', 'Locais turísticos', 'Experiências'],
@@ -384,15 +384,15 @@ const traducciones = {
         languageOptionZh: '中文',
         languageOptionAr: 'العربية',
         languageOptionRu: 'Русский',
-        eventsHeroLabel: 'EVENTOS',
-        eventsHeroTitle: 'EVENTOS',
+        eventsHeroLabel: 'Eventos',
+        eventsHeroTitle: 'Eventos',
         eventsHeroText: 'Esta seção reúne os diferentes eventos turísticos, esportivos e culturais de Salto para que você possa se informar e participar de atividades divertidas.',
         eventsFeaturedLabel: 'Destaques',
         tourismHeroLabel: 'Descubra o turismo em Salto',
-        tourismHeroTitle: 'TURISMO',
+        tourismHeroTitle: 'Turismo',
         tourismHeroText: 'Explore propostas de turismo local, rotas gastronômicas e experiências ao ar livre concebidas para cada tipo de visitante.',
         placesHeroLabel: 'Lugares históricos',
-        placesHeroTitle: 'LUGARES',
+        placesHeroTitle: 'Lugares',
         placesHeroText: 'Descubra os lugares mais emblemáticos de Salto, cheios de história e cultura.'
     }
 };
@@ -507,11 +507,9 @@ const traduccionesExtra = {
         todosEventsCardDates: ['12 agosto 2026', '19 agosto 2026', '24 agosto 2026', '2 septiembre 2026', '5 octubre 2026', '8 octubre 2026', '12 octubre 2026', '18 septiembre 2026', '30 septiembre 2026', '1 octubre 2026', '3 octubre 2026', '6 octubre 2026', '10 septiembre 2026', '16 septiembre 2026', '28 septiembre 2026', '9 octubre 2026', '14 octubre 2026', '20 octubre 2026'],
         todosEventsCardCategories: ['Cultural', 'Deportivo', 'Cultural', 'Social', 'Cultural', 'Deportivo', 'Social', 'Social', 'Cultural', 'Cultural', 'Cultural', 'Cultural', 'Deportivo', 'Deportivo', 'Deportivo', 'Deportivo', 'Deportivo', 'Deportivo'],
         eventsMainCategories: ['Deportivos', 'Discotecas', 'Competencias'],
-        eventsPreviousTitle: 'Eventos Anteriores',
         eventsReviewsTitle: 'Galería',
         eventsGalleryTitle: 'Galería',
         eventsViewAll: 'Ver todos los eventos',
-        eventsViewPrevious: 'Ver eventos anteriores',
         eventsReviewNames: ['Benjamín R.', 'Aaron C.', 'Santiago D.', 'Federico S.', 'Pío M.'],
         tourismSectionEscapadasTitle: 'Escapadas recomendadas',
         tourismSectionRoutesTitle: 'Rutas y experiencias',
@@ -695,11 +693,9 @@ const traduccionesExtra = {
         todosEventsNavPrev: 'Previous events',
         todosEventsNavNext: 'Next events',
         eventsMainCategories: ['Sports', 'Discotheques', 'Competitions'],
-        eventsPreviousTitle: 'Previous events',
         eventsReviewsTitle: 'Gallery',
         eventsGalleryTitle: 'Gallery',
         eventsViewAll: 'See all events',
-        eventsViewPrevious: 'See previous events',
         eventsReviewNames: ['Benjamin R.', 'Aaron C.', 'Santiago D.', 'Federico S.', 'Pio M.'],
         tourismSectionEscapadasTitle: 'Recommended escapes',
         tourismSectionRoutesTitle: 'Routes and experiences',
@@ -959,11 +955,9 @@ const traduccionesExtra = {
         todosEventsNavPrev: 'Eventos anteriores',
         todosEventsNavNext: 'Próximos eventos',
         eventsMainCategories: ['Esportivos', 'Discotecas', 'Competições'],
-        eventsPreviousTitle: 'Eventos anteriores',
         eventsReviewsTitle: 'Galeria',
         eventsGalleryTitle: 'Galeria',
         eventsViewAll: 'Ver todos os eventos',
-        eventsViewPrevious: 'Ver eventos anteriores',
         eventsReviewNames: ['Benjamim R.', 'Aaron C.', 'Santiago D.', 'Federico S.', 'Pío M.']
     }
 };
@@ -1349,10 +1343,12 @@ const activarCarrusel = () => {
         const indicadores = seccion?.querySelectorAll('.indicador') || [];
         const flechaIzquierda = carrusel.querySelector('.flecha.izquierda');
         const flechaDerecha = carrusel.querySelector('.flecha.derecha');
+        const autoplay = seccion?.hasAttribute('data-carrusel-autoplay') === true;
         let indiceActivo = 0;
+        let pausado = false;
 
         const cambiarSlide = (nuevoIndice) => {
-            if (slides.length === 0 || indicadores.length === 0) return;
+            if (slides.length === 0 || indicadores.length !== slides.length) return;
             slides[indiceActivo].classList.remove('activo');
             indicadores[indiceActivo].classList.remove('activo');
             indiceActivo = (nuevoIndice + slides.length) % slides.length;
@@ -1371,6 +1367,25 @@ const activarCarrusel = () => {
                 cambiarSlide(index);
             });
         });
+
+        if (autoplay && slides.length > 1) {
+            const avanzar = () => {
+                if (!pausado && !document.hidden) cambiarSlide(indiceActivo + 1);
+            };
+            const pausar = () => { pausado = true; };
+            const reanudar = () => { pausado = false; };
+
+            window.setInterval(avanzar, 3500);
+            carrusel.addEventListener('pointerenter', pausar);
+            carrusel.addEventListener('pointerleave', reanudar);
+            carrusel.addEventListener('focusin', pausar);
+            carrusel.addEventListener('focusout', (evento) => {
+                if (!carrusel.contains(evento.relatedTarget)) reanudar();
+            });
+            carrusel.addEventListener('touchstart', pausar, { passive: true });
+            carrusel.addEventListener('touchend', reanudar, { passive: true });
+            carrusel.addEventListener('touchcancel', reanudar, { passive: true });
+        }
     });
 };
 

@@ -38,9 +38,9 @@ function sigtur_inicializar_contenido_publico(PDO $pdo): void
     if (!in_array('seccion_publica', $columnasLugares, true)) {
         $pdo->exec("ALTER TABLE `lugares` ADD COLUMN `seccion_publica` VARCHAR(30) NOT NULL DEFAULT 'oculto' AFTER `categoria`");
         $pdo->exec("UPDATE `lugares` SET `seccion_publica` = 'emblematico' WHERE `slug` IN ('plaza-treinta-y-tres-orientales', 'plaza-artigas', 'parque-benito-solari')");
-        $pdo->exec("UPDATE `lugares` SET `seccion_publica` = 'recreacion' WHERE `slug` IN ('costanera-norte', 'muelle-negro')");
+        $pdo->exec("UPDATE `lugares` SET `seccion_publica` = 'recreacion' WHERE `slug` IN ('plaza-roosvelt', 'costanera-norte', 'muelle-negro')");
     }
-    $pdo->exec("UPDATE `lugares` SET `seccion_publica` = 'complementario' WHERE `seccion_publica` = 'oculto' AND `slug` IN ('basalto', 'costanera-sur', 'la-fosa', 'cine-sarandi', 'salto-shopping', 'la-trouville', 'plaza-general-flores', 'plaza-de-deportes-salto', 'museo-del-hombre-y-la-tecnologia', 'museo-horacio-quiroga', 'usina-cultural-salto', 'biblioteca-municipal-salto', 'termas-del-dayman', 'acuamania', 'termas-de-la-arapey', 'agua-clara')");
+    $pdo->exec("UPDATE `lugares` SET `seccion_publica` = 'complementario' WHERE `seccion_publica` = 'oculto' AND `slug` IN ('plaza-general-flores', 'plaza-de-deportes-salto', 'parque-acuatico-horacio-quiroga', 'museo-del-hombre-y-la-tecnologia', 'museo-horacio-quiroga', 'usina-cultural-salto', 'biblioteca-municipal-salto', 'termas-del-dayman', 'acuamania', 'termas-de-la-arapey', 'agua-clara')");
     $pdo->exec("UPDATE `lugares` SET `nombre` = 'Termas Agua Clara', `direccion` = 'Termas Agua Clara, Salto, Uruguay' WHERE `slug` = 'agua-clara' AND `nombre` = 'Agua Clara'");
 
     $marcadorLugaresOsm = $pdo->prepare('SELECT 1 FROM contenido_catalogo_meta WHERE clave = ?');
@@ -71,34 +71,6 @@ function sigtur_inicializar_contenido_publico(PDO $pdo): void
         $pdo->prepare('INSERT IGNORE INTO contenido_catalogo_meta (clave) VALUES (?)')->execute(['lugares_openstreetmap_referencias_v1']);
     }
 
-    $marcadorCatalogoSalto = $pdo->prepare('SELECT 1 FROM contenido_catalogo_meta WHERE clave = ?');
-    $marcadorCatalogoSalto->execute(['turismo_salto_ampliado_v1']);
-    if (!$marcadorCatalogoSalto->fetchColumn()) {
-        $lugaresSalto = [
-            ['costanera-norte', 'Costanera Norte', 'Paseo costero', 'Costanera Norte, Salto, Uruguay', '../img/Costanera_Norte.jpeg', 'Paseo ribereño de Salto para caminar, contemplar el río Uruguay y disfrutar del espacio público.', 'La costanera forma parte del vínculo histórico de Salto con el río Uruguay y es un espacio de encuentro y recreación.', 'Paseo junto al río|Caminatas|Atardeceres|Actividades al aire libre', 'Espacio público; consultar condiciones de cada sector', 'Llevar agua y protección solar; respetar la costa y retirar los residuos.', -31.3770000, -57.9540000, 'recreacion'],
-            ['costanera-sur', 'Costanera Sur', 'Paseo costero', 'Costanera Sur, Salto, Uruguay', '../img/turismo/rio-uruguay-atardecer.jpg', 'Tramo costero para recorrer y contemplar el paisaje del río Uruguay en Salto.', 'La ribera sur integra los paseos públicos vinculados al río y al paisaje urbano de Salto.', 'Vistas del río|Paseos|Fotografía de paisaje', 'Espacio público; consultar condiciones de acceso', 'Verificar accesos y condiciones del río antes de la visita.', -31.3910000, -57.9660000, 'recreacion'],
-            ['muelle-negro', 'Muelle Negro', 'Muelle y costa', 'Muelle Negro, Paseo de la Costa, Salto, Uruguay', '../img/turismo/rio-uruguay-vista.jpg', 'Punto de referencia del Paseo de la Costa, junto al río Uruguay en Salto.', 'El Muelle Negro forma parte del paisaje portuario y ribereño de la ciudad.', 'Paisaje del río|Recorrido costero|Fotografía', 'Consultar accesos y condiciones del lugar', 'La foto muestra el río desde Salto, no una toma específica del muelle. Respetar las zonas de acceso restringido.', -31.3841657, -57.9744017, 'recreacion'],
-            ['parque-benito-solari', 'Parque Benito Solari', 'Parque', 'Parque Benito Solari, Salto, Uruguay', '../img/turismo/parque-benito-solari.jpg', 'Parque urbano histórico con áreas verdes y espacios para recorrer al aire libre.', 'El Parque Benito Solari es uno de los espacios verdes emblemáticos de Salto.', 'Caminatas|Paisaje y patrimonio|Actividades al aire libre', 'Espacio público; consultar horarios y actividades', 'Respetar las áreas verdes y retirar los residuos.', -31.3900000, -57.9700000, 'emblematico'],
-            ['plaza-artigas', 'Plaza Artigas', 'Plaza', 'Plaza Artigas, Salto, Uruguay', '../img/turismo/plaza-artigas.jpg', 'Plaza céntrica y espacio cívico de Salto, reconocible por su monumento a José Gervasio Artigas.', 'La plaza es un punto de referencia de la vida pública y del patrimonio urbano de Salto.', 'Monumento a Artigas|Paseo urbano|Arquitectura del centro', 'Espacio público de acceso libre', 'Combinar la visita con un recorrido por el centro histórico.', -31.3840000, -57.9610000, 'emblematico'],
-            ['plaza-treinta-y-tres-orientales', 'Plaza Treinta y Tres Orientales', 'Plaza', 'Plaza Treinta y Tres Orientales, Salto, Uruguay', '../img/turismo/plaza-treinta-y-tres.jpg', 'Plaza céntrica de Salto con espacios verdes y patrimonio urbano.', 'La plaza integra la memoria cívica y la vida cotidiana de la ciudad.', 'Paseo|Espacios verdes|Patrimonio urbano', 'Espacio público de acceso libre', 'Visitar durante el día y respetar las áreas de descanso.', -31.3860000, -57.9620000, 'emblematico'],
-            ['biblioteca-municipal-salto', 'Biblioteca Municipal de Salto', 'Biblioteca', 'Biblioteca Municipal, Salto, Uruguay', '../img/turismo/biblioteca-ilustrativa.jpg', 'Espacio público de lectura y consulta bibliográfica en Salto. Confirmar dirección y horarios con la oficina municipal de Cultura antes de visitarlo.', 'La biblioteca integra la oferta cultural y de lectura de la ciudad.', 'Lectura|Consulta bibliográfica|Actividades culturales', 'Consultar horarios de atención con la oficina municipal de Cultura', 'La fotografía es ilustrativa y corresponde a una biblioteca universitaria de Finlandia; no es la sede de Salto.', null, null, 'complementario'],
-            ['museo-del-hombre-y-la-tecnologia', 'Museo del Hombre y la Tecnología', 'Museo', 'Brasil 511, Salto, Uruguay', '../img/turismo/museo-hombre-tecnologia.jpg', 'Museo municipal dedicado a la historia de Salto, la tecnología y su relación con las personas.', 'El museo ocupa un edificio patrimonial del centro y forma parte de la oferta cultural de Salto.', 'Exposiciones|Historia y tecnología|Patrimonio', 'Consultar días y horarios de apertura', 'Confirmar horarios y actividades antes de la visita.', -31.3857947, -57.9690985, 'complementario'],
-            ['termas-del-dayman', 'Termas del Daymán', 'Termas', 'Termas del Daymán, Salto, Uruguay', '../img/Termas_Dayman.webp', 'Complejo termal de Salto con piscinas de aguas cálidas y opciones de descanso.', 'Las Termas del Daymán son uno de los principales destinos termales del departamento.', 'Piscinas termales|Parques acuáticos|Descanso|Servicios turísticos', 'Según el complejo y la temporada', 'Consultar tarifas, horarios y disponibilidad antes de viajar.', -31.4530000, -57.8920000, 'recreacion'],
-            ['termas-de-la-arapey', 'Termas de Arapey', 'Termas', 'Termas de Arapey, Salto, Uruguay', '../img/experiencias.webp', 'Complejo termal del norte de Salto, rodeado de naturaleza y espacios de descanso.', 'Arapey integra la oferta termal del departamento y es un destino para estadías y recreación.', 'Piscinas termales|Naturaleza|Alojamiento|Descanso', 'Según el complejo y la temporada', 'Confirmar servicios, tarifas y disponibilidad antes de viajar.', null, null, 'recreacion'],
-            ['acuamania', 'Acuamania', 'Parque acuático', 'Acuamania, Termas del Daymán, Salto, Uruguay', '../img/turismo/acuamania.jpg', 'Parque acuático de Termas del Daymán con hidrotubos y espacios de recreación.', 'Acuamania forma parte de la propuesta recreativa y turística de Termas del Daymán.', 'Hidrotubos|Piscinas|Actividades familiares', 'Consultar temporada y horarios del parque', 'Revisar las condiciones de acceso y las normas de seguridad del parque.', -31.4550000, -57.8910000, 'recreacion'],
-        ];
-        $guardarLugarSalto = $pdo->prepare('INSERT INTO lugares (slug, nombre, categoria, direccion, imagen, descripcion, historia, atractivos, horarios, recomendaciones, latitud, longitud, seccion_publica)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE nombre = VALUES(nombre), categoria = VALUES(categoria), direccion = VALUES(direccion),
-                imagen = VALUES(imagen), descripcion = VALUES(descripcion), historia = VALUES(historia), atractivos = VALUES(atractivos),
-                horarios = VALUES(horarios), recomendaciones = VALUES(recomendaciones), latitud = VALUES(latitud),
-                longitud = VALUES(longitud), seccion_publica = VALUES(seccion_publica)');
-        foreach ($lugaresSalto as $lugarSalto) {
-            $guardarLugarSalto->execute($lugarSalto);
-        }
-        $pdo->prepare('INSERT IGNORE INTO contenido_catalogo_meta (clave) VALUES (?)')->execute(['turismo_salto_ampliado_v1']);
-    }
-
     $marcadorTurismo = $pdo->prepare('SELECT 1 FROM contenido_catalogo_meta WHERE clave = ?');
     $marcadorTurismo->execute(['turismo_base_v1']);
     if (!$marcadorTurismo->fetchColumn()) {
@@ -126,20 +98,36 @@ function sigtur_inicializar_contenido_publico(PDO $pdo): void
     $marcadorGastronomia->execute(['gastronomia_base_v1']);
     $restaurantes = [
         ['la-vieja-bodega', 'La Vieja Bodega', '../img/r1.jfif', 'Conocé La Vieja Bodega, una de las propuestas gastronómicas de Salto. Esta ficha reúne la información disponible del establecimiento y te permite consultar su ubicación. Para conocer su propuesta vigente, servicios o disponibilidad, contactá directamente con el local.'],
-        ['trattoria', 'Trattoria', '../img/r2.jfif', 'Trattoria forma parte de las opciones para disfrutar una salida gastronómica en Salto. Revisá la información publicada y usá el enlace para ubicar el establecimiento. Consultá directamente con el local por su propuesta vigente y los servicios disponibles.'],
-        ['toscana', 'Toscana', '../img/toscana-instagram.jpg', 'Toscana es una de las alternativas gastronómicas incluidas en la guía de SIGTUR. La ficha permite conocer la información publicada y abrir su ubicación; para detalles actuales sobre la propuesta o la atención, consultá al establecimiento.'],
+        ['trattoria', 'Trattoria', '../img/gastronomia.jpg', 'Trattoria forma parte de las opciones para disfrutar una salida gastronómica en Salto. Revisá la información publicada y usá el enlace para ubicar el establecimiento. Consultá directamente con el local por su propuesta vigente y los servicios disponibles.'],
+        ['toscana', 'Toscana', '../img/toscana.jpg', 'Toscana es una de las alternativas gastronómicas incluidas en la guía de SIGTUR. La ficha permite conocer la información publicada y abrir su ubicación; para detalles actuales sobre la propuesta o la atención, consultá al establecimiento.'],
         ['punto-y-aparte', 'Punto y Aparte', '../img/r4.jpg', 'Punto y Aparte suma una opción para tener en cuenta al recorrer la oferta gastronómica de Salto. Encontrá aquí los datos disponibles y accedé al mapa para planificar tu visita. La información sobre servicios y propuesta actual debe confirmarse con el local.'],
         ['rodelu', 'Rodelu', '../img/r5.jfif', 'Rodelu integra el catálogo gastronómico local de SIGTUR. Esta ficha te ayuda a identificar el establecimiento y llegar a su ubicación; contactá directamente con el local para consultar su propuesta y los servicios disponibles actualmente.'],
         ['el-tony', 'El Tony', '../img/r6.jfif', 'El Tony es una de las propuestas gastronómicas que podés explorar en Salto. Consultá la información disponible en esta ficha y abrí el mapa para ubicar el lugar. Para conocer opciones vigentes o hacer consultas específicas, comunicate con el establecimiento.'],
-        ['la-canilla', 'La Canilla', '../img/r7.jfif', 'La Canilla forma parte de la oferta gastronómica que reúne SIGTUR. Desde esta ficha podés identificar el establecimiento y consultar su ubicación. Para información actualizada sobre su propuesta, servicios o disponibilidad, lo mejor es contactar directamente con el local.'],
+        ['la-canilla', 'La Canilla', '../img/lacanilla.jpg', 'La Canilla forma parte de la oferta gastronómica que reúne SIGTUR. Desde esta ficha podés identificar el establecimiento y consultar su ubicación. Para información actualizada sobre su propuesta, servicios o disponibilidad, lo mejor es contactar directamente con el local.'],
         ['el-dominico', 'El Dominico', '../img/r8.jfif', 'El Dominico es una alternativa para considerar al organizar una salida gastronómica por Salto. La ficha reúne los datos publicados y facilita el acceso a su ubicación; consultá al establecimiento para confirmar la información vigente.'],
-        ['la-2000', 'La 2000', '../img/gastronomia.jpg', 'La 2000 integra el catálogo de lugares gastronómicos de SIGTUR. Revisá la información disponible, abrí la ubicación en el mapa y contactá directamente con el establecimiento para conocer su propuesta actual y resolver consultas antes de visitarlo.'],
-        ['buffet-del-chef', 'Buffet del Chef', '../img/Trouville.jpg', 'Buffet del Chef es una de las opciones gastronómicas listadas para Salto. Esta ficha te permite conocer los datos publicados y encontrar su ubicación. Para detalles sobre la oferta vigente, servicios o disponibilidad, consultá directamente con el local.'],
-        ['don-diego', 'Don Diego', '../img/Shopping_Salto.jpg', 'Don Diego forma parte de las propuestas gastronómicas registradas en SIGTUR. Encontrá aquí la información disponible y el acceso al mapa para planificar cómo llegar. Los detalles de la propuesta y los servicios actuales se confirman directamente con el establecimiento.'],
-        ['gaucho', 'GAUCHO', '../img/feria_emprendedores.jpg', 'GAUCHO es una propuesta incluida en la guía gastronómica de Salto. Usá esta ficha para identificar el establecimiento y consultar su ubicación; contactá directamente con el local para obtener información actualizada sobre su propuesta y servicios.'],
+        ['la-2000', 'La 2000', '../img/la2000.jpg', 'La 2000 integra el catálogo de lugares gastronómicos de SIGTUR. Revisá la información disponible, abrí la ubicación en el mapa y contactá directamente con el establecimiento para conocer su propuesta actual y resolver consultas antes de visitarlo.'],
+        ['buffet-del-chef', 'Buffet del Chef', '../img/buffet_del_chef.jpg', 'Buffet del Chef es una de las opciones gastronómicas listadas para Salto. Esta ficha te permite conocer los datos publicados y encontrar su ubicación. Para detalles sobre la oferta vigente, servicios o disponibilidad, consultá directamente con el local.'],
+        ['don-diego', 'Don Diego', '../img/Don-diego.jpg', 'Don Diego forma parte de las propuestas gastronómicas registradas en SIGTUR. Encontrá aquí la información disponible y el acceso al mapa para planificar cómo llegar. Los detalles de la propuesta y los servicios actuales se confirman directamente con el establecimiento.'],
+        ['gaucho', 'GAUCHO', '../img/gaucho.jpg', 'GAUCHO es una propuesta incluida en la guía gastronómica de Salto. Usá esta ficha para identificar el establecimiento y consultar su ubicación; contactá directamente con el local para obtener información actualizada sobre su propuesta y servicios.']
     ];
-    $actualizarImagenToscana = $pdo->prepare("UPDATE gastronomia_catalogo SET imagen = :imagen WHERE slug = 'toscana' AND imagen IN ('../img/r3.jfif', 'r3.jfif')");
-    $actualizarImagenToscana->execute([':imagen' => '../img/toscana-instagram.jpg']);
+    $imagenesGastronomiaMigradas = [
+        'toscana' => ['../img/toscana.jpg', ['../img/r3.jfif', 'r3.jfif', '../img/toscana-instagram.jpg']],
+        'la-canilla' => ['../img/lacanilla.jpg', ['../img/r7.jfif', 'r7.jfif']],
+        'la-2000' => ['../img/la2000.jpg', ['../img/gastronomia.jpg']],
+        'buffet-del-chef' => ['../img/buffet_del_chef.jpg', ['../img/Trouville.jpg']],
+        'don-diego' => ['../img/Don-diego.jpg', ['../img/Shopping_Salto.jpg']],
+        'gaucho' => ['../img/gaucho.jpg', ['../img/feria_emprendedores.jpg']],
+    ];
+    $actualizarImagenGastronomia = $pdo->prepare('UPDATE gastronomia_catalogo SET imagen = :imagen_nueva WHERE slug = :slug AND imagen = :imagen_anterior');
+    foreach ($imagenesGastronomiaMigradas as $slug => [$rutaNueva, $rutasAnteriores]) {
+        foreach ($rutasAnteriores as $rutaAnterior) {
+            $actualizarImagenGastronomia->execute([
+                ':imagen_nueva' => $rutaNueva,
+                ':slug' => $slug,
+                ':imagen_anterior' => $rutaAnterior,
+            ]);
+        }
+    }
     $descripcionAnterior = 'Consultá la propuesta, los horarios y los precios directamente con el restaurante.';
     $actualizarDescripcionBase = $pdo->prepare('UPDATE gastronomia_catalogo SET descripcion = :descripcion WHERE slug = :slug AND descripcion = :anterior');
     foreach ($restaurantes as [$slug, $nombre, $imagen, $descripcion]) {

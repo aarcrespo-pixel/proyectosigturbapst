@@ -4,7 +4,7 @@ require_once __DIR__ . '/helpers/contenido_publico.php';
 require_once __DIR__ . '/helpers/imagenes.php';
 
 sigtur_inicializar_contenido_publico($pdo);
-$propuestasGastronomicas = $pdo->query('SELECT id, nombre, imagen, descripcion, categoria, url_mapa FROM gastronomia_catalogo ORDER BY orden, nombre')->fetchAll(PDO::FETCH_ASSOC);
+$propuestasGastronomicas = $pdo->query('SELECT id, slug, nombre, imagen, descripcion, categoria, url_mapa FROM gastronomia_catalogo ORDER BY orden, nombre')->fetchAll(PDO::FETCH_ASSOC);
 $categoriasGastronomicas = array_values(array_unique(array_filter(array_map(
     static fn (array $propuesta): string => trim((string) ($propuesta['categoria'] ?? '')),
     $propuestasGastronomicas
@@ -31,7 +31,7 @@ unset($propuesta);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/estilos.css?v=<?= time(); ?>">
-    <link rel="stylesheet" href="../css/gastronomia.css?v=20261027-3">
+    <link rel="stylesheet" href="../css/gastronomia.css?v=20261112-warm-palette-1">
 </head>
 
 <body>
@@ -68,7 +68,7 @@ unset($propuesta);
         <section class="hero-gastronomia">
             <div class="hero-gastronomia__contenido">
                 <span>Sabores de Salto</span>
-                <h1>GASTRONOMÍA</h1>
+                <h1>Gastronomía</h1>
                 <p>Descubrí propuestas locales, productos regionales y lugares para disfrutar la identidad de Salto.</p>
             </div>
         </section>
@@ -114,7 +114,10 @@ unset($propuesta);
                             <h3><?= htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') ?></h3>
                             <p><?= htmlspecialchars($descripcion, ENT_QUOTES, 'UTF-8') ?></p>
                             <p class="tarjeta-gastronomia__nota">Para consultar la propuesta vigente, servicios o disponibilidad, comunicate directamente con el establecimiento.</p>
-                            <a href="<?= htmlspecialchars($propuesta['url_mapa'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Ver ubicación <span aria-hidden="true">↗</span></a>
+                            <div class="tarjeta-gastronomia__acciones">
+                                <a class="gastronomia-boton-principal" href="restaurante.php?slug=<?= rawurlencode((string) $propuesta['slug']) ?>">Ver restaurante</a>
+                                <a class="gastronomia-boton-secundario" href="<?= htmlspecialchars($propuesta['url_mapa'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">Ver ubicación <span aria-hidden="true">↗</span></a>
+                            </div>
                         </div>
                     </article>
                 <?php endforeach; ?>
@@ -138,13 +141,13 @@ unset($propuesta);
                     <p>Plaza Artigas, una caminata por el centro y una pausa con café, torta o medialunas.</p>
                     <span class="recorrido-gastronomia__duracion">Plan tranquilo</span>
                 </article>
-                <article class="recorrido-gastronomia recorrido-gastronomia--green">
+                <article class="recorrido-gastronomia recorrido-gastronomia--amber">
                     <span class="recorrido-gastronomia__numero">02</span>
                     <h3>Río y sabores locales</h3>
                     <p>Atardecer en la Costanera, paseo al aire libre y una cena con parrilla o cocina regional.</p>
                     <span class="recorrido-gastronomia__duracion">Para compartir</span>
                 </article>
-                <article class="recorrido-gastronomia recorrido-gastronomia--blue">
+                <article class="recorrido-gastronomia recorrido-gastronomia--peach">
                     <span class="recorrido-gastronomia__numero">03</span>
                     <h3>Plan familiar</h3>
                     <p>Salto Shopping, entretenimiento y opciones variadas para que cada persona elija su plato.</p>

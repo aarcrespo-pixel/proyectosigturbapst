@@ -41,7 +41,7 @@
 
             <section id="manual-eventos">
                 <h3>3. Buscar y participar en eventos</h3>
-                <p>En <a href="<?= htmlspecialchars(BASE_URL, ENT_QUOTES, 'UTF-8') ?>php/eventos.php">Eventos</a> revisá los destacados, el listado y los eventos anteriores. Usá el buscador y los filtros de categoría, tipo de entrada, precio y fechas para acotar resultados. “Ver más” amplía una lista y “Ver menos” la vuelve a contraer.</p>
+                <p>En <a href="<?= htmlspecialchars(BASE_URL, ENT_QUOTES, 'UTF-8') ?>php/eventos.php">Eventos</a> revisá los destacados, el listado y el calendario. Usá el buscador y los filtros de categoría, tipo de entrada, precio y fechas para acotar resultados; para consultar eventos pasados, navegá a los meses anteriores.</p>
                 <p>Abrí una tarjeta o tocá “Ver más” para entrar en el detalle. Allí podés consultar fecha, lugar, descripción y datos de acceso; según el evento, también inscribirte, guardar en favoritos, hacer una pregunta o participar en comentarios. Iniciá sesión si la acción lo requiere.</p>
                 <p>Las fechas y condiciones pueden cambiar: confirmá los detalles con el organizador antes de asistir. Los organizadores habilitados pueden publicar eventos desde “Crear Evento”; el envío queda sujeto a las reglas y permisos de la plataforma.</p>
             </section>

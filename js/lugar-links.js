@@ -78,14 +78,17 @@
         document.querySelectorAll('.tarjeta-destino, .tarjeta-ruta, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria').forEach((card) => {
             if (card.closest('.gallery-photo-grid')) return;
             const title = card.querySelector('h3')?.textContent.trim();
-            const slug = card.dataset.lugarSlug || placeSlugs[title];
+            const slug = placeSlugs[title];
             if (!slug) return;
             const origen = origenTurismo ? 'turismo' : origenLugares ? 'lugares' : '';
             const href = `lugar.php?id=${encodeURIComponent(slug)}${origen ? `&origen=${origen}` : ''}`;
             card.setAttribute('role', 'link');
             card.setAttribute('tabindex', '0');
             card.dataset.lugarHref = href;
-            card.addEventListener('click', () => { window.location.href = href; });
+            card.addEventListener('click', (event) => {
+                if (event.target instanceof Element && event.target.closest('a, button')) return;
+                window.location.href = href;
+            });
             card.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location.href = href; }
             });

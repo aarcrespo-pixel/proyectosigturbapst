@@ -102,7 +102,6 @@ body {
   border: 1px solid rgba(40, 83, 107, 0.24);
   font-size: 0.85rem;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
   font-weight: 700;
   margin-left: auto;
 }
@@ -899,7 +898,6 @@ body[data-tema="oscuro"] .contact-item a:hover {
 .footer-col h4 {
   font-size: 0.95rem;
   letter-spacing: 0.18em;
-  text-transform: uppercase;
   margin: 0;
   color: #f5e8d7;
 }
@@ -934,7 +932,6 @@ body[data-tema="oscuro"] .contact-item a:hover {
   border: 1px solid rgba(245, 232, 216, 0.16);
   color: #f5e8d7;
   font-size: 0.82rem;
-  text-transform: uppercase;
   letter-spacing: 0.18em;
 }
 

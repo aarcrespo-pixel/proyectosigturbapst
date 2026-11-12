@@ -3,10 +3,10 @@
     --bg-card: #ffffff;
     --text-primary: #172033;
     --text-secondary: #5f6b7a;
-    --accent-blue: #00a8ff;
+    --lugar-accent: #00a8ff;
 }
 
-body.lugar-page { margin: 0; background: var(--bg-main); color: var(--text-primary); }
+body.lugar-page { --lugar-accent: #00a8ff; margin: 0; background: var(--bg-main); color: var(--text-primary); }
 body[data-tema="oscuro"].lugar-page { --bg-main: #101114; --bg-card: #1e1e22; --text-primary: #f9fafb; --text-secondary: #a1a1aa; }
 
 .lugar-hero { position: relative; height: 400px; background: var(--lugar-image) center/cover; display: flex; align-items: flex-end; }
@@ -19,10 +19,8 @@ body[data-tema="oscuro"].lugar-page { --bg-main: #101114; --bg-card: #1e1e22; --
 .lugar-seccion-titulo,
 .lugar-hero-titulo { font-weight: 600; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--text-primary); margin-bottom: 12px; }
 .lugar-hero-titulo { margin: 12px 0 8px; color: #fff; font-size: 2.5rem; font-weight: 800; line-height: 1.05; }
-.lugar-badge { display: inline-flex; padding: 6px 12px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; background: rgba(255,255,255,.16); text-transform: uppercase; font-size: .78rem; font-weight: 700; }
+.lugar-badge { display: inline-flex; padding: 6px 12px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; background: rgba(255,255,255,.16);  font-size: .78rem; font-weight: 700; }
 .lugar-location { margin: 0; color: rgba(255,255,255,.86); }
-.lugar-image-credit { margin: .7rem 0 0; color: rgba(255,255,255,.74); font-size: .75rem; }
-.lugar-image-credit a { color: inherit; text-underline-offset: 2px; }
 .lugar-content { max-width: 1000px; margin: 0 auto; padding: 40px 24px; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; }
 .lugar-copy, .lugar-useful { min-width: 0; }
 .lugar-module { padding: 0 0 28px; border-bottom: 1px solid rgba(127,127,127,.18); margin-bottom: 28px; }
@@ -30,14 +28,14 @@ body[data-tema="oscuro"].lugar-page { --bg-main: #101114; --bg-card: #1e1e22; --
 .lugar-descripcion,
 .lugar-historia-texto { font-weight: 400; font-size: 1rem; line-height: 1.6; letter-spacing: -0.01em; color: var(--text-secondary); }
 .lugar-module p { color: var(--text-secondary); line-height: 1.75; }
-.lugar-kicker { margin: 0 0 8px; color: var(--accent-blue); font-size: .78rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.lugar-kicker { margin: 0 0 8px; color: var(--lugar-accent); font-size: .78rem; font-weight: 800; letter-spacing: .12em; }
 .lugar-attractions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .lugar-attraction { padding: 14px; border: 1px solid rgba(127,127,127,.18); border-radius: 12px; background: var(--bg-card); color: var(--text-secondary); }
-.lugar-attraction:first-letter { color: var(--accent-blue); }
+.lugar-attraction:first-letter { color: var(--lugar-accent); }
 .lugar-useful { align-self: start; padding: 24px; border: 1px solid rgba(127,127,127,.18); border-radius: 18px; background: var(--bg-card); box-shadow: 0 14px 32px rgba(0,0,0,.08); }
 .useful-item { display: grid; gap: 6px; padding: 16px 0; border-bottom: 1px solid rgba(127,127,127,.18); color: var(--text-secondary); line-height: 1.5; }
 .useful-item strong { color: var(--text-primary); }
-.map-link, .event-more { display: inline-flex; justify-content: center; margin-top: 18px; padding: 11px 16px; border-radius: 10px; background: var(--accent-blue); color: #06131c; font-weight: 800; text-decoration: none; }
+.map-link, .event-more { display: inline-flex; justify-content: center; margin-top: 18px; padding: 11px 16px; border-radius: 10px; background: var(--lugar-accent); color: #06131c; font-weight: 800; text-decoration: none; }
 .lugar-events { max-width: 1000px; margin: 0 auto; padding: 12px 24px 72px; }
 .lugar-events__heading { margin-bottom: 20px; }
 .lugar-events-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }

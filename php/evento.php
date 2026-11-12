@@ -73,7 +73,12 @@ $usuarioRolEvento = 'turista';
 if ($usuarioId > 0) {
     $rolEventoStmt = $pdo->prepare('SELECT rol FROM usuarios WHERE id = :id LIMIT 1');
     $rolEventoStmt->execute([':id' => $usuarioId]);
-    $usuarioRolEvento = sigtur_normalizar_rol((string) ($rolEventoStmt->fetchColumn() ?: 'turista'));
+    $rolUsuarioEvento = $rolEventoStmt->fetchColumn();
+    if ($rolUsuarioEvento === false) {
+        $usuarioId = 0;
+    } else {
+        $usuarioRolEvento = sigtur_normalizar_rol((string) $rolUsuarioEvento);
+    }
 }
 $favoritoQuery = $pdo->prepare('SELECT 1 FROM favoritos_eventos WHERE usuario_id = :usuario AND evento_slug = :slug');
 $favoritoQuery->execute([':usuario' => $usuarioId, ':slug' => $slug]);
@@ -91,6 +96,21 @@ if (!$esEventoDinamico) {
     $consultaIdEvento = $pdo->prepare('SELECT id FROM eventos WHERE slug = :slug LIMIT 1');
     $consultaIdEvento->execute([':slug' => $slug]);
     $eventoId = (int) $consultaIdEvento->fetchColumn();
+}
+
+if ($eventoId > 0) {
+    if (!isset($_SESSION['sigtur_evento_visita_sesion']) || !is_string($_SESSION['sigtur_evento_visita_sesion'])) {
+        $_SESSION['sigtur_evento_visita_sesion'] = bin2hex(random_bytes(32));
+    }
+    $registrarVisita = $pdo->prepare("INSERT INTO evento_visitas (evento_id, usuario_id, sesion_hash)
+        VALUES (:evento_id, :usuario_insertar, :sesion_hash)
+        ON DUPLICATE KEY UPDATE usuario_id = COALESCE(usuario_id, :usuario_actualizar)");
+    $registrarVisita->execute([
+        ':evento_id' => $eventoId,
+        ':usuario_insertar' => $usuarioId > 0 ? $usuarioId : null,
+        ':usuario_actualizar' => $usuarioId > 0 ? $usuarioId : null,
+        ':sesion_hash' => hash('sha256', $_SESSION['sigtur_evento_visita_sesion']),
+    ]);
 }
 
 $apiBase = $esEventoDinamico ? 'api/' : '../api/';
