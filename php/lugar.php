@@ -22,14 +22,18 @@ if (!$lugar) {
     exit('Lugar turístico no encontrado.');
 }
 
-/* La relación usa lugar_id; el límite mantiene la sección final ligera y el
-   orden por fecha ofrece al visitante los próximos eventos primero. */
-$consultaEventos = $pdo->prepare('SELECT id, titulo, fecha, ubicacion, categoria, imagen_portada FROM eventos WHERE lugar_id = :lugar_id AND es_pasado = 0 ORDER BY fecha ASC LIMIT 3');
-$consultaEventos->execute([':lugar_id' => (int) $lugar['id']]);
-$eventosRelacionados = $consultaEventos->fetchAll();
+$eventosRelacionados = [];
+if ($origenDetalle !== 'turismo') {
+    /* La relación usa lugar_id; el límite mantiene la sección ligera y el
+       orden por fecha ofrece los próximos eventos primero. */
+    $consultaEventos = $pdo->prepare('SELECT id, titulo, fecha, ubicacion, categoria, imagen_portada FROM eventos WHERE lugar_id = :lugar_id AND es_pasado = 0 ORDER BY fecha ASC LIMIT 3');
+    $consultaEventos->execute([':lugar_id' => (int) $lugar['id']]);
+    $eventosRelacionados = $consultaEventos->fetchAll();
+}
 $atractivos = array_values(array_filter(array_map('trim', explode('|', $lugar['atractivos']))));
 $imagenLugar = htmlspecialchars(sigtur_url_imagen_subida((string) $lugar['imagen'], 'contenido-publico'), ENT_QUOTES, 'UTF-8');
 $nombreLugar = htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8');
+$atribucionFotoLugar = sigtur_atribucion_imagen_lugar((string) $lugar['slug']);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -51,6 +55,9 @@ $nombreLugar = htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8');
             <span class="lugar-badge"> <?= htmlspecialchars($lugar['categoria'], ENT_QUOTES, 'UTF-8') ?> </span>
             <h1 class="lugar-hero-titulo"><?= $nombreLugar ?></h1>
             <p class="lugar-location">⌖ <?= htmlspecialchars($lugar['direccion'], ENT_QUOTES, 'UTF-8') ?></p>
+            <?php if ($atribucionFotoLugar): ?>
+                <p class="lugar-image-credit">Foto: <a href="<?= htmlspecialchars($atribucionFotoLugar['fuente'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($atribucionFotoLugar['texto'], ENT_QUOTES, 'UTF-8') ?></a></p>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -81,23 +88,25 @@ $nombreLugar = htmlspecialchars($lugar['nombre'], ENT_QUOTES, 'UTF-8');
         </aside>
     </div>
 
-    <section class="lugar-events">
-        <div class="lugar-events__heading"><p class="lugar-kicker" data-i18n="placeEventsKicker">Agenda local</p><h2 class="lugar-seccion-titulo" data-i18n="placeEventsTitle">Próximos Eventos en este Lugar</h2></div>
-        <?php if (!$eventosRelacionados): ?>
-            <p class="empty-events" data-i18n="placeNoEvents">No hay eventos próximos en este lugar.</p>
-        <?php else: ?>
-            <div class="lugar-events-grid">
-                <?php foreach ($eventosRelacionados as $evento): ?>
-                    <a href="evento.php?id=<?= (int) $evento['id'] ?>" class="card-evento-sugerido-link">
-                        <div class="card-evento-sugerido">
-                            <div class="card-img-container"><img src="<?= htmlspecialchars(sigtur_url_imagen_subida((string) ($evento['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif'), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>"></div>
-                            <div class="lugar-event-card__body"><span class="event-category"><?= htmlspecialchars($evento['categoria'], ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><span class="event-date">📅 <?= htmlspecialchars(date('d/m/Y', strtotime($evento['fecha'])), ENT_QUOTES, 'UTF-8') ?></span><span class="event-more" data-i18n="placeViewMore">Ver Más</span></div>
-                        </div>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </section>
+    <?php if ($origenDetalle !== 'turismo'): ?>
+        <section class="lugar-events">
+            <div class="lugar-events__heading"><p class="lugar-kicker" data-i18n="placeEventsKicker">Agenda local</p><h2 class="lugar-seccion-titulo" data-i18n="placeEventsTitle">Próximos Eventos en este Lugar</h2></div>
+            <?php if (!$eventosRelacionados): ?>
+                <p class="empty-events" data-i18n="placeNoEvents">No hay eventos próximos en este lugar.</p>
+            <?php else: ?>
+                <div class="lugar-events-grid">
+                    <?php foreach ($eventosRelacionados as $evento): ?>
+                        <a href="evento.php?id=<?= (int) $evento['id'] ?>" class="card-evento-sugerido-link">
+                            <div class="card-evento-sugerido">
+                                <div class="card-img-container"><img src="<?= htmlspecialchars(sigtur_url_imagen_subida((string) ($evento['imagen_portada'] ?? ''), 'eventos', '../img/porco.avif'), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?>"></div>
+                                <div class="lugar-event-card__body"><span class="event-category"><?= htmlspecialchars($evento['categoria'], ENT_QUOTES, 'UTF-8') ?></span><h3><?= htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8') ?></h3><span class="event-date">📅 <?= htmlspecialchars(date('d/m/Y', strtotime($evento['fecha'])), ENT_QUOTES, 'UTF-8') ?></span><span class="event-more" data-i18n="placeViewMore">Ver Más</span></div>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </section>
+    <?php endif; ?>
 </main>
 <script src="../js/volver-posicion.js?v=category-scroll-return-20261102-1" defer></script>
 <script src="../js/script.js?v=nav-reveal-hint-20261029-1" defer></script>

@@ -37,7 +37,7 @@ body {
     place-items: center;
     margin-bottom: 3rem;
     padding-top: clamp(6rem, 8vw, 8rem);
-    background-image: url('https://turismo.salto.gub.uy/sites/default/files/styles/16_9_lg/public/2024-09/00d9b1e39f02d57be65ad2a9a6eaa3b8.jpg.webp?itok=Vk2Qhil_');
+    background-image: url('../img/turi.jpg');
     background-size: cover;
     background-position: center;
 }
@@ -297,12 +297,91 @@ body[data-tema="oscuro"] .info-panel article {
     align-self: start;
 }
 
-#rutas-experiencias .tarjeta-ruta,
-#rutas-experiencias .tarjeta-ruta:hover,
-#rutas-experiencias .tarjeta-ruta:focus-visible {
-    transform: none;
-    box-shadow: 0 24px 60px rgba(59, 88, 165, 0.10);
-    transition: none;
+#rutas-experiencias .tarjeta-ruta {
+    position: relative;
+    transition: transform .38s cubic-bezier(.2,.8,.2,1), box-shadow .38s ease, outline-color .25s ease;
+}
+
+#rutas-experiencias .tarjeta-ruta__imagen {
+    position: relative;
+    min-height: 220px;
+    height: 100%;
+    overflow: hidden;
+}
+
+#rutas-experiencias .tarjeta-ruta__imagen::after {
+    position: absolute;
+    inset: 30% 0 0;
+    background: linear-gradient(180deg, transparent, rgba(7, 24, 55, .66));
+    content: '';
+    pointer-events: none;
+}
+
+#rutas-experiencias .tarjeta-ruta__imagen img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .5s cubic-bezier(.2,.8,.2,1), filter .4s ease;
+}
+
+#rutas-experiencias .tarjeta-ruta__indicacion {
+    position: absolute;
+    z-index: 1;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    width: max-content;
+    max-width: calc(100% - 2rem);
+    padding: .6rem .9rem;
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 999px;
+    background: rgba(13, 37, 83, .9);
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 800;
+    box-shadow: 0 6px 20px rgba(0,0,0,.24);
+    pointer-events: none;
+    transition: transform .35s ease, background .3s ease, box-shadow .3s ease;
+}
+
+#rutas-experiencias .tarjeta-ruta:hover {
+    z-index: 1;
+    outline: 3px solid #f7b500;
+    outline-offset: 3px;
+    transform: translateY(-10px) scale(1.035);
+    box-shadow: 0 30px 65px rgba(24, 54, 118, .32);
+}
+
+#rutas-experiencias .tarjeta-ruta:hover .tarjeta-ruta__imagen img,
+#rutas-experiencias .tarjeta-ruta:focus-visible .tarjeta-ruta__imagen img {
+    transform: scale(1.12);
+    filter: saturate(1.18) brightness(.84);
+}
+
+#rutas-experiencias .tarjeta-ruta:hover .tarjeta-ruta__indicacion,
+#rutas-experiencias .tarjeta-ruta:focus-visible .tarjeta-ruta__indicacion {
+    transform: translateY(-5px) scale(1.06);
+    background: #f7b500;
+    color: #1c1c27;
+    box-shadow: 0 10px 28px rgba(0,0,0,.32);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #rutas-experiencias .tarjeta-ruta,
+    #rutas-experiencias .tarjeta-ruta__imagen img,
+    #rutas-experiencias .tarjeta-ruta__indicacion {
+        transition: none;
+    }
+
+    #rutas-experiencias .tarjeta-ruta:hover,
+    #rutas-experiencias .tarjeta-ruta:focus-visible,
+    #rutas-experiencias .tarjeta-ruta:hover .tarjeta-ruta__imagen img,
+    #rutas-experiencias .tarjeta-ruta:focus-visible .tarjeta-ruta__imagen img,
+    #rutas-experiencias .tarjeta-ruta:hover .tarjeta-ruta__indicacion,
+    #rutas-experiencias .tarjeta-ruta:focus-visible .tarjeta-ruta__indicacion {
+        transform: none;
+    }
 }
 
 #parques-termas .tarjeta-ruta {
@@ -601,6 +680,102 @@ body[data-tema="oscuro"] .gallery-photo-grid .tarjeta-galeria {
     border-color: rgba(220, 226, 255, .13);
 }
 
+.turismo-catalogo-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.turismo-catalogo-heading h2 {
+    margin: .25rem 0 .5rem;
+}
+
+.turismo-catalogo-heading p {
+    margin: 0;
+    color: #5a6487;
+    line-height: 1.6;
+}
+
+.turismo-destinos-grid {
+    margin-top: 1.5rem;
+}
+
+.turismo-destino-card .contenido {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .45rem;
+    padding: 1.15rem 1.2rem 1.3rem;
+}
+
+.turismo-destino-card h3,
+.turismo-destino-card p {
+    margin: 0;
+}
+
+.turismo-destino-card h3 {
+    line-height: 1.3;
+}
+
+.turismo-destino-card p {
+    color: #5a6487;
+    line-height: 1.55;
+}
+
+.turismo-tipo {
+    display: inline-flex;
+    align-items: center;
+    padding: .3rem .65rem;
+    border-radius: 999px;
+    background: rgba(75, 99, 255, .1);
+    color: #3e54bd;
+    font-size: .73rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+.turismo-imagen-nota {
+    width: 100%;
+    padding-top: .55rem;
+    border-top: 1px solid rgba(75, 99, 255, .12);
+    font-size: .78rem;
+}
+
+.turismo-imagen-credito {
+    color: #69738d;
+    font-size: .72rem;
+    line-height: 1.45;
+}
+
+.turismo-imagen-credito a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.turismo-galeria-vacia {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 1.25rem;
+    border: 1px dashed var(--card-border);
+    border-radius: 18px;
+    color: #5a6487;
+    line-height: 1.6;
+}
+
+body[data-tema="oscuro"] .turismo-catalogo-heading p,
+body[data-tema="oscuro"] .turismo-destino-card p,
+body[data-tema="oscuro"] .turismo-imagen-credito,
+body[data-tema="oscuro"] .turismo-galeria-vacia {
+    color: #d7dced;
+}
+
+body[data-tema="oscuro"] .turismo-tipo {
+    background: rgba(195, 207, 255, .14);
+    color: #dbe3ff;
+}
+
 @media (max-width: 900px) {
 
     .destinos-grid,
@@ -633,6 +808,10 @@ body[data-tema="oscuro"] .gallery-photo-grid .tarjeta-galeria {
     .galeria-grid,
     .info-panel {
         grid-template-columns: 1fr;
+    }
+
+    .turismo-catalogo-heading {
+        align-items: flex-start;
     }
 
     .tarjeta-destino,

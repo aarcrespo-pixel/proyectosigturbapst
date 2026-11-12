@@ -381,6 +381,22 @@ body[data-tema="oscuro"] .tarjeta-contenido p {
     color: #54443f;
 }
 
+.lugar-foto-credit {
+    display: block;
+    color: #69738d;
+    font-size: .72rem;
+    line-height: 1.45;
+}
+
+.lugar-foto-credit a {
+    color: inherit;
+    text-underline-offset: 2px;
+}
+
+body[data-tema="oscuro"] .lugar-foto-credit {
+    color: #d7dced;
+}
+
 .boton-lugares {
     display: inline-flex;
     padding: 1rem 2rem;

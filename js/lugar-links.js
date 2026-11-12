@@ -78,7 +78,7 @@
         document.querySelectorAll('.tarjeta-destino, .tarjeta-ruta, .tarjeta-lugar, .tarjeta-interes, .tarjeta-galeria').forEach((card) => {
             if (card.closest('.gallery-photo-grid')) return;
             const title = card.querySelector('h3')?.textContent.trim();
-            const slug = placeSlugs[title];
+            const slug = card.dataset.lugarSlug || placeSlugs[title];
             if (!slug) return;
             const origen = origenTurismo ? 'turismo' : origenLugares ? 'lugares' : '';
             const href = `lugar.php?id=${encodeURIComponent(slug)}${origen ? `&origen=${origen}` : ''}`;

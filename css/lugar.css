@@ -21,6 +21,8 @@ body[data-tema="oscuro"].lugar-page { --bg-main: #101114; --bg-card: #1e1e22; --
 .lugar-hero-titulo { margin: 12px 0 8px; color: #fff; font-size: 2.5rem; font-weight: 800; line-height: 1.05; }
 .lugar-badge { display: inline-flex; padding: 6px 12px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; background: rgba(255,255,255,.16); text-transform: uppercase; font-size: .78rem; font-weight: 700; }
 .lugar-location { margin: 0; color: rgba(255,255,255,.86); }
+.lugar-image-credit { margin: .7rem 0 0; color: rgba(255,255,255,.74); font-size: .75rem; }
+.lugar-image-credit a { color: inherit; text-underline-offset: 2px; }
 .lugar-content { max-width: 1000px; margin: 0 auto; padding: 40px 24px; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; }
 .lugar-copy, .lugar-useful { min-width: 0; }
 .lugar-module { padding: 0 0 28px; border-bottom: 1px solid rgba(127,127,127,.18); margin-bottom: 28px; }
